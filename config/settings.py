@@ -30,7 +30,9 @@ OUTPUT_METADATA = "metadata.json"
 OUTPUT_RAW_RESPONSE = "full_response.txt"
 
 # Error messages
-ERROR_API_KEY_MISSING = "MISTRAL_API_KEY not provided (set env or run interactively to enter it)"
+ERROR_API_KEY_MISSING = (
+    "MISTRAL_API_KEY not provided (set env or run interactively to enter it)"
+)
 ERROR_FILE_NOT_FOUND = "Input file not found: {}"
 ERROR_PROMPT_NOT_FOUND = "Prompt file not found: {}"
 

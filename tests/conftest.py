@@ -1,20 +1,18 @@
 """Shared fixtures for all tests."""
 
 import pytest
-from unittest.mock import Mock, patch
-import json
+from unittest.mock import Mock
 import os
-from pathlib import Path
 
 # Set test environment variables BEFORE importing agents
-os.environ['MISTRAL_API_KEY'] = 'test-key-placeholder'
-os.environ['PYTEST_CURRENT_TEST'] = 'yes'
+os.environ["MISTRAL_API_KEY"] = "test-key-placeholder"
+os.environ["PYTEST_CURRENT_TEST"] = "yes"
 
 
 @pytest.fixture(autouse=True)
 def mock_env():
     """Mock environment variables for all tests."""
-    os.environ['MISTRAL_API_KEY'] = 'test-key-placeholder'
+    os.environ["MISTRAL_API_KEY"] = "test-key-placeholder"
     yield
 
 
@@ -44,7 +42,7 @@ def sample_parsed_output():
             {"type": "decision", "id": "step_3", "condition": "user_data.valid"},
             {"type": "process", "id": "step_4"},
             {"type": "output", "id": "step_5"},
-            {"type": "end", "id": "step_6"}
+            {"type": "end", "id": "step_6"},
         ]
     }
 
@@ -58,8 +56,8 @@ def sample_bpmn_output():
             {"id": "StartEvent_1", "type": "startEvent"},
             {"id": "Task_1", "type": "task", "name": "Process user_data"},
             {"id": "Gateway_1", "type": "exclusiveGateway"},
-            {"id": "EndEvent_1", "type": "endEvent"}
-        ]
+            {"id": "EndEvent_1", "type": "endEvent"},
+        ],
     }
 
 
@@ -76,10 +74,7 @@ def mock_api_response():
     """Mock API response."""
     return {
         "messages": [
-            {
-                "content": '```json\n{"id": "Process_1"}\n```',
-                "role": "assistant"
-            }
+            {"content": '```json\n{"id": "Process_1"}\n```', "role": "assistant"}
         ]
     }
 
@@ -88,5 +83,5 @@ def mock_api_response():
 def mock_mistral_model():
     """Mock Mistral AI model."""
     model = Mock()
-    model.invoke = Mock(return_value={"messages": [{"content": '```json\n{}\n```'}]})
+    model.invoke = Mock(return_value={"messages": [{"content": "```json\n{}\n```"}]})
     return model
