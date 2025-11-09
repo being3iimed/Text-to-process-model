@@ -5,7 +5,7 @@ from typing import Optional, Dict, Any
 from agents.parser_agent import ParserAgent
 from agents.modeler_agent import ModelerAgent
 from utils.file_handler import ensure_output_dir
-
+from utils.langsmith_integration import setup_langsmith
 
 class OrchestratorAgent:
     """
@@ -30,6 +30,9 @@ class OrchestratorAgent:
         self.parser_agent = ParserAgent(api_key=api_key)
         self.modeler_agent = ModelerAgent(api_key=api_key)
 
+        # Setup LangSmith
+        setup_langsmith()
+        
         # Ensure output directory exists
         self.output_dir = ensure_output_dir()
 

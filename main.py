@@ -9,7 +9,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from agents.orchestrator_agent import OrchestratorAgent
+from utils.langsmith_integration import setup_langsmith
 
+# Setup LangSmith
+setup_langsmith()
 
 def print_header():
     """Print welcome header."""

@@ -36,6 +36,11 @@ ERROR_API_KEY_MISSING = (
 ERROR_FILE_NOT_FOUND = "Input file not found: {}"
 ERROR_PROMPT_NOT_FOUND = "Prompt file not found: {}"
 
+# LangSmith Configuration
+LANGSMITH_ENABLED = os.getenv("LANGSMITH_TRACING_V2", "false").lower() == "true"
+LANGSMITH_API_KEY = os.getenv("LANGSMITH_API_KEY")
+LANGSMITH_PROJECT = os.getenv("LANGSMITH_PROJECT", "text-to-process-model")
+
 # API Error Messages
 ERROR_RATE_LIMIT = "ERROR: Mistral API Rate Limit Exceeded (429)"
 ERROR_RATE_LIMIT_MSG = """
