@@ -1,4 +1,4 @@
-"""Deep Agent Orchestrator - Complete workflow management."""
+"""Orchestrator Agent Orchestrator - Complete workflow management."""
 
 from typing import Optional, Dict, Any
 
@@ -7,9 +7,9 @@ from agents.modeler_agent import ModelerAgent
 from utils.file_handler import ensure_output_dir
 
 
-class DeepAgent:
+class OrchestratorAgent:
     """
-    Deep Agent Orchestrator.
+    Orchestrator Agent Orchestrator.
     
     Manages the complete workflow:
     1. Parse natural language process description
@@ -19,12 +19,12 @@ class DeepAgent:
     
     def __init__(self, api_key: Optional[str] = None):
         """
-        Initialize the deep agent orchestrator.
+        Initialize the Orchestrator agent orchestrator.
         
         Args:
             api_key: Optional API key (uses config default if not provided)
         """
-        print("[DeepAgent] Initializing...")
+        print("[OrchestratorAgent] Initializing...")
         
         # Initialize sub-agents with API key
         self.parser_agent = ParserAgent(api_key=api_key)
@@ -46,7 +46,7 @@ class DeepAgent:
         """
         try:
             print("\n" + "="*70)
-            print("DEEP AGENT WORKFLOW - COMPLETE PROCESS TRANSFORMATION")
+            print("Orchestrator AGENT WORKFLOW - COMPLETE PROCESS TRANSFORMATION")
             print("="*70)
             
             # Step 1: Parse the process description

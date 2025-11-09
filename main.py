@@ -1,4 +1,4 @@
-"""Deep Agent Main Entry Point - Interactive Process Transformation."""
+"""Orchestrator Agent Main Entry Point - Interactive Process Transformation."""
 
 import argparse
 import sys
@@ -8,13 +8,13 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from agents.deep_agent import DeepAgent
+from agents.orchestrator_agent import OrchestratorAgent
 
 
 def print_header():
     """Print welcome header."""
     print("\n" + "="*70)
-    print("🚀 DEEP AGENT - PROCESS TO BPMN TRANSFORMER")
+    print("🚀 Orchestrator AGENT - PROCESS TO BPMN TRANSFORMER")
     print("="*70)
     print("Transform natural language process descriptions into BPMN 2.0 models")
     print("="*70 + "\n")
@@ -106,7 +106,7 @@ def get_process_description_from_file(input_file: str) -> tuple:
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="Deep Agent - Transform process descriptions to BPMN 2.0",
+        description="Orchestrator Agent - Transform process descriptions to BPMN 2.0",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -175,12 +175,12 @@ Examples:
             if process_description is None:
                 return 1
         
-        # Initialize deep agent
-        print("\n🔄 Initializing Deep Agent...\n")
-        deep_agent = DeepAgent()
+        # Initialize Orchestrator agent
+        print("\n🔄 Initializing Orchestrator Agent...\n")
+        Orchestrator_agent = OrchestratorAgent()
         
         # Run complete workflow
-        result = deep_agent.run_complete_workflow(
+        result = Orchestrator_agent.run_complete_workflow(
             process_description=process_description,
             process_name=process_name
         )
