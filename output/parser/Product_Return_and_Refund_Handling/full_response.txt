@@ -1,0 +1,32 @@
+```plaintext
+startEvent("Return Process Initiated")
+
+userTask("Customer Service Team Verifies Return Reason")
+
+AND:
+    serviceTask("Check Return Policy")
+    serviceTask("Verify Product Eligibility")
+END_AND
+
+if (eligible_for_return):
+    serviceTask("Issue Return Authorization")
+    sendTask("Send: Return Authorization to Customer")
+    receiveTask("Receive: Returned Product")
+    serviceTask("Log Returned Product")
+    userTask("Quality Control Inspects Returned Product")
+    if (product_meets_return_criteria):
+        serviceTask("Process Refund")
+        sendTask("Send: Refund Confirmation to Customer")
+        AND:
+            serviceTask("Restock Returned Product")
+            serviceTask("Update Inventory System")
+        END_AND
+        endEvent("Return Process Complete")
+    else:
+        sendTask("Send: Rejection Notice to Customer")
+        serviceTask("Handle Non-Returnable Product")
+        endEvent("Return Process Complete")
+else:
+    sendTask("Send: Return Rejection Notice to Customer")
+    endEvent("Return Process Complete")
+```

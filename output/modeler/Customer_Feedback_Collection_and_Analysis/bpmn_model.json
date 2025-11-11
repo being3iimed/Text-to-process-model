@@ -1,0 +1,160 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "feedback-process-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "bpmn-js (https://demo.bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Customer-Feedback-Process-id-0001",
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-CustomerInteractionComplete-id-0001",
+          "name": "Customer Interaction Complete"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-FeedbackRequest-id-0002",
+          "name": "Send feedback request via email/SMS"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-CustomerFeedback-id-0003",
+          "name": "Receive customer feedback response"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-LogFeedback-id-0004",
+          "name": "Log feedback in centralized system"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CategorizeFeedback-id-0005",
+          "name": "Categorize feedback by type and sentiment"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-FeedbackSentiment-id-0006",
+          "name": "Evaluate Feedback Sentiment",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-PositiveFeedback-id-0007",
+          "name": "Send positive feedback to relevant team"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-FlagIssue-id-0008",
+          "name": "Flag issue for investigation"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CreateActionPlan-id-0009",
+          "name": "Create action plan to address concern"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-FollowUpCustomer-id-0010",
+          "name": "Send follow-up to customer with significant problem"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ArchiveFeedback-id-0011",
+          "name": "Archive feedback for trend analysis"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-FeedbackProcessComplete-id-0012",
+          "name": "Feedback Process Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToSend-id-0013",
+          "sourceRef": "StartEvent-CustomerInteractionComplete-id-0001",
+          "targetRef": "SendTask-FeedbackRequest-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendToReceive-id-0014",
+          "sourceRef": "SendTask-FeedbackRequest-id-0002",
+          "targetRef": "ReceiveTask-CustomerFeedback-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReceiveToLog-id-0015",
+          "sourceRef": "ReceiveTask-CustomerFeedback-id-0003",
+          "targetRef": "ServiceTask-LogFeedback-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LogToCategorize-id-0016",
+          "sourceRef": "ServiceTask-LogFeedback-id-0004",
+          "targetRef": "ServiceTask-CategorizeFeedback-id-0005"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CategorizeToGateway-id-0017",
+          "sourceRef": "ServiceTask-CategorizeFeedback-id-0005",
+          "targetRef": "ExclusiveGateway-FeedbackSentiment-id-0006"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToPositive-id-0018",
+          "name": "feedback_sentiment == \"positive\"",
+          "sourceRef": "ExclusiveGateway-FeedbackSentiment-id-0006",
+          "targetRef": "SendTask-PositiveFeedback-id-0007",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToNegativeRecurring-id-0019",
+          "name": "feedback_sentiment == \"negative\" AND feedback_issue_recurring == \"true\"",
+          "sourceRef": "ExclusiveGateway-FeedbackSentiment-id-0006",
+          "targetRef": "ServiceTask-FlagIssue-id-0008",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToOther-id-0020",
+          "name": "",
+          "sourceRef": "ExclusiveGateway-FeedbackSentiment-id-0006",
+          "targetRef": "ServiceTask-ArchiveFeedback-id-0011",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PositiveToEnd-id-0021",
+          "sourceRef": "SendTask-PositiveFeedback-id-0007",
+          "targetRef": "EndEvent-FeedbackProcessComplete-id-0012"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FlagToActionPlan-id-0022",
+          "sourceRef": "ServiceTask-FlagIssue-id-0008",
+          "targetRef": "ServiceTask-CreateActionPlan-id-0009"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ActionPlanToFollowUp-id-0023",
+          "sourceRef": "ServiceTask-CreateActionPlan-id-0009",
+          "targetRef": "SendTask-FollowUpCustomer-id-0010"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FollowUpToEnd-id-0024",
+          "sourceRef": "SendTask-FollowUpCustomer-id-0010",
+          "targetRef": "EndEvent-FeedbackProcessComplete-id-0012"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OtherToEnd-id-0025",
+          "sourceRef": "ServiceTask-ArchiveFeedback-id-0011",
+          "targetRef": "EndEvent-FeedbackProcessComplete-id-0012"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,162 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "Supplier-Audit-Process",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "bpmn-js (https://demo.bpmn.io)",
+    "exporterVersion": "18.0.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "Supplier-Audit-Process-id-0001",
+        "name": "Supplier Quality Audit Process",
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-SupplierFlagged-id-0001",
+            "name": "Supplier Flagged for Audit"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ConductAudit-id-0002",
+            "name": "Conduct Quality Audit"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-DocumentFindings-id-0003",
+            "name": "Document Findings"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-IssuesIdentified-id-0004",
+            "name": "Issues Identified?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ImplementActions-id-0005",
+            "name": "Implement Corrective Actions"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ConductFollowUp-id-0006",
+            "name": "Conduct Follow-up Audit"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-EvaluateCompliance-id-0007",
+            "name": "Evaluate Compliance"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-ComplianceVerified-id-0008",
+            "name": "Compliance Verified?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-SupplierPasses-id-0009",
+            "name": "Supplier Passes Audit"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-SupplierDisqualified-id-0010",
+            "name": "Supplier Disqualified"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToAudit-id-0011",
+            "sourceRef": "StartEvent-SupplierFlagged-id-0001",
+            "targetRef": "UserTask-ConductAudit-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AuditToDocument-id-0012",
+            "sourceRef": "UserTask-ConductAudit-id-0002",
+            "targetRef": "UserTask-DocumentFindings-id-0003"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DocumentToGateway-id-0013",
+            "sourceRef": "UserTask-DocumentFindings-id-0003",
+            "targetRef": "ExclusiveGateway-IssuesIdentified-id-0004"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-IssuesYes-id-0014",
+            "name": "Yes",
+            "sourceRef": "ExclusiveGateway-IssuesIdentified-id-0004",
+            "targetRef": "UserTask-ImplementActions-id-0005",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-IssuesNo-id-0015",
+            "name": "No",
+            "sourceRef": "ExclusiveGateway-IssuesIdentified-id-0004",
+            "targetRef": "EndEvent-SupplierPasses-id-0009",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ImplementToFollowUp-id-0016",
+            "sourceRef": "UserTask-ImplementActions-id-0005",
+            "targetRef": "UserTask-ConductFollowUp-id-0006"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-FollowUpToEvaluate-id-0017",
+            "sourceRef": "UserTask-ConductFollowUp-id-0006",
+            "targetRef": "UserTask-EvaluateCompliance-id-0007"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-EvaluateToGateway-id-0018",
+            "sourceRef": "UserTask-EvaluateCompliance-id-0007",
+            "targetRef": "ExclusiveGateway-ComplianceVerified-id-0008"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ComplianceYes-id-0019",
+            "name": "Yes",
+            "sourceRef": "ExclusiveGateway-ComplianceVerified-id-0008",
+            "targetRef": "EndEvent-SupplierPasses-id-0009",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ComplianceNo-id-0020",
+            "name": "No",
+            "sourceRef": "ExclusiveGateway-ComplianceVerified-id-0008",
+            "targetRef": "EndEvent-SupplierDisqualified-id-0010",
+            "isDefault": true
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "This JSON model represents the Supplier Quality Audit Process with:\n\n1. A single start event for when a supplier is flagged for audit 2. Sequential tasks for conducting the audit, documenting findings, and implementing corrective actions 3. Two exclusive gateways to handle decision points: - One to determine if issues were identified - Another to determine if compliance was verified 4. Two end events for successful audit completion or disqualification 5. All necessary sequence flows connecting the elements\n\nThe model follows BPMN 2.0 standards with proper element IDs, names, and relationships. It includes all the tasks, gateways, and events specified in the pseudocode while maintaining a balanced, core-focused approach with no unnecessary boundary events or subprocesses.",
+  "metadata": {
+    "model": "codestral-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11062,
+        "total_tokens": 12613,
+        "completion_tokens": 1551
+      },
+      "model_name": "codestral-latest",
+      "model": "codestral-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11062,
+      "output_tokens": 1551,
+      "total_tokens": 12613
+    },
+    "id": "lc_run--2b5b5b69-267e-45a3-a12e-adc71e2d6fa5-0"
+  },
+  "status": "success"
+}

@@ -1,0 +1,360 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "LoyaltyProgram-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "bpmn-js (https://demo.bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "LoyaltyProgram-Process-id-0001",
+      "name": "Customer Loyalty Program",
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-CustomerSignsUp-id-0001",
+          "name": "Customer Signs Up for Loyalty Program"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CaptureCustomerInfo-id-0002",
+          "name": "Capture customer information (name, contact details)"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CreateLoyaltyAccount-id-0003",
+          "name": "Create loyalty account"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-ActiveProgram-id-0004",
+          "name": "Active Program",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-ActiveProgramStart-id-0001",
+              "name": "Active Program Start"
+            },
+            {
+              "$type": "bpmn:ReceiveTask",
+              "id": "ReceiveTask-CustomerPurchase-id-0002",
+              "name": "Receive: customer purchase"
+            },
+            {
+              "$type": "bpmn:ScriptTask",
+              "id": "ScriptTask-CalculatePoints-id-0003",
+              "name": "Calculate points earned"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-UpdateBalance-id-0004",
+              "name": "Update customer loyalty balance"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-PointsUpdate-id-0005",
+              "name": "Send: real-time points update notification"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-PointsRedemption-id-0006",
+              "name": "Points >= redemption threshold?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-RedeemPoints-id-0007",
+              "name": "Customer redeems points for reward"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-ProcessRedemption-id-0008",
+              "name": "Process reward redemption"
+            },
+            {
+              "$type": "bpmn:ScriptTask",
+              "id": "ScriptTask-DeductPoints-id-0009",
+              "name": "Deduct redeemed points"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-UpdateBalanceAfterRedemption-id-0010",
+              "name": "Update customer loyalty balance"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-TimeSinceLastOffer-id-0011",
+              "name": "Time since last offer > offer frequency?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-AnalyzePatterns-id-0012",
+              "name": "Analyze customer spending patterns"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-GenerateOffer-id-0013",
+              "name": "Generate personalized offer"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-SendOffer-id-0014",
+              "name": "Send: personalized offer to customer"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-PointsMilestone-id-0015",
+              "name": "Points >= milestone threshold?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-IdentifySpecialReward-id-0016",
+              "name": "Identify special reward"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-SendMilestoneReward-id-0017",
+              "name": "Send: milestone reward notification"
+            },
+            {
+              "$type": "bpmn:ReceiveTask",
+              "id": "ReceiveTask-CustomerActivity-id-0018",
+              "name": "Receive: customer activity (purchase, redemption, etc.)"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-ContinueLoop-id-0019",
+              "name": "Continue program?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-ActiveProgramEnd-id-0020",
+              "name": "Active Program End"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StartToPurchase-id-0021",
+              "sourceRef": "StartEvent-ActiveProgramStart-id-0001",
+              "targetRef": "ReceiveTask-CustomerPurchase-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PurchaseToCalculate-id-0022",
+              "sourceRef": "ReceiveTask-CustomerPurchase-id-0002",
+              "targetRef": "ScriptTask-CalculatePoints-id-0003"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CalculateToUpdate-id-0023",
+              "sourceRef": "ScriptTask-CalculatePoints-id-0003",
+              "targetRef": "ServiceTask-UpdateBalance-id-0004"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-UpdateToSend-id-0024",
+              "sourceRef": "ServiceTask-UpdateBalance-id-0004",
+              "targetRef": "SendTask-PointsUpdate-id-0005"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendToRedemptionGateway-id-0025",
+              "sourceRef": "SendTask-PointsUpdate-id-0005",
+              "targetRef": "ExclusiveGateway-PointsRedemption-id-0006"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RedemptionYes-id-0026",
+              "name": "Yes",
+              "sourceRef": "ExclusiveGateway-PointsRedemption-id-0006",
+              "targetRef": "UserTask-RedeemPoints-id-0007",
+              "conditionExpression": "points >= redemption_threshold"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RedemptionNo-id-0027",
+              "name": "No",
+              "sourceRef": "ExclusiveGateway-PointsRedemption-id-0006",
+              "targetRef": "ExclusiveGateway-TimeSinceLastOffer-id-0011",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RedeemToProcess-id-0028",
+              "sourceRef": "UserTask-RedeemPoints-id-0007",
+              "targetRef": "ServiceTask-ProcessRedemption-id-0008"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ProcessToDeduct-id-0029",
+              "sourceRef": "ServiceTask-ProcessRedemption-id-0008",
+              "targetRef": "ScriptTask-DeductPoints-id-0009"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-DeductToUpdate-id-0030",
+              "sourceRef": "ScriptTask-DeductPoints-id-0009",
+              "targetRef": "ServiceTask-UpdateBalanceAfterRedemption-id-0010"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-UpdateAfterRedemptionToOfferGateway-id-0031",
+              "sourceRef": "ServiceTask-UpdateBalanceAfterRedemption-id-0010",
+              "targetRef": "ExclusiveGateway-TimeSinceLastOffer-id-0011"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-OfferYes-id-0032",
+              "name": "Yes",
+              "sourceRef": "ExclusiveGateway-TimeSinceLastOffer-id-0011",
+              "targetRef": "ServiceTask-AnalyzePatterns-id-0012",
+              "conditionExpression": "time_since_last_offer > offer_frequency"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-OfferNo-id-0033",
+              "name": "No",
+              "sourceRef": "ExclusiveGateway-TimeSinceLastOffer-id-0011",
+              "targetRef": "ExclusiveGateway-PointsMilestone-id-0015",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-AnalyzeToGenerate-id-0034",
+              "sourceRef": "ServiceTask-AnalyzePatterns-id-0012",
+              "targetRef": "ServiceTask-GenerateOffer-id-0013"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GenerateToSend-id-0035",
+              "sourceRef": "ServiceTask-GenerateOffer-id-0013",
+              "targetRef": "SendTask-SendOffer-id-0014"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendOfferToMilestoneGateway-id-0036",
+              "sourceRef": "SendTask-SendOffer-id-0014",
+              "targetRef": "ExclusiveGateway-PointsMilestone-id-0015"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MilestoneYes-id-0037",
+              "name": "Yes",
+              "sourceRef": "ExclusiveGateway-PointsMilestone-id-0015",
+              "targetRef": "ServiceTask-IdentifySpecialReward-id-0016",
+              "conditionExpression": "points >= milestone_threshold"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MilestoneNo-id-0038",
+              "name": "No",
+              "sourceRef": "ExclusiveGateway-PointsMilestone-id-0015",
+              "targetRef": "ReceiveTask-CustomerActivity-id-0018",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-IdentifyToSendReward-id-0039",
+              "sourceRef": "ServiceTask-IdentifySpecialReward-id-0016",
+              "targetRef": "SendTask-SendMilestoneReward-id-0017"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendRewardToActivity-id-0040",
+              "sourceRef": "SendTask-SendMilestoneReward-id-0017",
+              "targetRef": "ReceiveTask-CustomerActivity-id-0018"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ActivityToContinueGateway-id-0041",
+              "sourceRef": "ReceiveTask-CustomerActivity-id-0018",
+              "targetRef": "ExclusiveGateway-ContinueLoop-id-0019"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ContinueYes-id-0042",
+              "name": "Yes",
+              "sourceRef": "ExclusiveGateway-ContinueLoop-id-0019",
+              "targetRef": "ReceiveTask-CustomerPurchase-id-0002",
+              "conditionExpression": "customer_active_in_program"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ContinueNo-id-0043",
+              "name": "No",
+              "sourceRef": "ExclusiveGateway-ContinueLoop-id-0019",
+              "targetRef": "EndEvent-ActiveProgramEnd-id-0020",
+              "isDefault": true
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-CustomerOptOut-id-0005",
+          "name": "Receive: customer opt-out request"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProcessOptOut-id-0006",
+          "name": "Process opt-out request"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ArchiveData-id-0007",
+          "name": "Archive customer loyalty data"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-CustomerOptsOut-id-0008",
+          "name": "Customer Opts Out of Loyalty Program"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToCapture-id-0009",
+          "sourceRef": "StartEvent-CustomerSignsUp-id-0001",
+          "targetRef": "ServiceTask-CaptureCustomerInfo-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CaptureToCreate-id-0010",
+          "sourceRef": "ServiceTask-CaptureCustomerInfo-id-0002",
+          "targetRef": "ServiceTask-CreateLoyaltyAccount-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CreateToActiveProgram-id-0011",
+          "sourceRef": "ServiceTask-CreateLoyaltyAccount-id-0003",
+          "targetRef": "SubProcess-ActiveProgram-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ActiveProgramToOptOut-id-0012",
+          "sourceRef": "SubProcess-ActiveProgram-id-0004",
+          "targetRef": "ReceiveTask-CustomerOptOut-id-0005"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OptOutToProcess-id-0013",
+          "sourceRef": "ReceiveTask-CustomerOptOut-id-0005",
+          "targetRef": "ServiceTask-ProcessOptOut-id-0006"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProcessToArchive-id-0014",
+          "sourceRef": "ServiceTask-ProcessOptOut-id-0006",
+          "targetRef": "ServiceTask-ArchiveData-id-0007"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ArchiveToEnd-id-0015",
+          "sourceRef": "ServiceTask-ArchiveData-id-0007",
+          "targetRef": "EndEvent-CustomerOptsOut-id-0008"
+        }
+      ]
+    }
+  ]
+}
+```

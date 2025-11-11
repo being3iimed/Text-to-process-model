@@ -1,0 +1,250 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "Tax-Filing-Process",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "bpmn-js (https://demo.bpmn.io)",
+    "exporterVersion": "18.0.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "Tax-Filing-Process-id-0001",
+        "name": "Tax Filing Process",
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-FiscalYearBegins-id-0001",
+            "name": "Fiscal year begins"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-SetUpTaxCalendar-id-0002",
+            "name": "Set up tax calendar"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-CategorizeTransactions-id-0003",
+            "name": "Categorize and record financial transactions"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ReconcileAccounts-id-0004",
+            "name": "Reconcile accounts"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ReviewDeductions-id-0005",
+            "name": "Review deductions"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-PrepareDocuments-id-0006",
+            "name": "Prepare necessary documents"
+          },
+          {
+            "$type": "bpmn:BoundaryEvent",
+            "id": "BoundaryEvent-Timer1Month-PrepareDocuments-id-0007",
+            "name": "1 Month Before Deadline",
+            "attachedToRef": "UserTask-PrepareDocuments-id-0006",
+            "cancelActivity": false,
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:TimerEventDefinition",
+                "timeDuration": "P1M"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-SendReminder-id-0008",
+            "name": "Send reminder to accountant"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-SubmitReturns-id-0009",
+            "name": "Submit tax returns electronically"
+          },
+          {
+            "$type": "bpmn:BoundaryEvent",
+            "id": "BoundaryEvent-Error-SubmitReturns-id-0010",
+            "name": "Submission Failed",
+            "attachedToRef": "ServiceTask-SubmitReturns-id-0009",
+            "cancelActivity": true,
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:ErrorEventDefinition",
+                "errorRef": "SUBMISSION_ERROR"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ResubmitReturns-id-0011",
+            "name": "Resubmit tax returns"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-SaveReceipts-id-0012",
+            "name": "Save confirmation receipts"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-AuditOrInquiry-id-0013",
+            "name": "Audit or inquiry?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ProvideDocumentation-id-0014",
+            "name": "Provide additional documentation"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ComplianceFulfilled-id-0015",
+            "name": "All compliance obligations fulfilled"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-IncorporateLessons-id-0016",
+            "name": "Incorporate lessons learned"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ProcessComplete-id-0017",
+            "name": "Process complete"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToCalendar-id-0018",
+            "sourceRef": "StartEvent-FiscalYearBegins-id-0001",
+            "targetRef": "UserTask-SetUpTaxCalendar-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CalendarToCategorize-id-0019",
+            "sourceRef": "UserTask-SetUpTaxCalendar-id-0002",
+            "targetRef": "ServiceTask-CategorizeTransactions-id-0003"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CategorizeToReconcile-id-0020",
+            "sourceRef": "ServiceTask-CategorizeTransactions-id-0003",
+            "targetRef": "UserTask-ReconcileAccounts-id-0004"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReconcileToReview-id-0021",
+            "sourceRef": "UserTask-ReconcileAccounts-id-0004",
+            "targetRef": "UserTask-ReviewDeductions-id-0005"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReviewToPrepare-id-0022",
+            "sourceRef": "UserTask-ReviewDeductions-id-0005",
+            "targetRef": "UserTask-PrepareDocuments-id-0006"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-PrepareToSubmit-id-0023",
+            "sourceRef": "UserTask-PrepareDocuments-id-0006",
+            "targetRef": "ServiceTask-SubmitReturns-id-0009"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SubmitToSave-id-0024",
+            "sourceRef": "ServiceTask-SubmitReturns-id-0009",
+            "targetRef": "ServiceTask-SaveReceipts-id-0012"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SaveToGateway-id-0025",
+            "sourceRef": "ServiceTask-SaveReceipts-id-0012",
+            "targetRef": "ExclusiveGateway-AuditOrInquiry-id-0013"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToDocumentation-id-0026",
+            "name": "audit_or_inquiry_occurs",
+            "sourceRef": "ExclusiveGateway-AuditOrInquiry-id-0013",
+            "targetRef": "UserTask-ProvideDocumentation-id-0014",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToEnd-id-0027",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-AuditOrInquiry-id-0013",
+            "targetRef": "EndEvent-ComplianceFulfilled-id-0015",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DocumentationToEnd-id-0028",
+            "sourceRef": "UserTask-ProvideDocumentation-id-0014",
+            "targetRef": "EndEvent-ComplianceFulfilled-id-0015"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-EndToLessons-id-0029",
+            "sourceRef": "EndEvent-ComplianceFulfilled-id-0015",
+            "targetRef": "UserTask-IncorporateLessons-id-0016"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-LessonsToComplete-id-0030",
+            "sourceRef": "UserTask-IncorporateLessons-id-0016",
+            "targetRef": "EndEvent-ProcessComplete-id-0017"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-BoundaryToReminder-id-0031",
+            "sourceRef": "BoundaryEvent-Timer1Month-PrepareDocuments-id-0007",
+            "targetRef": "SendTask-SendReminder-id-0008"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReminderToPrepare-id-0032",
+            "sourceRef": "SendTask-SendReminder-id-0008",
+            "targetRef": "UserTask-PrepareDocuments-id-0006"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-BoundaryToResubmit-id-0033",
+            "sourceRef": "BoundaryEvent-Error-SubmitReturns-id-0010",
+            "targetRef": "UserTask-ResubmitReturns-id-0011"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ResubmitToSubmit-id-0034",
+            "sourceRef": "UserTask-ResubmitReturns-id-0011",
+            "targetRef": "ServiceTask-SubmitReturns-id-0009"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "codestral-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11279,
+        "total_tokens": 13626,
+        "completion_tokens": 2347
+      },
+      "model_name": "codestral-latest",
+      "model": "codestral-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11279,
+      "output_tokens": 2347,
+      "total_tokens": 13626
+    },
+    "id": "lc_run--4d55f8ad-db01-462b-b260-49736c200619-0"
+  },
+  "status": "success"
+}

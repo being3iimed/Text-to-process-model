@@ -1,0 +1,213 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "RecallProcess-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "bpmn-js (https://demo.bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "RecallProcess-id-0001",
+      "name": "Product Recall Process",
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-DefectSafetyIssueIdentified-id-0001",
+          "name": "Defect/Safety Issue Identified"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-InvestigateIssue-id-0002",
+          "name": "Investigate Issue"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-DraftRecallNotice-id-0003",
+          "name": "Draft Recall Notice"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-Split-id-0004",
+          "name": "Parallel Execution",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendRecallNotice-id-0005",
+          "name": "Send: Recall Notice"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-PrepareReturnCenters-id-0006",
+          "name": "Prepare Return Centers"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-Join-id-0007",
+          "name": "Synchronize Branches",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-ReceiveReturnedProducts-id-0008",
+          "name": "Receive: Returned Products"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-InspectReturnedProducts-id-0009",
+          "name": "Inspect Returned Products"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ProductRepairable-id-0010",
+          "name": "Product Repairable?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-RepairProduct-id-0011",
+          "name": "Repair Product"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ShipReplacement-id-0012",
+          "name": "Ship Replacement"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProcessRefund-id-0013",
+          "name": "Process Refund"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-AnalyzeRootCauses-id-0014",
+          "name": "Analyze Root Causes"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ImplementPreventiveMeasures-id-0015",
+          "name": "Implement Preventive Measures"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-RecallProcessComplete-id-0016",
+          "name": "Recall Process Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToInvestigate-id-0017",
+          "sourceRef": "StartEvent-DefectSafetyIssueIdentified-id-0001",
+          "targetRef": "UserTask-InvestigateIssue-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InvestigateToDraft-id-0018",
+          "sourceRef": "UserTask-InvestigateIssue-id-0002",
+          "targetRef": "ServiceTask-DraftRecallNotice-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DraftToSplit-id-0019",
+          "sourceRef": "ServiceTask-DraftRecallNotice-id-0003",
+          "targetRef": "ParallelGateway-Split-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToSendNotice-id-0020",
+          "sourceRef": "ParallelGateway-Split-id-0004",
+          "targetRef": "SendTask-SendRecallNotice-id-0005"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToPrepareReturns-id-0021",
+          "sourceRef": "ParallelGateway-Split-id-0004",
+          "targetRef": "ServiceTask-PrepareReturnCenters-id-0006"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendNoticeToJoin-id-0022",
+          "sourceRef": "SendTask-SendRecallNotice-id-0005",
+          "targetRef": "ParallelGateway-Join-id-0007"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PrepareReturnsToJoin-id-0023",
+          "sourceRef": "ServiceTask-PrepareReturnCenters-id-0006",
+          "targetRef": "ParallelGateway-Join-id-0007"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinToReceive-id-0024",
+          "sourceRef": "ParallelGateway-Join-id-0007",
+          "targetRef": "ReceiveTask-ReceiveReturnedProducts-id-0008"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReceiveToInspect-id-0025",
+          "sourceRef": "ReceiveTask-ReceiveReturnedProducts-id-0008",
+          "targetRef": "UserTask-InspectReturnedProducts-id-0009"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InspectToGateway-id-0026",
+          "sourceRef": "UserTask-InspectReturnedProducts-id-0009",
+          "targetRef": "ExclusiveGateway-ProductRepairable-id-0010"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToRepair-id-0027",
+          "name": "product_repairable",
+          "sourceRef": "ExclusiveGateway-ProductRepairable-id-0010",
+          "targetRef": "ServiceTask-RepairProduct-id-0011",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToShip-id-0028",
+          "name": "product_replaceable",
+          "sourceRef": "ExclusiveGateway-ProductRepairable-id-0010",
+          "targetRef": "ServiceTask-ShipReplacement-id-0012",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToRefund-id-0029",
+          "name": "",
+          "sourceRef": "ExclusiveGateway-ProductRepairable-id-0010",
+          "targetRef": "ServiceTask-ProcessRefund-id-0013",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RepairToAnalyze-id-0030",
+          "sourceRef": "ServiceTask-RepairProduct-id-0011",
+          "targetRef": "UserTask-AnalyzeRootCauses-id-0014"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ShipToAnalyze-id-0031",
+          "sourceRef": "ServiceTask-ShipReplacement-id-0012",
+          "targetRef": "UserTask-AnalyzeRootCauses-id-0014"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RefundToAnalyze-id-0032",
+          "sourceRef": "ServiceTask-ProcessRefund-id-0013",
+          "targetRef": "UserTask-AnalyzeRootCauses-id-0014"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AnalyzeToImplement-id-0033",
+          "sourceRef": "UserTask-AnalyzeRootCauses-id-0014",
+          "targetRef": "ServiceTask-ImplementPreventiveMeasures-id-0015"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ImplementToEnd-id-0034",
+          "sourceRef": "ServiceTask-ImplementPreventiveMeasures-id-0015",
+          "targetRef": "EndEvent-RecallProcessComplete-id-0016"
+        }
+      ]
+    }
+  ]
+}

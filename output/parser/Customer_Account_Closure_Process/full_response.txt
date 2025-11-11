@@ -1,0 +1,71 @@
+### Process Elements Summary
+
+#### Tasks
+
+1. **userTask("Verify Account Closure Request")**
+   - **Type**: userTask
+   - **Justification**: Requires human verification of request and checking for outstanding balances/issues
+
+2. **serviceTask("Check for Outstanding Balances")**
+   - **Type**: serviceTask
+   - **Justification**: Automated check for balances/issues
+
+3. **serviceTask("Deactivate Account")**
+   - **Type**: serviceTask
+   - **Justification**: System action to deactivate account
+
+4. **serviceTask("Transfer Remaining Funds")**
+   - **Type**: serviceTask
+   - **Justification**: Automated transfer of funds/assets
+
+5. **sendTask("Send: Account Closure Confirmation")**
+   - **Type**: sendTask
+   - **Justification**: One-way communication to customer
+
+6. **serviceTask("Archive Customer Data")**
+   - **Type**: serviceTask
+   - **Justification**: System action to archive data
+
+#### Gateways
+
+1. **XOR Gateway (Exclusive Gateway)**
+   - **Justification**: Decision point based on verification result (clear or not clear)
+   - **Conditions**:
+     - If outstanding balances/issues: route to resolution
+     - If no issues: proceed to deactivation
+
+#### Events
+
+1. **startEvent("Account Closure Request Received")**
+   - **Type**: messageStartEvent
+   - **Justification**: Process starts when customer submits request
+
+2. **endEvent("Account Successfully Closed")**
+   - **Type**: endEvent
+   - **Justification**: Process ends when account is successfully closed
+
+### BPMN Pseudocode
+
+```
+messageStartEvent("AccountClosureRequest")
+userTask("Verify Account Closure Request")
+serviceTask("Check for Outstanding Balances")
+if (outstanding_balances OR unresolved_issues):
+    userTask("Resolve Outstanding Issues")
+    serviceTask("Check for Outstanding Balances")
+    if (outstanding_balances OR unresolved_issues):
+        sendTask("Send: Account Closure Denied")
+        endEvent("Account Closure Denied")
+    else:
+        serviceTask("Deactivate Account")
+        serviceTask("Transfer Remaining Funds")
+        sendTask("Send: Account Closure Confirmation")
+        serviceTask("Archive Customer Data")
+        endEvent("Account Successfully Closed")
+else:
+    serviceTask("Deactivate Account")
+    serviceTask("Transfer Remaining Funds")
+    sendTask("Send: Account Closure Confirmation")
+    serviceTask("Archive Customer Data")
+    endEvent("Account Successfully Closed")
+```

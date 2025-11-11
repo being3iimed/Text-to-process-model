@@ -1,0 +1,77 @@
+## Process Elements Summary
+
+### Tasks
+
+1. **userTask**: "Set up tax calendar"
+   - Justification: Requires human decision-making to establish deadlines and tracking mechanisms
+
+2. **serviceTask**: "Categorize and record financial transactions"
+   - Justification: Automated accounting software handles this routine task
+
+3. **userTask**: "Reconcile accounts"
+   - Justification: Requires human review and verification of financial records
+
+4. **userTask**: "Review deductions"
+   - Justification: Requires human judgment to assess eligibility and accuracy of deductions
+
+5. **userTask**: "Prepare necessary documents"
+   - Justification: Requires human compilation of information for filing
+
+6. **serviceTask**: "Submit tax returns electronically"
+   - Justification: Automated system handles electronic submission
+
+7. **serviceTask**: "Save confirmation receipts"
+   - Justification: Automated system saves digital receipts
+
+8. **userTask**: "Provide additional documentation"
+   - Justification: Requires human preparation of supporting documents for audit/inquiry
+
+9. **userTask**: "Incorporate lessons learned"
+   - Justification: Requires human reflection and planning for future improvements
+
+### Gateways
+
+1. **XOR Gateway**: "Audit or inquiry?"
+   - Justification: Simple binary decision (yes/no) about whether audit/inquiry occurs
+
+### Events
+
+1. **startEvent**: "Fiscal year begins"
+   - Justification: Process begins at start of fiscal year
+
+2. **endEvent**: "All compliance obligations fulfilled"
+   - Justification: Process ends when all requirements are met
+
+### Boundary Events
+
+1. **timerBoundary**: "1 month before deadline"
+   - Justification: Hard SLA requirement to ensure timely preparation
+   - Attached to: "Prepare necessary documents"
+   - Handler: "Send reminder to accountant"
+
+2. **errorBoundary**: "Submission fails"
+   - Justification: Known fault pattern with deterministic recovery
+   - Attached to: "Submit tax returns electronically"
+   - Handler: "userTask: Resubmit tax returns"
+
+## BPMN Pseudocode
+
+```
+startEvent("Fiscal year begins")
+userTask("Set up tax calendar")
+serviceTask("Categorize and record financial transactions")
+userTask("Reconcile accounts")
+userTask("Review deductions")
+userTask("Prepare necessary documents"):
+    timerBoundary("1 month before deadline"):
+        sendTask("Send: reminder to accountant")
+serviceTask("Submit tax returns electronically"):
+    errorBoundary():
+        userTask("Resubmit tax returns")
+serviceTask("Save confirmation receipts")
+if (audit_or_inquiry_occurs):
+    userTask("Provide additional documentation")
+endEvent("All compliance obligations fulfilled")
+userTask("Incorporate lessons learned")
+endEvent("Process complete")
+```

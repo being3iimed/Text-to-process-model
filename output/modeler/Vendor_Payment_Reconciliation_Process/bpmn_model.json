@@ -1,0 +1,130 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "definitions-invoice-processing",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "bpmn-js (https://demo.bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process-InvoiceProcessing-id-0001",
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-ProcessInitiated-id-0001",
+          "name": "Process Initiated"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-MatchInvoice-id-0002",
+          "name": "Match Invoice to Purchase Order and Receipt"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-InvoiceMatch-id-0003",
+          "name": "Invoice Matches?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-InvestigateDiscrepancies-id-0004",
+          "name": "Investigate and Resolve Discrepancies"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-AuthorizePayment-id-0005",
+          "name": "Authorize Payment"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProcessPayment-id-0006",
+          "name": "Process Payment via Bank Transfer or Check"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-PaymentNotification-id-0007",
+          "name": "Send: Payment Notification to Vendor"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-UpdateRecords-id-0008",
+          "name": "Update Financial Records"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateReport-id-0009",
+          "name": "Generate Reconciliation Report"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProcessComplete-id-0010",
+          "name": "Process Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToMatch-id-0011",
+          "sourceRef": "StartEvent-ProcessInitiated-id-0001",
+          "targetRef": "UserTask-MatchInvoice-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MatchToGateway-id-0012",
+          "sourceRef": "UserTask-MatchInvoice-id-0002",
+          "targetRef": "ExclusiveGateway-InvoiceMatch-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToAuthorize-id-0013",
+          "name": "invoice_matches_purchase_order_and_receipt",
+          "sourceRef": "ExclusiveGateway-InvoiceMatch-id-0003",
+          "targetRef": "UserTask-AuthorizePayment-id-0005",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToInvestigate-id-0014",
+          "name": "",
+          "sourceRef": "ExclusiveGateway-InvoiceMatch-id-0003",
+          "targetRef": "UserTask-InvestigateDiscrepancies-id-0004",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InvestigateToAuthorize-id-0015",
+          "sourceRef": "UserTask-InvestigateDiscrepancies-id-0004",
+          "targetRef": "UserTask-AuthorizePayment-id-0005"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AuthorizeToProcess-id-0016",
+          "sourceRef": "UserTask-AuthorizePayment-id-0005",
+          "targetRef": "ServiceTask-ProcessPayment-id-0006"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProcessToSend-id-0017",
+          "sourceRef": "ServiceTask-ProcessPayment-id-0006",
+          "targetRef": "SendTask-PaymentNotification-id-0007"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendToUpdate-id-0018",
+          "sourceRef": "SendTask-PaymentNotification-id-0007",
+          "targetRef": "ServiceTask-UpdateRecords-id-0008"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-UpdateToGenerate-id-0019",
+          "sourceRef": "ServiceTask-UpdateRecords-id-0008",
+          "targetRef": "ServiceTask-GenerateReport-id-0009"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GenerateToEnd-id-0020",
+          "sourceRef": "ServiceTask-GenerateReport-id-0009",
+          "targetRef": "EndEvent-ProcessComplete-id-0010"
+        }
+      ]
+    }
+  ]
+}

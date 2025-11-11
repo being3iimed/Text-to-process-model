@@ -1,0 +1,49 @@
+```plaintext
+startEvent("Content Creation Process Starts")
+
+AND:
+    userTask("Content Creator drafts marketing materials")
+    userTask("Editor reviews draft for accuracy and tone")
+END_AND
+
+if (editor_approval):
+    AND:
+        userTask("Legal team checks compliance with advertising laws")
+        userTask("Graphic Designer formats approved content")
+    END_AND
+    if (legal_approval):
+        userTask("Stakeholders review final content")
+        if (stakeholder_approval):
+            serviceTask("Publish content across channels")
+            receiveTask("Receive: analytics confirmation of successful delivery")
+            endEvent("Content Published and Delivered")
+        else:
+            userTask("Content Creator revises based on stakeholder feedback")
+            userTask("Editor reviews revised draft")
+            if (editor_approval):
+                AND:
+                    userTask("Legal team checks revised content")
+                    userTask("Graphic Designer reformats revised content")
+                END_AND
+                if (legal_approval):
+                    userTask("Stakeholders review revised content")
+                    if (stakeholder_approval):
+                        serviceTask("Publish revised content across channels")
+                        receiveTask("Receive: analytics confirmation of successful delivery")
+                        endEvent("Content Published and Delivered")
+                    else:
+                        userTask("Content Creator revises again based on stakeholder feedback")
+                        endEvent("Content Creation Process Ended Without Approval")
+                else:
+                    userTask("Content Creator revises based on legal feedback")
+                    endEvent("Content Creation Process Ended Without Legal Approval")
+            else:
+                userTask("Content Creator revises based on editor feedback")
+                endEvent("Content Creation Process Ended Without Editor Approval")
+    else:
+        userTask("Content Creator revises based on legal feedback")
+        endEvent("Content Creation Process Ended Without Legal Approval")
+else:
+    userTask("Content Creator revises based on editor feedback")
+    endEvent("Content Creation Process Ended Without Editor Approval")
+```
