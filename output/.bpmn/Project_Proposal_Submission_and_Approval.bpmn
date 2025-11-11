@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="project-initiation-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="ProjectInitiationProcess-id-0001">
+    <bpmn:startEvent id="StartEvent-ProjectInitiationProcessStarts-id-0001" name="Project Initiation Process Starts">
+      <bpmn:outgoing>SequenceFlow-StartToPitch-id-0012</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-StakeholdersPitchProjectIdea-id-0002" name="Stakeholders pitch project idea">
+      <bpmn:incoming>SequenceFlow-StartToPitch-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PitchToPrepare-id-0013</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-PrepareProposalDocument-id-0003" name="Prepare proposal document">
+      <bpmn:incoming>SequenceFlow-PitchToPrepare-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PrepareToReview-id-0014</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-DecisionMakersReviewProposal-id-0004" name="Decision-makers review proposal">
+      <bpmn:incoming>SequenceFlow-PrepareToReview-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToGateway-id-0015</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-RevisionsRequested-id-0005" name="Revisions Requested?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewToGateway-id-0015</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ReviewRevisedToGateway-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToRevisions-id-0016</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToProceed-id-0019</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-IncorporateRequestedRevisions-id-0006" name="Incorporate requested revisions">
+      <bpmn:incoming>SequenceFlow-GatewayToRevisions-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RevisionsToReview-id-0017</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-DecisionMakersReviewRevisedProposal-id-0007" name="Decision-makers review revised proposal">
+      <bpmn:incoming>SequenceFlow-RevisionsToReview-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewRevisedToGateway-id-0018</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ProceedWithApprovedProposal-id-0008" name="Proceed with approved proposal">
+      <bpmn:incoming>SequenceFlow-GatewayToProceed-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProceedToAllocate-id-0020</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-AllocateResources-id-0009" name="Allocate resources">
+      <bpmn:incoming>SequenceFlow-ProceedToAllocate-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AllocateToSchedule-id-0021</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ScheduleProjectKickoffMeeting-id-0010" name="Schedule project kickoff meeting">
+      <bpmn:incoming>SequenceFlow-AllocateToSchedule-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ScheduleToEnd-id-0022</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-ProjectOfficiallyBegins-id-0011" name="Project Officially Begins">
+      <bpmn:incoming>SequenceFlow-ScheduleToEnd-id-0022</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToPitch-id-0012" sourceRef="StartEvent-ProjectInitiationProcessStarts-id-0001" targetRef="UserTask-StakeholdersPitchProjectIdea-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-PitchToPrepare-id-0013" sourceRef="UserTask-StakeholdersPitchProjectIdea-id-0002" targetRef="ServiceTask-PrepareProposalDocument-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrepareToReview-id-0014" sourceRef="ServiceTask-PrepareProposalDocument-id-0003" targetRef="UserTask-DecisionMakersReviewProposal-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToGateway-id-0015" sourceRef="UserTask-DecisionMakersReviewProposal-id-0004" targetRef="ExclusiveGateway-RevisionsRequested-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToRevisions-id-0016" name="revisions_requested" sourceRef="ExclusiveGateway-RevisionsRequested-id-0005" targetRef="ServiceTask-IncorporateRequestedRevisions-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-RevisionsToReview-id-0017" sourceRef="ServiceTask-IncorporateRequestedRevisions-id-0006" targetRef="UserTask-DecisionMakersReviewRevisedProposal-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewRevisedToGateway-id-0018" sourceRef="UserTask-DecisionMakersReviewRevisedProposal-id-0007" targetRef="ExclusiveGateway-RevisionsRequested-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToProceed-id-0019" sourceRef="ExclusiveGateway-RevisionsRequested-id-0005" targetRef="ServiceTask-ProceedWithApprovedProposal-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProceedToAllocate-id-0020" sourceRef="ServiceTask-ProceedWithApprovedProposal-id-0008" targetRef="ServiceTask-AllocateResources-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-AllocateToSchedule-id-0021" sourceRef="ServiceTask-AllocateResources-id-0009" targetRef="ServiceTask-ScheduleProjectKickoffMeeting-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-ScheduleToEnd-id-0022" sourceRef="ServiceTask-ScheduleProjectKickoffMeeting-id-0010" targetRef="EndEvent-ProjectOfficiallyBegins-id-0011" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ProjectInitiationProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_ProjectInitiationProcess-id-0001" bpmnElement="ProjectInitiationProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ProjectInitiationProcessStarts-id-0001_di" bpmnElement="StartEvent-ProjectInitiationProcessStarts-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-StakeholdersPitchProjectIdea-id-0002_di" bpmnElement="UserTask-StakeholdersPitchProjectIdea-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareProposalDocument-id-0003_di" bpmnElement="ServiceTask-PrepareProposalDocument-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-DecisionMakersReviewProposal-id-0004_di" bpmnElement="UserTask-DecisionMakersReviewProposal-id-0004">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RevisionsRequested-id-0005_di" bpmnElement="ExclusiveGateway-RevisionsRequested-id-0005" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-IncorporateRequestedRevisions-id-0006_di" bpmnElement="ServiceTask-IncorporateRequestedRevisions-id-0006">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-DecisionMakersReviewRevisedProposal-id-0007_di" bpmnElement="UserTask-DecisionMakersReviewRevisedProposal-id-0007">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProceedWithApprovedProposal-id-0008_di" bpmnElement="ServiceTask-ProceedWithApprovedProposal-id-0008">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AllocateResources-id-0009_di" bpmnElement="ServiceTask-AllocateResources-id-0009">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ScheduleProjectKickoffMeeting-id-0010_di" bpmnElement="ServiceTask-ScheduleProjectKickoffMeeting-id-0010">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProjectOfficiallyBegins-id-0011_di" bpmnElement="EndEvent-ProjectOfficiallyBegins-id-0011">
+        <dc:Bounds x="1257" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToPitch-id-0012_di" bpmnElement="SequenceFlow-StartToPitch-id-0012">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PitchToPrepare-id-0013_di" bpmnElement="SequenceFlow-PitchToPrepare-id-0013">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrepareToReview-id-0014_di" bpmnElement="SequenceFlow-PrepareToReview-id-0014">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToGateway-id-0015_di" bpmnElement="SequenceFlow-ReviewToGateway-id-0015">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToRevisions-id-0016_di" bpmnElement="SequenceFlow-GatewayToRevisions-id-0016">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToProceed-id-0019_di" bpmnElement="SequenceFlow-GatewayToProceed-id-0019">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RevisionsToReview-id-0017_di" bpmnElement="SequenceFlow-RevisionsToReview-id-0017">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewRevisedToGateway-id-0018_di" bpmnElement="SequenceFlow-ReviewRevisedToGateway-id-0018">
+        <di:waypoint x="975" y="110" />
+        <di:waypoint x="975" y="140" />
+        <di:waypoint x="675" y="140" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProceedToAllocate-id-0020_di" bpmnElement="SequenceFlow-ProceedToAllocate-id-0020">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AllocateToSchedule-id-0021_di" bpmnElement="SequenceFlow-AllocateToSchedule-id-0021">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ScheduleToEnd-id-0022_di" bpmnElement="SequenceFlow-ScheduleToEnd-id-0022">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1257" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

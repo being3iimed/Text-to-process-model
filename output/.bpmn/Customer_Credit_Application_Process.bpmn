@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="credit-application-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="CreditApplicationProcess-id-0001" name="Credit Application Process">
+    <bpmn:startEvent id="StartEvent-CreditApplicationProcessStarts-id-0001" name="Credit Application Process Starts">
+      <bpmn:outgoing>SequenceFlow-StartToSplit-id-0015</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:parallelGateway id="ParallelGateway-Split-id-0001" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-StartToSplit-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToCustomerSubmits-id-0016</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToSystemCollects-id-0017</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-CustomerSubmitsFinancialInformation-id-0002" name="Customer submits financial information">
+      <bpmn:incoming>SequenceFlow-SplitToCustomerSubmits-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CustomerSubmitsToJoin-id-0018</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-SystemCollectsFinancialData-id-0003" name="System collects financial data">
+      <bpmn:incoming>SequenceFlow-SplitToSystemCollects-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SystemCollectsToJoin-id-0019</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join-id-0004" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-CustomerSubmitsToJoin-id-0018</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-SystemCollectsToJoin-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToVerify-id-0020</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-SystemVerifiesFinancialInformation-id-0005" name="System verifies financial information">
+      <bpmn:incoming>SequenceFlow-JoinToVerify-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VerifyToCalculate-id-0021</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:scriptTask id="ScriptTask-ComputationCalculateCreditScore-id-0006" name="Computation: calculate credit score using income, debt, and credit history">
+      <bpmn:incoming>SequenceFlow-VerifyToCalculate-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CalculateToGateway-id-0022</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-CreditScoreCheck-id-0007" name="Credit Score Check" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CalculateToGateway-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToApproved-id-0023</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToRejected-id-0028</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-SystemApprovesCreditApplication-id-0008" name="System approves credit application">
+      <bpmn:incoming>SequenceFlow-GatewayToApproved-id-0023</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ApprovedToSendNotification-id-0024</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendApprovalNotificationToCustomer-id-0009" name="Send: approval notification to customer">
+      <bpmn:incoming>SequenceFlow-ApprovedToSendNotification-id-0024</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendNotificationToReview-id-0025</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-CustomerReviewsAndSignsContract-id-0010" name="Customer reviews and signs contract">
+      <bpmn:incoming>SequenceFlow-SendNotificationToReview-id-0025</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToActivate-id-0026</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-SystemActivatesCreditLimit-id-0011" name="System activates credit limit">
+      <bpmn:incoming>SequenceFlow-ReviewToActivate-id-0026</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ActivateToEnd-id-0027</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-CreditFacilityActivated-id-0012" name="Credit Facility Activated">
+      <bpmn:incoming>SequenceFlow-ActivateToEnd-id-0027</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="SendTask-SendRejectionNotificationToCustomer-id-0013" name="Send: rejection notification to customer">
+      <bpmn:incoming>SequenceFlow-GatewayToRejected-id-0028</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RejectedToEnd-id-0029</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-CreditApplicationRejected-id-0014" name="Credit Application Rejected">
+      <bpmn:incoming>SequenceFlow-RejectedToEnd-id-0029</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSplit-id-0015" sourceRef="StartEvent-CreditApplicationProcessStarts-id-0001" targetRef="ParallelGateway-Split-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToCustomerSubmits-id-0016" sourceRef="ParallelGateway-Split-id-0001" targetRef="UserTask-CustomerSubmitsFinancialInformation-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToSystemCollects-id-0017" sourceRef="ParallelGateway-Split-id-0001" targetRef="ServiceTask-SystemCollectsFinancialData-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-CustomerSubmitsToJoin-id-0018" sourceRef="UserTask-CustomerSubmitsFinancialInformation-id-0002" targetRef="ParallelGateway-Join-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-SystemCollectsToJoin-id-0019" sourceRef="ServiceTask-SystemCollectsFinancialData-id-0003" targetRef="ParallelGateway-Join-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToVerify-id-0020" sourceRef="ParallelGateway-Join-id-0004" targetRef="ServiceTask-SystemVerifiesFinancialInformation-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerifyToCalculate-id-0021" sourceRef="ServiceTask-SystemVerifiesFinancialInformation-id-0005" targetRef="ScriptTask-ComputationCalculateCreditScore-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-CalculateToGateway-id-0022" sourceRef="ScriptTask-ComputationCalculateCreditScore-id-0006" targetRef="ExclusiveGateway-CreditScoreCheck-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToApproved-id-0023" name="credit_score &#62;= approval_threshold" sourceRef="ExclusiveGateway-CreditScoreCheck-id-0007" targetRef="ServiceTask-SystemApprovesCreditApplication-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApprovedToSendNotification-id-0024" sourceRef="ServiceTask-SystemApprovesCreditApplication-id-0008" targetRef="SendTask-SendApprovalNotificationToCustomer-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendNotificationToReview-id-0025" sourceRef="SendTask-SendApprovalNotificationToCustomer-id-0009" targetRef="UserTask-CustomerReviewsAndSignsContract-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToActivate-id-0026" sourceRef="UserTask-CustomerReviewsAndSignsContract-id-0010" targetRef="ServiceTask-SystemActivatesCreditLimit-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-ActivateToEnd-id-0027" sourceRef="ServiceTask-SystemActivatesCreditLimit-id-0011" targetRef="EndEvent-CreditFacilityActivated-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToRejected-id-0028" sourceRef="ExclusiveGateway-CreditScoreCheck-id-0007" targetRef="SendTask-SendRejectionNotificationToCustomer-id-0013" />
+    <bpmn:sequenceFlow id="SequenceFlow-RejectedToEnd-id-0029" sourceRef="SendTask-SendRejectionNotificationToCustomer-id-0013" targetRef="EndEvent-CreditApplicationRejected-id-0014" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_CreditApplicationProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_CreditApplicationProcess-id-0001" bpmnElement="CreditApplicationProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-CreditApplicationProcessStarts-id-0001_di" bpmnElement="StartEvent-CreditApplicationProcessStarts-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0001_di" bpmnElement="ParallelGateway-Split-id-0001">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CustomerSubmitsFinancialInformation-id-0002_di" bpmnElement="UserTask-CustomerSubmitsFinancialInformation-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0004_di" bpmnElement="ParallelGateway-Join-id-0004">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SystemVerifiesFinancialInformation-id-0005_di" bpmnElement="ServiceTask-SystemVerifiesFinancialInformation-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-ComputationCalculateCreditScore-id-0006_di" bpmnElement="ScriptTask-ComputationCalculateCreditScore-id-0006">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CreditScoreCheck-id-0007_di" bpmnElement="ExclusiveGateway-CreditScoreCheck-id-0007" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SystemApprovesCreditApplication-id-0008_di" bpmnElement="ServiceTask-SystemApprovesCreditApplication-id-0008">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendApprovalNotificationToCustomer-id-0009_di" bpmnElement="SendTask-SendApprovalNotificationToCustomer-id-0009">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CustomerReviewsAndSignsContract-id-0010_di" bpmnElement="UserTask-CustomerReviewsAndSignsContract-id-0010">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SystemActivatesCreditLimit-id-0011_di" bpmnElement="ServiceTask-SystemActivatesCreditLimit-id-0011">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CreditFacilityActivated-id-0012_di" bpmnElement="EndEvent-CreditFacilityActivated-id-0012">
+        <dc:Bounds x="1707" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SystemCollectsFinancialData-id-0003_di" bpmnElement="ServiceTask-SystemCollectsFinancialData-id-0003">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendRejectionNotificationToCustomer-id-0013_di" bpmnElement="SendTask-SendRejectionNotificationToCustomer-id-0013">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CreditApplicationRejected-id-0014_di" bpmnElement="EndEvent-CreditApplicationRejected-id-0014">
+        <dc:Bounds x="1257" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSplit-id-0015_di" bpmnElement="SequenceFlow-StartToSplit-id-0015">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToCustomerSubmits-id-0016_di" bpmnElement="SequenceFlow-SplitToCustomerSubmits-id-0016">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToSystemCollects-id-0017_di" bpmnElement="SequenceFlow-SplitToSystemCollects-id-0017">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CustomerSubmitsToJoin-id-0018_di" bpmnElement="SequenceFlow-CustomerSubmitsToJoin-id-0018">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToVerify-id-0020_di" bpmnElement="SequenceFlow-JoinToVerify-id-0020">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyToCalculate-id-0021_di" bpmnElement="SequenceFlow-VerifyToCalculate-id-0021">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculateToGateway-id-0022_di" bpmnElement="SequenceFlow-CalculateToGateway-id-0022">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToApproved-id-0023_di" bpmnElement="SequenceFlow-GatewayToApproved-id-0023">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToRejected-id-0028_di" bpmnElement="SequenceFlow-GatewayToRejected-id-0028">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovedToSendNotification-id-0024_di" bpmnElement="SequenceFlow-ApprovedToSendNotification-id-0024">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendNotificationToReview-id-0025_di" bpmnElement="SequenceFlow-SendNotificationToReview-id-0025">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToActivate-id-0026_di" bpmnElement="SequenceFlow-ReviewToActivate-id-0026">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ActivateToEnd-id-0027_di" bpmnElement="SequenceFlow-ActivateToEnd-id-0027">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1707" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SystemCollectsToJoin-id-0019_di" bpmnElement="SequenceFlow-SystemCollectsToJoin-id-0019">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RejectedToEnd-id-0029_di" bpmnElement="SequenceFlow-RejectedToEnd-id-0029">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1257" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

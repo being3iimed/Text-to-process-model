@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="feedback-process-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="Customer-Feedback-Process-id-0001">
+    <bpmn:startEvent id="StartEvent-CustomerInteractionComplete-id-0001" name="Customer Interaction Complete">
+      <bpmn:outgoing>SequenceFlow-StartToSend-id-0013</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sendTask id="SendTask-FeedbackRequest-id-0002" name="Send feedback request via email/SMS">
+      <bpmn:incoming>SequenceFlow-StartToSend-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendToReceive-id-0014</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-CustomerFeedback-id-0003" name="Receive customer feedback response">
+      <bpmn:incoming>SequenceFlow-SendToReceive-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveToLog-id-0015</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:serviceTask id="ServiceTask-LogFeedback-id-0004" name="Log feedback in centralized system">
+      <bpmn:incoming>SequenceFlow-ReceiveToLog-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogToCategorize-id-0016</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-CategorizeFeedback-id-0005" name="Categorize feedback by type and sentiment">
+      <bpmn:incoming>SequenceFlow-LogToCategorize-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CategorizeToGateway-id-0017</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-FeedbackSentiment-id-0006" name="Evaluate Feedback Sentiment" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CategorizeToGateway-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToPositive-id-0018</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToNegativeRecurring-id-0019</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToOther-id-0020</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-PositiveFeedback-id-0007" name="Send positive feedback to relevant team">
+      <bpmn:incoming>SequenceFlow-GatewayToPositive-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PositiveToEnd-id-0021</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-FlagIssue-id-0008" name="Flag issue for investigation">
+      <bpmn:incoming>SequenceFlow-GatewayToNegativeRecurring-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FlagToActionPlan-id-0022</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-CreateActionPlan-id-0009" name="Create action plan to address concern">
+      <bpmn:incoming>SequenceFlow-FlagToActionPlan-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ActionPlanToFollowUp-id-0023</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-FollowUpCustomer-id-0010" name="Send follow-up to customer with significant problem">
+      <bpmn:incoming>SequenceFlow-ActionPlanToFollowUp-id-0023</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FollowUpToEnd-id-0024</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-ArchiveFeedback-id-0011" name="Archive feedback for trend analysis">
+      <bpmn:incoming>SequenceFlow-GatewayToOther-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OtherToEnd-id-0025</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-FeedbackProcessComplete-id-0012" name="Feedback Process Complete">
+      <bpmn:incoming>SequenceFlow-PositiveToEnd-id-0021</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-FollowUpToEnd-id-0024</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-OtherToEnd-id-0025</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSend-id-0013" sourceRef="StartEvent-CustomerInteractionComplete-id-0001" targetRef="SendTask-FeedbackRequest-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendToReceive-id-0014" sourceRef="SendTask-FeedbackRequest-id-0002" targetRef="ReceiveTask-CustomerFeedback-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveToLog-id-0015" sourceRef="ReceiveTask-CustomerFeedback-id-0003" targetRef="ServiceTask-LogFeedback-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogToCategorize-id-0016" sourceRef="ServiceTask-LogFeedback-id-0004" targetRef="ServiceTask-CategorizeFeedback-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-CategorizeToGateway-id-0017" sourceRef="ServiceTask-CategorizeFeedback-id-0005" targetRef="ExclusiveGateway-FeedbackSentiment-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToPositive-id-0018" name="feedback_sentiment == &#34;positive&#34;" sourceRef="ExclusiveGateway-FeedbackSentiment-id-0006" targetRef="SendTask-PositiveFeedback-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToNegativeRecurring-id-0019" name="feedback_sentiment == &#34;negative&#34; AND feedback_issue_recurring == &#34;true&#34;" sourceRef="ExclusiveGateway-FeedbackSentiment-id-0006" targetRef="ServiceTask-FlagIssue-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToOther-id-0020" sourceRef="ExclusiveGateway-FeedbackSentiment-id-0006" targetRef="ServiceTask-ArchiveFeedback-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-PositiveToEnd-id-0021" sourceRef="SendTask-PositiveFeedback-id-0007" targetRef="EndEvent-FeedbackProcessComplete-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-FlagToActionPlan-id-0022" sourceRef="ServiceTask-FlagIssue-id-0008" targetRef="ServiceTask-CreateActionPlan-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-ActionPlanToFollowUp-id-0023" sourceRef="ServiceTask-CreateActionPlan-id-0009" targetRef="SendTask-FollowUpCustomer-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-FollowUpToEnd-id-0024" sourceRef="SendTask-FollowUpCustomer-id-0010" targetRef="EndEvent-FeedbackProcessComplete-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-OtherToEnd-id-0025" sourceRef="ServiceTask-ArchiveFeedback-id-0011" targetRef="EndEvent-FeedbackProcessComplete-id-0012" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Customer-Feedback-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Customer-Feedback-Process-id-0001" bpmnElement="Customer-Feedback-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-CustomerInteractionComplete-id-0001_di" bpmnElement="StartEvent-CustomerInteractionComplete-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-FeedbackRequest-id-0002_di" bpmnElement="SendTask-FeedbackRequest-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-CustomerFeedback-id-0003_di" bpmnElement="ReceiveTask-CustomerFeedback-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogFeedback-id-0004_di" bpmnElement="ServiceTask-LogFeedback-id-0004">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CategorizeFeedback-id-0005_di" bpmnElement="ServiceTask-CategorizeFeedback-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-FeedbackSentiment-id-0006_di" bpmnElement="ExclusiveGateway-FeedbackSentiment-id-0006" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-PositiveFeedback-id-0007_di" bpmnElement="SendTask-PositiveFeedback-id-0007">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-FeedbackProcessComplete-id-0012_di" bpmnElement="EndEvent-FeedbackProcessComplete-id-0012">
+        <dc:Bounds x="1407" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-FlagIssue-id-0008_di" bpmnElement="ServiceTask-FlagIssue-id-0008">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CreateActionPlan-id-0009_di" bpmnElement="ServiceTask-CreateActionPlan-id-0009">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-FollowUpCustomer-id-0010_di" bpmnElement="SendTask-FollowUpCustomer-id-0010">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ArchiveFeedback-id-0011_di" bpmnElement="ServiceTask-ArchiveFeedback-id-0011">
+        <dc:Bounds x="925" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSend-id-0013_di" bpmnElement="SequenceFlow-StartToSend-id-0013">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToReceive-id-0014_di" bpmnElement="SequenceFlow-SendToReceive-id-0014">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToLog-id-0015_di" bpmnElement="SequenceFlow-ReceiveToLog-id-0015">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogToCategorize-id-0016_di" bpmnElement="SequenceFlow-LogToCategorize-id-0016">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CategorizeToGateway-id-0017_di" bpmnElement="SequenceFlow-CategorizeToGateway-id-0017">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToPositive-id-0018_di" bpmnElement="SequenceFlow-GatewayToPositive-id-0018">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToNegativeRecurring-id-0019_di" bpmnElement="SequenceFlow-GatewayToNegativeRecurring-id-0019">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToOther-id-0020_di" bpmnElement="SequenceFlow-GatewayToOther-id-0020">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="350" />
+        <di:waypoint x="925" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PositiveToEnd-id-0021_di" bpmnElement="SequenceFlow-PositiveToEnd-id-0021">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1407" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FlagToActionPlan-id-0022_di" bpmnElement="SequenceFlow-FlagToActionPlan-id-0022">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ActionPlanToFollowUp-id-0023_di" bpmnElement="SequenceFlow-ActionPlanToFollowUp-id-0023">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FollowUpToEnd-id-0024_di" bpmnElement="SequenceFlow-FollowUpToEnd-id-0024">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1425" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OtherToEnd-id-0025_di" bpmnElement="SequenceFlow-OtherToEnd-id-0025">
+        <di:waypoint x="1025" y="350" />
+        <di:waypoint x="1425" y="350" />
+        <di:waypoint x="1425" y="88" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

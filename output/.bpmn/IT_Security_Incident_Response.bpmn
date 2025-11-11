@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="SecurityBreachResponse-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="SecurityBreachResponse-Process-id-0001" name="Security Breach Response Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-SecurityBreachDetected-id-0001" name="Security Breach Detected">
+      <bpmn:outgoing>SequenceFlow-StartToIsolate-id-0012</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-IsolateAffectedSystems-id-0002" name="Isolate Affected Systems">
+      <bpmn:incoming>SequenceFlow-StartToIsolate-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-IsolateToAnalyze-id-0013</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-AnalyzeBreachForensically-id-0003" name="Analyze Breach Forensically">
+      <bpmn:incoming>SequenceFlow-IsolateToAnalyze-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AnalyzeToNotify-id-0014</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-NotifyStakeholders-id-0004" name="Notify Stakeholders">
+      <bpmn:incoming>SequenceFlow-AnalyzeToNotify-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotifyToMitigate-id-0015</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ImplementMitigationSteps-id-0005" name="Implement Mitigation Steps">
+      <bpmn:incoming>SequenceFlow-NotifyToMitigate-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MitigateToGateway-id-0016</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ExternalCommunicationRequired-id-0006" name="External Communication Required?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-MitigateToGateway-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToCommunicate-id-0017</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToReport-id-0018</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-CommunicateWithExternalParties-id-0007" name="Communicate with External Parties">
+      <bpmn:incoming>SequenceFlow-GatewayToCommunicate-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CommunicateToReport-id-0019</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-PrepareIncidentReport-id-0008" name="Prepare Incident Report">
+      <bpmn:incoming>SequenceFlow-GatewayToReport-id-0018</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-CommunicateToReport-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReportToUpdate-id-0020</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-UpdatePreventiveMeasures-id-0009" name="Update Preventive Measures">
+      <bpmn:incoming>SequenceFlow-ReportToUpdate-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateToDebrief-id-0021</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ConductDebriefMeeting-id-0010" name="Conduct Debrief Meeting">
+      <bpmn:incoming>SequenceFlow-UpdateToDebrief-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DebriefToEnd-id-0022</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0011" name="Process Complete">
+      <bpmn:incoming>SequenceFlow-DebriefToEnd-id-0022</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToIsolate-id-0012" sourceRef="StartEvent-SecurityBreachDetected-id-0001" targetRef="UserTask-IsolateAffectedSystems-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-IsolateToAnalyze-id-0013" sourceRef="UserTask-IsolateAffectedSystems-id-0002" targetRef="UserTask-AnalyzeBreachForensically-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-AnalyzeToNotify-id-0014" sourceRef="UserTask-AnalyzeBreachForensically-id-0003" targetRef="UserTask-NotifyStakeholders-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotifyToMitigate-id-0015" sourceRef="UserTask-NotifyStakeholders-id-0004" targetRef="UserTask-ImplementMitigationSteps-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-MitigateToGateway-id-0016" sourceRef="UserTask-ImplementMitigationSteps-id-0005" targetRef="ExclusiveGateway-ExternalCommunicationRequired-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToCommunicate-id-0017" name="Yes" sourceRef="ExclusiveGateway-ExternalCommunicationRequired-id-0006" targetRef="ServiceTask-CommunicateWithExternalParties-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToReport-id-0018" name="No" sourceRef="ExclusiveGateway-ExternalCommunicationRequired-id-0006" targetRef="UserTask-PrepareIncidentReport-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-CommunicateToReport-id-0019" sourceRef="ServiceTask-CommunicateWithExternalParties-id-0007" targetRef="UserTask-PrepareIncidentReport-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReportToUpdate-id-0020" sourceRef="UserTask-PrepareIncidentReport-id-0008" targetRef="UserTask-UpdatePreventiveMeasures-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateToDebrief-id-0021" sourceRef="UserTask-UpdatePreventiveMeasures-id-0009" targetRef="UserTask-ConductDebriefMeeting-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-DebriefToEnd-id-0022" sourceRef="UserTask-ConductDebriefMeeting-id-0010" targetRef="EndEvent-ProcessComplete-id-0011" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SecurityBreachResponse-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SecurityBreachResponse-Process-id-0001" bpmnElement="SecurityBreachResponse-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-SecurityBreachDetected-id-0001_di" bpmnElement="StartEvent-SecurityBreachDetected-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-IsolateAffectedSystems-id-0002_di" bpmnElement="UserTask-IsolateAffectedSystems-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AnalyzeBreachForensically-id-0003_di" bpmnElement="UserTask-AnalyzeBreachForensically-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-NotifyStakeholders-id-0004_di" bpmnElement="UserTask-NotifyStakeholders-id-0004">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ImplementMitigationSteps-id-0005_di" bpmnElement="UserTask-ImplementMitigationSteps-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ExternalCommunicationRequired-id-0006_di" bpmnElement="ExclusiveGateway-ExternalCommunicationRequired-id-0006" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CommunicateWithExternalParties-id-0007_di" bpmnElement="ServiceTask-CommunicateWithExternalParties-id-0007">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PrepareIncidentReport-id-0008_di" bpmnElement="UserTask-PrepareIncidentReport-id-0008">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-UpdatePreventiveMeasures-id-0009_di" bpmnElement="UserTask-UpdatePreventiveMeasures-id-0009">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConductDebriefMeeting-id-0010_di" bpmnElement="UserTask-ConductDebriefMeeting-id-0010">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0011_di" bpmnElement="EndEvent-ProcessComplete-id-0011">
+        <dc:Bounds x="1557" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToIsolate-id-0012_di" bpmnElement="SequenceFlow-StartToIsolate-id-0012">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IsolateToAnalyze-id-0013_di" bpmnElement="SequenceFlow-IsolateToAnalyze-id-0013">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AnalyzeToNotify-id-0014_di" bpmnElement="SequenceFlow-AnalyzeToNotify-id-0014">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotifyToMitigate-id-0015_di" bpmnElement="SequenceFlow-NotifyToMitigate-id-0015">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MitigateToGateway-id-0016_di" bpmnElement="SequenceFlow-MitigateToGateway-id-0016">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToCommunicate-id-0017_di" bpmnElement="SequenceFlow-GatewayToCommunicate-id-0017">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToReport-id-0018_di" bpmnElement="SequenceFlow-GatewayToReport-id-0018">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="140" />
+        <di:waypoint x="1125" y="140" />
+        <di:waypoint x="1125" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CommunicateToReport-id-0019_di" bpmnElement="SequenceFlow-CommunicateToReport-id-0019">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReportToUpdate-id-0020_di" bpmnElement="SequenceFlow-ReportToUpdate-id-0020">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateToDebrief-id-0021_di" bpmnElement="SequenceFlow-UpdateToDebrief-id-0021">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DebriefToEnd-id-0022_di" bpmnElement="SequenceFlow-DebriefToEnd-id-0022">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1557" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="performance-review-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="PerformanceReviewProcess-id-0001" name="Performance Review Process">
+    <bpmn:startEvent id="StartEvent-PerformanceReviewProcessStarts-id-0001" name="Performance Review Process Starts">
+      <bpmn:outgoing>SequenceFlow-StartToSetGoals-id-0012</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-SetEmployeeGoals-id-0002" name="Set Employee Goals">
+      <bpmn:incoming>SequenceFlow-StartToSetGoals-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SetGoalsToTrack-id-0013</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-TrackProgress-id-0003" name="Track Progress">
+      <bpmn:incoming>SequenceFlow-SetGoalsToTrack-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TrackToDocument-id-0014</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-DocumentAchievements-id-0004" name="Document Achievements">
+      <bpmn:incoming>SequenceFlow-TrackToDocument-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DocumentToSplit-id-0015</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-Split-id-0005" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-DocumentToSplit-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToSelfAssessment-id-0016</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToFeedback-id-0017</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-CompleteSelfAssessment-id-0006" name="Complete Self-Assessment">
+      <bpmn:incoming>SequenceFlow-SplitToSelfAssessment-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelfAssessmentToJoin-id-0018</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ProvideFeedback-id-0007" name="Provide Feedback">
+      <bpmn:incoming>SequenceFlow-SplitToFeedback-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FeedbackToJoin-id-0019</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join-id-0008" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-SelfAssessmentToJoin-id-0018</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-FeedbackToJoin-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToDecisions-id-0020</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-MakeDecisions-id-0009" name="Make Decisions">
+      <bpmn:incoming>SequenceFlow-JoinToDecisions-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DecisionsToNewObjectives-id-0021</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-SetNewObjectives-id-0010" name="Set New Objectives">
+      <bpmn:incoming>SequenceFlow-DecisionsToNewObjectives-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NewObjectivesToEnd-id-0022</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-PerformanceReviewComplete-id-0011" name="Performance Review Complete">
+      <bpmn:incoming>SequenceFlow-NewObjectivesToEnd-id-0022</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSetGoals-id-0012" sourceRef="StartEvent-PerformanceReviewProcessStarts-id-0001" targetRef="UserTask-SetEmployeeGoals-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SetGoalsToTrack-id-0013" sourceRef="UserTask-SetEmployeeGoals-id-0002" targetRef="UserTask-TrackProgress-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-TrackToDocument-id-0014" sourceRef="UserTask-TrackProgress-id-0003" targetRef="UserTask-DocumentAchievements-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-DocumentToSplit-id-0015" sourceRef="UserTask-DocumentAchievements-id-0004" targetRef="ParallelGateway-Split-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToSelfAssessment-id-0016" sourceRef="ParallelGateway-Split-id-0005" targetRef="UserTask-CompleteSelfAssessment-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToFeedback-id-0017" sourceRef="ParallelGateway-Split-id-0005" targetRef="UserTask-ProvideFeedback-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelfAssessmentToJoin-id-0018" sourceRef="UserTask-CompleteSelfAssessment-id-0006" targetRef="ParallelGateway-Join-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-FeedbackToJoin-id-0019" sourceRef="UserTask-ProvideFeedback-id-0007" targetRef="ParallelGateway-Join-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToDecisions-id-0020" sourceRef="ParallelGateway-Join-id-0008" targetRef="UserTask-MakeDecisions-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-DecisionsToNewObjectives-id-0021" sourceRef="UserTask-MakeDecisions-id-0009" targetRef="UserTask-SetNewObjectives-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-NewObjectivesToEnd-id-0022" sourceRef="UserTask-SetNewObjectives-id-0010" targetRef="EndEvent-PerformanceReviewComplete-id-0011" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_PerformanceReviewProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_PerformanceReviewProcess-id-0001" bpmnElement="PerformanceReviewProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-PerformanceReviewProcessStarts-id-0001_di" bpmnElement="StartEvent-PerformanceReviewProcessStarts-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SetEmployeeGoals-id-0002_di" bpmnElement="UserTask-SetEmployeeGoals-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-TrackProgress-id-0003_di" bpmnElement="UserTask-TrackProgress-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-DocumentAchievements-id-0004_di" bpmnElement="UserTask-DocumentAchievements-id-0004">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0005_di" bpmnElement="ParallelGateway-Split-id-0005">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CompleteSelfAssessment-id-0006_di" bpmnElement="UserTask-CompleteSelfAssessment-id-0006">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0008_di" bpmnElement="ParallelGateway-Join-id-0008">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-MakeDecisions-id-0009_di" bpmnElement="UserTask-MakeDecisions-id-0009">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SetNewObjectives-id-0010_di" bpmnElement="UserTask-SetNewObjectives-id-0010">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-PerformanceReviewComplete-id-0011_di" bpmnElement="EndEvent-PerformanceReviewComplete-id-0011">
+        <dc:Bounds x="1407" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ProvideFeedback-id-0007_di" bpmnElement="UserTask-ProvideFeedback-id-0007">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSetGoals-id-0012_di" bpmnElement="SequenceFlow-StartToSetGoals-id-0012">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SetGoalsToTrack-id-0013_di" bpmnElement="SequenceFlow-SetGoalsToTrack-id-0013">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TrackToDocument-id-0014_di" bpmnElement="SequenceFlow-TrackToDocument-id-0014">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DocumentToSplit-id-0015_di" bpmnElement="SequenceFlow-DocumentToSplit-id-0015">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToSelfAssessment-id-0016_di" bpmnElement="SequenceFlow-SplitToSelfAssessment-id-0016">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToFeedback-id-0017_di" bpmnElement="SequenceFlow-SplitToFeedback-id-0017">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelfAssessmentToJoin-id-0018_di" bpmnElement="SequenceFlow-SelfAssessmentToJoin-id-0018">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToDecisions-id-0020_di" bpmnElement="SequenceFlow-JoinToDecisions-id-0020">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DecisionsToNewObjectives-id-0021_di" bpmnElement="SequenceFlow-DecisionsToNewObjectives-id-0021">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NewObjectivesToEnd-id-0022_di" bpmnElement="SequenceFlow-NewObjectivesToEnd-id-0022">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1407" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FeedbackToJoin-id-0019_di" bpmnElement="SequenceFlow-FeedbackToJoin-id-0019">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="975" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

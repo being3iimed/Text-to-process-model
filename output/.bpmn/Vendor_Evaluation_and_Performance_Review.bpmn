@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="vendor-evaluation-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="VendorEvaluationProcess-id-0001" name="Vendor Evaluation Process">
+    <bpmn:startEvent id="StartEvent-VendorEvaluationProcessStarts-id-0001" name="Vendor Evaluation Process Starts">
+      <bpmn:outgoing>SequenceFlow-StartToDefineKPIs-id-0018</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-DefineKPIs-id-0002" name="Define KPIs: delivery time, quality, responsiveness">
+      <bpmn:incoming>SequenceFlow-StartToDefineKPIs-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DefineKPIsToParallelSplit-id-0019</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-Split-id-0003" name="Parallel Data Collection" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-DefineKPIsToParallelSplit-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ParallelSplitToCollectSurvey-id-0020</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ParallelSplitToConductAudits-id-0021</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ParallelSplitToRetrieveLogs-id-0022</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-CollectSurveyData-id-0004" name="Collect survey data">
+      <bpmn:incoming>SequenceFlow-ParallelSplitToCollectSurvey-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CollectSurveyToParallelJoin-id-0023</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ConductInternalAudits-id-0005" name="Conduct internal audits">
+      <bpmn:incoming>SequenceFlow-ParallelSplitToConductAudits-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConductAuditsToParallelJoin-id-0024</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-RetrievePerformanceLogs-id-0006" name="Retrieve performance logs">
+      <bpmn:incoming>SequenceFlow-ParallelSplitToRetrieveLogs-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RetrieveLogsToParallelJoin-id-0025</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join-id-0007" name="Synchronize Data Collection" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-CollectSurveyToParallelJoin-id-0023</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ConductAuditsToParallelJoin-id-0024</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-RetrieveLogsToParallelJoin-id-0025</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ParallelJoinToCalculateScores-id-0026</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:scriptTask id="ScriptTask-CalculateVendorScores-id-0008" name="Calculate vendor scores based on KPIs">
+      <bpmn:incoming>SequenceFlow-ParallelJoinToCalculateScores-id-0026</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CalculateScoresToGenerateReport-id-0027</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:serviceTask id="ServiceTask-GenerateEvaluationReport-id-0009" name="Generate detailed vendor evaluation report">
+      <bpmn:incoming>SequenceFlow-CalculateScoresToGenerateReport-id-0027</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GenerateReportToScoreEvaluation-id-0028</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-VendorScoreEvaluation-id-0010" name="Evaluate Vendor Score" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-GenerateReportToScoreEvaluation-id-0028</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ScoreEvaluationToImprovementRequest-id-0029</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ScoreEvaluationToIncentiveOffer-id-0033</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ScoreEvaluationToMaintainedStatus-id-0036</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-SendImprovementRequest-id-0011" name="Send improvement discussion request">
+      <bpmn:incoming>SequenceFlow-ScoreEvaluationToImprovementRequest-id-0029</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ImprovementRequestToVendorResponse-id-0030</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-VendorRespondsToImprovement-id-0012" name="Vendor responds to improvement plan">
+      <bpmn:incoming>SequenceFlow-ImprovementRequestToVendorResponse-id-0030</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VendorResponseToConfirmation-id-0031</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveImprovementConfirmation-id-0013" name="Receive vendor improvement confirmation">
+      <bpmn:incoming>SequenceFlow-VendorResponseToConfirmation-id-0031</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmationToEnd-id-0032</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:sendTask id="SendTask-SendIncentiveOffer-id-0014" name="Send incentive offer (extended contract/priority status)">
+      <bpmn:incoming>SequenceFlow-ScoreEvaluationToIncentiveOffer-id-0033</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-IncentiveOfferToAcceptance-id-0034</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveIncentiveAcceptance-id-0015" name="Receive vendor acceptance of incentive">
+      <bpmn:incoming>SequenceFlow-IncentiveOfferToAcceptance-id-0034</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AcceptanceToEnd-id-0035</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:sendTask id="SendTask-SendMaintainedStatusNotification-id-0016" name="Send vendor maintained status notification">
+      <bpmn:incoming>SequenceFlow-ScoreEvaluationToMaintainedStatus-id-0036</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MaintainedStatusToEnd-id-0037</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-VendorEvaluationComplete-id-0017" name="Vendor Evaluation Complete">
+      <bpmn:incoming>SequenceFlow-ConfirmationToEnd-id-0032</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-AcceptanceToEnd-id-0035</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-MaintainedStatusToEnd-id-0037</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToDefineKPIs-id-0018" sourceRef="StartEvent-VendorEvaluationProcessStarts-id-0001" targetRef="ServiceTask-DefineKPIs-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-DefineKPIsToParallelSplit-id-0019" sourceRef="ServiceTask-DefineKPIs-id-0002" targetRef="ParallelGateway-Split-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelSplitToCollectSurvey-id-0020" sourceRef="ParallelGateway-Split-id-0003" targetRef="ServiceTask-CollectSurveyData-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelSplitToConductAudits-id-0021" sourceRef="ParallelGateway-Split-id-0003" targetRef="ServiceTask-ConductInternalAudits-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelSplitToRetrieveLogs-id-0022" sourceRef="ParallelGateway-Split-id-0003" targetRef="ServiceTask-RetrievePerformanceLogs-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-CollectSurveyToParallelJoin-id-0023" sourceRef="ServiceTask-CollectSurveyData-id-0004" targetRef="ParallelGateway-Join-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConductAuditsToParallelJoin-id-0024" sourceRef="ServiceTask-ConductInternalAudits-id-0005" targetRef="ParallelGateway-Join-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-RetrieveLogsToParallelJoin-id-0025" sourceRef="ServiceTask-RetrievePerformanceLogs-id-0006" targetRef="ParallelGateway-Join-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelJoinToCalculateScores-id-0026" sourceRef="ParallelGateway-Join-id-0007" targetRef="ScriptTask-CalculateVendorScores-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-CalculateScoresToGenerateReport-id-0027" sourceRef="ScriptTask-CalculateVendorScores-id-0008" targetRef="ServiceTask-GenerateEvaluationReport-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-GenerateReportToScoreEvaluation-id-0028" sourceRef="ServiceTask-GenerateEvaluationReport-id-0009" targetRef="ExclusiveGateway-VendorScoreEvaluation-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-ScoreEvaluationToImprovementRequest-id-0029" name="vendor_score &#60; threshold" sourceRef="ExclusiveGateway-VendorScoreEvaluation-id-0010" targetRef="SendTask-SendImprovementRequest-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-ImprovementRequestToVendorResponse-id-0030" sourceRef="SendTask-SendImprovementRequest-id-0011" targetRef="UserTask-VendorRespondsToImprovement-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-VendorResponseToConfirmation-id-0031" sourceRef="UserTask-VendorRespondsToImprovement-id-0012" targetRef="ReceiveTask-ReceiveImprovementConfirmation-id-0013" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmationToEnd-id-0032" sourceRef="ReceiveTask-ReceiveImprovementConfirmation-id-0013" targetRef="EndEvent-VendorEvaluationComplete-id-0017" />
+    <bpmn:sequenceFlow id="SequenceFlow-ScoreEvaluationToIncentiveOffer-id-0033" name="vendor_score &#62;= high_performance_threshold" sourceRef="ExclusiveGateway-VendorScoreEvaluation-id-0010" targetRef="SendTask-SendIncentiveOffer-id-0014" />
+    <bpmn:sequenceFlow id="SequenceFlow-IncentiveOfferToAcceptance-id-0034" sourceRef="SendTask-SendIncentiveOffer-id-0014" targetRef="ReceiveTask-ReceiveIncentiveAcceptance-id-0015" />
+    <bpmn:sequenceFlow id="SequenceFlow-AcceptanceToEnd-id-0035" sourceRef="ReceiveTask-ReceiveIncentiveAcceptance-id-0015" targetRef="EndEvent-VendorEvaluationComplete-id-0017" />
+    <bpmn:sequenceFlow id="SequenceFlow-ScoreEvaluationToMaintainedStatus-id-0036" sourceRef="ExclusiveGateway-VendorScoreEvaluation-id-0010" targetRef="SendTask-SendMaintainedStatusNotification-id-0016" />
+    <bpmn:sequenceFlow id="SequenceFlow-MaintainedStatusToEnd-id-0037" sourceRef="SendTask-SendMaintainedStatusNotification-id-0016" targetRef="EndEvent-VendorEvaluationComplete-id-0017" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_VendorEvaluationProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_VendorEvaluationProcess-id-0001" bpmnElement="VendorEvaluationProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-VendorEvaluationProcessStarts-id-0001_di" bpmnElement="StartEvent-VendorEvaluationProcessStarts-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DefineKPIs-id-0002_di" bpmnElement="ServiceTask-DefineKPIs-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0003_di" bpmnElement="ParallelGateway-Split-id-0003">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CollectSurveyData-id-0004_di" bpmnElement="ServiceTask-CollectSurveyData-id-0004">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0007_di" bpmnElement="ParallelGateway-Join-id-0007">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-CalculateVendorScores-id-0008_di" bpmnElement="ScriptTask-CalculateVendorScores-id-0008">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateEvaluationReport-id-0009_di" bpmnElement="ServiceTask-GenerateEvaluationReport-id-0009">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-VendorScoreEvaluation-id-0010_di" bpmnElement="ExclusiveGateway-VendorScoreEvaluation-id-0010" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendImprovementRequest-id-0011_di" bpmnElement="SendTask-SendImprovementRequest-id-0011">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-VendorRespondsToImprovement-id-0012_di" bpmnElement="UserTask-VendorRespondsToImprovement-id-0012">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveImprovementConfirmation-id-0013_di" bpmnElement="ReceiveTask-ReceiveImprovementConfirmation-id-0013">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-VendorEvaluationComplete-id-0017_di" bpmnElement="EndEvent-VendorEvaluationComplete-id-0017">
+        <dc:Bounds x="1707" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ConductInternalAudits-id-0005_di" bpmnElement="ServiceTask-ConductInternalAudits-id-0005">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendIncentiveOffer-id-0014_di" bpmnElement="SendTask-SendIncentiveOffer-id-0014">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveIncentiveAcceptance-id-0015_di" bpmnElement="ReceiveTask-ReceiveIncentiveAcceptance-id-0015">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RetrievePerformanceLogs-id-0006_di" bpmnElement="ServiceTask-RetrievePerformanceLogs-id-0006">
+        <dc:Bounds x="475" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendMaintainedStatusNotification-id-0016_di" bpmnElement="SendTask-SendMaintainedStatusNotification-id-0016">
+        <dc:Bounds x="1225" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToDefineKPIs-id-0018_di" bpmnElement="SequenceFlow-StartToDefineKPIs-id-0018">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DefineKPIsToParallelSplit-id-0019_di" bpmnElement="SequenceFlow-DefineKPIsToParallelSplit-id-0019">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelSplitToCollectSurvey-id-0020_di" bpmnElement="SequenceFlow-ParallelSplitToCollectSurvey-id-0020">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelSplitToConductAudits-id-0021_di" bpmnElement="SequenceFlow-ParallelSplitToConductAudits-id-0021">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelSplitToRetrieveLogs-id-0022_di" bpmnElement="SequenceFlow-ParallelSplitToRetrieveLogs-id-0022">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="350" />
+        <di:waypoint x="475" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CollectSurveyToParallelJoin-id-0023_di" bpmnElement="SequenceFlow-CollectSurveyToParallelJoin-id-0023">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelJoinToCalculateScores-id-0026_di" bpmnElement="SequenceFlow-ParallelJoinToCalculateScores-id-0026">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculateScoresToGenerateReport-id-0027_di" bpmnElement="SequenceFlow-CalculateScoresToGenerateReport-id-0027">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateReportToScoreEvaluation-id-0028_di" bpmnElement="SequenceFlow-GenerateReportToScoreEvaluation-id-0028">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ScoreEvaluationToImprovementRequest-id-0029_di" bpmnElement="SequenceFlow-ScoreEvaluationToImprovementRequest-id-0029">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ScoreEvaluationToIncentiveOffer-id-0033_di" bpmnElement="SequenceFlow-ScoreEvaluationToIncentiveOffer-id-0033">
+        <di:waypoint x="1125" y="95" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ScoreEvaluationToMaintainedStatus-id-0036_di" bpmnElement="SequenceFlow-ScoreEvaluationToMaintainedStatus-id-0036">
+        <di:waypoint x="1125" y="95" />
+        <di:waypoint x="1125" y="350" />
+        <di:waypoint x="1225" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ImprovementRequestToVendorResponse-id-0030_di" bpmnElement="SequenceFlow-ImprovementRequestToVendorResponse-id-0030">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VendorResponseToConfirmation-id-0031_di" bpmnElement="SequenceFlow-VendorResponseToConfirmation-id-0031">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmationToEnd-id-0032_di" bpmnElement="SequenceFlow-ConfirmationToEnd-id-0032">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1707" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConductAuditsToParallelJoin-id-0024_di" bpmnElement="SequenceFlow-ConductAuditsToParallelJoin-id-0024">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IncentiveOfferToAcceptance-id-0034_di" bpmnElement="SequenceFlow-IncentiveOfferToAcceptance-id-0034">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AcceptanceToEnd-id-0035_di" bpmnElement="SequenceFlow-AcceptanceToEnd-id-0035">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1725" y="210" />
+        <di:waypoint x="1725" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RetrieveLogsToParallelJoin-id-0025_di" bpmnElement="SequenceFlow-RetrieveLogsToParallelJoin-id-0025">
+        <di:waypoint x="575" y="350" />
+        <di:waypoint x="675" y="350" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MaintainedStatusToEnd-id-0037_di" bpmnElement="SequenceFlow-MaintainedStatusToEnd-id-0037">
+        <di:waypoint x="1325" y="350" />
+        <di:waypoint x="1725" y="350" />
+        <di:waypoint x="1725" y="88" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

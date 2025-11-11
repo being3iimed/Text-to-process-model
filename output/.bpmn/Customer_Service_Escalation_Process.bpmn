@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Customer-Issue-Escalation-Process" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="Customer-Issue-Escalation-Process-id-0001" name="Customer Issue Escalation Process">
+    <bpmn:startEvent id="StartEvent-CustomerIssueEscalationProcessStarts-id-0001" name="Customer Issue Escalation Process Starts">
+      <bpmn:outgoing>SequenceFlow-StartToFrontlineStaff-id-0030</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-FrontlineStaffAttemptsToResolveIssue-id-0002" name="Frontline staff attempts to resolve issue">
+      <bpmn:incoming>SequenceFlow-StartToFrontlineStaff-id-0030</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FrontlineStaffToGateway-id-0031</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-IssueNotResolved-id-0003" name="Issue Not Resolved?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-FrontlineStaffToGateway-id-0031</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToSendNotification-id-0032</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToSendResolutionNotification-id-0056</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-SendEscalationNotificationToSeniorSupport-id-0004" name="Send: escalation notification to senior support">
+      <bpmn:incoming>SequenceFlow-GatewayToSendNotification-id-0032</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendNotificationToSeniorSupport-id-0033</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-SeniorSupportTeamConductsPriorityReview-id-0005" name="Senior support team conducts priority review">
+      <bpmn:incoming>SequenceFlow-SendNotificationToSeniorSupport-id-0033</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SeniorSupportToParallelSplit-id-0034</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-Split-id-0006" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-SeniorSupportToParallelSplit-id-0034</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ParallelSplitToAllocateResources-id-0035</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ParallelSplitToRootCauseAnalysis-id-0036</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-AllocateAdditionalResources-id-0007" name="Allocate additional resources">
+      <bpmn:incoming>SequenceFlow-ParallelSplitToAllocateResources-id-0035</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AllocateResourcesToParallelJoin-id-0037</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ConductRootCauseAnalysis-id-0008" name="Conduct root cause analysis">
+      <bpmn:incoming>SequenceFlow-ParallelSplitToRootCauseAnalysis-id-0036</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RootCauseAnalysisToParallelJoin-id-0038</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join-id-0009" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-AllocateResourcesToParallelJoin-id-0037</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-RootCauseAnalysisToParallelJoin-id-0038</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ParallelJoinToProposeSolutions-id-0039</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-ProposeSolutions-id-0010" name="Propose solutions">
+      <bpmn:incoming>SequenceFlow-ParallelJoinToProposeSolutions-id-0039</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProposeSolutionsToSendStatusUpdate-id-0040</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendStatusUpdateToCustomer-id-0011" name="Send: status update to customer">
+      <bpmn:incoming>SequenceFlow-ProposeSolutionsToSendStatusUpdate-id-0040</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendStatusUpdateToImplementSolutions-id-0041</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-SeniorSupportTeamImplementsSolutions-id-0012" name="Senior support team implements solutions">
+      <bpmn:incoming>SequenceFlow-SendStatusUpdateToImplementSolutions-id-0041</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ImplementSolutionsToGateway-id-0042</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-IssueResolved-id-0013" name="Issue Resolved?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ImplementSolutionsToGateway-id-0042</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToSendResolutionNotification-id-0043</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToSendEscalationToManagement-id-0048</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-SendResolutionNotificationToCustomer-id-0014" name="Send: resolution notification to customer">
+      <bpmn:incoming>SequenceFlow-GatewayToSendResolutionNotification-id-0043</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendResolutionNotificationToSolicitFeedback-id-0044</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-SolicitCustomerFeedback-id-0015" name="Solicit customer feedback">
+      <bpmn:incoming>SequenceFlow-SendResolutionNotificationToSolicitFeedback-id-0044</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SolicitFeedbackToDocumentDetails-id-0045</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-DocumentResolutionDetails-id-0016" name="Document resolution details">
+      <bpmn:incoming>SequenceFlow-SolicitFeedbackToDocumentDetails-id-0045</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DocumentDetailsToUpdateKnowledgeBase-id-0046</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-UpdateKnowledgeBaseToPreventRecurrence-id-0017" name="Update knowledge base to prevent recurrence">
+      <bpmn:incoming>SequenceFlow-DocumentDetailsToUpdateKnowledgeBase-id-0046</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateKnowledgeBaseToEndEvent-id-0047</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-CaseClosed-id-0018" name="Case Closed">
+      <bpmn:incoming>SequenceFlow-UpdateKnowledgeBaseToEndEvent-id-0047</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="SendTask-SendEscalationToManagement-id-0019" name="Send: escalation to management">
+      <bpmn:incoming>SequenceFlow-GatewayToSendEscalationToManagement-id-0048</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendEscalationToManagementToManagementReview-id-0049</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-ManagementReviewsUnresolvedCase-id-0020" name="Management reviews unresolved case">
+      <bpmn:incoming>SequenceFlow-SendEscalationToManagementToManagementReview-id-0049</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ManagementReviewToDecisionGateway-id-0050</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ManagementDecision-id-0021" name="Management Decision?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ManagementReviewToDecisionGateway-id-0050</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DecisionGatewayToSendReassignmentNotification-id-0051</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-DecisionGatewayToSendFinalResolutionNotification-id-0054</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-SendReassignmentNotification-id-0022" name="Send: reassignment notification">
+      <bpmn:incoming>SequenceFlow-DecisionGatewayToSendReassignmentNotification-id-0051</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendReassignmentNotificationToReassignTeam-id-0052</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-ReassignToSpecializedTeam-id-0023" name="Reassign to specialized team">
+      <bpmn:incoming>SequenceFlow-SendReassignmentNotificationToReassignTeam-id-0052</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReassignTeamToEndEvent-id-0053</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="SendTask-SendFinalResolutionNotification-id-0024" name="Send: final resolution notification">
+      <bpmn:incoming>SequenceFlow-DecisionGatewayToSendFinalResolutionNotification-id-0054</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendFinalResolutionNotificationToEndEvent-id-0055</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-CaseClosedWithManagementDecision-id-0025" name="Case Closed with Management Decision">
+      <bpmn:incoming>SequenceFlow-ReassignTeamToEndEvent-id-0053</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-SendFinalResolutionNotificationToEndEvent-id-0055</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="SendTask-SendResolutionNotificationToCustomer-id-0026" name="Send: resolution notification to customer">
+      <bpmn:incoming>SequenceFlow-GatewayToSendResolutionNotification-id-0056</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendResolutionNotificationToSolicitFeedback-id-0057</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-SolicitCustomerFeedback-id-0027" name="Solicit customer feedback">
+      <bpmn:incoming>SequenceFlow-SendResolutionNotificationToSolicitFeedback-id-0057</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SolicitFeedbackToDocumentDetails-id-0058</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-DocumentResolutionDetails-id-0028" name="Document resolution details">
+      <bpmn:incoming>SequenceFlow-SolicitFeedbackToDocumentDetails-id-0058</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DocumentDetailsToEndEvent-id-0059</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-CaseResolvedByFrontlineStaff-id-0029" name="Case Resolved by Frontline Staff">
+      <bpmn:incoming>SequenceFlow-DocumentDetailsToEndEvent-id-0059</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToFrontlineStaff-id-0030" sourceRef="StartEvent-CustomerIssueEscalationProcessStarts-id-0001" targetRef="UserTask-FrontlineStaffAttemptsToResolveIssue-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-FrontlineStaffToGateway-id-0031" sourceRef="UserTask-FrontlineStaffAttemptsToResolveIssue-id-0002" targetRef="ExclusiveGateway-IssueNotResolved-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToSendNotification-id-0032" name="issue_not_resolved" sourceRef="ExclusiveGateway-IssueNotResolved-id-0003" targetRef="SendTask-SendEscalationNotificationToSeniorSupport-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendNotificationToSeniorSupport-id-0033" sourceRef="SendTask-SendEscalationNotificationToSeniorSupport-id-0004" targetRef="UserTask-SeniorSupportTeamConductsPriorityReview-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-SeniorSupportToParallelSplit-id-0034" sourceRef="UserTask-SeniorSupportTeamConductsPriorityReview-id-0005" targetRef="ParallelGateway-Split-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelSplitToAllocateResources-id-0035" sourceRef="ParallelGateway-Split-id-0006" targetRef="ServiceTask-AllocateAdditionalResources-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelSplitToRootCauseAnalysis-id-0036" sourceRef="ParallelGateway-Split-id-0006" targetRef="ServiceTask-ConductRootCauseAnalysis-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-AllocateResourcesToParallelJoin-id-0037" sourceRef="ServiceTask-AllocateAdditionalResources-id-0007" targetRef="ParallelGateway-Join-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-RootCauseAnalysisToParallelJoin-id-0038" sourceRef="ServiceTask-ConductRootCauseAnalysis-id-0008" targetRef="ParallelGateway-Join-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelJoinToProposeSolutions-id-0039" sourceRef="ParallelGateway-Join-id-0009" targetRef="ServiceTask-ProposeSolutions-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProposeSolutionsToSendStatusUpdate-id-0040" sourceRef="ServiceTask-ProposeSolutions-id-0010" targetRef="SendTask-SendStatusUpdateToCustomer-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendStatusUpdateToImplementSolutions-id-0041" sourceRef="SendTask-SendStatusUpdateToCustomer-id-0011" targetRef="UserTask-SeniorSupportTeamImplementsSolutions-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-ImplementSolutionsToGateway-id-0042" sourceRef="UserTask-SeniorSupportTeamImplementsSolutions-id-0012" targetRef="ExclusiveGateway-IssueResolved-id-0013" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToSendResolutionNotification-id-0043" name="issue_resolved" sourceRef="ExclusiveGateway-IssueResolved-id-0013" targetRef="SendTask-SendResolutionNotificationToCustomer-id-0014" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendResolutionNotificationToSolicitFeedback-id-0044" sourceRef="SendTask-SendResolutionNotificationToCustomer-id-0014" targetRef="UserTask-SolicitCustomerFeedback-id-0015" />
+    <bpmn:sequenceFlow id="SequenceFlow-SolicitFeedbackToDocumentDetails-id-0045" sourceRef="UserTask-SolicitCustomerFeedback-id-0015" targetRef="ServiceTask-DocumentResolutionDetails-id-0016" />
+    <bpmn:sequenceFlow id="SequenceFlow-DocumentDetailsToUpdateKnowledgeBase-id-0046" sourceRef="ServiceTask-DocumentResolutionDetails-id-0016" targetRef="ServiceTask-UpdateKnowledgeBaseToPreventRecurrence-id-0017" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateKnowledgeBaseToEndEvent-id-0047" sourceRef="ServiceTask-UpdateKnowledgeBaseToPreventRecurrence-id-0017" targetRef="EndEvent-CaseClosed-id-0018" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToSendEscalationToManagement-id-0048" sourceRef="ExclusiveGateway-IssueResolved-id-0013" targetRef="SendTask-SendEscalationToManagement-id-0019" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendEscalationToManagementToManagementReview-id-0049" sourceRef="SendTask-SendEscalationToManagement-id-0019" targetRef="UserTask-ManagementReviewsUnresolvedCase-id-0020" />
+    <bpmn:sequenceFlow id="SequenceFlow-ManagementReviewToDecisionGateway-id-0050" sourceRef="UserTask-ManagementReviewsUnresolvedCase-id-0020" targetRef="ExclusiveGateway-ManagementDecision-id-0021" />
+    <bpmn:sequenceFlow id="SequenceFlow-DecisionGatewayToSendReassignmentNotification-id-0051" name="management_decision == &#34;reassign&#34;" sourceRef="ExclusiveGateway-ManagementDecision-id-0021" targetRef="SendTask-SendReassignmentNotification-id-0022" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendReassignmentNotificationToReassignTeam-id-0052" sourceRef="SendTask-SendReassignmentNotification-id-0022" targetRef="UserTask-ReassignToSpecializedTeam-id-0023" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReassignTeamToEndEvent-id-0053" sourceRef="UserTask-ReassignToSpecializedTeam-id-0023" targetRef="EndEvent-CaseClosedWithManagementDecision-id-0025" />
+    <bpmn:sequenceFlow id="SequenceFlow-DecisionGatewayToSendFinalResolutionNotification-id-0054" sourceRef="ExclusiveGateway-ManagementDecision-id-0021" targetRef="SendTask-SendFinalResolutionNotification-id-0024" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendFinalResolutionNotificationToEndEvent-id-0055" sourceRef="SendTask-SendFinalResolutionNotification-id-0024" targetRef="EndEvent-CaseClosedWithManagementDecision-id-0025" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToSendResolutionNotification-id-0056" sourceRef="ExclusiveGateway-IssueNotResolved-id-0003" targetRef="SendTask-SendResolutionNotificationToCustomer-id-0026" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendResolutionNotificationToSolicitFeedback-id-0057" sourceRef="SendTask-SendResolutionNotificationToCustomer-id-0026" targetRef="UserTask-SolicitCustomerFeedback-id-0027" />
+    <bpmn:sequenceFlow id="SequenceFlow-SolicitFeedbackToDocumentDetails-id-0058" sourceRef="UserTask-SolicitCustomerFeedback-id-0027" targetRef="ServiceTask-DocumentResolutionDetails-id-0028" />
+    <bpmn:sequenceFlow id="SequenceFlow-DocumentDetailsToEndEvent-id-0059" sourceRef="ServiceTask-DocumentResolutionDetails-id-0028" targetRef="EndEvent-CaseResolvedByFrontlineStaff-id-0029" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Customer-Issue-Escalation-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Customer-Issue-Escalation-Process-id-0001" bpmnElement="Customer-Issue-Escalation-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-CustomerIssueEscalationProcessStarts-id-0001_di" bpmnElement="StartEvent-CustomerIssueEscalationProcessStarts-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-FrontlineStaffAttemptsToResolveIssue-id-0002_di" bpmnElement="UserTask-FrontlineStaffAttemptsToResolveIssue-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-IssueNotResolved-id-0003_di" bpmnElement="ExclusiveGateway-IssueNotResolved-id-0003" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendEscalationNotificationToSeniorSupport-id-0004_di" bpmnElement="SendTask-SendEscalationNotificationToSeniorSupport-id-0004">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SeniorSupportTeamConductsPriorityReview-id-0005_di" bpmnElement="UserTask-SeniorSupportTeamConductsPriorityReview-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0006_di" bpmnElement="ParallelGateway-Split-id-0006">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AllocateAdditionalResources-id-0007_di" bpmnElement="ServiceTask-AllocateAdditionalResources-id-0007">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0009_di" bpmnElement="ParallelGateway-Join-id-0009">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProposeSolutions-id-0010_di" bpmnElement="ServiceTask-ProposeSolutions-id-0010">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendStatusUpdateToCustomer-id-0011_di" bpmnElement="SendTask-SendStatusUpdateToCustomer-id-0011">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SeniorSupportTeamImplementsSolutions-id-0012_di" bpmnElement="UserTask-SeniorSupportTeamImplementsSolutions-id-0012">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-IssueResolved-id-0013_di" bpmnElement="ExclusiveGateway-IssueResolved-id-0013" isMarkerVisible="true">
+        <dc:Bounds x="1700" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendResolutionNotificationToCustomer-id-0014_di" bpmnElement="SendTask-SendResolutionNotificationToCustomer-id-0014">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SolicitCustomerFeedback-id-0015_di" bpmnElement="UserTask-SolicitCustomerFeedback-id-0015">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DocumentResolutionDetails-id-0016_di" bpmnElement="ServiceTask-DocumentResolutionDetails-id-0016">
+        <dc:Bounds x="2125" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateKnowledgeBaseToPreventRecurrence-id-0017_di" bpmnElement="ServiceTask-UpdateKnowledgeBaseToPreventRecurrence-id-0017">
+        <dc:Bounds x="2275" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CaseClosed-id-0018_di" bpmnElement="EndEvent-CaseClosed-id-0018">
+        <dc:Bounds x="2457" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendResolutionNotificationToCustomer-id-0026_di" bpmnElement="SendTask-SendResolutionNotificationToCustomer-id-0026">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SolicitCustomerFeedback-id-0027_di" bpmnElement="UserTask-SolicitCustomerFeedback-id-0027">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DocumentResolutionDetails-id-0028_di" bpmnElement="ServiceTask-DocumentResolutionDetails-id-0028">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CaseResolvedByFrontlineStaff-id-0029_di" bpmnElement="EndEvent-CaseResolvedByFrontlineStaff-id-0029">
+        <dc:Bounds x="957" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ConductRootCauseAnalysis-id-0008_di" bpmnElement="ServiceTask-ConductRootCauseAnalysis-id-0008">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendEscalationToManagement-id-0019_di" bpmnElement="SendTask-SendEscalationToManagement-id-0019">
+        <dc:Bounds x="2275" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ManagementReviewsUnresolvedCase-id-0020_di" bpmnElement="UserTask-ManagementReviewsUnresolvedCase-id-0020">
+        <dc:Bounds x="2425" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ManagementDecision-id-0021_di" bpmnElement="ExclusiveGateway-ManagementDecision-id-0021" isMarkerVisible="true">
+        <dc:Bounds x="3050" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendReassignmentNotification-id-0022_di" bpmnElement="SendTask-SendReassignmentNotification-id-0022">
+        <dc:Bounds x="3175" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReassignToSpecializedTeam-id-0023_di" bpmnElement="UserTask-ReassignToSpecializedTeam-id-0023">
+        <dc:Bounds x="3325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CaseClosedWithManagementDecision-id-0025_di" bpmnElement="EndEvent-CaseClosedWithManagementDecision-id-0025">
+        <dc:Bounds x="3507" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendFinalResolutionNotification-id-0024_di" bpmnElement="SendTask-SendFinalResolutionNotification-id-0024">
+        <dc:Bounds x="2725" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToFrontlineStaff-id-0030_di" bpmnElement="SequenceFlow-StartToFrontlineStaff-id-0030">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FrontlineStaffToGateway-id-0031_di" bpmnElement="SequenceFlow-FrontlineStaffToGateway-id-0031">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToSendNotification-id-0032_di" bpmnElement="SequenceFlow-GatewayToSendNotification-id-0032">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToSendResolutionNotification-id-0056_di" bpmnElement="SequenceFlow-GatewayToSendResolutionNotification-id-0056">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendNotificationToSeniorSupport-id-0033_di" bpmnElement="SequenceFlow-SendNotificationToSeniorSupport-id-0033">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SeniorSupportToParallelSplit-id-0034_di" bpmnElement="SequenceFlow-SeniorSupportToParallelSplit-id-0034">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelSplitToAllocateResources-id-0035_di" bpmnElement="SequenceFlow-ParallelSplitToAllocateResources-id-0035">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelSplitToRootCauseAnalysis-id-0036_di" bpmnElement="SequenceFlow-ParallelSplitToRootCauseAnalysis-id-0036">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="900" y="70" />
+        <di:waypoint x="900" y="140" />
+        <di:waypoint x="1350" y="140" />
+        <di:waypoint x="1350" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AllocateResourcesToParallelJoin-id-0037_di" bpmnElement="SequenceFlow-AllocateResourcesToParallelJoin-id-0037">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelJoinToProposeSolutions-id-0039_di" bpmnElement="SequenceFlow-ParallelJoinToProposeSolutions-id-0039">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProposeSolutionsToSendStatusUpdate-id-0040_di" bpmnElement="SequenceFlow-ProposeSolutionsToSendStatusUpdate-id-0040">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendStatusUpdateToImplementSolutions-id-0041_di" bpmnElement="SequenceFlow-SendStatusUpdateToImplementSolutions-id-0041">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ImplementSolutionsToGateway-id-0042_di" bpmnElement="SequenceFlow-ImplementSolutionsToGateway-id-0042">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1700" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToSendResolutionNotification-id-0043_di" bpmnElement="SequenceFlow-GatewayToSendResolutionNotification-id-0043">
+        <di:waypoint x="1750" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToSendEscalationToManagement-id-0048_di" bpmnElement="SequenceFlow-GatewayToSendEscalationToManagement-id-0048">
+        <di:waypoint x="1725" y="95" />
+        <di:waypoint x="1725" y="210" />
+        <di:waypoint x="2275" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendResolutionNotificationToSolicitFeedback-id-0044_di" bpmnElement="SequenceFlow-SendResolutionNotificationToSolicitFeedback-id-0044">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SolicitFeedbackToDocumentDetails-id-0045_di" bpmnElement="SequenceFlow-SolicitFeedbackToDocumentDetails-id-0045">
+        <di:waypoint x="2075" y="70" />
+        <di:waypoint x="2125" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DocumentDetailsToUpdateKnowledgeBase-id-0046_di" bpmnElement="SequenceFlow-DocumentDetailsToUpdateKnowledgeBase-id-0046">
+        <di:waypoint x="2225" y="70" />
+        <di:waypoint x="2275" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateKnowledgeBaseToEndEvent-id-0047_di" bpmnElement="SequenceFlow-UpdateKnowledgeBaseToEndEvent-id-0047">
+        <di:waypoint x="2375" y="70" />
+        <di:waypoint x="2457" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendResolutionNotificationToSolicitFeedback-id-0057_di" bpmnElement="SequenceFlow-SendResolutionNotificationToSolicitFeedback-id-0057">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SolicitFeedbackToDocumentDetails-id-0058_di" bpmnElement="SequenceFlow-SolicitFeedbackToDocumentDetails-id-0058">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DocumentDetailsToEndEvent-id-0059_di" bpmnElement="SequenceFlow-DocumentDetailsToEndEvent-id-0059">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="957" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RootCauseAnalysisToParallelJoin-id-0038_di" bpmnElement="SequenceFlow-RootCauseAnalysisToParallelJoin-id-0038">
+        <di:waypoint x="1425" y="250" />
+        <di:waypoint x="1425" y="280" />
+        <di:waypoint x="1125" y="280" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendEscalationToManagementToManagementReview-id-0049_di" bpmnElement="SequenceFlow-SendEscalationToManagementToManagementReview-id-0049">
+        <di:waypoint x="2375" y="210" />
+        <di:waypoint x="2425" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ManagementReviewToDecisionGateway-id-0050_di" bpmnElement="SequenceFlow-ManagementReviewToDecisionGateway-id-0050">
+        <di:waypoint x="2525" y="210" />
+        <di:waypoint x="3050" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DecisionGatewayToSendReassignmentNotification-id-0051_di" bpmnElement="SequenceFlow-DecisionGatewayToSendReassignmentNotification-id-0051">
+        <di:waypoint x="3100" y="210" />
+        <di:waypoint x="3175" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DecisionGatewayToSendFinalResolutionNotification-id-0054_di" bpmnElement="SequenceFlow-DecisionGatewayToSendFinalResolutionNotification-id-0054">
+        <di:waypoint x="3075" y="185" />
+        <di:waypoint x="3075" y="140" />
+        <di:waypoint x="2775" y="140" />
+        <di:waypoint x="2775" y="310" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendReassignmentNotificationToReassignTeam-id-0052_di" bpmnElement="SequenceFlow-SendReassignmentNotificationToReassignTeam-id-0052">
+        <di:waypoint x="3275" y="210" />
+        <di:waypoint x="3325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReassignTeamToEndEvent-id-0053_di" bpmnElement="SequenceFlow-ReassignTeamToEndEvent-id-0053">
+        <di:waypoint x="3425" y="210" />
+        <di:waypoint x="3507" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendFinalResolutionNotificationToEndEvent-id-0055_di" bpmnElement="SequenceFlow-SendFinalResolutionNotificationToEndEvent-id-0055">
+        <di:waypoint x="2825" y="350" />
+        <di:waypoint x="3525" y="350" />
+        <di:waypoint x="3525" y="228" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

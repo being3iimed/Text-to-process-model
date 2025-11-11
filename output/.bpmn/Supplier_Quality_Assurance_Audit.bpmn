@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Supplier-Audit-Process" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="Supplier-Audit-Process-id-0001" name="Supplier Quality Audit Process">
+    <bpmn:startEvent id="StartEvent-SupplierFlagged-id-0001" name="Supplier Flagged for Audit">
+      <bpmn:outgoing>SequenceFlow-StartToAudit-id-0011</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-ConductAudit-id-0002" name="Conduct Quality Audit">
+      <bpmn:incoming>SequenceFlow-StartToAudit-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AuditToDocument-id-0012</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-DocumentFindings-id-0003" name="Document Findings">
+      <bpmn:incoming>SequenceFlow-AuditToDocument-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DocumentToGateway-id-0013</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-IssuesIdentified-id-0004" name="Issues Identified?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-DocumentToGateway-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-IssuesYes-id-0014</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-IssuesNo-id-0015</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-ImplementActions-id-0005" name="Implement Corrective Actions">
+      <bpmn:incoming>SequenceFlow-IssuesYes-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ImplementToFollowUp-id-0016</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ConductFollowUp-id-0006" name="Conduct Follow-up Audit">
+      <bpmn:incoming>SequenceFlow-ImplementToFollowUp-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FollowUpToEvaluate-id-0017</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-EvaluateCompliance-id-0007" name="Evaluate Compliance">
+      <bpmn:incoming>SequenceFlow-FollowUpToEvaluate-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EvaluateToGateway-id-0018</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ComplianceVerified-id-0008" name="Compliance Verified?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-EvaluateToGateway-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ComplianceYes-id-0019</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ComplianceNo-id-0020</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="EndEvent-SupplierPasses-id-0009" name="Supplier Passes Audit">
+      <bpmn:incoming>SequenceFlow-IssuesNo-id-0015</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ComplianceYes-id-0019</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-SupplierDisqualified-id-0010" name="Supplier Disqualified">
+      <bpmn:incoming>SequenceFlow-ComplianceNo-id-0020</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToAudit-id-0011" sourceRef="StartEvent-SupplierFlagged-id-0001" targetRef="UserTask-ConductAudit-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-AuditToDocument-id-0012" sourceRef="UserTask-ConductAudit-id-0002" targetRef="UserTask-DocumentFindings-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-DocumentToGateway-id-0013" sourceRef="UserTask-DocumentFindings-id-0003" targetRef="ExclusiveGateway-IssuesIdentified-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-IssuesYes-id-0014" name="Yes" sourceRef="ExclusiveGateway-IssuesIdentified-id-0004" targetRef="UserTask-ImplementActions-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-IssuesNo-id-0015" name="No" sourceRef="ExclusiveGateway-IssuesIdentified-id-0004" targetRef="EndEvent-SupplierPasses-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-ImplementToFollowUp-id-0016" sourceRef="UserTask-ImplementActions-id-0005" targetRef="UserTask-ConductFollowUp-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-FollowUpToEvaluate-id-0017" sourceRef="UserTask-ConductFollowUp-id-0006" targetRef="UserTask-EvaluateCompliance-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-EvaluateToGateway-id-0018" sourceRef="UserTask-EvaluateCompliance-id-0007" targetRef="ExclusiveGateway-ComplianceVerified-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-ComplianceYes-id-0019" name="Yes" sourceRef="ExclusiveGateway-ComplianceVerified-id-0008" targetRef="EndEvent-SupplierPasses-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-ComplianceNo-id-0020" name="No" sourceRef="ExclusiveGateway-ComplianceVerified-id-0008" targetRef="EndEvent-SupplierDisqualified-id-0010" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Supplier-Audit-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Supplier-Audit-Process-id-0001" bpmnElement="Supplier-Audit-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-SupplierFlagged-id-0001_di" bpmnElement="StartEvent-SupplierFlagged-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConductAudit-id-0002_di" bpmnElement="UserTask-ConductAudit-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-DocumentFindings-id-0003_di" bpmnElement="UserTask-DocumentFindings-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-IssuesIdentified-id-0004_di" bpmnElement="ExclusiveGateway-IssuesIdentified-id-0004" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ImplementActions-id-0005_di" bpmnElement="UserTask-ImplementActions-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConductFollowUp-id-0006_di" bpmnElement="UserTask-ConductFollowUp-id-0006">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EvaluateCompliance-id-0007_di" bpmnElement="UserTask-EvaluateCompliance-id-0007">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ComplianceVerified-id-0008_di" bpmnElement="ExclusiveGateway-ComplianceVerified-id-0008" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-SupplierPasses-id-0009_di" bpmnElement="EndEvent-SupplierPasses-id-0009">
+        <dc:Bounds x="1257" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-SupplierDisqualified-id-0010_di" bpmnElement="EndEvent-SupplierDisqualified-id-0010">
+        <dc:Bounds x="1257" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToAudit-id-0011_di" bpmnElement="SequenceFlow-StartToAudit-id-0011">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AuditToDocument-id-0012_di" bpmnElement="SequenceFlow-AuditToDocument-id-0012">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DocumentToGateway-id-0013_di" bpmnElement="SequenceFlow-DocumentToGateway-id-0013">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IssuesYes-id-0014_di" bpmnElement="SequenceFlow-IssuesYes-id-0014">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IssuesNo-id-0015_di" bpmnElement="SequenceFlow-IssuesNo-id-0015">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="140" />
+        <di:waypoint x="1275" y="140" />
+        <di:waypoint x="1275" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ImplementToFollowUp-id-0016_di" bpmnElement="SequenceFlow-ImplementToFollowUp-id-0016">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FollowUpToEvaluate-id-0017_di" bpmnElement="SequenceFlow-FollowUpToEvaluate-id-0017">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EvaluateToGateway-id-0018_di" bpmnElement="SequenceFlow-EvaluateToGateway-id-0018">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ComplianceYes-id-0019_di" bpmnElement="SequenceFlow-ComplianceYes-id-0019">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1257" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ComplianceNo-id-0020_di" bpmnElement="SequenceFlow-ComplianceNo-id-0020">
+        <di:waypoint x="1125" y="95" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1257" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

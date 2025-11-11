@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="ReturnProcess-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="ReturnProcess-id-0001" name="Return Process">
+    <bpmn:startEvent id="StartEvent-ReturnProcessInitiated-id-0001" name="Return Process Initiated">
+      <bpmn:outgoing>SequenceFlow-StartToVerify-id-0026</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-VerifyReturnReason-id-0002" name="Customer Service Team Verifies Return Reason">
+      <bpmn:incoming>SequenceFlow-StartToVerify-id-0026</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VerifyToSplit-id-0027</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-Split-id-0003" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-VerifyToSplit-id-0027</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToCheckPolicy-id-0028</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToVerifyEligibility-id-0029</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-CheckReturnPolicy-id-0004" name="Check Return Policy">
+      <bpmn:incoming>SequenceFlow-SplitToCheckPolicy-id-0028</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckPolicyToJoin-id-0030</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-VerifyProductEligibility-id-0005" name="Verify Product Eligibility">
+      <bpmn:incoming>SequenceFlow-SplitToVerifyEligibility-id-0029</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VerifyEligibilityToJoin-id-0031</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join-id-0006" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-CheckPolicyToJoin-id-0030</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-VerifyEligibilityToJoin-id-0031</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToExclusive-id-0032</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-EligibleForReturn-id-0007" name="Eligible for Return?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-JoinToExclusive-id-0032</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ExclusiveYesToIssue-id-0033</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ExclusiveNoToSend2-id-0050</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-IssueReturnAuthorization-id-0008" name="Issue Return Authorization">
+      <bpmn:incoming>SequenceFlow-ExclusiveYesToIssue-id-0033</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-IssueToSend-id-0034</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendReturnAuthorization-id-0009" name="Send: Return Authorization to Customer">
+      <bpmn:incoming>SequenceFlow-IssueToSend-id-0034</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendToReceive-id-0035</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveReturnedProduct-id-0010" name="Receive: Returned Product">
+      <bpmn:incoming>SequenceFlow-SendToReceive-id-0035</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveToLog-id-0036</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:serviceTask id="ServiceTask-LogReturnedProduct-id-0011" name="Log Returned Product">
+      <bpmn:incoming>SequenceFlow-ReceiveToLog-id-0036</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogToInspect-id-0037</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-QualityControlInspection-id-0012" name="Quality Control Inspects Returned Product">
+      <bpmn:incoming>SequenceFlow-LogToInspect-id-0037</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InspectToExclusive-id-0038</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ProductMeetsCriteria-id-0013" name="Product Meets Return Criteria?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-InspectToExclusive-id-0038</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ExclusiveYesToProcess-id-0039</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ExclusiveNoToSend-id-0047</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-ProcessRefund-id-0014" name="Process Refund">
+      <bpmn:incoming>SequenceFlow-ExclusiveYesToProcess-id-0039</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProcessToSend-id-0040</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendRefundConfirmation-id-0015" name="Send: Refund Confirmation to Customer">
+      <bpmn:incoming>SequenceFlow-ProcessToSend-id-0040</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendToSplit2-id-0041</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:parallelGateway id="ParallelGateway-Split2-id-0016" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-SendToSplit2-id-0041</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Split2ToRestock-id-0042</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-Split2ToUpdate-id-0043</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-RestockProduct-id-0017" name="Restock Returned Product">
+      <bpmn:incoming>SequenceFlow-Split2ToRestock-id-0042</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RestockToJoin2-id-0044</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-UpdateInventory-id-0018" name="Update Inventory System">
+      <bpmn:incoming>SequenceFlow-Split2ToUpdate-id-0043</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateToJoin2-id-0045</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join2-id-0019" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-RestockToJoin2-id-0044</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-UpdateToJoin2-id-0045</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Join2ToEnd-id-0046</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sendTask id="SendTask-SendRejectionNotice-id-0020" name="Send: Rejection Notice to Customer">
+      <bpmn:incoming>SequenceFlow-ExclusiveNoToSend-id-0047</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendToHandle-id-0048</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-HandleNonReturnable-id-0021" name="Handle Non-Returnable Product">
+      <bpmn:incoming>SequenceFlow-SendToHandle-id-0048</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-HandleToEnd-id-0049</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendReturnRejection-id-0022" name="Send: Return Rejection Notice to Customer">
+      <bpmn:incoming>SequenceFlow-ExclusiveNoToSend2-id-0050</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Send2ToEnd-id-0051</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ReturnProcessComplete-id-0023" name="Return Process Complete">
+      <bpmn:incoming>SequenceFlow-Join2ToEnd-id-0046</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-ReturnProcessComplete2-id-0024" name="Return Process Complete">
+      <bpmn:incoming>SequenceFlow-HandleToEnd-id-0049</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-ReturnProcessComplete3-id-0025" name="Return Process Complete">
+      <bpmn:incoming>SequenceFlow-Send2ToEnd-id-0051</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToVerify-id-0026" sourceRef="StartEvent-ReturnProcessInitiated-id-0001" targetRef="UserTask-VerifyReturnReason-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerifyToSplit-id-0027" sourceRef="UserTask-VerifyReturnReason-id-0002" targetRef="ParallelGateway-Split-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToCheckPolicy-id-0028" sourceRef="ParallelGateway-Split-id-0003" targetRef="ServiceTask-CheckReturnPolicy-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToVerifyEligibility-id-0029" sourceRef="ParallelGateway-Split-id-0003" targetRef="ServiceTask-VerifyProductEligibility-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckPolicyToJoin-id-0030" sourceRef="ServiceTask-CheckReturnPolicy-id-0004" targetRef="ParallelGateway-Join-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerifyEligibilityToJoin-id-0031" sourceRef="ServiceTask-VerifyProductEligibility-id-0005" targetRef="ParallelGateway-Join-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToExclusive-id-0032" sourceRef="ParallelGateway-Join-id-0006" targetRef="ExclusiveGateway-EligibleForReturn-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-ExclusiveYesToIssue-id-0033" name="eligible_for_return" sourceRef="ExclusiveGateway-EligibleForReturn-id-0007" targetRef="ServiceTask-IssueReturnAuthorization-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-IssueToSend-id-0034" sourceRef="ServiceTask-IssueReturnAuthorization-id-0008" targetRef="SendTask-SendReturnAuthorization-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendToReceive-id-0035" sourceRef="SendTask-SendReturnAuthorization-id-0009" targetRef="ReceiveTask-ReceiveReturnedProduct-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveToLog-id-0036" sourceRef="ReceiveTask-ReceiveReturnedProduct-id-0010" targetRef="ServiceTask-LogReturnedProduct-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogToInspect-id-0037" sourceRef="ServiceTask-LogReturnedProduct-id-0011" targetRef="UserTask-QualityControlInspection-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-InspectToExclusive-id-0038" sourceRef="UserTask-QualityControlInspection-id-0012" targetRef="ExclusiveGateway-ProductMeetsCriteria-id-0013" />
+    <bpmn:sequenceFlow id="SequenceFlow-ExclusiveYesToProcess-id-0039" name="product_meets_return_criteria" sourceRef="ExclusiveGateway-ProductMeetsCriteria-id-0013" targetRef="ServiceTask-ProcessRefund-id-0014" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProcessToSend-id-0040" sourceRef="ServiceTask-ProcessRefund-id-0014" targetRef="SendTask-SendRefundConfirmation-id-0015" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendToSplit2-id-0041" sourceRef="SendTask-SendRefundConfirmation-id-0015" targetRef="ParallelGateway-Split2-id-0016" />
+    <bpmn:sequenceFlow id="SequenceFlow-Split2ToRestock-id-0042" sourceRef="ParallelGateway-Split2-id-0016" targetRef="ServiceTask-RestockProduct-id-0017" />
+    <bpmn:sequenceFlow id="SequenceFlow-Split2ToUpdate-id-0043" sourceRef="ParallelGateway-Split2-id-0016" targetRef="ServiceTask-UpdateInventory-id-0018" />
+    <bpmn:sequenceFlow id="SequenceFlow-RestockToJoin2-id-0044" sourceRef="ServiceTask-RestockProduct-id-0017" targetRef="ParallelGateway-Join2-id-0019" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateToJoin2-id-0045" sourceRef="ServiceTask-UpdateInventory-id-0018" targetRef="ParallelGateway-Join2-id-0019" />
+    <bpmn:sequenceFlow id="SequenceFlow-Join2ToEnd-id-0046" sourceRef="ParallelGateway-Join2-id-0019" targetRef="EndEvent-ReturnProcessComplete-id-0023" />
+    <bpmn:sequenceFlow id="SequenceFlow-ExclusiveNoToSend-id-0047" sourceRef="ExclusiveGateway-ProductMeetsCriteria-id-0013" targetRef="SendTask-SendRejectionNotice-id-0020" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendToHandle-id-0048" sourceRef="SendTask-SendRejectionNotice-id-0020" targetRef="ServiceTask-HandleNonReturnable-id-0021" />
+    <bpmn:sequenceFlow id="SequenceFlow-HandleToEnd-id-0049" sourceRef="ServiceTask-HandleNonReturnable-id-0021" targetRef="EndEvent-ReturnProcessComplete2-id-0024" />
+    <bpmn:sequenceFlow id="SequenceFlow-ExclusiveNoToSend2-id-0050" sourceRef="ExclusiveGateway-EligibleForReturn-id-0007" targetRef="SendTask-SendReturnRejection-id-0022" />
+    <bpmn:sequenceFlow id="SequenceFlow-Send2ToEnd-id-0051" sourceRef="SendTask-SendReturnRejection-id-0022" targetRef="EndEvent-ReturnProcessComplete3-id-0025" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ReturnProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_ReturnProcess-id-0001" bpmnElement="ReturnProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ReturnProcessInitiated-id-0001_di" bpmnElement="StartEvent-ReturnProcessInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-VerifyReturnReason-id-0002_di" bpmnElement="UserTask-VerifyReturnReason-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0003_di" bpmnElement="ParallelGateway-Split-id-0003">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckReturnPolicy-id-0004_di" bpmnElement="ServiceTask-CheckReturnPolicy-id-0004">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0006_di" bpmnElement="ParallelGateway-Join-id-0006">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-EligibleForReturn-id-0007_di" bpmnElement="ExclusiveGateway-EligibleForReturn-id-0007" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-IssueReturnAuthorization-id-0008_di" bpmnElement="ServiceTask-IssueReturnAuthorization-id-0008">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendReturnAuthorization-id-0009_di" bpmnElement="SendTask-SendReturnAuthorization-id-0009">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveReturnedProduct-id-0010_di" bpmnElement="ReceiveTask-ReceiveReturnedProduct-id-0010">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogReturnedProduct-id-0011_di" bpmnElement="ServiceTask-LogReturnedProduct-id-0011">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-QualityControlInspection-id-0012_di" bpmnElement="UserTask-QualityControlInspection-id-0012">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ProductMeetsCriteria-id-0013_di" bpmnElement="ExclusiveGateway-ProductMeetsCriteria-id-0013" isMarkerVisible="true">
+        <dc:Bounds x="1700" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessRefund-id-0014_di" bpmnElement="ServiceTask-ProcessRefund-id-0014">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendRefundConfirmation-id-0015_di" bpmnElement="SendTask-SendRefundConfirmation-id-0015">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split2-id-0016_di" bpmnElement="ParallelGateway-Split2-id-0016">
+        <dc:Bounds x="2150" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RestockProduct-id-0017_di" bpmnElement="ServiceTask-RestockProduct-id-0017">
+        <dc:Bounds x="2275" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join2-id-0019_di" bpmnElement="ParallelGateway-Join2-id-0019">
+        <dc:Bounds x="2450" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ReturnProcessComplete-id-0023_di" bpmnElement="EndEvent-ReturnProcessComplete-id-0023">
+        <dc:Bounds x="2607" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-VerifyProductEligibility-id-0005_di" bpmnElement="ServiceTask-VerifyProductEligibility-id-0005">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendReturnRejection-id-0022_di" bpmnElement="SendTask-SendReturnRejection-id-0022">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ReturnProcessComplete3-id-0025_di" bpmnElement="EndEvent-ReturnProcessComplete3-id-0025">
+        <dc:Bounds x="1107" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendRejectionNotice-id-0020_di" bpmnElement="SendTask-SendRejectionNotice-id-0020">
+        <dc:Bounds x="1975" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-HandleNonReturnable-id-0021_di" bpmnElement="ServiceTask-HandleNonReturnable-id-0021">
+        <dc:Bounds x="2125" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ReturnProcessComplete2-id-0024_di" bpmnElement="EndEvent-ReturnProcessComplete2-id-0024">
+        <dc:Bounds x="2307" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateInventory-id-0018_di" bpmnElement="ServiceTask-UpdateInventory-id-0018">
+        <dc:Bounds x="2725" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToVerify-id-0026_di" bpmnElement="SequenceFlow-StartToVerify-id-0026">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyToSplit-id-0027_di" bpmnElement="SequenceFlow-VerifyToSplit-id-0027">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToCheckPolicy-id-0028_di" bpmnElement="SequenceFlow-SplitToCheckPolicy-id-0028">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToVerifyEligibility-id-0029_di" bpmnElement="SequenceFlow-SplitToVerifyEligibility-id-0029">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckPolicyToJoin-id-0030_di" bpmnElement="SequenceFlow-CheckPolicyToJoin-id-0030">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToExclusive-id-0032_di" bpmnElement="SequenceFlow-JoinToExclusive-id-0032">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExclusiveYesToIssue-id-0033_di" bpmnElement="SequenceFlow-ExclusiveYesToIssue-id-0033">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExclusiveNoToSend2-id-0050_di" bpmnElement="SequenceFlow-ExclusiveNoToSend2-id-0050">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IssueToSend-id-0034_di" bpmnElement="SequenceFlow-IssueToSend-id-0034">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToReceive-id-0035_di" bpmnElement="SequenceFlow-SendToReceive-id-0035">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToLog-id-0036_di" bpmnElement="SequenceFlow-ReceiveToLog-id-0036">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogToInspect-id-0037_di" bpmnElement="SequenceFlow-LogToInspect-id-0037">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InspectToExclusive-id-0038_di" bpmnElement="SequenceFlow-InspectToExclusive-id-0038">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1700" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExclusiveYesToProcess-id-0039_di" bpmnElement="SequenceFlow-ExclusiveYesToProcess-id-0039">
+        <di:waypoint x="1750" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExclusiveNoToSend-id-0047_di" bpmnElement="SequenceFlow-ExclusiveNoToSend-id-0047">
+        <di:waypoint x="1725" y="95" />
+        <di:waypoint x="1725" y="210" />
+        <di:waypoint x="1975" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessToSend-id-0040_di" bpmnElement="SequenceFlow-ProcessToSend-id-0040">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToSplit2-id-0041_di" bpmnElement="SequenceFlow-SendToSplit2-id-0041">
+        <di:waypoint x="2075" y="70" />
+        <di:waypoint x="2150" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Split2ToRestock-id-0042_di" bpmnElement="SequenceFlow-Split2ToRestock-id-0042">
+        <di:waypoint x="2200" y="70" />
+        <di:waypoint x="2275" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Split2ToUpdate-id-0043_di" bpmnElement="SequenceFlow-Split2ToUpdate-id-0043">
+        <di:waypoint x="2200" y="70" />
+        <di:waypoint x="2250" y="70" />
+        <di:waypoint x="2250" y="140" />
+        <di:waypoint x="2700" y="140" />
+        <di:waypoint x="2700" y="210" />
+        <di:waypoint x="2725" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RestockToJoin2-id-0044_di" bpmnElement="SequenceFlow-RestockToJoin2-id-0044">
+        <di:waypoint x="2375" y="70" />
+        <di:waypoint x="2450" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Join2ToEnd-id-0046_di" bpmnElement="SequenceFlow-Join2ToEnd-id-0046">
+        <di:waypoint x="2500" y="70" />
+        <di:waypoint x="2607" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyEligibilityToJoin-id-0031_di" bpmnElement="SequenceFlow-VerifyEligibilityToJoin-id-0031">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Send2ToEnd-id-0051_di" bpmnElement="SequenceFlow-Send2ToEnd-id-0051">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1107" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToHandle-id-0048_di" bpmnElement="SequenceFlow-SendToHandle-id-0048">
+        <di:waypoint x="2075" y="210" />
+        <di:waypoint x="2125" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HandleToEnd-id-0049_di" bpmnElement="SequenceFlow-HandleToEnd-id-0049">
+        <di:waypoint x="2225" y="210" />
+        <di:waypoint x="2307" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateToJoin2-id-0045_di" bpmnElement="SequenceFlow-UpdateToJoin2-id-0045">
+        <di:waypoint x="2775" y="250" />
+        <di:waypoint x="2775" y="280" />
+        <di:waypoint x="2475" y="280" />
+        <di:waypoint x="2475" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

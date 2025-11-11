@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Incident-Response-Process" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="Incident-Response-Process-id-0001" name="Incident Response Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-MonitoringProcessStarts-id-0001" name="Monitoring Process Starts">
+      <bpmn:outgoing>SequenceFlow-StartToMonitor-id-0015</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-MonitorSystems-id-0002" name="Monitor Systems">
+      <bpmn:incoming>SequenceFlow-StartToMonitor-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MonitorToDetect-id-0016</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-DetectAnomalies-id-0003" name="Detect Anomalies">
+      <bpmn:incoming>SequenceFlow-MonitorToDetect-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DetectToGateway-id-0017</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-AnomalySeverity-id-0004" name="Anomaly Severity?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-DetectToGateway-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToEscalate-id-0018</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToInvestigate-id-0019</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-EscalateToSeniorEngineer-id-0005" name="Escalate to Senior Engineer">
+      <bpmn:incoming>SequenceFlow-GatewayToEscalate-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EscalateToFix-id-0020</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-InvestigateIssue-id-0006" name="Investigate Issue">
+      <bpmn:incoming>SequenceFlow-GatewayToInvestigate-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InvestigateToFix-id-0021</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ApplyTemporaryFix-id-0007" name="Apply Temporary Fix">
+      <bpmn:incoming>SequenceFlow-EscalateToFix-id-0020</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-InvestigateToFix-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FixToRootCauseGateway-id-0022</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-RootCauseIdentified-id-0008" name="Root Cause Identified?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-FixToRootCauseGateway-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RootCauseGatewayToAnalyze-id-0023</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-RootCauseGatewayToDocument-id-0024</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-AnalyzeRootCause-id-0009" name="Analyze Root Cause">
+      <bpmn:incoming>SequenceFlow-RootCauseGatewayToAnalyze-id-0023</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AnalyzeToImplement-id-0025</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ImplementPermanentSolution-id-0010" name="Implement Permanent Solution">
+      <bpmn:incoming>SequenceFlow-AnalyzeToImplement-id-0025</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ImplementToDocument-id-0026</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-DocumentFindings-id-0011" name="Document Findings">
+      <bpmn:incoming>SequenceFlow-RootCauseGatewayToDocument-id-0024</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ImplementToDocument-id-0026</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DocumentToUpdate-id-0027</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-UpdateProtocols-id-0012" name="Update Protocols">
+      <bpmn:incoming>SequenceFlow-DocumentToUpdate-id-0027</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateToArchive-id-0028</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ArchiveDocumentation-id-0013" name="Archive Documentation">
+      <bpmn:incoming>SequenceFlow-UpdateToArchive-id-0028</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ArchiveToEnd-id-0029</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-IncidentResolved-id-0014" name="Incident Resolved">
+      <bpmn:incoming>SequenceFlow-ArchiveToEnd-id-0029</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToMonitor-id-0015" sourceRef="StartEvent-MonitoringProcessStarts-id-0001" targetRef="ServiceTask-MonitorSystems-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-MonitorToDetect-id-0016" sourceRef="ServiceTask-MonitorSystems-id-0002" targetRef="ServiceTask-DetectAnomalies-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-DetectToGateway-id-0017" sourceRef="ServiceTask-DetectAnomalies-id-0003" targetRef="ExclusiveGateway-AnomalySeverity-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToEscalate-id-0018" name="anomaly_severe" sourceRef="ExclusiveGateway-AnomalySeverity-id-0004" targetRef="UserTask-EscalateToSeniorEngineer-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToInvestigate-id-0019" sourceRef="ExclusiveGateway-AnomalySeverity-id-0004" targetRef="UserTask-InvestigateIssue-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-EscalateToFix-id-0020" sourceRef="UserTask-EscalateToSeniorEngineer-id-0005" targetRef="ServiceTask-ApplyTemporaryFix-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-InvestigateToFix-id-0021" sourceRef="UserTask-InvestigateIssue-id-0006" targetRef="ServiceTask-ApplyTemporaryFix-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-FixToRootCauseGateway-id-0022" sourceRef="ServiceTask-ApplyTemporaryFix-id-0007" targetRef="ExclusiveGateway-RootCauseIdentified-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-RootCauseGatewayToAnalyze-id-0023" name="root_cause_identified" sourceRef="ExclusiveGateway-RootCauseIdentified-id-0008" targetRef="UserTask-AnalyzeRootCause-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-RootCauseGatewayToDocument-id-0024" sourceRef="ExclusiveGateway-RootCauseIdentified-id-0008" targetRef="UserTask-DocumentFindings-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-AnalyzeToImplement-id-0025" sourceRef="UserTask-AnalyzeRootCause-id-0009" targetRef="UserTask-ImplementPermanentSolution-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-ImplementToDocument-id-0026" sourceRef="UserTask-ImplementPermanentSolution-id-0010" targetRef="UserTask-DocumentFindings-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-DocumentToUpdate-id-0027" sourceRef="UserTask-DocumentFindings-id-0011" targetRef="UserTask-UpdateProtocols-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateToArchive-id-0028" sourceRef="UserTask-UpdateProtocols-id-0012" targetRef="ServiceTask-ArchiveDocumentation-id-0013" />
+    <bpmn:sequenceFlow id="SequenceFlow-ArchiveToEnd-id-0029" sourceRef="ServiceTask-ArchiveDocumentation-id-0013" targetRef="EndEvent-IncidentResolved-id-0014" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Incident-Response-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Incident-Response-Process-id-0001" bpmnElement="Incident-Response-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-MonitoringProcessStarts-id-0001_di" bpmnElement="StartEvent-MonitoringProcessStarts-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MonitorSystems-id-0002_di" bpmnElement="ServiceTask-MonitorSystems-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DetectAnomalies-id-0003_di" bpmnElement="ServiceTask-DetectAnomalies-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-AnomalySeverity-id-0004_di" bpmnElement="ExclusiveGateway-AnomalySeverity-id-0004" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EscalateToSeniorEngineer-id-0005_di" bpmnElement="UserTask-EscalateToSeniorEngineer-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ApplyTemporaryFix-id-0007_di" bpmnElement="ServiceTask-ApplyTemporaryFix-id-0007">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RootCauseIdentified-id-0008_di" bpmnElement="ExclusiveGateway-RootCauseIdentified-id-0008" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AnalyzeRootCause-id-0009_di" bpmnElement="UserTask-AnalyzeRootCause-id-0009">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ImplementPermanentSolution-id-0010_di" bpmnElement="UserTask-ImplementPermanentSolution-id-0010">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-DocumentFindings-id-0011_di" bpmnElement="UserTask-DocumentFindings-id-0011">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-UpdateProtocols-id-0012_di" bpmnElement="UserTask-UpdateProtocols-id-0012">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ArchiveDocumentation-id-0013_di" bpmnElement="ServiceTask-ArchiveDocumentation-id-0013">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-IncidentResolved-id-0014_di" bpmnElement="EndEvent-IncidentResolved-id-0014">
+        <dc:Bounds x="1857" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-InvestigateIssue-id-0006_di" bpmnElement="UserTask-InvestigateIssue-id-0006">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToMonitor-id-0015_di" bpmnElement="SequenceFlow-StartToMonitor-id-0015">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MonitorToDetect-id-0016_di" bpmnElement="SequenceFlow-MonitorToDetect-id-0016">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DetectToGateway-id-0017_di" bpmnElement="SequenceFlow-DetectToGateway-id-0017">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToEscalate-id-0018_di" bpmnElement="SequenceFlow-GatewayToEscalate-id-0018">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToInvestigate-id-0019_di" bpmnElement="SequenceFlow-GatewayToInvestigate-id-0019">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EscalateToFix-id-0020_di" bpmnElement="SequenceFlow-EscalateToFix-id-0020">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FixToRootCauseGateway-id-0022_di" bpmnElement="SequenceFlow-FixToRootCauseGateway-id-0022">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RootCauseGatewayToAnalyze-id-0023_di" bpmnElement="SequenceFlow-RootCauseGatewayToAnalyze-id-0023">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RootCauseGatewayToDocument-id-0024_di" bpmnElement="SequenceFlow-RootCauseGatewayToDocument-id-0024">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="140" />
+        <di:waypoint x="1425" y="140" />
+        <di:waypoint x="1425" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AnalyzeToImplement-id-0025_di" bpmnElement="SequenceFlow-AnalyzeToImplement-id-0025">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ImplementToDocument-id-0026_di" bpmnElement="SequenceFlow-ImplementToDocument-id-0026">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DocumentToUpdate-id-0027_di" bpmnElement="SequenceFlow-DocumentToUpdate-id-0027">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateToArchive-id-0028_di" bpmnElement="SequenceFlow-UpdateToArchive-id-0028">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ArchiveToEnd-id-0029_di" bpmnElement="SequenceFlow-ArchiveToEnd-id-0029">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1857" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvestigateToFix-id-0021_di" bpmnElement="SequenceFlow-InvestigateToFix-id-0021">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="825" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

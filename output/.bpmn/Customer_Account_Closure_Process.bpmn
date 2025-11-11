@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="AccountClosureProcess-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="AccountClosureProcess-id-0001" name="Account Closure Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-AccountClosureRequest-id-0001" name="Account Closure Request Received">
+      <bpmn:outgoing>SequenceFlow-StartToVerify-id-0015</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-VerifyAccountClosureRequest-id-0002" name="Verify Account Closure Request">
+      <bpmn:incoming>SequenceFlow-StartToVerify-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VerifyToCheck-id-0016</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-CheckOutstandingBalances-id-0003" name="Check for Outstanding Balances">
+      <bpmn:incoming>SequenceFlow-VerifyToCheck-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckToGateway-id-0017</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-OutstandingBalances-id-0004" name="Outstanding Balances?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CheckToGateway-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToResolve-id-0018</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToDeactivate-id-0024</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-ResolveOutstandingIssues-id-0005" name="Resolve Outstanding Issues">
+      <bpmn:incoming>SequenceFlow-GatewayToResolve-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ResolveToCheck-id-0019</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-CheckOutstandingBalances2-id-0006" name="Check for Outstanding Balances">
+      <bpmn:incoming>SequenceFlow-ResolveToCheck-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Check2ToGateway2-id-0020</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-OutstandingBalances2-id-0007" name="Outstanding Balances?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-Check2ToGateway2-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Gateway2ToDeny-id-0021</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-Gateway2ToDeactivate-id-0023</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-AccountClosureDenied-id-0008" name="Send: Account Closure Denied">
+      <bpmn:incoming>SequenceFlow-Gateway2ToDeny-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DenyToEnd-id-0022</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-AccountClosureDenied-id-0009" name="Account Closure Denied">
+      <bpmn:incoming>SequenceFlow-DenyToEnd-id-0022</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-DeactivateAccount-id-0010" name="Deactivate Account">
+      <bpmn:incoming>SequenceFlow-Gateway2ToDeactivate-id-0023</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-GatewayToDeactivate-id-0024</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DeactivateToTransfer-id-0025</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-TransferRemainingFunds-id-0011" name="Transfer Remaining Funds">
+      <bpmn:incoming>SequenceFlow-DeactivateToTransfer-id-0025</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TransferToSend-id-0026</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-AccountClosureConfirmation-id-0012" name="Send: Account Closure Confirmation">
+      <bpmn:incoming>SequenceFlow-TransferToSend-id-0026</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendToArchive-id-0027</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-ArchiveCustomerData-id-0013" name="Archive Customer Data">
+      <bpmn:incoming>SequenceFlow-SendToArchive-id-0027</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ArchiveToEnd-id-0028</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-AccountSuccessfullyClosed-id-0014" name="Account Successfully Closed">
+      <bpmn:incoming>SequenceFlow-ArchiveToEnd-id-0028</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToVerify-id-0015" sourceRef="StartEvent-AccountClosureRequest-id-0001" targetRef="UserTask-VerifyAccountClosureRequest-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerifyToCheck-id-0016" sourceRef="UserTask-VerifyAccountClosureRequest-id-0002" targetRef="ServiceTask-CheckOutstandingBalances-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckToGateway-id-0017" sourceRef="ServiceTask-CheckOutstandingBalances-id-0003" targetRef="ExclusiveGateway-OutstandingBalances-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToResolve-id-0018" name="outstanding_balances OR unresolved_issues" sourceRef="ExclusiveGateway-OutstandingBalances-id-0004" targetRef="UserTask-ResolveOutstandingIssues-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-ResolveToCheck-id-0019" sourceRef="UserTask-ResolveOutstandingIssues-id-0005" targetRef="ServiceTask-CheckOutstandingBalances2-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-Check2ToGateway2-id-0020" sourceRef="ServiceTask-CheckOutstandingBalances2-id-0006" targetRef="ExclusiveGateway-OutstandingBalances2-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-Gateway2ToDeny-id-0021" name="outstanding_balances OR unresolved_issues" sourceRef="ExclusiveGateway-OutstandingBalances2-id-0007" targetRef="SendTask-AccountClosureDenied-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-DenyToEnd-id-0022" sourceRef="SendTask-AccountClosureDenied-id-0008" targetRef="EndEvent-AccountClosureDenied-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-Gateway2ToDeactivate-id-0023" sourceRef="ExclusiveGateway-OutstandingBalances2-id-0007" targetRef="ServiceTask-DeactivateAccount-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToDeactivate-id-0024" sourceRef="ExclusiveGateway-OutstandingBalances-id-0004" targetRef="ServiceTask-DeactivateAccount-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-DeactivateToTransfer-id-0025" sourceRef="ServiceTask-DeactivateAccount-id-0010" targetRef="ServiceTask-TransferRemainingFunds-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-TransferToSend-id-0026" sourceRef="ServiceTask-TransferRemainingFunds-id-0011" targetRef="SendTask-AccountClosureConfirmation-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendToArchive-id-0027" sourceRef="SendTask-AccountClosureConfirmation-id-0012" targetRef="ServiceTask-ArchiveCustomerData-id-0013" />
+    <bpmn:sequenceFlow id="SequenceFlow-ArchiveToEnd-id-0028" sourceRef="ServiceTask-ArchiveCustomerData-id-0013" targetRef="EndEvent-AccountSuccessfullyClosed-id-0014" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_AccountClosureProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_AccountClosureProcess-id-0001" bpmnElement="AccountClosureProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-AccountClosureRequest-id-0001_di" bpmnElement="StartEvent-AccountClosureRequest-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-VerifyAccountClosureRequest-id-0002_di" bpmnElement="UserTask-VerifyAccountClosureRequest-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckOutstandingBalances-id-0003_di" bpmnElement="ServiceTask-CheckOutstandingBalances-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-OutstandingBalances-id-0004_di" bpmnElement="ExclusiveGateway-OutstandingBalances-id-0004" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ResolveOutstandingIssues-id-0005_di" bpmnElement="UserTask-ResolveOutstandingIssues-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckOutstandingBalances2-id-0006_di" bpmnElement="ServiceTask-CheckOutstandingBalances2-id-0006">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-OutstandingBalances2-id-0007_di" bpmnElement="ExclusiveGateway-OutstandingBalances2-id-0007" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-AccountClosureDenied-id-0008_di" bpmnElement="SendTask-AccountClosureDenied-id-0008">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AccountClosureDenied-id-0009_di" bpmnElement="EndEvent-AccountClosureDenied-id-0009">
+        <dc:Bounds x="1257" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DeactivateAccount-id-0010_di" bpmnElement="ServiceTask-DeactivateAccount-id-0010">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-TransferRemainingFunds-id-0011_di" bpmnElement="ServiceTask-TransferRemainingFunds-id-0011">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-AccountClosureConfirmation-id-0012_di" bpmnElement="SendTask-AccountClosureConfirmation-id-0012">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ArchiveCustomerData-id-0013_di" bpmnElement="ServiceTask-ArchiveCustomerData-id-0013">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AccountSuccessfullyClosed-id-0014_di" bpmnElement="EndEvent-AccountSuccessfullyClosed-id-0014">
+        <dc:Bounds x="1707" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToVerify-id-0015_di" bpmnElement="SequenceFlow-StartToVerify-id-0015">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyToCheck-id-0016_di" bpmnElement="SequenceFlow-VerifyToCheck-id-0016">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckToGateway-id-0017_di" bpmnElement="SequenceFlow-CheckToGateway-id-0017">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToResolve-id-0018_di" bpmnElement="SequenceFlow-GatewayToResolve-id-0018">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToDeactivate-id-0024_di" bpmnElement="SequenceFlow-GatewayToDeactivate-id-0024">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ResolveToCheck-id-0019_di" bpmnElement="SequenceFlow-ResolveToCheck-id-0019">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Check2ToGateway2-id-0020_di" bpmnElement="SequenceFlow-Check2ToGateway2-id-0020">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Gateway2ToDeny-id-0021_di" bpmnElement="SequenceFlow-Gateway2ToDeny-id-0021">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Gateway2ToDeactivate-id-0023_di" bpmnElement="SequenceFlow-Gateway2ToDeactivate-id-0023">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DenyToEnd-id-0022_di" bpmnElement="SequenceFlow-DenyToEnd-id-0022">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1257" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DeactivateToTransfer-id-0025_di" bpmnElement="SequenceFlow-DeactivateToTransfer-id-0025">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TransferToSend-id-0026_di" bpmnElement="SequenceFlow-TransferToSend-id-0026">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToArchive-id-0027_di" bpmnElement="SequenceFlow-SendToArchive-id-0027">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ArchiveToEnd-id-0028_di" bpmnElement="SequenceFlow-ArchiveToEnd-id-0028">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1707" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

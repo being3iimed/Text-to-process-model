@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="content-creation-process-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="ContentCreationProcess-id-0001" name="Content Creation Process">
+    <bpmn:startEvent id="StartEvent-ContentCreationProcessStarts-id-0001" name="Content Creation Process Starts">
+      <bpmn:outgoing>SequenceFlow-StartToParallelSplit-id-0033</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:parallelGateway id="ParallelGateway-Split-id-0001" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-StartToParallelSplit-id-0033</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ParallelSplitToContentCreator-id-0034</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ParallelSplitToEditor-id-0035</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-ContentCreatorDraftsMarketingMaterials-id-0002" name="Content Creator drafts marketing materials">
+      <bpmn:incoming>SequenceFlow-ParallelSplitToContentCreator-id-0034</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ContentCreatorToParallelJoin-id-0036</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-EditorReviewsDraft-id-0003" name="Editor reviews draft for accuracy and tone">
+      <bpmn:incoming>SequenceFlow-ParallelSplitToEditor-id-0035</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EditorToParallelJoin-id-0037</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join-id-0004" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-ContentCreatorToParallelJoin-id-0036</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-EditorToParallelJoin-id-0037</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ParallelJoinToExclusiveGateway-id-0038</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-EditorApproval-id-0005" name="Editor Approval?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ParallelJoinToExclusiveGateway-id-0038</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EditorApprovedToParallelSplitLegalAndDesign-id-0039</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-EditorNotApprovedToRevisions-id-0040</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:parallelGateway id="ParallelGateway-SplitLegalAndDesign-id-0006" name="Parallel Legal and Design Review" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-EditorApprovedToParallelSplitLegalAndDesign-id-0039</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ParallelSplitLegalAndDesignToLegal-id-0041</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ParallelSplitLegalAndDesignToDesign-id-0042</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-LegalTeamChecksCompliance-id-0007" name="Legal team checks compliance with advertising laws">
+      <bpmn:incoming>SequenceFlow-ParallelSplitLegalAndDesignToLegal-id-0041</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LegalToParallelJoinLegalAndDesign-id-0043</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-GraphicDesignerFormatsContent-id-0008" name="Graphic Designer formats approved content">
+      <bpmn:incoming>SequenceFlow-ParallelSplitLegalAndDesignToDesign-id-0042</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DesignToParallelJoinLegalAndDesign-id-0044</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-JoinLegalAndDesign-id-0009" name="Synchronize Legal and Design" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-LegalToParallelJoinLegalAndDesign-id-0043</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-DesignToParallelJoinLegalAndDesign-id-0044</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ParallelJoinLegalAndDesignToExclusiveGateway-id-0045</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-LegalApproval-id-0010" name="Legal Approval?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ParallelJoinLegalAndDesignToExclusiveGateway-id-0045</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LegalApprovedToStakeholders-id-0046</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-LegalNotApprovedToRevisions-id-0047</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-StakeholdersReviewFinalContent-id-0011" name="Stakeholders review final content">
+      <bpmn:incoming>SequenceFlow-LegalApprovedToStakeholders-id-0046</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StakeholdersToExclusiveGateway-id-0048</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-StakeholderApproval-id-0012" name="Stakeholder Approval?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-StakeholdersToExclusiveGateway-id-0048</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StakeholderApprovedToPublish-id-0049</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-StakeholderNotApprovedToRevisions-id-0050</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-PublishContent-id-0013" name="Publish content across channels">
+      <bpmn:incoming>SequenceFlow-StakeholderApprovedToPublish-id-0049</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PublishToReceiveAnalytics-id-0051</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveAnalyticsConfirmation-id-0014" name="Receive: analytics confirmation of successful delivery">
+      <bpmn:incoming>SequenceFlow-PublishToReceiveAnalytics-id-0051</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveAnalyticsToEnd-id-0052</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:endEvent id="EndEvent-ContentPublishedAndDelivered-id-0015" name="Content Published and Delivered">
+      <bpmn:incoming>SequenceFlow-ReceiveAnalyticsToEnd-id-0052</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-PublishRevisedToEnd-id-0067</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="UserTask-ContentCreatorRevisesBasedOnStakeholderFeedback-id-0016" name="Content Creator revises based on stakeholder feedback">
+      <bpmn:incoming>SequenceFlow-StakeholderNotApprovedToRevisions-id-0050</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RevisionsToEditorReview-id-0053</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-EditorReviewsRevisedDraft-id-0017" name="Editor reviews revised draft">
+      <bpmn:incoming>SequenceFlow-RevisionsToEditorReview-id-0053</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EditorReviewToExclusiveGateway-id-0054</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-EditorApprovalRevised-id-0018" name="Editor Approval (Revised)?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-EditorReviewToExclusiveGateway-id-0054</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EditorApprovedRevisedToParallelSplitLegalAndDesign-id-0055</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-EditorNotApprovedRevisedToRevisions-id-0056</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:parallelGateway id="ParallelGateway-SplitLegalAndDesignRevised-id-0019" name="Parallel Legal and Design Review (Revised)" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-EditorApprovedRevisedToParallelSplitLegalAndDesign-id-0055</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ParallelSplitLegalAndDesignRevisedToLegal-id-0057</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ParallelSplitLegalAndDesignRevisedToDesign-id-0058</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-LegalTeamChecksRevisedContent-id-0020" name="Legal team checks revised content">
+      <bpmn:incoming>SequenceFlow-ParallelSplitLegalAndDesignRevisedToLegal-id-0057</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LegalRevisedToParallelJoinLegalAndDesign-id-0059</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-GraphicDesignerReformatsRevisedContent-id-0021" name="Graphic Designer reformats revised content">
+      <bpmn:incoming>SequenceFlow-ParallelSplitLegalAndDesignRevisedToDesign-id-0058</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DesignRevisedToParallelJoinLegalAndDesign-id-0060</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-JoinLegalAndDesignRevised-id-0022" name="Synchronize Legal and Design (Revised)" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-LegalRevisedToParallelJoinLegalAndDesign-id-0059</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-DesignRevisedToParallelJoinLegalAndDesign-id-0060</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ParallelJoinLegalAndDesignRevisedToExclusiveGateway-id-0061</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-LegalApprovalRevised-id-0023" name="Legal Approval (Revised)?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ParallelJoinLegalAndDesignRevisedToExclusiveGateway-id-0061</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LegalApprovedRevisedToStakeholders-id-0062</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-LegalNotApprovedRevisedToRevisions-id-0063</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-StakeholdersReviewRevisedContent-id-0024" name="Stakeholders review revised content">
+      <bpmn:incoming>SequenceFlow-LegalApprovedRevisedToStakeholders-id-0062</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StakeholdersRevisedToExclusiveGateway-id-0064</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-StakeholderApprovalRevised-id-0025" name="Stakeholder Approval (Revised)?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-StakeholdersRevisedToExclusiveGateway-id-0064</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StakeholderApprovedRevisedToPublish-id-0065</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-StakeholderNotApprovedRevisedToRevisions-id-0066</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-PublishRevisedContent-id-0026" name="Publish revised content across channels">
+      <bpmn:incoming>SequenceFlow-StakeholderApprovedRevisedToPublish-id-0065</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PublishRevisedToEnd-id-0067</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-ContentCreatorRevisesAgainBasedOnStakeholderFeedback-id-0027" name="Content Creator revises again based on stakeholder feedback">
+      <bpmn:incoming>SequenceFlow-StakeholderNotApprovedRevisedToRevisions-id-0066</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RevisionsAgainToEnd-id-0068</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-ContentCreationProcessEndedWithoutApproval-id-0028" name="Content Creation Process Ended Without Approval">
+      <bpmn:incoming>SequenceFlow-RevisionsAgainToEnd-id-0068</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="UserTask-ContentCreatorRevisesBasedOnLegalFeedback-id-0029" name="Content Creator revises based on legal feedback">
+      <bpmn:incoming>SequenceFlow-LegalNotApprovedToRevisions-id-0047</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-LegalNotApprovedRevisedToRevisions-id-0063</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RevisionsBasedOnLegalFeedbackToEnd-id-0069</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-ContentCreationProcessEndedWithoutLegalApproval-id-0030" name="Content Creation Process Ended Without Legal Approval">
+      <bpmn:incoming>SequenceFlow-RevisionsBasedOnLegalFeedbackToEnd-id-0069</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="UserTask-ContentCreatorRevisesBasedOnEditorFeedback-id-0031" name="Content Creator revises based on editor feedback">
+      <bpmn:incoming>SequenceFlow-EditorNotApprovedToRevisions-id-0040</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-EditorNotApprovedRevisedToRevisions-id-0056</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RevisionsBasedOnEditorFeedbackToEnd-id-0070</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-ContentCreationProcessEndedWithoutEditorApproval-id-0032" name="Content Creation Process Ended Without Editor Approval">
+      <bpmn:incoming>SequenceFlow-RevisionsBasedOnEditorFeedbackToEnd-id-0070</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToParallelSplit-id-0033" sourceRef="StartEvent-ContentCreationProcessStarts-id-0001" targetRef="ParallelGateway-Split-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelSplitToContentCreator-id-0034" sourceRef="ParallelGateway-Split-id-0001" targetRef="UserTask-ContentCreatorDraftsMarketingMaterials-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelSplitToEditor-id-0035" sourceRef="ParallelGateway-Split-id-0001" targetRef="UserTask-EditorReviewsDraft-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-ContentCreatorToParallelJoin-id-0036" sourceRef="UserTask-ContentCreatorDraftsMarketingMaterials-id-0002" targetRef="ParallelGateway-Join-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-EditorToParallelJoin-id-0037" sourceRef="UserTask-EditorReviewsDraft-id-0003" targetRef="ParallelGateway-Join-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelJoinToExclusiveGateway-id-0038" sourceRef="ParallelGateway-Join-id-0004" targetRef="ExclusiveGateway-EditorApproval-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-EditorApprovedToParallelSplitLegalAndDesign-id-0039" name="editor_approval" sourceRef="ExclusiveGateway-EditorApproval-id-0005" targetRef="ParallelGateway-SplitLegalAndDesign-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-EditorNotApprovedToRevisions-id-0040" sourceRef="ExclusiveGateway-EditorApproval-id-0005" targetRef="UserTask-ContentCreatorRevisesBasedOnEditorFeedback-id-0031" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelSplitLegalAndDesignToLegal-id-0041" sourceRef="ParallelGateway-SplitLegalAndDesign-id-0006" targetRef="UserTask-LegalTeamChecksCompliance-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelSplitLegalAndDesignToDesign-id-0042" sourceRef="ParallelGateway-SplitLegalAndDesign-id-0006" targetRef="UserTask-GraphicDesignerFormatsContent-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-LegalToParallelJoinLegalAndDesign-id-0043" sourceRef="UserTask-LegalTeamChecksCompliance-id-0007" targetRef="ParallelGateway-JoinLegalAndDesign-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-DesignToParallelJoinLegalAndDesign-id-0044" sourceRef="UserTask-GraphicDesignerFormatsContent-id-0008" targetRef="ParallelGateway-JoinLegalAndDesign-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelJoinLegalAndDesignToExclusiveGateway-id-0045" sourceRef="ParallelGateway-JoinLegalAndDesign-id-0009" targetRef="ExclusiveGateway-LegalApproval-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-LegalApprovedToStakeholders-id-0046" name="legal_approval" sourceRef="ExclusiveGateway-LegalApproval-id-0010" targetRef="UserTask-StakeholdersReviewFinalContent-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-LegalNotApprovedToRevisions-id-0047" sourceRef="ExclusiveGateway-LegalApproval-id-0010" targetRef="UserTask-ContentCreatorRevisesBasedOnLegalFeedback-id-0029" />
+    <bpmn:sequenceFlow id="SequenceFlow-StakeholdersToExclusiveGateway-id-0048" sourceRef="UserTask-StakeholdersReviewFinalContent-id-0011" targetRef="ExclusiveGateway-StakeholderApproval-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-StakeholderApprovedToPublish-id-0049" name="stakeholder_approval" sourceRef="ExclusiveGateway-StakeholderApproval-id-0012" targetRef="ServiceTask-PublishContent-id-0013" />
+    <bpmn:sequenceFlow id="SequenceFlow-StakeholderNotApprovedToRevisions-id-0050" sourceRef="ExclusiveGateway-StakeholderApproval-id-0012" targetRef="UserTask-ContentCreatorRevisesBasedOnStakeholderFeedback-id-0016" />
+    <bpmn:sequenceFlow id="SequenceFlow-PublishToReceiveAnalytics-id-0051" sourceRef="ServiceTask-PublishContent-id-0013" targetRef="ReceiveTask-ReceiveAnalyticsConfirmation-id-0014" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveAnalyticsToEnd-id-0052" sourceRef="ReceiveTask-ReceiveAnalyticsConfirmation-id-0014" targetRef="EndEvent-ContentPublishedAndDelivered-id-0015" />
+    <bpmn:sequenceFlow id="SequenceFlow-RevisionsToEditorReview-id-0053" sourceRef="UserTask-ContentCreatorRevisesBasedOnStakeholderFeedback-id-0016" targetRef="UserTask-EditorReviewsRevisedDraft-id-0017" />
+    <bpmn:sequenceFlow id="SequenceFlow-EditorReviewToExclusiveGateway-id-0054" sourceRef="UserTask-EditorReviewsRevisedDraft-id-0017" targetRef="ExclusiveGateway-EditorApprovalRevised-id-0018" />
+    <bpmn:sequenceFlow id="SequenceFlow-EditorApprovedRevisedToParallelSplitLegalAndDesign-id-0055" name="editor_approval" sourceRef="ExclusiveGateway-EditorApprovalRevised-id-0018" targetRef="ParallelGateway-SplitLegalAndDesignRevised-id-0019" />
+    <bpmn:sequenceFlow id="SequenceFlow-EditorNotApprovedRevisedToRevisions-id-0056" sourceRef="ExclusiveGateway-EditorApprovalRevised-id-0018" targetRef="UserTask-ContentCreatorRevisesBasedOnEditorFeedback-id-0031" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelSplitLegalAndDesignRevisedToLegal-id-0057" sourceRef="ParallelGateway-SplitLegalAndDesignRevised-id-0019" targetRef="UserTask-LegalTeamChecksRevisedContent-id-0020" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelSplitLegalAndDesignRevisedToDesign-id-0058" sourceRef="ParallelGateway-SplitLegalAndDesignRevised-id-0019" targetRef="UserTask-GraphicDesignerReformatsRevisedContent-id-0021" />
+    <bpmn:sequenceFlow id="SequenceFlow-LegalRevisedToParallelJoinLegalAndDesign-id-0059" sourceRef="UserTask-LegalTeamChecksRevisedContent-id-0020" targetRef="ParallelGateway-JoinLegalAndDesignRevised-id-0022" />
+    <bpmn:sequenceFlow id="SequenceFlow-DesignRevisedToParallelJoinLegalAndDesign-id-0060" sourceRef="UserTask-GraphicDesignerReformatsRevisedContent-id-0021" targetRef="ParallelGateway-JoinLegalAndDesignRevised-id-0022" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelJoinLegalAndDesignRevisedToExclusiveGateway-id-0061" sourceRef="ParallelGateway-JoinLegalAndDesignRevised-id-0022" targetRef="ExclusiveGateway-LegalApprovalRevised-id-0023" />
+    <bpmn:sequenceFlow id="SequenceFlow-LegalApprovedRevisedToStakeholders-id-0062" name="legal_approval" sourceRef="ExclusiveGateway-LegalApprovalRevised-id-0023" targetRef="UserTask-StakeholdersReviewRevisedContent-id-0024" />
+    <bpmn:sequenceFlow id="SequenceFlow-LegalNotApprovedRevisedToRevisions-id-0063" sourceRef="ExclusiveGateway-LegalApprovalRevised-id-0023" targetRef="UserTask-ContentCreatorRevisesBasedOnLegalFeedback-id-0029" />
+    <bpmn:sequenceFlow id="SequenceFlow-StakeholdersRevisedToExclusiveGateway-id-0064" sourceRef="UserTask-StakeholdersReviewRevisedContent-id-0024" targetRef="ExclusiveGateway-StakeholderApprovalRevised-id-0025" />
+    <bpmn:sequenceFlow id="SequenceFlow-StakeholderApprovedRevisedToPublish-id-0065" name="stakeholder_approval" sourceRef="ExclusiveGateway-StakeholderApprovalRevised-id-0025" targetRef="ServiceTask-PublishRevisedContent-id-0026" />
+    <bpmn:sequenceFlow id="SequenceFlow-StakeholderNotApprovedRevisedToRevisions-id-0066" sourceRef="ExclusiveGateway-StakeholderApprovalRevised-id-0025" targetRef="UserTask-ContentCreatorRevisesAgainBasedOnStakeholderFeedback-id-0027" />
+    <bpmn:sequenceFlow id="SequenceFlow-PublishRevisedToEnd-id-0067" sourceRef="ServiceTask-PublishRevisedContent-id-0026" targetRef="EndEvent-ContentPublishedAndDelivered-id-0015" />
+    <bpmn:sequenceFlow id="SequenceFlow-RevisionsAgainToEnd-id-0068" sourceRef="UserTask-ContentCreatorRevisesAgainBasedOnStakeholderFeedback-id-0027" targetRef="EndEvent-ContentCreationProcessEndedWithoutApproval-id-0028" />
+    <bpmn:sequenceFlow id="SequenceFlow-RevisionsBasedOnLegalFeedbackToEnd-id-0069" sourceRef="UserTask-ContentCreatorRevisesBasedOnLegalFeedback-id-0029" targetRef="EndEvent-ContentCreationProcessEndedWithoutLegalApproval-id-0030" />
+    <bpmn:sequenceFlow id="SequenceFlow-RevisionsBasedOnEditorFeedbackToEnd-id-0070" sourceRef="UserTask-ContentCreatorRevisesBasedOnEditorFeedback-id-0031" targetRef="EndEvent-ContentCreationProcessEndedWithoutEditorApproval-id-0032" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ContentCreationProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_ContentCreationProcess-id-0001" bpmnElement="ContentCreationProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ContentCreationProcessStarts-id-0001_di" bpmnElement="StartEvent-ContentCreationProcessStarts-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0001_di" bpmnElement="ParallelGateway-Split-id-0001">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ContentCreatorDraftsMarketingMaterials-id-0002_di" bpmnElement="UserTask-ContentCreatorDraftsMarketingMaterials-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0004_di" bpmnElement="ParallelGateway-Join-id-0004">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-EditorApproval-id-0005_di" bpmnElement="ExclusiveGateway-EditorApproval-id-0005" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-SplitLegalAndDesign-id-0006_di" bpmnElement="ParallelGateway-SplitLegalAndDesign-id-0006">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-LegalTeamChecksCompliance-id-0007_di" bpmnElement="UserTask-LegalTeamChecksCompliance-id-0007">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-JoinLegalAndDesign-id-0009_di" bpmnElement="ParallelGateway-JoinLegalAndDesign-id-0009">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-LegalApproval-id-0010_di" bpmnElement="ExclusiveGateway-LegalApproval-id-0010" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-StakeholdersReviewFinalContent-id-0011_di" bpmnElement="UserTask-StakeholdersReviewFinalContent-id-0011">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-StakeholderApproval-id-0012_di" bpmnElement="ExclusiveGateway-StakeholderApproval-id-0012" isMarkerVisible="true">
+        <dc:Bounds x="1550" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PublishContent-id-0013_di" bpmnElement="ServiceTask-PublishContent-id-0013">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveAnalyticsConfirmation-id-0014_di" bpmnElement="ReceiveTask-ReceiveAnalyticsConfirmation-id-0014">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ContentCreatorRevisesBasedOnEditorFeedback-id-0031_di" bpmnElement="UserTask-ContentCreatorRevisesBasedOnEditorFeedback-id-0031">
+        <dc:Bounds x="2125" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ContentCreationProcessEndedWithoutEditorApproval-id-0032_di" bpmnElement="EndEvent-ContentCreationProcessEndedWithoutEditorApproval-id-0032">
+        <dc:Bounds x="2307" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ContentCreatorRevisesBasedOnLegalFeedback-id-0029_di" bpmnElement="UserTask-ContentCreatorRevisesBasedOnLegalFeedback-id-0029">
+        <dc:Bounds x="2875" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ContentCreationProcessEndedWithoutLegalApproval-id-0030_di" bpmnElement="EndEvent-ContentCreationProcessEndedWithoutLegalApproval-id-0030">
+        <dc:Bounds x="3057" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ContentPublishedAndDelivered-id-0015_di" bpmnElement="EndEvent-ContentPublishedAndDelivered-id-0015">
+        <dc:Bounds x="3507" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EditorReviewsDraft-id-0003_di" bpmnElement="UserTask-EditorReviewsDraft-id-0003">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-GraphicDesignerFormatsContent-id-0008_di" bpmnElement="UserTask-GraphicDesignerFormatsContent-id-0008">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ContentCreatorRevisesBasedOnStakeholderFeedback-id-0016_di" bpmnElement="UserTask-ContentCreatorRevisesBasedOnStakeholderFeedback-id-0016">
+        <dc:Bounds x="1675" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EditorReviewsRevisedDraft-id-0017_di" bpmnElement="UserTask-EditorReviewsRevisedDraft-id-0017">
+        <dc:Bounds x="1825" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-EditorApprovalRevised-id-0018_di" bpmnElement="ExclusiveGateway-EditorApprovalRevised-id-0018" isMarkerVisible="true">
+        <dc:Bounds x="2000" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-SplitLegalAndDesignRevised-id-0019_di" bpmnElement="ParallelGateway-SplitLegalAndDesignRevised-id-0019">
+        <dc:Bounds x="2150" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-LegalTeamChecksRevisedContent-id-0020_di" bpmnElement="UserTask-LegalTeamChecksRevisedContent-id-0020">
+        <dc:Bounds x="2275" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-JoinLegalAndDesignRevised-id-0022_di" bpmnElement="ParallelGateway-JoinLegalAndDesignRevised-id-0022">
+        <dc:Bounds x="2450" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-LegalApprovalRevised-id-0023_di" bpmnElement="ExclusiveGateway-LegalApprovalRevised-id-0023" isMarkerVisible="true">
+        <dc:Bounds x="2600" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-StakeholdersReviewRevisedContent-id-0024_di" bpmnElement="UserTask-StakeholdersReviewRevisedContent-id-0024">
+        <dc:Bounds x="2725" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-StakeholderApprovalRevised-id-0025_di" bpmnElement="ExclusiveGateway-StakeholderApprovalRevised-id-0025" isMarkerVisible="true">
+        <dc:Bounds x="2900" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PublishRevisedContent-id-0026_di" bpmnElement="ServiceTask-PublishRevisedContent-id-0026">
+        <dc:Bounds x="3025" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-GraphicDesignerReformatsRevisedContent-id-0021_di" bpmnElement="UserTask-GraphicDesignerReformatsRevisedContent-id-0021">
+        <dc:Bounds x="2275" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ContentCreatorRevisesAgainBasedOnStakeholderFeedback-id-0027_di" bpmnElement="UserTask-ContentCreatorRevisesAgainBasedOnStakeholderFeedback-id-0027">
+        <dc:Bounds x="3025" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ContentCreationProcessEndedWithoutApproval-id-0028_di" bpmnElement="EndEvent-ContentCreationProcessEndedWithoutApproval-id-0028">
+        <dc:Bounds x="3207" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToParallelSplit-id-0033_di" bpmnElement="SequenceFlow-StartToParallelSplit-id-0033">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelSplitToContentCreator-id-0034_di" bpmnElement="SequenceFlow-ParallelSplitToContentCreator-id-0034">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelSplitToEditor-id-0035_di" bpmnElement="SequenceFlow-ParallelSplitToEditor-id-0035">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ContentCreatorToParallelJoin-id-0036_di" bpmnElement="SequenceFlow-ContentCreatorToParallelJoin-id-0036">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelJoinToExclusiveGateway-id-0038_di" bpmnElement="SequenceFlow-ParallelJoinToExclusiveGateway-id-0038">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EditorApprovedToParallelSplitLegalAndDesign-id-0039_di" bpmnElement="SequenceFlow-EditorApprovedToParallelSplitLegalAndDesign-id-0039">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EditorNotApprovedToRevisions-id-0040_di" bpmnElement="SequenceFlow-EditorNotApprovedToRevisions-id-0040">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="140" />
+        <di:waypoint x="2175" y="140" />
+        <di:waypoint x="2175" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelSplitLegalAndDesignToLegal-id-0041_di" bpmnElement="SequenceFlow-ParallelSplitLegalAndDesignToLegal-id-0041">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelSplitLegalAndDesignToDesign-id-0042_di" bpmnElement="SequenceFlow-ParallelSplitLegalAndDesignToDesign-id-0042">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LegalToParallelJoinLegalAndDesign-id-0043_di" bpmnElement="SequenceFlow-LegalToParallelJoinLegalAndDesign-id-0043">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelJoinLegalAndDesignToExclusiveGateway-id-0045_di" bpmnElement="SequenceFlow-ParallelJoinLegalAndDesignToExclusiveGateway-id-0045">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LegalApprovedToStakeholders-id-0046_di" bpmnElement="SequenceFlow-LegalApprovedToStakeholders-id-0046">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LegalNotApprovedToRevisions-id-0047_di" bpmnElement="SequenceFlow-LegalNotApprovedToRevisions-id-0047">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="140" />
+        <di:waypoint x="2925" y="140" />
+        <di:waypoint x="2925" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StakeholdersToExclusiveGateway-id-0048_di" bpmnElement="SequenceFlow-StakeholdersToExclusiveGateway-id-0048">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1550" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StakeholderApprovedToPublish-id-0049_di" bpmnElement="SequenceFlow-StakeholderApprovedToPublish-id-0049">
+        <di:waypoint x="1600" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StakeholderNotApprovedToRevisions-id-0050_di" bpmnElement="SequenceFlow-StakeholderNotApprovedToRevisions-id-0050">
+        <di:waypoint x="1575" y="95" />
+        <di:waypoint x="1575" y="210" />
+        <di:waypoint x="1675" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PublishToReceiveAnalytics-id-0051_di" bpmnElement="SequenceFlow-PublishToReceiveAnalytics-id-0051">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveAnalyticsToEnd-id-0052_di" bpmnElement="SequenceFlow-ReceiveAnalyticsToEnd-id-0052">
+        <di:waypoint x="1875" y="110" />
+        <di:waypoint x="1875" y="140" />
+        <di:waypoint x="3525" y="140" />
+        <di:waypoint x="3525" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RevisionsBasedOnEditorFeedbackToEnd-id-0070_di" bpmnElement="SequenceFlow-RevisionsBasedOnEditorFeedbackToEnd-id-0070">
+        <di:waypoint x="2225" y="70" />
+        <di:waypoint x="2307" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RevisionsBasedOnLegalFeedbackToEnd-id-0069_di" bpmnElement="SequenceFlow-RevisionsBasedOnLegalFeedbackToEnd-id-0069">
+        <di:waypoint x="2975" y="70" />
+        <di:waypoint x="3057" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EditorToParallelJoin-id-0037_di" bpmnElement="SequenceFlow-EditorToParallelJoin-id-0037">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DesignToParallelJoinLegalAndDesign-id-0044_di" bpmnElement="SequenceFlow-DesignToParallelJoinLegalAndDesign-id-0044">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RevisionsToEditorReview-id-0053_di" bpmnElement="SequenceFlow-RevisionsToEditorReview-id-0053">
+        <di:waypoint x="1775" y="210" />
+        <di:waypoint x="1825" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EditorReviewToExclusiveGateway-id-0054_di" bpmnElement="SequenceFlow-EditorReviewToExclusiveGateway-id-0054">
+        <di:waypoint x="1925" y="210" />
+        <di:waypoint x="2000" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EditorApprovedRevisedToParallelSplitLegalAndDesign-id-0055_di" bpmnElement="SequenceFlow-EditorApprovedRevisedToParallelSplitLegalAndDesign-id-0055">
+        <di:waypoint x="2050" y="210" />
+        <di:waypoint x="2150" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EditorNotApprovedRevisedToRevisions-id-0056_di" bpmnElement="SequenceFlow-EditorNotApprovedRevisedToRevisions-id-0056">
+        <di:waypoint x="2050" y="210" />
+        <di:waypoint x="2100" y="210" />
+        <di:waypoint x="2100" y="140" />
+        <di:waypoint x="2100" y="140" />
+        <di:waypoint x="2100" y="70" />
+        <di:waypoint x="2125" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelSplitLegalAndDesignRevisedToLegal-id-0057_di" bpmnElement="SequenceFlow-ParallelSplitLegalAndDesignRevisedToLegal-id-0057">
+        <di:waypoint x="2200" y="210" />
+        <di:waypoint x="2275" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelSplitLegalAndDesignRevisedToDesign-id-0058_di" bpmnElement="SequenceFlow-ParallelSplitLegalAndDesignRevisedToDesign-id-0058">
+        <di:waypoint x="2175" y="235" />
+        <di:waypoint x="2175" y="350" />
+        <di:waypoint x="2275" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LegalRevisedToParallelJoinLegalAndDesign-id-0059_di" bpmnElement="SequenceFlow-LegalRevisedToParallelJoinLegalAndDesign-id-0059">
+        <di:waypoint x="2375" y="210" />
+        <di:waypoint x="2450" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelJoinLegalAndDesignRevisedToExclusiveGateway-id-0061_di" bpmnElement="SequenceFlow-ParallelJoinLegalAndDesignRevisedToExclusiveGateway-id-0061">
+        <di:waypoint x="2500" y="210" />
+        <di:waypoint x="2600" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LegalApprovedRevisedToStakeholders-id-0062_di" bpmnElement="SequenceFlow-LegalApprovedRevisedToStakeholders-id-0062">
+        <di:waypoint x="2650" y="210" />
+        <di:waypoint x="2725" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LegalNotApprovedRevisedToRevisions-id-0063_di" bpmnElement="SequenceFlow-LegalNotApprovedRevisedToRevisions-id-0063">
+        <di:waypoint x="2650" y="210" />
+        <di:waypoint x="2700" y="210" />
+        <di:waypoint x="2700" y="140" />
+        <di:waypoint x="2850" y="140" />
+        <di:waypoint x="2850" y="70" />
+        <di:waypoint x="2875" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StakeholdersRevisedToExclusiveGateway-id-0064_di" bpmnElement="SequenceFlow-StakeholdersRevisedToExclusiveGateway-id-0064">
+        <di:waypoint x="2825" y="210" />
+        <di:waypoint x="2900" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StakeholderApprovedRevisedToPublish-id-0065_di" bpmnElement="SequenceFlow-StakeholderApprovedRevisedToPublish-id-0065">
+        <di:waypoint x="2950" y="210" />
+        <di:waypoint x="3025" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StakeholderNotApprovedRevisedToRevisions-id-0066_di" bpmnElement="SequenceFlow-StakeholderNotApprovedRevisedToRevisions-id-0066">
+        <di:waypoint x="2925" y="235" />
+        <di:waypoint x="2925" y="350" />
+        <di:waypoint x="3025" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PublishRevisedToEnd-id-0067_di" bpmnElement="SequenceFlow-PublishRevisedToEnd-id-0067">
+        <di:waypoint x="3125" y="210" />
+        <di:waypoint x="3525" y="210" />
+        <di:waypoint x="3525" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DesignRevisedToParallelJoinLegalAndDesign-id-0060_di" bpmnElement="SequenceFlow-DesignRevisedToParallelJoinLegalAndDesign-id-0060">
+        <di:waypoint x="2375" y="350" />
+        <di:waypoint x="2475" y="350" />
+        <di:waypoint x="2475" y="235" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RevisionsAgainToEnd-id-0068_di" bpmnElement="SequenceFlow-RevisionsAgainToEnd-id-0068">
+        <di:waypoint x="3125" y="350" />
+        <di:waypoint x="3207" y="350" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

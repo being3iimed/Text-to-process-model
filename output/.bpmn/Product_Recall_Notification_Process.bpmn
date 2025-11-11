@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="DefectRecallProcess" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="DefectRecallProcess-id-0001" name="Defect Recall Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-DefectDiscovered-id-0001" name="Defect Discovered">
+      <bpmn:outgoing>SequenceFlow-StartToSplit-id-0015</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:parallelGateway id="ParallelGateway-Split-id-0002" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-StartToSplit-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToIdentify-id-0016</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToPrepare-id-0017</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-IdentifyCustomers-id-0003" name="Identify affected customers">
+      <bpmn:incoming>SequenceFlow-SplitToIdentify-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-IdentifyToJoin-id-0018</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-PrepareInstructions-id-0004" name="Prepare return instructions">
+      <bpmn:incoming>SequenceFlow-SplitToPrepare-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PrepareToJoin-id-0019</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join-id-0005" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-IdentifyToJoin-id-0018</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-PrepareToJoin-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToSend-id-0020</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-SendNotifications-id-0006" name="Send notifications to affected customers via email, SMS, or postal mail">
+      <bpmn:incoming>SequenceFlow-JoinToSend-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendToReceive-id-0021</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:receiveTask id="ReceiveTask-ReturnProducts-id-0007" name="Receive returned defective products">
+      <bpmn:incoming>SequenceFlow-SendToReceive-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveToProcess-id-0022</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:serviceTask id="ServiceTask-ProcessReturns-id-0008" name="Process returns">
+      <bpmn:incoming>SequenceFlow-ReceiveToProcess-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProcessToGateway-id-0023</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ActionRequired-id-0009" name="Action Required?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ProcessToGateway-id-0023</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToReplacement-id-0024</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToRefund-id-0025</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToLog-id-0026</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-IssueReplacement-id-0010" name="Issue replacement products">
+      <bpmn:incoming>SequenceFlow-GatewayToReplacement-id-0024</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReplacementToSurvey-id-0027</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ProcessRefund-id-0011" name="Process refund">
+      <bpmn:incoming>SequenceFlow-GatewayToRefund-id-0025</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RefundToSurvey-id-0028</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-LogNoAction-id-0012" name="Log no action required">
+      <bpmn:incoming>SequenceFlow-GatewayToLog-id-0026</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogToSurvey-id-0029</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ConductSurvey-id-0013" name="Conduct post-recall survey">
+      <bpmn:incoming>SequenceFlow-ReplacementToSurvey-id-0027</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-RefundToSurvey-id-0028</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-LogToSurvey-id-0029</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SurveyToEnd-id-0030</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0014" name="Process Complete">
+      <bpmn:incoming>SequenceFlow-SurveyToEnd-id-0030</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSplit-id-0015" sourceRef="StartEvent-DefectDiscovered-id-0001" targetRef="ParallelGateway-Split-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToIdentify-id-0016" sourceRef="ParallelGateway-Split-id-0002" targetRef="ServiceTask-IdentifyCustomers-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToPrepare-id-0017" sourceRef="ParallelGateway-Split-id-0002" targetRef="ServiceTask-PrepareInstructions-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-IdentifyToJoin-id-0018" sourceRef="ServiceTask-IdentifyCustomers-id-0003" targetRef="ParallelGateway-Join-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrepareToJoin-id-0019" sourceRef="ServiceTask-PrepareInstructions-id-0004" targetRef="ParallelGateway-Join-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToSend-id-0020" sourceRef="ParallelGateway-Join-id-0005" targetRef="ServiceTask-SendNotifications-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendToReceive-id-0021" sourceRef="ServiceTask-SendNotifications-id-0006" targetRef="ReceiveTask-ReturnProducts-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveToProcess-id-0022" sourceRef="ReceiveTask-ReturnProducts-id-0007" targetRef="ServiceTask-ProcessReturns-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProcessToGateway-id-0023" sourceRef="ServiceTask-ProcessReturns-id-0008" targetRef="ExclusiveGateway-ActionRequired-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToReplacement-id-0024" name="replacement_needed" sourceRef="ExclusiveGateway-ActionRequired-id-0009" targetRef="ServiceTask-IssueReplacement-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToRefund-id-0025" name="refund_needed" sourceRef="ExclusiveGateway-ActionRequired-id-0009" targetRef="ServiceTask-ProcessRefund-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToLog-id-0026" sourceRef="ExclusiveGateway-ActionRequired-id-0009" targetRef="ServiceTask-LogNoAction-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReplacementToSurvey-id-0027" sourceRef="ServiceTask-IssueReplacement-id-0010" targetRef="ServiceTask-ConductSurvey-id-0013" />
+    <bpmn:sequenceFlow id="SequenceFlow-RefundToSurvey-id-0028" sourceRef="ServiceTask-ProcessRefund-id-0011" targetRef="ServiceTask-ConductSurvey-id-0013" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogToSurvey-id-0029" sourceRef="ServiceTask-LogNoAction-id-0012" targetRef="ServiceTask-ConductSurvey-id-0013" />
+    <bpmn:sequenceFlow id="SequenceFlow-SurveyToEnd-id-0030" sourceRef="ServiceTask-ConductSurvey-id-0013" targetRef="EndEvent-ProcessComplete-id-0014" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_DefectRecallProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_DefectRecallProcess-id-0001" bpmnElement="DefectRecallProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-DefectDiscovered-id-0001_di" bpmnElement="StartEvent-DefectDiscovered-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0002_di" bpmnElement="ParallelGateway-Split-id-0002">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-IdentifyCustomers-id-0003_di" bpmnElement="ServiceTask-IdentifyCustomers-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0005_di" bpmnElement="ParallelGateway-Join-id-0005">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SendNotifications-id-0006_di" bpmnElement="ServiceTask-SendNotifications-id-0006">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReturnProducts-id-0007_di" bpmnElement="ReceiveTask-ReturnProducts-id-0007">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessReturns-id-0008_di" bpmnElement="ServiceTask-ProcessReturns-id-0008">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ActionRequired-id-0009_di" bpmnElement="ExclusiveGateway-ActionRequired-id-0009" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-IssueReplacement-id-0010_di" bpmnElement="ServiceTask-IssueReplacement-id-0010">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ConductSurvey-id-0013_di" bpmnElement="ServiceTask-ConductSurvey-id-0013">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0014_di" bpmnElement="EndEvent-ProcessComplete-id-0014">
+        <dc:Bounds x="1557" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareInstructions-id-0004_di" bpmnElement="ServiceTask-PrepareInstructions-id-0004">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessRefund-id-0011_di" bpmnElement="ServiceTask-ProcessRefund-id-0011">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogNoAction-id-0012_di" bpmnElement="ServiceTask-LogNoAction-id-0012">
+        <dc:Bounds x="1225" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSplit-id-0015_di" bpmnElement="SequenceFlow-StartToSplit-id-0015">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToIdentify-id-0016_di" bpmnElement="SequenceFlow-SplitToIdentify-id-0016">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToPrepare-id-0017_di" bpmnElement="SequenceFlow-SplitToPrepare-id-0017">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IdentifyToJoin-id-0018_di" bpmnElement="SequenceFlow-IdentifyToJoin-id-0018">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToSend-id-0020_di" bpmnElement="SequenceFlow-JoinToSend-id-0020">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToReceive-id-0021_di" bpmnElement="SequenceFlow-SendToReceive-id-0021">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToProcess-id-0022_di" bpmnElement="SequenceFlow-ReceiveToProcess-id-0022">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessToGateway-id-0023_di" bpmnElement="SequenceFlow-ProcessToGateway-id-0023">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToReplacement-id-0024_di" bpmnElement="SequenceFlow-GatewayToReplacement-id-0024">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToRefund-id-0025_di" bpmnElement="SequenceFlow-GatewayToRefund-id-0025">
+        <di:waypoint x="1125" y="95" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToLog-id-0026_di" bpmnElement="SequenceFlow-GatewayToLog-id-0026">
+        <di:waypoint x="1125" y="95" />
+        <di:waypoint x="1125" y="350" />
+        <di:waypoint x="1225" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReplacementToSurvey-id-0027_di" bpmnElement="SequenceFlow-ReplacementToSurvey-id-0027">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SurveyToEnd-id-0030_di" bpmnElement="SequenceFlow-SurveyToEnd-id-0030">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1557" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrepareToJoin-id-0019_di" bpmnElement="SequenceFlow-PrepareToJoin-id-0019">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RefundToSurvey-id-0028_di" bpmnElement="SequenceFlow-RefundToSurvey-id-0028">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1425" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogToSurvey-id-0029_di" bpmnElement="SequenceFlow-LogToSurvey-id-0029">
+        <di:waypoint x="1325" y="350" />
+        <di:waypoint x="1425" y="350" />
+        <di:waypoint x="1425" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

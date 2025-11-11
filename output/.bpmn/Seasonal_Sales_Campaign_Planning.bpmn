@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="campaign-planning-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="Campaign-Planning-Process-id-0001" name="Campaign Planning Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-CampaignPlanningBegins-id-0001" name="Campaign Planning Begins">
+      <bpmn:outgoing>SequenceFlow-StartToSplit-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:parallelGateway id="ParallelGateway-Split-id-0001" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-StartToSplit-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToBrainstorm-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToMarketing-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToInventory-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:scriptTask id="ScriptTask-BrainstormCampaign-id-0001" name="Brainstorm campaign themes and promotions">
+      <bpmn:incoming>SequenceFlow-SplitToBrainstorm-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BrainstormToJoin-id-0001</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:serviceTask id="ServiceTask-CreateMarketingMaterials-id-0002" name="Create marketing materials">
+      <bpmn:incoming>SequenceFlow-SplitToMarketing-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MarketingToJoin-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-PrepareInventory-id-0003" name="Prepare inventory">
+      <bpmn:incoming>SequenceFlow-SplitToInventory-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InventoryToJoin-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join-id-0002" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-BrainstormToJoin-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-MarketingToJoin-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-InventoryToJoin-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToSelectDate-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-SelectLaunchDate-id-0001" name="Select launch date aligning with holidays or events">
+      <bpmn:incoming>SequenceFlow-JoinToSelectDate-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectDateToLaunch-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-LaunchCampaign-id-0001" name="Launch campaign">
+      <bpmn:incoming>SequenceFlow-SelectDateToLaunch-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LaunchToReceiveData-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:receiveTask id="ReceiveTask-RealTimeSalesData-id-0001" name="Receive real-time sales data">
+      <bpmn:incoming>SequenceFlow-LaunchToReceiveData-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveDataToAnalyze-id-0001</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:scriptTask id="ScriptTask-AnalyzeSalesData-id-0001" name="Analyze sales data and make adjustments">
+      <bpmn:incoming>SequenceFlow-ReceiveDataToAnalyze-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AnalyzeToPostAnalysis-id-0001</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:serviceTask id="ServiceTask-PostCampaignAnalysis-id-0001" name="Conduct post-campaign analysis">
+      <bpmn:incoming>SequenceFlow-AnalyzeToPostAnalysis-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PostAnalysisToEnd-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-CampaignProcessComplete-id-0001" name="Campaign Process Complete">
+      <bpmn:incoming>SequenceFlow-PostAnalysisToEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSplit-id-0001" sourceRef="StartEvent-CampaignPlanningBegins-id-0001" targetRef="ParallelGateway-Split-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToBrainstorm-id-0001" sourceRef="ParallelGateway-Split-id-0001" targetRef="ScriptTask-BrainstormCampaign-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToMarketing-id-0001" sourceRef="ParallelGateway-Split-id-0001" targetRef="ServiceTask-CreateMarketingMaterials-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToInventory-id-0001" sourceRef="ParallelGateway-Split-id-0001" targetRef="ServiceTask-PrepareInventory-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-BrainstormToJoin-id-0001" sourceRef="ScriptTask-BrainstormCampaign-id-0001" targetRef="ParallelGateway-Join-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-MarketingToJoin-id-0001" sourceRef="ServiceTask-CreateMarketingMaterials-id-0002" targetRef="ParallelGateway-Join-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-InventoryToJoin-id-0001" sourceRef="ServiceTask-PrepareInventory-id-0003" targetRef="ParallelGateway-Join-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToSelectDate-id-0001" sourceRef="ParallelGateway-Join-id-0002" targetRef="UserTask-SelectLaunchDate-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectDateToLaunch-id-0001" sourceRef="UserTask-SelectLaunchDate-id-0001" targetRef="ServiceTask-LaunchCampaign-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-LaunchToReceiveData-id-0001" sourceRef="ServiceTask-LaunchCampaign-id-0001" targetRef="ReceiveTask-RealTimeSalesData-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveDataToAnalyze-id-0001" sourceRef="ReceiveTask-RealTimeSalesData-id-0001" targetRef="ScriptTask-AnalyzeSalesData-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AnalyzeToPostAnalysis-id-0001" sourceRef="ScriptTask-AnalyzeSalesData-id-0001" targetRef="ServiceTask-PostCampaignAnalysis-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PostAnalysisToEnd-id-0001" sourceRef="ServiceTask-PostCampaignAnalysis-id-0001" targetRef="EndEvent-CampaignProcessComplete-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Campaign-Planning-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Campaign-Planning-Process-id-0001" bpmnElement="Campaign-Planning-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-CampaignPlanningBegins-id-0001_di" bpmnElement="StartEvent-CampaignPlanningBegins-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0001_di" bpmnElement="ParallelGateway-Split-id-0001">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-BrainstormCampaign-id-0001_di" bpmnElement="ScriptTask-BrainstormCampaign-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0002_di" bpmnElement="ParallelGateway-Join-id-0002">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectLaunchDate-id-0001_di" bpmnElement="UserTask-SelectLaunchDate-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LaunchCampaign-id-0001_di" bpmnElement="ServiceTask-LaunchCampaign-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-RealTimeSalesData-id-0001_di" bpmnElement="ReceiveTask-RealTimeSalesData-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-AnalyzeSalesData-id-0001_di" bpmnElement="ScriptTask-AnalyzeSalesData-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PostCampaignAnalysis-id-0001_di" bpmnElement="ServiceTask-PostCampaignAnalysis-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CampaignProcessComplete-id-0001_di" bpmnElement="EndEvent-CampaignProcessComplete-id-0001">
+        <dc:Bounds x="1407" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CreateMarketingMaterials-id-0002_di" bpmnElement="ServiceTask-CreateMarketingMaterials-id-0002">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareInventory-id-0003_di" bpmnElement="ServiceTask-PrepareInventory-id-0003">
+        <dc:Bounds x="325" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSplit-id-0001_di" bpmnElement="SequenceFlow-StartToSplit-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToBrainstorm-id-0001_di" bpmnElement="SequenceFlow-SplitToBrainstorm-id-0001">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToMarketing-id-0001_di" bpmnElement="SequenceFlow-SplitToMarketing-id-0001">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToInventory-id-0001_di" bpmnElement="SequenceFlow-SplitToInventory-id-0001">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="350" />
+        <di:waypoint x="325" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BrainstormToJoin-id-0001_di" bpmnElement="SequenceFlow-BrainstormToJoin-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToSelectDate-id-0001_di" bpmnElement="SequenceFlow-JoinToSelectDate-id-0001">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectDateToLaunch-id-0001_di" bpmnElement="SequenceFlow-SelectDateToLaunch-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LaunchToReceiveData-id-0001_di" bpmnElement="SequenceFlow-LaunchToReceiveData-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveDataToAnalyze-id-0001_di" bpmnElement="SequenceFlow-ReceiveDataToAnalyze-id-0001">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AnalyzeToPostAnalysis-id-0001_di" bpmnElement="SequenceFlow-AnalyzeToPostAnalysis-id-0001">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PostAnalysisToEnd-id-0001_di" bpmnElement="SequenceFlow-PostAnalysisToEnd-id-0001">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1407" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MarketingToJoin-id-0001_di" bpmnElement="SequenceFlow-MarketingToJoin-id-0001">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InventoryToJoin-id-0001_di" bpmnElement="SequenceFlow-InventoryToJoin-id-0001">
+        <di:waypoint x="425" y="350" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

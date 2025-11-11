@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="LoyaltyProgram-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="LoyaltyProgram-Process-id-0001" name="Customer Loyalty Program">
+    <bpmn:startEvent id="StartEvent-CustomerSignsUp-id-0001" name="Customer Signs Up for Loyalty Program">
+      <bpmn:outgoing>SequenceFlow-StartToCapture-id-0009</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-CaptureCustomerInfo-id-0002" name="Capture customer information (name, contact details)">
+      <bpmn:incoming>SequenceFlow-StartToCapture-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CaptureToCreate-id-0010</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-CreateLoyaltyAccount-id-0003" name="Create loyalty account">
+      <bpmn:incoming>SequenceFlow-CaptureToCreate-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CreateToActiveProgram-id-0011</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:subProcess id="SubProcess-ActiveProgram-id-0004" name="Active Program">
+      <bpmn:incoming>SequenceFlow-CreateToActiveProgram-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ActiveProgramToOptOut-id-0012</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-ActiveProgramStart-id-0001" name="Active Program Start">
+        <bpmn:outgoing>SequenceFlow-StartToPurchase-id-0021</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:receiveTask id="ReceiveTask-CustomerPurchase-id-0002" name="Receive: customer purchase">
+        <bpmn:incoming>SequenceFlow-StartToPurchase-id-0021</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ContinueYes-id-0042</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PurchaseToCalculate-id-0022</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:scriptTask id="ScriptTask-CalculatePoints-id-0003" name="Calculate points earned">
+        <bpmn:incoming>SequenceFlow-PurchaseToCalculate-id-0022</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CalculateToUpdate-id-0023</bpmn:outgoing>
+      </bpmn:scriptTask>
+      <bpmn:serviceTask id="ServiceTask-UpdateBalance-id-0004" name="Update customer loyalty balance">
+        <bpmn:incoming>SequenceFlow-CalculateToUpdate-id-0023</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-UpdateToSend-id-0024</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-PointsUpdate-id-0005" name="Send: real-time points update notification">
+        <bpmn:incoming>SequenceFlow-UpdateToSend-id-0024</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SendToRedemptionGateway-id-0025</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-PointsRedemption-id-0006" name="Points &#62;= redemption threshold?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-SendToRedemptionGateway-id-0025</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RedemptionYes-id-0026</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-RedemptionNo-id-0027</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:userTask id="UserTask-RedeemPoints-id-0007" name="Customer redeems points for reward">
+        <bpmn:incoming>SequenceFlow-RedemptionYes-id-0026</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RedeemToProcess-id-0028</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:serviceTask id="ServiceTask-ProcessRedemption-id-0008" name="Process reward redemption">
+        <bpmn:incoming>SequenceFlow-RedeemToProcess-id-0028</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ProcessToDeduct-id-0029</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:scriptTask id="ScriptTask-DeductPoints-id-0009" name="Deduct redeemed points">
+        <bpmn:incoming>SequenceFlow-ProcessToDeduct-id-0029</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-DeductToUpdate-id-0030</bpmn:outgoing>
+      </bpmn:scriptTask>
+      <bpmn:serviceTask id="ServiceTask-UpdateBalanceAfterRedemption-id-0010" name="Update customer loyalty balance">
+        <bpmn:incoming>SequenceFlow-DeductToUpdate-id-0030</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-UpdateAfterRedemptionToOfferGateway-id-0031</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-TimeSinceLastOffer-id-0011" name="Time since last offer &#62; offer frequency?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-RedemptionNo-id-0027</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-UpdateAfterRedemptionToOfferGateway-id-0031</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-OfferYes-id-0032</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-OfferNo-id-0033</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-AnalyzePatterns-id-0012" name="Analyze customer spending patterns">
+        <bpmn:incoming>SequenceFlow-OfferYes-id-0032</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AnalyzeToGenerate-id-0034</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-GenerateOffer-id-0013" name="Generate personalized offer">
+        <bpmn:incoming>SequenceFlow-AnalyzeToGenerate-id-0034</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GenerateToSend-id-0035</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-SendOffer-id-0014" name="Send: personalized offer to customer">
+        <bpmn:incoming>SequenceFlow-GenerateToSend-id-0035</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SendOfferToMilestoneGateway-id-0036</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-PointsMilestone-id-0015" name="Points &#62;= milestone threshold?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-OfferNo-id-0033</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-SendOfferToMilestoneGateway-id-0036</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-MilestoneYes-id-0037</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-MilestoneNo-id-0038</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-IdentifySpecialReward-id-0016" name="Identify special reward">
+        <bpmn:incoming>SequenceFlow-MilestoneYes-id-0037</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-IdentifyToSendReward-id-0039</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-SendMilestoneReward-id-0017" name="Send: milestone reward notification">
+        <bpmn:incoming>SequenceFlow-IdentifyToSendReward-id-0039</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SendRewardToActivity-id-0040</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:receiveTask id="ReceiveTask-CustomerActivity-id-0018" name="Receive: customer activity (purchase, redemption, etc.)">
+        <bpmn:incoming>SequenceFlow-MilestoneNo-id-0038</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-SendRewardToActivity-id-0040</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ActivityToContinueGateway-id-0041</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-ContinueLoop-id-0019" name="Continue program?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-ActivityToContinueGateway-id-0041</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ContinueYes-id-0042</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-ContinueNo-id-0043</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="EndEvent-ActiveProgramEnd-id-0020" name="Active Program End">
+        <bpmn:incoming>SequenceFlow-ContinueNo-id-0043</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToPurchase-id-0021" sourceRef="StartEvent-ActiveProgramStart-id-0001" targetRef="ReceiveTask-CustomerPurchase-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-PurchaseToCalculate-id-0022" sourceRef="ReceiveTask-CustomerPurchase-id-0002" targetRef="ScriptTask-CalculatePoints-id-0003" />
+      <bpmn:sequenceFlow id="SequenceFlow-CalculateToUpdate-id-0023" sourceRef="ScriptTask-CalculatePoints-id-0003" targetRef="ServiceTask-UpdateBalance-id-0004" />
+      <bpmn:sequenceFlow id="SequenceFlow-UpdateToSend-id-0024" sourceRef="ServiceTask-UpdateBalance-id-0004" targetRef="SendTask-PointsUpdate-id-0005" />
+      <bpmn:sequenceFlow id="SequenceFlow-SendToRedemptionGateway-id-0025" sourceRef="SendTask-PointsUpdate-id-0005" targetRef="ExclusiveGateway-PointsRedemption-id-0006" />
+      <bpmn:sequenceFlow id="SequenceFlow-RedemptionYes-id-0026" name="Yes" sourceRef="ExclusiveGateway-PointsRedemption-id-0006" targetRef="UserTask-RedeemPoints-id-0007" />
+      <bpmn:sequenceFlow id="SequenceFlow-RedemptionNo-id-0027" name="No" sourceRef="ExclusiveGateway-PointsRedemption-id-0006" targetRef="ExclusiveGateway-TimeSinceLastOffer-id-0011" />
+      <bpmn:sequenceFlow id="SequenceFlow-RedeemToProcess-id-0028" sourceRef="UserTask-RedeemPoints-id-0007" targetRef="ServiceTask-ProcessRedemption-id-0008" />
+      <bpmn:sequenceFlow id="SequenceFlow-ProcessToDeduct-id-0029" sourceRef="ServiceTask-ProcessRedemption-id-0008" targetRef="ScriptTask-DeductPoints-id-0009" />
+      <bpmn:sequenceFlow id="SequenceFlow-DeductToUpdate-id-0030" sourceRef="ScriptTask-DeductPoints-id-0009" targetRef="ServiceTask-UpdateBalanceAfterRedemption-id-0010" />
+      <bpmn:sequenceFlow id="SequenceFlow-UpdateAfterRedemptionToOfferGateway-id-0031" sourceRef="ServiceTask-UpdateBalanceAfterRedemption-id-0010" targetRef="ExclusiveGateway-TimeSinceLastOffer-id-0011" />
+      <bpmn:sequenceFlow id="SequenceFlow-OfferYes-id-0032" name="Yes" sourceRef="ExclusiveGateway-TimeSinceLastOffer-id-0011" targetRef="ServiceTask-AnalyzePatterns-id-0012" />
+      <bpmn:sequenceFlow id="SequenceFlow-OfferNo-id-0033" name="No" sourceRef="ExclusiveGateway-TimeSinceLastOffer-id-0011" targetRef="ExclusiveGateway-PointsMilestone-id-0015" />
+      <bpmn:sequenceFlow id="SequenceFlow-AnalyzeToGenerate-id-0034" sourceRef="ServiceTask-AnalyzePatterns-id-0012" targetRef="ServiceTask-GenerateOffer-id-0013" />
+      <bpmn:sequenceFlow id="SequenceFlow-GenerateToSend-id-0035" sourceRef="ServiceTask-GenerateOffer-id-0013" targetRef="SendTask-SendOffer-id-0014" />
+      <bpmn:sequenceFlow id="SequenceFlow-SendOfferToMilestoneGateway-id-0036" sourceRef="SendTask-SendOffer-id-0014" targetRef="ExclusiveGateway-PointsMilestone-id-0015" />
+      <bpmn:sequenceFlow id="SequenceFlow-MilestoneYes-id-0037" name="Yes" sourceRef="ExclusiveGateway-PointsMilestone-id-0015" targetRef="ServiceTask-IdentifySpecialReward-id-0016" />
+      <bpmn:sequenceFlow id="SequenceFlow-MilestoneNo-id-0038" name="No" sourceRef="ExclusiveGateway-PointsMilestone-id-0015" targetRef="ReceiveTask-CustomerActivity-id-0018" />
+      <bpmn:sequenceFlow id="SequenceFlow-IdentifyToSendReward-id-0039" sourceRef="ServiceTask-IdentifySpecialReward-id-0016" targetRef="SendTask-SendMilestoneReward-id-0017" />
+      <bpmn:sequenceFlow id="SequenceFlow-SendRewardToActivity-id-0040" sourceRef="SendTask-SendMilestoneReward-id-0017" targetRef="ReceiveTask-CustomerActivity-id-0018" />
+      <bpmn:sequenceFlow id="SequenceFlow-ActivityToContinueGateway-id-0041" sourceRef="ReceiveTask-CustomerActivity-id-0018" targetRef="ExclusiveGateway-ContinueLoop-id-0019" />
+      <bpmn:sequenceFlow id="SequenceFlow-ContinueYes-id-0042" name="Yes" sourceRef="ExclusiveGateway-ContinueLoop-id-0019" targetRef="ReceiveTask-CustomerPurchase-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-ContinueNo-id-0043" name="No" sourceRef="ExclusiveGateway-ContinueLoop-id-0019" targetRef="EndEvent-ActiveProgramEnd-id-0020" />
+    </bpmn:subProcess>
+    <bpmn:receiveTask id="ReceiveTask-CustomerOptOut-id-0005" name="Receive: customer opt-out request">
+      <bpmn:incoming>SequenceFlow-ActiveProgramToOptOut-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OptOutToProcess-id-0013</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:serviceTask id="ServiceTask-ProcessOptOut-id-0006" name="Process opt-out request">
+      <bpmn:incoming>SequenceFlow-OptOutToProcess-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProcessToArchive-id-0014</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ArchiveData-id-0007" name="Archive customer loyalty data">
+      <bpmn:incoming>SequenceFlow-ProcessToArchive-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ArchiveToEnd-id-0015</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-CustomerOptsOut-id-0008" name="Customer Opts Out of Loyalty Program">
+      <bpmn:incoming>SequenceFlow-ArchiveToEnd-id-0015</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToCapture-id-0009" sourceRef="StartEvent-CustomerSignsUp-id-0001" targetRef="ServiceTask-CaptureCustomerInfo-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-CaptureToCreate-id-0010" sourceRef="ServiceTask-CaptureCustomerInfo-id-0002" targetRef="ServiceTask-CreateLoyaltyAccount-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-CreateToActiveProgram-id-0011" sourceRef="ServiceTask-CreateLoyaltyAccount-id-0003" targetRef="SubProcess-ActiveProgram-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-ActiveProgramToOptOut-id-0012" sourceRef="SubProcess-ActiveProgram-id-0004" targetRef="ReceiveTask-CustomerOptOut-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-OptOutToProcess-id-0013" sourceRef="ReceiveTask-CustomerOptOut-id-0005" targetRef="ServiceTask-ProcessOptOut-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProcessToArchive-id-0014" sourceRef="ServiceTask-ProcessOptOut-id-0006" targetRef="ServiceTask-ArchiveData-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-ArchiveToEnd-id-0015" sourceRef="ServiceTask-ArchiveData-id-0007" targetRef="EndEvent-CustomerOptsOut-id-0008" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_LoyaltyProgram-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_LoyaltyProgram-Process-id-0001" bpmnElement="LoyaltyProgram-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-CustomerSignsUp-id-0001_di" bpmnElement="StartEvent-CustomerSignsUp-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CaptureCustomerInfo-id-0002_di" bpmnElement="ServiceTask-CaptureCustomerInfo-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CreateLoyaltyAccount-id-0003_di" bpmnElement="ServiceTask-CreateLoyaltyAccount-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-ActiveProgram-id-0004_di" bpmnElement="SubProcess-ActiveProgram-id-0004">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-CustomerOptOut-id-0005_di" bpmnElement="ReceiveTask-CustomerOptOut-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessOptOut-id-0006_di" bpmnElement="ServiceTask-ProcessOptOut-id-0006">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ArchiveData-id-0007_di" bpmnElement="ServiceTask-ArchiveData-id-0007">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CustomerOptsOut-id-0008_di" bpmnElement="EndEvent-CustomerOptsOut-id-0008">
+        <dc:Bounds x="1107" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToCapture-id-0009_di" bpmnElement="SequenceFlow-StartToCapture-id-0009">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CaptureToCreate-id-0010_di" bpmnElement="SequenceFlow-CaptureToCreate-id-0010">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CreateToActiveProgram-id-0011_di" bpmnElement="SequenceFlow-CreateToActiveProgram-id-0011">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ActiveProgramToOptOut-id-0012_di" bpmnElement="SequenceFlow-ActiveProgramToOptOut-id-0012">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OptOutToProcess-id-0013_di" bpmnElement="SequenceFlow-OptOutToProcess-id-0013">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessToArchive-id-0014_di" bpmnElement="SequenceFlow-ProcessToArchive-id-0014">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ArchiveToEnd-id-0015_di" bpmnElement="SequenceFlow-ArchiveToEnd-id-0015">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1107" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-ActiveProgram-id-0004">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-ActiveProgram-id-0004" bpmnElement="SubProcess-ActiveProgram-id-0004">
+      <bpmndi:BPMNShape id="StartEvent-ActiveProgramStart-id-0001_di" bpmnElement="StartEvent-ActiveProgramStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-CustomerPurchase-id-0002_di" bpmnElement="ReceiveTask-CustomerPurchase-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-CalculatePoints-id-0003_di" bpmnElement="ScriptTask-CalculatePoints-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateBalance-id-0004_di" bpmnElement="ServiceTask-UpdateBalance-id-0004">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-PointsUpdate-id-0005_di" bpmnElement="SendTask-PointsUpdate-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PointsRedemption-id-0006_di" bpmnElement="ExclusiveGateway-PointsRedemption-id-0006" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-RedeemPoints-id-0007_di" bpmnElement="UserTask-RedeemPoints-id-0007">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessRedemption-id-0008_di" bpmnElement="ServiceTask-ProcessRedemption-id-0008">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-DeductPoints-id-0009_di" bpmnElement="ScriptTask-DeductPoints-id-0009">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateBalanceAfterRedemption-id-0010_di" bpmnElement="ServiceTask-UpdateBalanceAfterRedemption-id-0010">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-TimeSinceLastOffer-id-0011_di" bpmnElement="ExclusiveGateway-TimeSinceLastOffer-id-0011" isMarkerVisible="true">
+        <dc:Bounds x="1550" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AnalyzePatterns-id-0012_di" bpmnElement="ServiceTask-AnalyzePatterns-id-0012">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateOffer-id-0013_di" bpmnElement="ServiceTask-GenerateOffer-id-0013">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendOffer-id-0014_di" bpmnElement="SendTask-SendOffer-id-0014">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PointsMilestone-id-0015_di" bpmnElement="ExclusiveGateway-PointsMilestone-id-0015" isMarkerVisible="true">
+        <dc:Bounds x="2150" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-IdentifySpecialReward-id-0016_di" bpmnElement="ServiceTask-IdentifySpecialReward-id-0016">
+        <dc:Bounds x="2275" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendMilestoneReward-id-0017_di" bpmnElement="SendTask-SendMilestoneReward-id-0017">
+        <dc:Bounds x="2425" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-CustomerActivity-id-0018_di" bpmnElement="ReceiveTask-CustomerActivity-id-0018">
+        <dc:Bounds x="2575" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ContinueLoop-id-0019_di" bpmnElement="ExclusiveGateway-ContinueLoop-id-0019" isMarkerVisible="true">
+        <dc:Bounds x="2750" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ActiveProgramEnd-id-0020_di" bpmnElement="EndEvent-ActiveProgramEnd-id-0020">
+        <dc:Bounds x="2907" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToPurchase-id-0021_di" bpmnElement="SequenceFlow-StartToPurchase-id-0021">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PurchaseToCalculate-id-0022_di" bpmnElement="SequenceFlow-PurchaseToCalculate-id-0022">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculateToUpdate-id-0023_di" bpmnElement="SequenceFlow-CalculateToUpdate-id-0023">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateToSend-id-0024_di" bpmnElement="SequenceFlow-UpdateToSend-id-0024">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToRedemptionGateway-id-0025_di" bpmnElement="SequenceFlow-SendToRedemptionGateway-id-0025">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RedemptionYes-id-0026_di" bpmnElement="SequenceFlow-RedemptionYes-id-0026">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RedemptionNo-id-0027_di" bpmnElement="SequenceFlow-RedemptionNo-id-0027">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="140" />
+        <di:waypoint x="1575" y="140" />
+        <di:waypoint x="1575" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RedeemToProcess-id-0028_di" bpmnElement="SequenceFlow-RedeemToProcess-id-0028">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessToDeduct-id-0029_di" bpmnElement="SequenceFlow-ProcessToDeduct-id-0029">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DeductToUpdate-id-0030_di" bpmnElement="SequenceFlow-DeductToUpdate-id-0030">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateAfterRedemptionToOfferGateway-id-0031_di" bpmnElement="SequenceFlow-UpdateAfterRedemptionToOfferGateway-id-0031">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1550" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OfferYes-id-0032_di" bpmnElement="SequenceFlow-OfferYes-id-0032">
+        <di:waypoint x="1600" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OfferNo-id-0033_di" bpmnElement="SequenceFlow-OfferNo-id-0033">
+        <di:waypoint x="1575" y="95" />
+        <di:waypoint x="1575" y="140" />
+        <di:waypoint x="2175" y="140" />
+        <di:waypoint x="2175" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AnalyzeToGenerate-id-0034_di" bpmnElement="SequenceFlow-AnalyzeToGenerate-id-0034">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateToSend-id-0035_di" bpmnElement="SequenceFlow-GenerateToSend-id-0035">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendOfferToMilestoneGateway-id-0036_di" bpmnElement="SequenceFlow-SendOfferToMilestoneGateway-id-0036">
+        <di:waypoint x="2075" y="70" />
+        <di:waypoint x="2150" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MilestoneYes-id-0037_di" bpmnElement="SequenceFlow-MilestoneYes-id-0037">
+        <di:waypoint x="2200" y="70" />
+        <di:waypoint x="2275" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MilestoneNo-id-0038_di" bpmnElement="SequenceFlow-MilestoneNo-id-0038">
+        <di:waypoint x="2175" y="95" />
+        <di:waypoint x="2175" y="140" />
+        <di:waypoint x="2625" y="140" />
+        <di:waypoint x="2625" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IdentifyToSendReward-id-0039_di" bpmnElement="SequenceFlow-IdentifyToSendReward-id-0039">
+        <di:waypoint x="2375" y="70" />
+        <di:waypoint x="2425" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendRewardToActivity-id-0040_di" bpmnElement="SequenceFlow-SendRewardToActivity-id-0040">
+        <di:waypoint x="2525" y="70" />
+        <di:waypoint x="2575" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ActivityToContinueGateway-id-0041_di" bpmnElement="SequenceFlow-ActivityToContinueGateway-id-0041">
+        <di:waypoint x="2675" y="70" />
+        <di:waypoint x="2750" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ContinueYes-id-0042_di" bpmnElement="SequenceFlow-ContinueYes-id-0042">
+        <di:waypoint x="2775" y="95" />
+        <di:waypoint x="2775" y="140" />
+        <di:waypoint x="225" y="140" />
+        <di:waypoint x="225" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ContinueNo-id-0043_di" bpmnElement="SequenceFlow-ContinueNo-id-0043">
+        <di:waypoint x="2800" y="70" />
+        <di:waypoint x="2907" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

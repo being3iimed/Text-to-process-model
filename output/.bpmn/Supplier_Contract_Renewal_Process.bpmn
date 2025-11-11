@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="contract-renewal-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="ContractRenewalProcess-id-0001">
+    <bpmn:startEvent id="StartEvent-ProcessStarts-id-0001" name="Contract Renewal Process Starts">
+      <bpmn:outgoing>SequenceFlow-StartToSplit-id-0020</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:parallelGateway id="ParallelGateway-Split-id-0001" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-StartToSplit-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToReviewTerms-id-0021</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToAssessPerformance-id-0022</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-ReviewContractTerms-id-0002" name="Procurement Team Reviews Current Contract Terms">
+      <bpmn:incoming>SequenceFlow-SplitToReviewTerms-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewTermsToJoin-id-0023</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-AssessSupplierPerformance-id-0003" name="Procurement Team Assesses Supplier Performance">
+      <bpmn:incoming>SequenceFlow-SplitToAssessPerformance-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AssessPerformanceToJoin-id-0024</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join-id-0004" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-ReviewTermsToJoin-id-0023</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-AssessPerformanceToJoin-id-0024</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToMarketResearch-id-0025</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-ConductMarketResearch-id-0005" name="Conduct Market Research on Alternative Suppliers">
+      <bpmn:incoming>SequenceFlow-JoinToMarketResearch-id-0025</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MarketResearchToNegotiate-id-0026</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-NegotiateWithSupplier-id-0006" name="Negotiate with Existing Supplier">
+      <bpmn:incoming>SequenceFlow-MarketResearchToNegotiate-id-0026</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NegotiateToGateway-id-0027</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-AgreementReached-id-0007" name="Agreement Reached?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-NegotiateToGateway-id-0027</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToDraft-id-0028</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToFailed-id-0029</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-DraftNewContract-id-0008" name="Draft New Contract">
+      <bpmn:incoming>SequenceFlow-GatewayToDraft-id-0028</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DraftToSplit2-id-0030</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-Split2-id-0009" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-DraftToSplit2-id-0030</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Split2ToLegalReview-id-0031</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-Split2ToStakeholderReview-id-0032</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-LegalReview-id-0010" name="Legal Team Reviews Contract">
+      <bpmn:incoming>SequenceFlow-Split2ToLegalReview-id-0031</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LegalReviewToJoin2-id-0033</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-StakeholderReview-id-0011" name="Other Stakeholders Review Contract">
+      <bpmn:incoming>SequenceFlow-Split2ToStakeholderReview-id-0032</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StakeholderReviewToJoin2-id-0034</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join2-id-0012" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-LegalReviewToJoin2-id-0033</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-StakeholderReviewToJoin2-id-0034</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Join2ToSign-id-0035</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-SignContract-id-0013" name="Sign Contract">
+      <bpmn:incoming>SequenceFlow-Join2ToSign-id-0035</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SignToSplit3-id-0036</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-Split3-id-0014" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-SignToSplit3-id-0036</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Split3ToStore-id-0037</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-Split3ToSend-id-0038</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-StoreContract-id-0015" name="Store Updated Contract in Database">
+      <bpmn:incoming>SequenceFlow-Split3ToStore-id-0037</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StoreToJoin3-id-0039</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendContract-id-0016" name="Send: Contract to Relevant Stakeholders">
+      <bpmn:incoming>SequenceFlow-Split3ToSend-id-0038</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendToJoin3-id-0040</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join3-id-0017" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-StoreToJoin3-id-0039</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-SendToJoin3-id-0040</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Join3ToComplete-id-0041</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0018" name="Contract Renewal Complete">
+      <bpmn:incoming>SequenceFlow-Join3ToComplete-id-0041</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-ProcessFailed-id-0019" name="Contract Renewal Failed">
+      <bpmn:incoming>SequenceFlow-GatewayToFailed-id-0029</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSplit-id-0020" sourceRef="StartEvent-ProcessStarts-id-0001" targetRef="ParallelGateway-Split-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToReviewTerms-id-0021" sourceRef="ParallelGateway-Split-id-0001" targetRef="UserTask-ReviewContractTerms-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToAssessPerformance-id-0022" sourceRef="ParallelGateway-Split-id-0001" targetRef="UserTask-AssessSupplierPerformance-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewTermsToJoin-id-0023" sourceRef="UserTask-ReviewContractTerms-id-0002" targetRef="ParallelGateway-Join-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-AssessPerformanceToJoin-id-0024" sourceRef="UserTask-AssessSupplierPerformance-id-0003" targetRef="ParallelGateway-Join-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToMarketResearch-id-0025" sourceRef="ParallelGateway-Join-id-0004" targetRef="ServiceTask-ConductMarketResearch-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-MarketResearchToNegotiate-id-0026" sourceRef="ServiceTask-ConductMarketResearch-id-0005" targetRef="UserTask-NegotiateWithSupplier-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-NegotiateToGateway-id-0027" sourceRef="UserTask-NegotiateWithSupplier-id-0006" targetRef="ExclusiveGateway-AgreementReached-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToDraft-id-0028" name="agreement_reached" sourceRef="ExclusiveGateway-AgreementReached-id-0007" targetRef="ServiceTask-DraftNewContract-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToFailed-id-0029" sourceRef="ExclusiveGateway-AgreementReached-id-0007" targetRef="EndEvent-ProcessFailed-id-0019" />
+    <bpmn:sequenceFlow id="SequenceFlow-DraftToSplit2-id-0030" sourceRef="ServiceTask-DraftNewContract-id-0008" targetRef="ParallelGateway-Split2-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-Split2ToLegalReview-id-0031" sourceRef="ParallelGateway-Split2-id-0009" targetRef="UserTask-LegalReview-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-Split2ToStakeholderReview-id-0032" sourceRef="ParallelGateway-Split2-id-0009" targetRef="UserTask-StakeholderReview-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-LegalReviewToJoin2-id-0033" sourceRef="UserTask-LegalReview-id-0010" targetRef="ParallelGateway-Join2-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-StakeholderReviewToJoin2-id-0034" sourceRef="UserTask-StakeholderReview-id-0011" targetRef="ParallelGateway-Join2-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-Join2ToSign-id-0035" sourceRef="ParallelGateway-Join2-id-0012" targetRef="UserTask-SignContract-id-0013" />
+    <bpmn:sequenceFlow id="SequenceFlow-SignToSplit3-id-0036" sourceRef="UserTask-SignContract-id-0013" targetRef="ParallelGateway-Split3-id-0014" />
+    <bpmn:sequenceFlow id="SequenceFlow-Split3ToStore-id-0037" sourceRef="ParallelGateway-Split3-id-0014" targetRef="ServiceTask-StoreContract-id-0015" />
+    <bpmn:sequenceFlow id="SequenceFlow-Split3ToSend-id-0038" sourceRef="ParallelGateway-Split3-id-0014" targetRef="SendTask-SendContract-id-0016" />
+    <bpmn:sequenceFlow id="SequenceFlow-StoreToJoin3-id-0039" sourceRef="ServiceTask-StoreContract-id-0015" targetRef="ParallelGateway-Join3-id-0017" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendToJoin3-id-0040" sourceRef="SendTask-SendContract-id-0016" targetRef="ParallelGateway-Join3-id-0017" />
+    <bpmn:sequenceFlow id="SequenceFlow-Join3ToComplete-id-0041" sourceRef="ParallelGateway-Join3-id-0017" targetRef="EndEvent-ProcessComplete-id-0018" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ContractRenewalProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_ContractRenewalProcess-id-0001" bpmnElement="ContractRenewalProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ProcessStarts-id-0001_di" bpmnElement="StartEvent-ProcessStarts-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0001_di" bpmnElement="ParallelGateway-Split-id-0001">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewContractTerms-id-0002_di" bpmnElement="UserTask-ReviewContractTerms-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0004_di" bpmnElement="ParallelGateway-Join-id-0004">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ConductMarketResearch-id-0005_di" bpmnElement="ServiceTask-ConductMarketResearch-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-NegotiateWithSupplier-id-0006_di" bpmnElement="UserTask-NegotiateWithSupplier-id-0006">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-AgreementReached-id-0007_di" bpmnElement="ExclusiveGateway-AgreementReached-id-0007" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DraftNewContract-id-0008_di" bpmnElement="ServiceTask-DraftNewContract-id-0008">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split2-id-0009_di" bpmnElement="ParallelGateway-Split2-id-0009">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-LegalReview-id-0010_di" bpmnElement="UserTask-LegalReview-id-0010">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join2-id-0012_di" bpmnElement="ParallelGateway-Join2-id-0012">
+        <dc:Bounds x="1550" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SignContract-id-0013_di" bpmnElement="UserTask-SignContract-id-0013">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split3-id-0014_di" bpmnElement="ParallelGateway-Split3-id-0014">
+        <dc:Bounds x="1850" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-StoreContract-id-0015_di" bpmnElement="ServiceTask-StoreContract-id-0015">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join3-id-0017_di" bpmnElement="ParallelGateway-Join3-id-0017">
+        <dc:Bounds x="2150" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0018_di" bpmnElement="EndEvent-ProcessComplete-id-0018">
+        <dc:Bounds x="2307" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AssessSupplierPerformance-id-0003_di" bpmnElement="UserTask-AssessSupplierPerformance-id-0003">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessFailed-id-0019_di" bpmnElement="EndEvent-ProcessFailed-id-0019">
+        <dc:Bounds x="1107" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-StakeholderReview-id-0011_di" bpmnElement="UserTask-StakeholderReview-id-0011">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendContract-id-0016_di" bpmnElement="SendTask-SendContract-id-0016">
+        <dc:Bounds x="1975" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSplit-id-0020_di" bpmnElement="SequenceFlow-StartToSplit-id-0020">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToReviewTerms-id-0021_di" bpmnElement="SequenceFlow-SplitToReviewTerms-id-0021">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToAssessPerformance-id-0022_di" bpmnElement="SequenceFlow-SplitToAssessPerformance-id-0022">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewTermsToJoin-id-0023_di" bpmnElement="SequenceFlow-ReviewTermsToJoin-id-0023">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToMarketResearch-id-0025_di" bpmnElement="SequenceFlow-JoinToMarketResearch-id-0025">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MarketResearchToNegotiate-id-0026_di" bpmnElement="SequenceFlow-MarketResearchToNegotiate-id-0026">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NegotiateToGateway-id-0027_di" bpmnElement="SequenceFlow-NegotiateToGateway-id-0027">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToDraft-id-0028_di" bpmnElement="SequenceFlow-GatewayToDraft-id-0028">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToFailed-id-0029_di" bpmnElement="SequenceFlow-GatewayToFailed-id-0029">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1107" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DraftToSplit2-id-0030_di" bpmnElement="SequenceFlow-DraftToSplit2-id-0030">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Split2ToLegalReview-id-0031_di" bpmnElement="SequenceFlow-Split2ToLegalReview-id-0031">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Split2ToStakeholderReview-id-0032_di" bpmnElement="SequenceFlow-Split2ToStakeholderReview-id-0032">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LegalReviewToJoin2-id-0033_di" bpmnElement="SequenceFlow-LegalReviewToJoin2-id-0033">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1550" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Join2ToSign-id-0035_di" bpmnElement="SequenceFlow-Join2ToSign-id-0035">
+        <di:waypoint x="1600" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SignToSplit3-id-0036_di" bpmnElement="SequenceFlow-SignToSplit3-id-0036">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1850" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Split3ToStore-id-0037_di" bpmnElement="SequenceFlow-Split3ToStore-id-0037">
+        <di:waypoint x="1900" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Split3ToSend-id-0038_di" bpmnElement="SequenceFlow-Split3ToSend-id-0038">
+        <di:waypoint x="1875" y="95" />
+        <di:waypoint x="1875" y="210" />
+        <di:waypoint x="1975" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StoreToJoin3-id-0039_di" bpmnElement="SequenceFlow-StoreToJoin3-id-0039">
+        <di:waypoint x="2075" y="70" />
+        <di:waypoint x="2150" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Join3ToComplete-id-0041_di" bpmnElement="SequenceFlow-Join3ToComplete-id-0041">
+        <di:waypoint x="2200" y="70" />
+        <di:waypoint x="2307" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AssessPerformanceToJoin-id-0024_di" bpmnElement="SequenceFlow-AssessPerformanceToJoin-id-0024">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StakeholderReviewToJoin2-id-0034_di" bpmnElement="SequenceFlow-StakeholderReviewToJoin2-id-0034">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1575" y="210" />
+        <di:waypoint x="1575" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToJoin3-id-0040_di" bpmnElement="SequenceFlow-SendToJoin3-id-0040">
+        <di:waypoint x="2075" y="210" />
+        <di:waypoint x="2175" y="210" />
+        <di:waypoint x="2175" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

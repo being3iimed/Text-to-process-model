@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="PrivacyPolicyReviewProcess" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="PrivacyPolicyReviewProcess-id-0001">
+    <bpmn:startEvent id="StartEvent-ProcessStarts-id-0001" name="Privacy Policy Review Process Starts">
+      <bpmn:outgoing>SequenceFlow-StartToSplit-id-0027</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:parallelGateway id="ParallelGateway-Split-id-0002" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-StartToSplit-id-0027</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToRetrievePolicy-id-0028</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToRetrieveRegulations-id-0029</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-RetrievePolicy-id-0003" name="Retrieve latest privacy policy">
+      <bpmn:incoming>SequenceFlow-SplitToRetrievePolicy-id-0028</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RetrievePolicyToJoin-id-0030</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-RetrieveRegulations-id-0004" name="Retrieve applicable regulations (e.g., GDPR)">
+      <bpmn:incoming>SequenceFlow-SplitToRetrieveRegulations-id-0029</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RetrieveRegulationsToJoin-id-0031</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join-id-0005" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-RetrievePolicyToJoin-id-0030</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-RetrieveRegulationsToJoin-id-0031</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToCompare-id-0032</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-ComparePolicy-id-0006" name="Compare policy against regulations">
+      <bpmn:incoming>SequenceFlow-JoinToCompare-id-0032</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CompareToGateway-id-0033</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-PolicyCompliant-id-0007" name="Policy Compliant?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CompareToGateway-id-0033</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToCompliant-id-0034</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToNonCompliant-id-0036</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-FlagCompliant-id-0008" name="Flag compliant areas">
+      <bpmn:incoming>SequenceFlow-GatewayToCompliant-id-0034</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CompliantToEnd-id-0035</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-PolicyCompliant-id-0009" name="Policy Compliant - Process Complete">
+      <bpmn:incoming>SequenceFlow-CompliantToEnd-id-0035</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-FlagNonCompliant-id-0010" name="Flag non-compliant areas">
+      <bpmn:incoming>SequenceFlow-GatewayToNonCompliant-id-0036</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NonCompliantToIdentify-id-0037</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-IdentifyRemediation-id-0011" name="Identify remediation actions">
+      <bpmn:incoming>SequenceFlow-NonCompliantToIdentify-id-0037</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-IdentifyToDocument-id-0038</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-DocumentRemediation-id-0012" name="Document remediation plan">
+      <bpmn:incoming>SequenceFlow-IdentifyToDocument-id-0038</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DocumentToSplit2-id-0039</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-Split2-id-0013" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-DocumentToSplit2-id-0039</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Split2ToSchedule-id-0040</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-Split2ToPrepare-id-0041</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-ScheduleAudit-id-0014" name="Schedule system audit">
+      <bpmn:incoming>SequenceFlow-Split2ToSchedule-id-0040</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ScheduleToJoin2-id-0042</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-PrepareTraining-id-0015" name="Prepare employee training materials">
+      <bpmn:incoming>SequenceFlow-Split2ToPrepare-id-0041</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PrepareToJoin2-id-0043</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join2-id-0016" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-ScheduleToJoin2-id-0042</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-PrepareToJoin2-id-0043</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Join2ToConduct-id-0044</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-ConductAudit-id-0017" name="Conduct system audit">
+      <bpmn:incoming>SequenceFlow-Join2ToConduct-id-0044</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConductToGateway2-id-0045</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-AuditPassed-id-0018" name="Audit Passed?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ConductToGateway2-id-0045</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Gateway2ToUpdate-id-0046</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-Gateway2ToDocument-id-0050</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-UpdatePolicy-id-0019" name="Update policy to address findings">
+      <bpmn:incoming>SequenceFlow-Gateway2ToUpdate-id-0046</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateToTraining-id-0047</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ConductTraining-id-0020" name="Conduct employee training">
+      <bpmn:incoming>SequenceFlow-UpdateToTraining-id-0047</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TrainingToCertification-id-0048</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-IssueCertification-id-0021" name="Issue certification">
+      <bpmn:incoming>SequenceFlow-TrainingToCertification-id-0048</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CertificationToEnd-id-0049</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-PolicyCertified-id-0022" name="Policy Certified - Process Complete">
+      <bpmn:incoming>SequenceFlow-CertificationToEnd-id-0049</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-DocumentFindings-id-0023" name="Document audit findings">
+      <bpmn:incoming>SequenceFlow-Gateway2ToDocument-id-0050</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DocumentToUpdate-id-0051</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-UpdateRemediation-id-0024" name="Update remediation plan">
+      <bpmn:incoming>SequenceFlow-DocumentToUpdate-id-0051</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateToSchedule-id-0052</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ScheduleFollowUp-id-0025" name="Schedule follow-up audit">
+      <bpmn:incoming>SequenceFlow-UpdateToSchedule-id-0052</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ScheduleToEnd-id-0053</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-PolicyNonCompliant-id-0026" name="Policy Non-Compliant - Ongoing Monitoring">
+      <bpmn:incoming>SequenceFlow-ScheduleToEnd-id-0053</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSplit-id-0027" sourceRef="StartEvent-ProcessStarts-id-0001" targetRef="ParallelGateway-Split-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToRetrievePolicy-id-0028" sourceRef="ParallelGateway-Split-id-0002" targetRef="ServiceTask-RetrievePolicy-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToRetrieveRegulations-id-0029" sourceRef="ParallelGateway-Split-id-0002" targetRef="ServiceTask-RetrieveRegulations-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-RetrievePolicyToJoin-id-0030" sourceRef="ServiceTask-RetrievePolicy-id-0003" targetRef="ParallelGateway-Join-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-RetrieveRegulationsToJoin-id-0031" sourceRef="ServiceTask-RetrieveRegulations-id-0004" targetRef="ParallelGateway-Join-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToCompare-id-0032" sourceRef="ParallelGateway-Join-id-0005" targetRef="ServiceTask-ComparePolicy-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-CompareToGateway-id-0033" sourceRef="ServiceTask-ComparePolicy-id-0006" targetRef="ExclusiveGateway-PolicyCompliant-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToCompliant-id-0034" name="policy_compliant" sourceRef="ExclusiveGateway-PolicyCompliant-id-0007" targetRef="ServiceTask-FlagCompliant-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-CompliantToEnd-id-0035" sourceRef="ServiceTask-FlagCompliant-id-0008" targetRef="EndEvent-PolicyCompliant-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToNonCompliant-id-0036" sourceRef="ExclusiveGateway-PolicyCompliant-id-0007" targetRef="ServiceTask-FlagNonCompliant-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-NonCompliantToIdentify-id-0037" sourceRef="ServiceTask-FlagNonCompliant-id-0010" targetRef="UserTask-IdentifyRemediation-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-IdentifyToDocument-id-0038" sourceRef="UserTask-IdentifyRemediation-id-0011" targetRef="ServiceTask-DocumentRemediation-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-DocumentToSplit2-id-0039" sourceRef="ServiceTask-DocumentRemediation-id-0012" targetRef="ParallelGateway-Split2-id-0013" />
+    <bpmn:sequenceFlow id="SequenceFlow-Split2ToSchedule-id-0040" sourceRef="ParallelGateway-Split2-id-0013" targetRef="ServiceTask-ScheduleAudit-id-0014" />
+    <bpmn:sequenceFlow id="SequenceFlow-Split2ToPrepare-id-0041" sourceRef="ParallelGateway-Split2-id-0013" targetRef="UserTask-PrepareTraining-id-0015" />
+    <bpmn:sequenceFlow id="SequenceFlow-ScheduleToJoin2-id-0042" sourceRef="ServiceTask-ScheduleAudit-id-0014" targetRef="ParallelGateway-Join2-id-0016" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrepareToJoin2-id-0043" sourceRef="UserTask-PrepareTraining-id-0015" targetRef="ParallelGateway-Join2-id-0016" />
+    <bpmn:sequenceFlow id="SequenceFlow-Join2ToConduct-id-0044" sourceRef="ParallelGateway-Join2-id-0016" targetRef="ServiceTask-ConductAudit-id-0017" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConductToGateway2-id-0045" sourceRef="ServiceTask-ConductAudit-id-0017" targetRef="ExclusiveGateway-AuditPassed-id-0018" />
+    <bpmn:sequenceFlow id="SequenceFlow-Gateway2ToUpdate-id-0046" name="audit_passed" sourceRef="ExclusiveGateway-AuditPassed-id-0018" targetRef="ServiceTask-UpdatePolicy-id-0019" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateToTraining-id-0047" sourceRef="ServiceTask-UpdatePolicy-id-0019" targetRef="ServiceTask-ConductTraining-id-0020" />
+    <bpmn:sequenceFlow id="SequenceFlow-TrainingToCertification-id-0048" sourceRef="ServiceTask-ConductTraining-id-0020" targetRef="ServiceTask-IssueCertification-id-0021" />
+    <bpmn:sequenceFlow id="SequenceFlow-CertificationToEnd-id-0049" sourceRef="ServiceTask-IssueCertification-id-0021" targetRef="EndEvent-PolicyCertified-id-0022" />
+    <bpmn:sequenceFlow id="SequenceFlow-Gateway2ToDocument-id-0050" sourceRef="ExclusiveGateway-AuditPassed-id-0018" targetRef="ServiceTask-DocumentFindings-id-0023" />
+    <bpmn:sequenceFlow id="SequenceFlow-DocumentToUpdate-id-0051" sourceRef="ServiceTask-DocumentFindings-id-0023" targetRef="ServiceTask-UpdateRemediation-id-0024" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateToSchedule-id-0052" sourceRef="ServiceTask-UpdateRemediation-id-0024" targetRef="ServiceTask-ScheduleFollowUp-id-0025" />
+    <bpmn:sequenceFlow id="SequenceFlow-ScheduleToEnd-id-0053" sourceRef="ServiceTask-ScheduleFollowUp-id-0025" targetRef="EndEvent-PolicyNonCompliant-id-0026" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_PrivacyPolicyReviewProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_PrivacyPolicyReviewProcess-id-0001" bpmnElement="PrivacyPolicyReviewProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ProcessStarts-id-0001_di" bpmnElement="StartEvent-ProcessStarts-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0002_di" bpmnElement="ParallelGateway-Split-id-0002">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RetrievePolicy-id-0003_di" bpmnElement="ServiceTask-RetrievePolicy-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0005_di" bpmnElement="ParallelGateway-Join-id-0005">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ComparePolicy-id-0006_di" bpmnElement="ServiceTask-ComparePolicy-id-0006">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PolicyCompliant-id-0007_di" bpmnElement="ExclusiveGateway-PolicyCompliant-id-0007" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-FlagCompliant-id-0008_di" bpmnElement="ServiceTask-FlagCompliant-id-0008">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-PolicyCompliant-id-0009_di" bpmnElement="EndEvent-PolicyCompliant-id-0009">
+        <dc:Bounds x="1107" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RetrieveRegulations-id-0004_di" bpmnElement="ServiceTask-RetrieveRegulations-id-0004">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-FlagNonCompliant-id-0010_di" bpmnElement="ServiceTask-FlagNonCompliant-id-0010">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-IdentifyRemediation-id-0011_di" bpmnElement="UserTask-IdentifyRemediation-id-0011">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DocumentRemediation-id-0012_di" bpmnElement="ServiceTask-DocumentRemediation-id-0012">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split2-id-0013_di" bpmnElement="ParallelGateway-Split2-id-0013">
+        <dc:Bounds x="1400" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ScheduleAudit-id-0014_di" bpmnElement="ServiceTask-ScheduleAudit-id-0014">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join2-id-0016_di" bpmnElement="ParallelGateway-Join2-id-0016">
+        <dc:Bounds x="1700" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ConductAudit-id-0017_di" bpmnElement="ServiceTask-ConductAudit-id-0017">
+        <dc:Bounds x="1825" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-AuditPassed-id-0018_di" bpmnElement="ExclusiveGateway-AuditPassed-id-0018" isMarkerVisible="true">
+        <dc:Bounds x="2000" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdatePolicy-id-0019_di" bpmnElement="ServiceTask-UpdatePolicy-id-0019">
+        <dc:Bounds x="2125" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ConductTraining-id-0020_di" bpmnElement="ServiceTask-ConductTraining-id-0020">
+        <dc:Bounds x="2275" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-IssueCertification-id-0021_di" bpmnElement="ServiceTask-IssueCertification-id-0021">
+        <dc:Bounds x="2425" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-PolicyCertified-id-0022_di" bpmnElement="EndEvent-PolicyCertified-id-0022">
+        <dc:Bounds x="2607" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PrepareTraining-id-0015_di" bpmnElement="UserTask-PrepareTraining-id-0015">
+        <dc:Bounds x="1525" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DocumentFindings-id-0023_di" bpmnElement="ServiceTask-DocumentFindings-id-0023">
+        <dc:Bounds x="2125" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateRemediation-id-0024_di" bpmnElement="ServiceTask-UpdateRemediation-id-0024">
+        <dc:Bounds x="2275" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ScheduleFollowUp-id-0025_di" bpmnElement="ServiceTask-ScheduleFollowUp-id-0025">
+        <dc:Bounds x="2425" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-PolicyNonCompliant-id-0026_di" bpmnElement="EndEvent-PolicyNonCompliant-id-0026">
+        <dc:Bounds x="2607" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSplit-id-0027_di" bpmnElement="SequenceFlow-StartToSplit-id-0027">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToRetrievePolicy-id-0028_di" bpmnElement="SequenceFlow-SplitToRetrievePolicy-id-0028">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToRetrieveRegulations-id-0029_di" bpmnElement="SequenceFlow-SplitToRetrieveRegulations-id-0029">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RetrievePolicyToJoin-id-0030_di" bpmnElement="SequenceFlow-RetrievePolicyToJoin-id-0030">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToCompare-id-0032_di" bpmnElement="SequenceFlow-JoinToCompare-id-0032">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompareToGateway-id-0033_di" bpmnElement="SequenceFlow-CompareToGateway-id-0033">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToCompliant-id-0034_di" bpmnElement="SequenceFlow-GatewayToCompliant-id-0034">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToNonCompliant-id-0036_di" bpmnElement="SequenceFlow-GatewayToNonCompliant-id-0036">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompliantToEnd-id-0035_di" bpmnElement="SequenceFlow-CompliantToEnd-id-0035">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1107" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RetrieveRegulationsToJoin-id-0031_di" bpmnElement="SequenceFlow-RetrieveRegulationsToJoin-id-0031">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NonCompliantToIdentify-id-0037_di" bpmnElement="SequenceFlow-NonCompliantToIdentify-id-0037">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IdentifyToDocument-id-0038_di" bpmnElement="SequenceFlow-IdentifyToDocument-id-0038">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DocumentToSplit2-id-0039_di" bpmnElement="SequenceFlow-DocumentToSplit2-id-0039">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1400" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Split2ToSchedule-id-0040_di" bpmnElement="SequenceFlow-Split2ToSchedule-id-0040">
+        <di:waypoint x="1450" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Split2ToPrepare-id-0041_di" bpmnElement="SequenceFlow-Split2ToPrepare-id-0041">
+        <di:waypoint x="1425" y="235" />
+        <di:waypoint x="1425" y="350" />
+        <di:waypoint x="1525" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ScheduleToJoin2-id-0042_di" bpmnElement="SequenceFlow-ScheduleToJoin2-id-0042">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1700" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Join2ToConduct-id-0044_di" bpmnElement="SequenceFlow-Join2ToConduct-id-0044">
+        <di:waypoint x="1750" y="210" />
+        <di:waypoint x="1825" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConductToGateway2-id-0045_di" bpmnElement="SequenceFlow-ConductToGateway2-id-0045">
+        <di:waypoint x="1925" y="210" />
+        <di:waypoint x="2000" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Gateway2ToUpdate-id-0046_di" bpmnElement="SequenceFlow-Gateway2ToUpdate-id-0046">
+        <di:waypoint x="2050" y="210" />
+        <di:waypoint x="2125" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Gateway2ToDocument-id-0050_di" bpmnElement="SequenceFlow-Gateway2ToDocument-id-0050">
+        <di:waypoint x="2025" y="235" />
+        <di:waypoint x="2025" y="350" />
+        <di:waypoint x="2125" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateToTraining-id-0047_di" bpmnElement="SequenceFlow-UpdateToTraining-id-0047">
+        <di:waypoint x="2225" y="210" />
+        <di:waypoint x="2275" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TrainingToCertification-id-0048_di" bpmnElement="SequenceFlow-TrainingToCertification-id-0048">
+        <di:waypoint x="2375" y="210" />
+        <di:waypoint x="2425" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CertificationToEnd-id-0049_di" bpmnElement="SequenceFlow-CertificationToEnd-id-0049">
+        <di:waypoint x="2525" y="210" />
+        <di:waypoint x="2607" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrepareToJoin2-id-0043_di" bpmnElement="SequenceFlow-PrepareToJoin2-id-0043">
+        <di:waypoint x="1625" y="350" />
+        <di:waypoint x="1725" y="350" />
+        <di:waypoint x="1725" y="235" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DocumentToUpdate-id-0051_di" bpmnElement="SequenceFlow-DocumentToUpdate-id-0051">
+        <di:waypoint x="2225" y="350" />
+        <di:waypoint x="2275" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateToSchedule-id-0052_di" bpmnElement="SequenceFlow-UpdateToSchedule-id-0052">
+        <di:waypoint x="2375" y="350" />
+        <di:waypoint x="2425" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ScheduleToEnd-id-0053_di" bpmnElement="SequenceFlow-ScheduleToEnd-id-0053">
+        <di:waypoint x="2525" y="350" />
+        <di:waypoint x="2607" y="350" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

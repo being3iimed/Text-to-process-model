@@ -1,4 +1,4 @@
-# Refined BPMN Modeler - Balanced, Core-Focused Approach
+# BPMN Modeler
 
 <role>
 
