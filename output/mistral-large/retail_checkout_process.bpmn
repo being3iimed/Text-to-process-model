@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="checkout-process-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="CheckoutProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-CheckoutProcessInitiated-id-0001" name="Checkout Process Initiated">
+      <bpmn:outgoing>SequenceFlow-StartToAddItems-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-AddItemsToCart-id-0001" name="Add Items to Cart">
+      <bpmn:incoming>SequenceFlow-StartToAddItems-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AddItemsToProceed-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ProceedToCheckout-id-0002" name="Proceed to Checkout">
+      <bpmn:incoming>SequenceFlow-AddItemsToProceed-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProceedToValidate-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ValidateInventory-id-0001" name="Validate Inventory">
+      <bpmn:incoming>SequenceFlow-ProceedToValidate-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidateToProcess-id-0004</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ProcessPayment-id-0001" name="Process Payment">
+      <bpmn:incoming>SequenceFlow-ValidateToProcess-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProcessToGateway-id-0005</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-PaymentStatus-id-0001" name="Payment Status?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ProcessToGateway-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToSuccess-id-0006</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToFailure-id-0007</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-OrderConfirmation-id-0001" name="Send: order confirmation">
+      <bpmn:incoming>SequenceFlow-GatewayToSuccess-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmationToEndSuccess-id-0008</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-OrderCompleted-id-0001" name="Order Completed">
+      <bpmn:incoming>SequenceFlow-ConfirmationToEndSuccess-id-0008</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="SendTask-PaymentFailureNotice-id-0001" name="Send: payment failure notice">
+      <bpmn:incoming>SequenceFlow-GatewayToFailure-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FailureToEndAbandoned-id-0009</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-CheckoutAbandoned-id-0002" name="Checkout Abandoned">
+      <bpmn:incoming>SequenceFlow-FailureToEndAbandoned-id-0009</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToAddItems-id-0001" sourceRef="StartEvent-CheckoutProcessInitiated-id-0001" targetRef="UserTask-AddItemsToCart-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AddItemsToProceed-id-0002" sourceRef="UserTask-AddItemsToCart-id-0001" targetRef="UserTask-ProceedToCheckout-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProceedToValidate-id-0003" sourceRef="UserTask-ProceedToCheckout-id-0002" targetRef="ServiceTask-ValidateInventory-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidateToProcess-id-0004" sourceRef="ServiceTask-ValidateInventory-id-0001" targetRef="ServiceTask-ProcessPayment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProcessToGateway-id-0005" sourceRef="ServiceTask-ProcessPayment-id-0001" targetRef="ExclusiveGateway-PaymentStatus-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToSuccess-id-0006" name="payment_successful" sourceRef="ExclusiveGateway-PaymentStatus-id-0001" targetRef="SendTask-OrderConfirmation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToFailure-id-0007" sourceRef="ExclusiveGateway-PaymentStatus-id-0001" targetRef="SendTask-PaymentFailureNotice-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmationToEndSuccess-id-0008" sourceRef="SendTask-OrderConfirmation-id-0001" targetRef="EndEvent-OrderCompleted-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FailureToEndAbandoned-id-0009" sourceRef="SendTask-PaymentFailureNotice-id-0001" targetRef="EndEvent-CheckoutAbandoned-id-0002" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_CheckoutProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_CheckoutProcess-id-0001" bpmnElement="CheckoutProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-CheckoutProcessInitiated-id-0001_di" bpmnElement="StartEvent-CheckoutProcessInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AddItemsToCart-id-0001_di" bpmnElement="UserTask-AddItemsToCart-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ProceedToCheckout-id-0002_di" bpmnElement="UserTask-ProceedToCheckout-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ValidateInventory-id-0001_di" bpmnElement="ServiceTask-ValidateInventory-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessPayment-id-0001_di" bpmnElement="ServiceTask-ProcessPayment-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PaymentStatus-id-0001_di" bpmnElement="ExclusiveGateway-PaymentStatus-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-OrderConfirmation-id-0001_di" bpmnElement="SendTask-OrderConfirmation-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-OrderCompleted-id-0001_di" bpmnElement="EndEvent-OrderCompleted-id-0001">
+        <dc:Bounds x="1107" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-PaymentFailureNotice-id-0001_di" bpmnElement="SendTask-PaymentFailureNotice-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CheckoutAbandoned-id-0002_di" bpmnElement="EndEvent-CheckoutAbandoned-id-0002">
+        <dc:Bounds x="1107" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToAddItems-id-0001_di" bpmnElement="SequenceFlow-StartToAddItems-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AddItemsToProceed-id-0002_di" bpmnElement="SequenceFlow-AddItemsToProceed-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProceedToValidate-id-0003_di" bpmnElement="SequenceFlow-ProceedToValidate-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidateToProcess-id-0004_di" bpmnElement="SequenceFlow-ValidateToProcess-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessToGateway-id-0005_di" bpmnElement="SequenceFlow-ProcessToGateway-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToSuccess-id-0006_di" bpmnElement="SequenceFlow-GatewayToSuccess-id-0006">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToFailure-id-0007_di" bpmnElement="SequenceFlow-GatewayToFailure-id-0007">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmationToEndSuccess-id-0008_di" bpmnElement="SequenceFlow-ConfirmationToEndSuccess-id-0008">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1107" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FailureToEndAbandoned-id-0009_di" bpmnElement="SequenceFlow-FailureToEndAbandoned-id-0009">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1107" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

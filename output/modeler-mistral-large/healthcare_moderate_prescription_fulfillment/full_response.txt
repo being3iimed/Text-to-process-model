@@ -1,0 +1,220 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "prescription-process-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "PrescriptionProcess",
+      "isExecutable": false,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-PrescriptionProcessInitiated-id-0001",
+          "name": "Prescription Process Initiated"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-DoctorPrescribesMedication-id-0001",
+          "name": "Doctor Prescribes Medication"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-SendPrescriptionToPharmacy-id-0002",
+          "name": "Send Prescription to Pharmacy"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-PharmacyTechnicianChecksInsurance-id-0003",
+          "name": "Pharmacy Technician Checks Insurance"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-PriorAuthCheck-id-0001",
+          "name": "Prior Authorization Check",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ContactInsuranceForPriorAuthorization-id-0004",
+          "name": "Contact Insurance for Prior Authorization"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-ReceiveInsuranceApprovalDenial-id-0005",
+          "name": "Receive: insurance approval/denial"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-InsuranceDecision-id-0002",
+          "name": "Insurance Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-FillPrescription-id-0006",
+          "name": "Fill Prescription"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendPickupNotificationToPatient-id-0007",
+          "name": "Send: pickup notification to patient"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-PatientSignsReceipt-id-0008",
+          "name": "Patient Signs Receipt"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-DispenseMedication-id-0009",
+          "name": "Dispense Medication"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-PrescriptionDispensed-id-0001",
+          "name": "Prescription Dispensed"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendDenialNotificationToPatientAndDoctor-id-0010",
+          "name": "Send: denial notification to patient and doctor"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-DenialHandling-id-0003",
+          "name": "Denial Handling",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-AppealProcessInitiated-id-0002",
+          "name": "Appeal Process Initiated"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-AlternativePrescribed-id-0003",
+          "name": "Alternative Prescribed"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToDoctorPrescribes-id-0001",
+          "sourceRef": "StartEvent-PrescriptionProcessInitiated-id-0001",
+          "targetRef": "UserTask-DoctorPrescribesMedication-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DoctorToSendPrescription-id-0002",
+          "sourceRef": "UserTask-DoctorPrescribesMedication-id-0001",
+          "targetRef": "ServiceTask-SendPrescriptionToPharmacy-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendPrescriptionToCheckInsurance-id-0003",
+          "sourceRef": "ServiceTask-SendPrescriptionToPharmacy-id-0002",
+          "targetRef": "UserTask-PharmacyTechnicianChecksInsurance-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CheckInsuranceToPriorAuthCheck-id-0004",
+          "sourceRef": "UserTask-PharmacyTechnicianChecksInsurance-id-0003",
+          "targetRef": "ExclusiveGateway-PriorAuthCheck-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PriorAuthRequiredToContactInsurance-id-0005",
+          "name": "prior_auth_required == true",
+          "sourceRef": "ExclusiveGateway-PriorAuthCheck-id-0001",
+          "targetRef": "ServiceTask-ContactInsuranceForPriorAuthorization-id-0004",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ContactInsuranceToReceiveResponse-id-0006",
+          "sourceRef": "ServiceTask-ContactInsuranceForPriorAuthorization-id-0004",
+          "targetRef": "ReceiveTask-ReceiveInsuranceApprovalDenial-id-0005"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReceiveResponseToInsuranceDecision-id-0007",
+          "sourceRef": "ReceiveTask-ReceiveInsuranceApprovalDenial-id-0005",
+          "targetRef": "ExclusiveGateway-InsuranceDecision-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InsuranceApprovedToFillPrescription-id-0008",
+          "name": "insurance_response == 'approved'",
+          "sourceRef": "ExclusiveGateway-InsuranceDecision-id-0002",
+          "targetRef": "ServiceTask-FillPrescription-id-0006",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FillPrescriptionToSendNotification-id-0009",
+          "sourceRef": "ServiceTask-FillPrescription-id-0006",
+          "targetRef": "SendTask-SendPickupNotificationToPatient-id-0007"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendNotificationToPatientSigns-id-0010",
+          "sourceRef": "SendTask-SendPickupNotificationToPatient-id-0007",
+          "targetRef": "UserTask-PatientSignsReceipt-id-0008"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PatientSignsToDispense-id-0011",
+          "sourceRef": "UserTask-PatientSignsReceipt-id-0008",
+          "targetRef": "ServiceTask-DispenseMedication-id-0009"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DispenseToPrescriptionDispensed-id-0012",
+          "sourceRef": "ServiceTask-DispenseMedication-id-0009",
+          "targetRef": "EndEvent-PrescriptionDispensed-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InsuranceDeniedToSendDenialNotification-id-0013",
+          "name": "insurance_response == 'denied'",
+          "sourceRef": "ExclusiveGateway-InsuranceDecision-id-0002",
+          "targetRef": "SendTask-SendDenialNotificationToPatientAndDoctor-id-0010",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendDenialToDenialHandling-id-0014",
+          "sourceRef": "SendTask-SendDenialNotificationToPatientAndDoctor-id-0010",
+          "targetRef": "ExclusiveGateway-DenialHandling-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PatientAppealsToAppealProcess-id-0015",
+          "name": "patient_action == 'appeal'",
+          "sourceRef": "ExclusiveGateway-DenialHandling-id-0003",
+          "targetRef": "EndEvent-AppealProcessInitiated-id-0002",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DoctorPrescribesAlternativeToAlternativePrescribed-id-0016",
+          "name": "doctor_action == 'prescribe_alternative'",
+          "sourceRef": "ExclusiveGateway-DenialHandling-id-0003",
+          "targetRef": "EndEvent-AlternativePrescribed-id-0003",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PriorAuthNotRequiredToFillPrescription-id-0017",
+          "name": "prior_auth_required == false",
+          "sourceRef": "ExclusiveGateway-PriorAuthCheck-id-0001",
+          "targetRef": "ServiceTask-FillPrescription-id-0006",
+          "isDefault": true
+        }
+      ]
+    }
+  ]
+}
+```

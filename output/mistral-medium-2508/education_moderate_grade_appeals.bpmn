@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="grade-appeal-process-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="GradeAppealProcess-id-0001" name="Grade Appeal Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-AppealWindowOpened-id-0001" name="10-day appeal window opened">
+      <bpmn:outgoing>SequenceFlow-StartToSubmit-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-StudentSubmitsAppeal-id-0001" name="Student submits grade appeal form">
+      <bpmn:incoming>SequenceFlow-StartToSubmit-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SubmitToProfessor-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-AppealWindowExpired-id-0001" name="10-day appeal window expired" attachedToRef="UserTask-StudentSubmitsAppeal-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryToExpired-id-0017</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-AppealWindowExpired-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P10D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:endEvent id="EndEvent-AppealWindowExpired-id-0001" name="Appeal window expired">
+      <bpmn:incoming>SequenceFlow-BoundaryToExpired-id-0017</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="UserTask-ProfessorReviewsAppeal-id-0002" name="Professor reviews appeal">
+      <bpmn:incoming>SequenceFlow-SubmitToProfessor-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProfessorToDecision-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-GradeDecision-id-0001" name="Grade decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ProfessorToDecision-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DecisionConfirmed-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-DecisionAdjusted-id-0005</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-GradeConfirmed-id-0001" name="Send: professor&#39;s decision to student (grade confirmed)">
+      <bpmn:incoming>SequenceFlow-DecisionConfirmed-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmedToEnd-id-0006</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ProfessorLevelResolution-id-0001" name="Appeal resolved at professor level">
+      <bpmn:incoming>SequenceFlow-ConfirmedToEnd-id-0006</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-AdjustGrade-id-0001" name="Professor adjusts grade in system">
+      <bpmn:incoming>SequenceFlow-DecisionAdjusted-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AdjustToNotify-id-0007</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-AdjustToStudentResponse-id-0010</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-GradeAdjusted-id-0002" name="Send: professor&#39;s decision to student (grade adjusted)">
+      <bpmn:incoming>SequenceFlow-AdjustToNotify-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotifyToUpdate-id-0008</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-UpdateGradeSystem-id-0001" name="Registrar updates grade system">
+      <bpmn:incoming>SequenceFlow-NotifyToUpdate-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateToEnd-id-0009</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-GradeAdjusted-id-0002" name="Appeal resolved with grade adjustment">
+      <bpmn:incoming>SequenceFlow-UpdateToEnd-id-0009</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-StudentAccepts-id-0011</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-StudentResponse-id-0001" name="Student response" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-AdjustToStudentResponse-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StudentAccepts-id-0011</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-StudentEscalates-id-0012</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-StudentEscalates-id-0001" name="Student escalates to department chair">
+      <bpmn:incoming>SequenceFlow-StudentEscalates-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EscalateToChair-id-0013</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ChairReviews-id-0001" name="Chair reviews escalated appeal">
+      <bpmn:incoming>SequenceFlow-EscalateToChair-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ChairToDecision-id-0014</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="SendTask-ChairDecision-id-0001" name="Send: chair&#39;s final decision to student">
+      <bpmn:incoming>SequenceFlow-ChairToDecision-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DecisionToUpdate-id-0015</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-UpdateGradeSystemFinal-id-0002" name="Registrar updates grade system (if applicable)">
+      <bpmn:incoming>SequenceFlow-DecisionToUpdate-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateToComplete-id-0016</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-AppealComplete-id-0003" name="Appeal Process Complete">
+      <bpmn:incoming>SequenceFlow-UpdateToComplete-id-0016</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSubmit-id-0001" sourceRef="StartEvent-AppealWindowOpened-id-0001" targetRef="UserTask-StudentSubmitsAppeal-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubmitToProfessor-id-0002" sourceRef="UserTask-StudentSubmitsAppeal-id-0001" targetRef="UserTask-ProfessorReviewsAppeal-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProfessorToDecision-id-0003" sourceRef="UserTask-ProfessorReviewsAppeal-id-0002" targetRef="ExclusiveGateway-GradeDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DecisionConfirmed-id-0004" name="grade_correct" sourceRef="ExclusiveGateway-GradeDecision-id-0001" targetRef="SendTask-GradeConfirmed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DecisionAdjusted-id-0005" name="grade_error_found" sourceRef="ExclusiveGateway-GradeDecision-id-0001" targetRef="ServiceTask-AdjustGrade-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmedToEnd-id-0006" sourceRef="SendTask-GradeConfirmed-id-0001" targetRef="EndEvent-ProfessorLevelResolution-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AdjustToNotify-id-0007" sourceRef="ServiceTask-AdjustGrade-id-0001" targetRef="SendTask-GradeAdjusted-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotifyToUpdate-id-0008" sourceRef="SendTask-GradeAdjusted-id-0002" targetRef="ServiceTask-UpdateGradeSystem-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateToEnd-id-0009" sourceRef="ServiceTask-UpdateGradeSystem-id-0001" targetRef="EndEvent-GradeAdjusted-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-AdjustToStudentResponse-id-0010" sourceRef="ServiceTask-AdjustGrade-id-0001" targetRef="ExclusiveGateway-StudentResponse-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-StudentAccepts-id-0011" name="student_accepts" sourceRef="ExclusiveGateway-StudentResponse-id-0001" targetRef="EndEvent-GradeAdjusted-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-StudentEscalates-id-0012" name="student_escalates" sourceRef="ExclusiveGateway-StudentResponse-id-0001" targetRef="UserTask-StudentEscalates-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EscalateToChair-id-0013" sourceRef="UserTask-StudentEscalates-id-0001" targetRef="UserTask-ChairReviews-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ChairToDecision-id-0014" sourceRef="UserTask-ChairReviews-id-0001" targetRef="SendTask-ChairDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DecisionToUpdate-id-0015" sourceRef="SendTask-ChairDecision-id-0001" targetRef="ServiceTask-UpdateGradeSystemFinal-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateToComplete-id-0016" sourceRef="ServiceTask-UpdateGradeSystemFinal-id-0002" targetRef="EndEvent-AppealComplete-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToExpired-id-0017" sourceRef="BoundaryEvent-AppealWindowExpired-id-0001" targetRef="EndEvent-AppealWindowExpired-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_GradeAppealProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_GradeAppealProcess-id-0001" bpmnElement="GradeAppealProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-AppealWindowOpened-id-0001_di" bpmnElement="StartEvent-AppealWindowOpened-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-StudentSubmitsAppeal-id-0001_di" bpmnElement="UserTask-StudentSubmitsAppeal-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-AppealWindowExpired-id-0001_di" bpmnElement="BoundaryEvent-AppealWindowExpired-id-0001">
+        <dc:Bounds x="207" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ProfessorReviewsAppeal-id-0002_di" bpmnElement="UserTask-ProfessorReviewsAppeal-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-GradeDecision-id-0001_di" bpmnElement="ExclusiveGateway-GradeDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-GradeConfirmed-id-0001_di" bpmnElement="SendTask-GradeConfirmed-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProfessorLevelResolution-id-0001_di" bpmnElement="EndEvent-ProfessorLevelResolution-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AppealWindowExpired-id-0001_di" bpmnElement="EndEvent-AppealWindowExpired-id-0001">
+        <dc:Bounds x="357" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AdjustGrade-id-0001_di" bpmnElement="ServiceTask-AdjustGrade-id-0001">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-GradeAdjusted-id-0002_di" bpmnElement="SendTask-GradeAdjusted-id-0002">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateGradeSystem-id-0001_di" bpmnElement="ServiceTask-UpdateGradeSystem-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-GradeAdjusted-id-0002_di" bpmnElement="EndEvent-GradeAdjusted-id-0002">
+        <dc:Bounds x="1107" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-StudentResponse-id-0001_di" bpmnElement="ExclusiveGateway-StudentResponse-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="325" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-StudentEscalates-id-0001_di" bpmnElement="UserTask-StudentEscalates-id-0001">
+        <dc:Bounds x="925" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ChairReviews-id-0001_di" bpmnElement="UserTask-ChairReviews-id-0001">
+        <dc:Bounds x="1075" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ChairDecision-id-0001_di" bpmnElement="SendTask-ChairDecision-id-0001">
+        <dc:Bounds x="1225" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateGradeSystemFinal-id-0002_di" bpmnElement="ServiceTask-UpdateGradeSystemFinal-id-0002">
+        <dc:Bounds x="1375" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AppealComplete-id-0003_di" bpmnElement="EndEvent-AppealComplete-id-0003">
+        <dc:Bounds x="1557" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSubmit-id-0001_di" bpmnElement="SequenceFlow-StartToSubmit-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubmitToProfessor-id-0002_di" bpmnElement="SequenceFlow-SubmitToProfessor-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToExpired-id-0017_di" bpmnElement="SequenceFlow-BoundaryToExpired-id-0017">
+        <di:waypoint x="225" y="128" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="357" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProfessorToDecision-id-0003_di" bpmnElement="SequenceFlow-ProfessorToDecision-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DecisionConfirmed-id-0004_di" bpmnElement="SequenceFlow-DecisionConfirmed-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DecisionAdjusted-id-0005_di" bpmnElement="SequenceFlow-DecisionAdjusted-id-0005">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmedToEnd-id-0006_di" bpmnElement="SequenceFlow-ConfirmedToEnd-id-0006">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AdjustToNotify-id-0007_di" bpmnElement="SequenceFlow-AdjustToNotify-id-0007">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AdjustToStudentResponse-id-0010_di" bpmnElement="SequenceFlow-AdjustToStudentResponse-id-0010">
+        <di:waypoint x="675" y="250" />
+        <di:waypoint x="675" y="350" />
+        <di:waypoint x="800" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotifyToUpdate-id-0008_di" bpmnElement="SequenceFlow-NotifyToUpdate-id-0008">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateToEnd-id-0009_di" bpmnElement="SequenceFlow-UpdateToEnd-id-0009">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1107" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StudentAccepts-id-0011_di" bpmnElement="SequenceFlow-StudentAccepts-id-0011">
+        <di:waypoint x="850" y="350" />
+        <di:waypoint x="900" y="350" />
+        <di:waypoint x="900" y="280" />
+        <di:waypoint x="1050" y="280" />
+        <di:waypoint x="1050" y="210" />
+        <di:waypoint x="1107" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StudentEscalates-id-0012_di" bpmnElement="SequenceFlow-StudentEscalates-id-0012">
+        <di:waypoint x="850" y="350" />
+        <di:waypoint x="925" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EscalateToChair-id-0013_di" bpmnElement="SequenceFlow-EscalateToChair-id-0013">
+        <di:waypoint x="1025" y="350" />
+        <di:waypoint x="1075" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ChairToDecision-id-0014_di" bpmnElement="SequenceFlow-ChairToDecision-id-0014">
+        <di:waypoint x="1175" y="350" />
+        <di:waypoint x="1225" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DecisionToUpdate-id-0015_di" bpmnElement="SequenceFlow-DecisionToUpdate-id-0015">
+        <di:waypoint x="1325" y="350" />
+        <di:waypoint x="1375" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateToComplete-id-0016_di" bpmnElement="SequenceFlow-UpdateToComplete-id-0016">
+        <di:waypoint x="1475" y="350" />
+        <di:waypoint x="1557" y="350" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

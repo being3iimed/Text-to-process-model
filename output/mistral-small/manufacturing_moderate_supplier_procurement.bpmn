@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="empty-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="MaterialPlanningProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-MonthlyCycle-id-0001" name="Monthly Forecast Cycle">
+      <bpmn:outgoing>SequenceFlow-StartToPlanning-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:subProcess id="SubProcess-MaterialPlanning-id-0001" name="Material Planning">
+      <bpmn:incoming>SequenceFlow-StartToPlanning-id-0001</bpmn:incoming>
+      <bpmn:startEvent id="StartEvent-PlanningCycleStart-id-0001" name="Planning Cycle Start">
+        <bpmn:outgoing>SequenceFlow-StartToForecast-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-ForecastMaterialNeeds-id-0001" name="Forecast Material Needs">
+        <bpmn:incoming>SequenceFlow-StartToForecast-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ForecastToGeneratePO-id-0002</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-GeneratePurchaseOrders-id-0002" name="Generate Purchase Orders">
+        <bpmn:incoming>SequenceFlow-ForecastToGeneratePO-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GeneratePOToSend-id-0003</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-SendPurchaseOrders-id-0003" name="Send Purchase Orders to Suppliers">
+        <bpmn:incoming>SequenceFlow-GeneratePOToSend-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SendToReceive-id-0004</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:receiveTask id="ReceiveTask-SupplierConfirmation-id-0004" name="Receive Supplier Confirmation">
+        <bpmn:incoming>SequenceFlow-SendToReceive-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReceiveToShip-id-0005</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-Timer14Day-SupplierConfirmation-id-0001" name="14 Day Timeout" attachedToRef="ReceiveTask-SupplierConfirmation-id-0004">
+        <bpmn:outgoing>SequenceFlow-BoundaryToReminder-id-0007</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="BoundaryEvent-Timer14Day-SupplierConfirmation-id-0001_EventDef">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P14D</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:boundaryEvent>
+      <bpmn:serviceTask id="ServiceTask-ShipMaterials-id-0005" name="Ship Materials">
+        <bpmn:incoming>SequenceFlow-ReceiveToShip-id-0005</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ReminderToShip-id-0008</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ShipToEnd-id-0006</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-PlanningComplete-id-0001" name="Planning Complete">
+        <bpmn:incoming>SequenceFlow-ShipToEnd-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PlanningToVerification-id-0002</bpmn:outgoing>
+      </bpmn:endEvent>
+      <bpmn:sendTask id="SendTask-SendSupplierReminder-id-0006" name="Send Supplier Confirmation Reminder">
+        <bpmn:incoming>SequenceFlow-BoundaryToReminder-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReminderToShip-id-0008</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToForecast-id-0001" sourceRef="StartEvent-PlanningCycleStart-id-0001" targetRef="ServiceTask-ForecastMaterialNeeds-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ForecastToGeneratePO-id-0002" sourceRef="ServiceTask-ForecastMaterialNeeds-id-0001" targetRef="ServiceTask-GeneratePurchaseOrders-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-GeneratePOToSend-id-0003" sourceRef="ServiceTask-GeneratePurchaseOrders-id-0002" targetRef="SendTask-SendPurchaseOrders-id-0003" />
+      <bpmn:sequenceFlow id="SequenceFlow-SendToReceive-id-0004" sourceRef="SendTask-SendPurchaseOrders-id-0003" targetRef="ReceiveTask-SupplierConfirmation-id-0004" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReceiveToShip-id-0005" sourceRef="ReceiveTask-SupplierConfirmation-id-0004" targetRef="ServiceTask-ShipMaterials-id-0005" />
+      <bpmn:sequenceFlow id="SequenceFlow-ShipToEnd-id-0006" sourceRef="ServiceTask-ShipMaterials-id-0005" targetRef="EndEvent-PlanningComplete-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BoundaryToReminder-id-0007" sourceRef="BoundaryEvent-Timer14Day-SupplierConfirmation-id-0001" targetRef="SendTask-SendSupplierReminder-id-0006" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReminderToShip-id-0008" sourceRef="SendTask-SendSupplierReminder-id-0006" targetRef="ServiceTask-ShipMaterials-id-0005" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-MaterialVerification-id-0001" name="Material Verification">
+      <bpmn:incoming>SequenceFlow-PlanningToVerification-id-0002</bpmn:incoming>
+      <bpmn:startEvent id="StartEvent-VerificationStart-id-0001" name="Verification Start">
+        <bpmn:outgoing>SequenceFlow-StartToVerify-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-VerifyReceivedMaterials-id-0001" name="Verify Received Materials">
+        <bpmn:incoming>SequenceFlow-StartToVerify-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-VerifyToGateway-id-0002</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-VerificationCheck-id-0001" name="Verification Check" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-VerifyToGateway-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GatewayToLog-id-0003</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToReturn-id-0006</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-LogAcceptedMaterials-id-0001" name="Log Accepted Materials">
+        <bpmn:incoming>SequenceFlow-GatewayToLog-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-LogToRoute-id-0004</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-RouteToProduction-id-0001" name="Route to Production">
+        <bpmn:incoming>SequenceFlow-LogToRoute-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RouteToEnd-id-0005</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-VerificationComplete-id-0001" name="Verification Complete">
+        <bpmn:incoming>SequenceFlow-RouteToEnd-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-VerificationToInvoice-id-0003</bpmn:outgoing>
+      </bpmn:endEvent>
+      <bpmn:sendTask id="SendTask-SendReturnToSupplier-id-0001" name="Send Return to Supplier">
+        <bpmn:incoming>SequenceFlow-GatewayToReturn-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReturnToEnd-id-0007</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:endEvent id="EndEvent-VerificationFailed-id-0001" name="Verification Failed">
+        <bpmn:incoming>SequenceFlow-ReturnToEnd-id-0007</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToVerify-id-0001" sourceRef="StartEvent-VerificationStart-id-0001" targetRef="UserTask-VerifyReceivedMaterials-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-VerifyToGateway-id-0002" sourceRef="UserTask-VerifyReceivedMaterials-id-0001" targetRef="ExclusiveGateway-VerificationCheck-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToLog-id-0003" name="quantity matches AND quality matches AND no damage" sourceRef="ExclusiveGateway-VerificationCheck-id-0001" targetRef="ServiceTask-LogAcceptedMaterials-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-LogToRoute-id-0004" sourceRef="ServiceTask-LogAcceptedMaterials-id-0001" targetRef="ServiceTask-RouteToProduction-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RouteToEnd-id-0005" sourceRef="ServiceTask-RouteToProduction-id-0001" targetRef="EndEvent-VerificationComplete-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToReturn-id-0006" name="any mismatch" sourceRef="ExclusiveGateway-VerificationCheck-id-0001" targetRef="SendTask-SendReturnToSupplier-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReturnToEnd-id-0007" sourceRef="SendTask-SendReturnToSupplier-id-0001" targetRef="EndEvent-VerificationFailed-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-InvoiceProcessing-id-0001" name="Invoice Processing">
+      <bpmn:incoming>SequenceFlow-VerificationToInvoice-id-0003</bpmn:incoming>
+      <bpmn:startEvent id="StartEvent-InvoiceProcessingStart-id-0001" name="Invoice Processing Start">
+        <bpmn:outgoing>SequenceFlow-StartToMatch-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-MatchInvoiceToPO-id-0001" name="Match Invoice to PO and Receipt">
+        <bpmn:incoming>SequenceFlow-StartToMatch-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-MatchToGateway-id-0002</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-InvoiceCheck-id-0001" name="Invoice Check" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-MatchToGateway-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GatewayToPayment-id-0003</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToInvestigate-id-0005</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:sendTask id="SendTask-SendPaymentApproval-id-0001" name="Send Payment Approval">
+        <bpmn:incoming>SequenceFlow-GatewayToPayment-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PaymentToEnd-id-0004</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:endEvent id="EndEvent-InvoiceApproved-id-0001" name="Invoice Approved">
+        <bpmn:incoming>SequenceFlow-PaymentToEnd-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-InvoiceToEnd-id-0004</bpmn:outgoing>
+      </bpmn:endEvent>
+      <bpmn:userTask id="UserTask-InvestigateMismatch-id-0001" name="Investigate Mismatch">
+        <bpmn:incoming>SequenceFlow-GatewayToInvestigate-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-InvestigateToEnd-id-0006</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:endEvent id="EndEvent-InvoiceRejected-id-0001" name="Invoice Rejected">
+        <bpmn:incoming>SequenceFlow-InvestigateToEnd-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-InvoiceRejectedToEnd-id-0005</bpmn:outgoing>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToMatch-id-0001" sourceRef="StartEvent-InvoiceProcessingStart-id-0001" targetRef="ServiceTask-MatchInvoiceToPO-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-MatchToGateway-id-0002" sourceRef="ServiceTask-MatchInvoiceToPO-id-0001" targetRef="ExclusiveGateway-InvoiceCheck-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToPayment-id-0003" name="3-way match" sourceRef="ExclusiveGateway-InvoiceCheck-id-0001" targetRef="SendTask-SendPaymentApproval-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-PaymentToEnd-id-0004" sourceRef="SendTask-SendPaymentApproval-id-0001" targetRef="EndEvent-InvoiceApproved-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToInvestigate-id-0005" name="mismatch" sourceRef="ExclusiveGateway-InvoiceCheck-id-0001" targetRef="UserTask-InvestigateMismatch-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-InvestigateToEnd-id-0006" sourceRef="UserTask-InvestigateMismatch-id-0001" targetRef="EndEvent-InvoiceRejected-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0001" name="Process Complete">
+      <bpmn:incoming>SequenceFlow-InvoiceToEnd-id-0004</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-InvoiceRejectedToEnd-id-0005</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToPlanning-id-0001" sourceRef="StartEvent-MonthlyCycle-id-0001" targetRef="SubProcess-MaterialPlanning-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PlanningToVerification-id-0002" sourceRef="EndEvent-PlanningComplete-id-0001" targetRef="SubProcess-MaterialVerification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerificationToInvoice-id-0003" sourceRef="EndEvent-VerificationComplete-id-0001" targetRef="SubProcess-InvoiceProcessing-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InvoiceToEnd-id-0004" sourceRef="EndEvent-InvoiceApproved-id-0001" targetRef="EndEvent-ProcessComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InvoiceRejectedToEnd-id-0005" sourceRef="EndEvent-InvoiceRejected-id-0001" targetRef="EndEvent-ProcessComplete-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_MaterialPlanningProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_MaterialPlanningProcess-id-0001" bpmnElement="MaterialPlanningProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-MonthlyCycle-id-0001_di" bpmnElement="StartEvent-MonthlyCycle-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-MaterialPlanning-id-0001_di" bpmnElement="SubProcess-MaterialPlanning-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-MaterialVerification-id-0001_di" bpmnElement="SubProcess-MaterialVerification-id-0001">
+        <dc:Bounds x="25" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToPlanning-id-0001_di" bpmnElement="SequenceFlow-StartToPlanning-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-MaterialVerification-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-MaterialVerification-id-0001" bpmnElement="SubProcess-MaterialVerification-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-VerificationStart-id-0001_di" bpmnElement="StartEvent-VerificationStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-VerifyReceivedMaterials-id-0001_di" bpmnElement="UserTask-VerifyReceivedMaterials-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-VerificationCheck-id-0001_di" bpmnElement="ExclusiveGateway-VerificationCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogAcceptedMaterials-id-0001_di" bpmnElement="ServiceTask-LogAcceptedMaterials-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RouteToProduction-id-0001_di" bpmnElement="ServiceTask-RouteToProduction-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-VerificationComplete-id-0001_di" bpmnElement="EndEvent-VerificationComplete-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-InvoiceProcessing-id-0001_di" bpmnElement="SubProcess-InvoiceProcessing-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendReturnToSupplier-id-0001_di" bpmnElement="SendTask-SendReturnToSupplier-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-VerificationFailed-id-0001_di" bpmnElement="EndEvent-VerificationFailed-id-0001">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToVerify-id-0001_di" bpmnElement="SequenceFlow-StartToVerify-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyToGateway-id-0002_di" bpmnElement="SequenceFlow-VerifyToGateway-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToLog-id-0003_di" bpmnElement="SequenceFlow-GatewayToLog-id-0003">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToReturn-id-0006_di" bpmnElement="SequenceFlow-GatewayToReturn-id-0006">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogToRoute-id-0004_di" bpmnElement="SequenceFlow-LogToRoute-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RouteToEnd-id-0005_di" bpmnElement="SequenceFlow-RouteToEnd-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerificationToInvoice-id-0003_di" bpmnElement="SequenceFlow-VerificationToInvoice-id-0003">
+        <di:waypoint x="843" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReturnToEnd-id-0007_di" bpmnElement="SequenceFlow-ReturnToEnd-id-0007">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-InvoiceProcessing-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-InvoiceProcessing-id-0001" bpmnElement="SubProcess-InvoiceProcessing-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-InvoiceProcessingStart-id-0001_di" bpmnElement="StartEvent-InvoiceProcessingStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MatchInvoiceToPO-id-0001_di" bpmnElement="ServiceTask-MatchInvoiceToPO-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-InvoiceCheck-id-0001_di" bpmnElement="ExclusiveGateway-InvoiceCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendPaymentApproval-id-0001_di" bpmnElement="SendTask-SendPaymentApproval-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-InvoiceApproved-id-0001_di" bpmnElement="EndEvent-InvoiceApproved-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0001_di" bpmnElement="EndEvent-ProcessComplete-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-InvestigateMismatch-id-0001_di" bpmnElement="UserTask-InvestigateMismatch-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-InvoiceRejected-id-0001_di" bpmnElement="EndEvent-InvoiceRejected-id-0001">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToMatch-id-0001_di" bpmnElement="SequenceFlow-StartToMatch-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MatchToGateway-id-0002_di" bpmnElement="SequenceFlow-MatchToGateway-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToPayment-id-0003_di" bpmnElement="SequenceFlow-GatewayToPayment-id-0003">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToInvestigate-id-0005_di" bpmnElement="SequenceFlow-GatewayToInvestigate-id-0005">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentToEnd-id-0004_di" bpmnElement="SequenceFlow-PaymentToEnd-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvoiceToEnd-id-0004_di" bpmnElement="SequenceFlow-InvoiceToEnd-id-0004">
+        <di:waypoint x="693" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvestigateToEnd-id-0006_di" bpmnElement="SequenceFlow-InvestigateToEnd-id-0006">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvoiceRejectedToEnd-id-0005_di" bpmnElement="SequenceFlow-InvoiceRejectedToEnd-id-0005">
+        <di:waypoint x="693" y="210" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="825" y="88" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-MaterialPlanning-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-MaterialPlanning-id-0001" bpmnElement="SubProcess-MaterialPlanning-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-PlanningCycleStart-id-0001_di" bpmnElement="StartEvent-PlanningCycleStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ForecastMaterialNeeds-id-0001_di" bpmnElement="ServiceTask-ForecastMaterialNeeds-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GeneratePurchaseOrders-id-0002_di" bpmnElement="ServiceTask-GeneratePurchaseOrders-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendPurchaseOrders-id-0003_di" bpmnElement="SendTask-SendPurchaseOrders-id-0003">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-SupplierConfirmation-id-0004_di" bpmnElement="ReceiveTask-SupplierConfirmation-id-0004">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer14Day-SupplierConfirmation-id-0001_di" bpmnElement="BoundaryEvent-Timer14Day-SupplierConfirmation-id-0001">
+        <dc:Bounds x="657" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ShipMaterials-id-0005_di" bpmnElement="ServiceTask-ShipMaterials-id-0005">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-PlanningComplete-id-0001_di" bpmnElement="EndEvent-PlanningComplete-id-0001">
+        <dc:Bounds x="1107" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-MaterialVerification-id-0001_di" bpmnElement="SubProcess-MaterialVerification-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendSupplierReminder-id-0006_di" bpmnElement="SendTask-SendSupplierReminder-id-0006">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToForecast-id-0001_di" bpmnElement="SequenceFlow-StartToForecast-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ForecastToGeneratePO-id-0002_di" bpmnElement="SequenceFlow-ForecastToGeneratePO-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GeneratePOToSend-id-0003_di" bpmnElement="SequenceFlow-GeneratePOToSend-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToReceive-id-0004_di" bpmnElement="SequenceFlow-SendToReceive-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToShip-id-0005_di" bpmnElement="SequenceFlow-ReceiveToShip-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToReminder-id-0007_di" bpmnElement="SequenceFlow-BoundaryToReminder-id-0007">
+        <di:waypoint x="675" y="128" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ShipToEnd-id-0006_di" bpmnElement="SequenceFlow-ShipToEnd-id-0006">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1107" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PlanningToVerification-id-0002_di" bpmnElement="SequenceFlow-PlanningToVerification-id-0002">
+        <di:waypoint x="1143" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReminderToShip-id-0008_di" bpmnElement="SequenceFlow-ReminderToShip-id-0008">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="975" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-MaterialVerification-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-MaterialVerification-id-0001" bpmnElement="SubProcess-MaterialVerification-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-VerificationStart-id-0001_di" bpmnElement="StartEvent-VerificationStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-VerifyReceivedMaterials-id-0001_di" bpmnElement="UserTask-VerifyReceivedMaterials-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-VerificationCheck-id-0001_di" bpmnElement="ExclusiveGateway-VerificationCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogAcceptedMaterials-id-0001_di" bpmnElement="ServiceTask-LogAcceptedMaterials-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RouteToProduction-id-0001_di" bpmnElement="ServiceTask-RouteToProduction-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-VerificationComplete-id-0001_di" bpmnElement="EndEvent-VerificationComplete-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-InvoiceProcessing-id-0001_di" bpmnElement="SubProcess-InvoiceProcessing-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendReturnToSupplier-id-0001_di" bpmnElement="SendTask-SendReturnToSupplier-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-VerificationFailed-id-0001_di" bpmnElement="EndEvent-VerificationFailed-id-0001">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToVerify-id-0001_di" bpmnElement="SequenceFlow-StartToVerify-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyToGateway-id-0002_di" bpmnElement="SequenceFlow-VerifyToGateway-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToLog-id-0003_di" bpmnElement="SequenceFlow-GatewayToLog-id-0003">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToReturn-id-0006_di" bpmnElement="SequenceFlow-GatewayToReturn-id-0006">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogToRoute-id-0004_di" bpmnElement="SequenceFlow-LogToRoute-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RouteToEnd-id-0005_di" bpmnElement="SequenceFlow-RouteToEnd-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerificationToInvoice-id-0003_di" bpmnElement="SequenceFlow-VerificationToInvoice-id-0003">
+        <di:waypoint x="843" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReturnToEnd-id-0007_di" bpmnElement="SequenceFlow-ReturnToEnd-id-0007">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-InvoiceProcessing-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-InvoiceProcessing-id-0001" bpmnElement="SubProcess-InvoiceProcessing-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-InvoiceProcessingStart-id-0001_di" bpmnElement="StartEvent-InvoiceProcessingStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MatchInvoiceToPO-id-0001_di" bpmnElement="ServiceTask-MatchInvoiceToPO-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-InvoiceCheck-id-0001_di" bpmnElement="ExclusiveGateway-InvoiceCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendPaymentApproval-id-0001_di" bpmnElement="SendTask-SendPaymentApproval-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-InvoiceApproved-id-0001_di" bpmnElement="EndEvent-InvoiceApproved-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0001_di" bpmnElement="EndEvent-ProcessComplete-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-InvestigateMismatch-id-0001_di" bpmnElement="UserTask-InvestigateMismatch-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-InvoiceRejected-id-0001_di" bpmnElement="EndEvent-InvoiceRejected-id-0001">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToMatch-id-0001_di" bpmnElement="SequenceFlow-StartToMatch-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MatchToGateway-id-0002_di" bpmnElement="SequenceFlow-MatchToGateway-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToPayment-id-0003_di" bpmnElement="SequenceFlow-GatewayToPayment-id-0003">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToInvestigate-id-0005_di" bpmnElement="SequenceFlow-GatewayToInvestigate-id-0005">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentToEnd-id-0004_di" bpmnElement="SequenceFlow-PaymentToEnd-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvoiceToEnd-id-0004_di" bpmnElement="SequenceFlow-InvoiceToEnd-id-0004">
+        <di:waypoint x="693" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvestigateToEnd-id-0006_di" bpmnElement="SequenceFlow-InvestigateToEnd-id-0006">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvoiceRejectedToEnd-id-0005_di" bpmnElement="SequenceFlow-InvoiceRejectedToEnd-id-0005">
+        <di:waypoint x="693" y="210" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="825" y="88" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

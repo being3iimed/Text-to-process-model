@@ -1,0 +1,542 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="WorkersCompensationClaimProcess" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="WorkersCompensationClaimProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-WorkplaceInjuryOccurs-id-0001" name="Workplace Injury Occurs">
+      <bpmn:outgoing>SequenceFlow-InjuryToReport-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-ReportInjuryToEmployer-id-0001" name="Report Injury to Employer">
+      <bpmn:incoming>SequenceFlow-InjuryToReport-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReportToSubmit-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-EmployerSubmitsInjuryReport-id-0001" name="Employer Submits Injury Report to Insurer">
+      <bpmn:incoming>SequenceFlow-ReportToSubmit-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SubmitToContact-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer24H-EmployerSubmitsReport-id-0001" name="24 Hour SLA Violation" attachedToRef="ServiceTask-EmployerSubmitsInjuryReport-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryTimerToSendNotice-id-0001</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer24H-EmployerSubmitsReport-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT24H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-SendSLANotice-id-0001" name="Send: SLA Violation Notice to Employer">
+      <bpmn:incoming>SequenceFlow-BoundaryTimerToSendNotice-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendNoticeToEnd-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ReportingDeadlineMissed-id-0001" name="Reporting Deadline Missed">
+      <bpmn:incoming>SequenceFlow-SendNoticeToEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="UserTask-AdjusterContactsWorker-id-0001" name="Adjuster Contacts Injured Worker">
+      <bpmn:incoming>SequenceFlow-SubmitToContact-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ContactToWorkRelated-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Error-ContactWorker-id-0001" name="Worker Unreachable" attachedToRef="UserTask-AdjusterContactsWorker-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryErrorToAlternativeContact-id-0001</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="BoundaryEvent-Error-ContactWorker-id-0001_EventDef" errorRef="CONTACT_ERROR" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="UserTask-AlternativeContactMethods-id-0001" name="Attempt Alternative Contact Methods">
+      <bpmn:incoming>SequenceFlow-BoundaryErrorToAlternativeContact-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AlternativeContactToWorkRelated-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-DetermineWorkRelatedness-id-0001" name="Adjuster Determines Work-Relatedness">
+      <bpmn:incoming>SequenceFlow-ContactToWorkRelated-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-AlternativeContactToWorkRelated-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-WorkRelatedToGateway-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-WorkRelated-id-0001" name="Work-Related?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-WorkRelatedToGateway-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-WorkRelatedYesToVerify-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-WorkRelatedNoToNonCoverage-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-VerifyWageHistory-id-0001" name="Adjuster Verifies Wage/Employment History">
+      <bpmn:incoming>SequenceFlow-WorkRelatedYesToVerify-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VerifyToBenefits-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-DetermineBenefits-id-0001" name="Adjuster Determines Applicable Benefits">
+      <bpmn:incoming>SequenceFlow-VerifyToBenefits-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BenefitsToBenefitsGateway-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-BenefitsType-id-0001" name="Benefits Type" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-BenefitsToBenefitsGateway-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BenefitsBothToMedicalAuth-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-BenefitsMedicalToMedicalOnly-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-BenefitsDisabilityToCalculate-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:subProcess id="SubProcess-MedicalTreatmentAuthorization-id-0001" name="Medical Treatment Authorization">
+      <bpmn:incoming>SequenceFlow-BenefitsBothToMedicalAuth-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MedicalAuthToMMI-id-0001</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-TreatmentAuthBegins-id-0001" name="Treatment Authorization Begins">
+        <bpmn:outgoing>SequenceFlow-TreatmentAuthStartToAuthorize-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-AuthorizeMedicalTreatment-id-0001" name="Adjuster Authorizes Medical Treatment">
+        <bpmn:incoming>SequenceFlow-TreatmentAuthStartToAuthorize-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AuthorizeToReview-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-ReviewMedicalReports-id-0001" name="Adjuster Reviews Medical Reports">
+        <bpmn:incoming>SequenceFlow-AuthorizeToReview-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReviewToMonitor-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-MonitorReturnToWork-id-0001" name="Adjuster Monitors Return-to-Work Status">
+        <bpmn:incoming>SequenceFlow-ReviewToMonitor-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-MonitorToDisputeCheck-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-DisputeArises-id-0001" name="Dispute Arises?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-MonitorToDisputeCheck-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-DisputeNoToReturnCheck-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-DisputeYesToOrderIME-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:userTask id="UserTask-OrderIME-id-0001" name="Order Independent Medical Examination">
+        <bpmn:incoming>SequenceFlow-DisputeYesToOrderIME-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-OrderIMEToSecondOpinion-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-IMESecondOpinion-id-0001" name="IME Physician Provides Second Opinion">
+        <bpmn:incoming>SequenceFlow-OrderIMEToSecondOpinion-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SecondOpinionToReturnCheck-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-CanReturnToWork-id-0001" name="Can Return to Work?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-DisputeNoToReturnCheck-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-SecondOpinionToReturnCheck-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReturnYesToCoordination-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-ReturnNoToStateReport-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:subProcess id="SubProcess-ReturnToWorkCoordination-id-0001" name="Return-to-Work Coordination">
+        <bpmn:incoming>SequenceFlow-ReturnYesToCoordination-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CoordinationToComplete-id-0001</bpmn:outgoing>
+        <bpmn:startEvent id="StartEvent-ReturnToWorkPlanning-id-0001" name="Return-to-Work Planning Begins">
+          <bpmn:outgoing>SequenceFlow-ReturnPlanningToPlacement-id-0001</bpmn:outgoing>
+        </bpmn:startEvent>
+        <bpmn:userTask id="UserTask-CoordinateJobPlacement-id-0001" name="Adjuster Coordinates Job Placement">
+          <bpmn:incoming>SequenceFlow-ReturnPlanningToPlacement-id-0001</bpmn:incoming>
+          <bpmn:outgoing>SequenceFlow-PlacementToReport-id-0001</bpmn:outgoing>
+        </bpmn:userTask>
+        <bpmn:serviceTask id="ServiceTask-SubmitStateReport-id-0001" name="Submit Status Report to State Board">
+          <bpmn:incoming>SequenceFlow-PlacementToReport-id-0001</bpmn:incoming>
+          <bpmn:outgoing>SequenceFlow-ReportToComplete-id-0001</bpmn:outgoing>
+        </bpmn:serviceTask>
+        <bpmn:endEvent id="EndEvent-ReturnToWorkComplete-id-0001" name="Return-to-Work Coordination Complete">
+          <bpmn:incoming>SequenceFlow-ReportToComplete-id-0001</bpmn:incoming>
+        </bpmn:endEvent>
+        <bpmn:sequenceFlow id="SequenceFlow-ReturnPlanningToPlacement-id-0001" sourceRef="StartEvent-ReturnToWorkPlanning-id-0001" targetRef="UserTask-CoordinateJobPlacement-id-0001" />
+        <bpmn:sequenceFlow id="SequenceFlow-PlacementToReport-id-0001" sourceRef="UserTask-CoordinateJobPlacement-id-0001" targetRef="ServiceTask-SubmitStateReport-id-0001" />
+        <bpmn:sequenceFlow id="SequenceFlow-ReportToComplete-id-0001" sourceRef="ServiceTask-SubmitStateReport-id-0001" targetRef="EndEvent-ReturnToWorkComplete-id-0001" />
+      </bpmn:subProcess>
+      <bpmn:serviceTask id="ServiceTask-SubmitStateReportNoReturn-id-0001" name="Submit Status Report to State Board">
+        <bpmn:incoming>SequenceFlow-ReturnNoToStateReport-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-StateReportToComplete-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-TreatmentAuthComplete-id-0001" name="Treatment Authorization Complete">
+        <bpmn:incoming>SequenceFlow-CoordinationToComplete-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-StateReportToComplete-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-TreatmentAuthStartToAuthorize-id-0001" sourceRef="StartEvent-TreatmentAuthBegins-id-0001" targetRef="UserTask-AuthorizeMedicalTreatment-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-AuthorizeToReview-id-0001" sourceRef="UserTask-AuthorizeMedicalTreatment-id-0001" targetRef="UserTask-ReviewMedicalReports-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReviewToMonitor-id-0001" sourceRef="UserTask-ReviewMedicalReports-id-0001" targetRef="UserTask-MonitorReturnToWork-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-MonitorToDisputeCheck-id-0001" sourceRef="UserTask-MonitorReturnToWork-id-0001" targetRef="ExclusiveGateway-DisputeArises-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-DisputeNoToReturnCheck-id-0001" name="No Dispute" sourceRef="ExclusiveGateway-DisputeArises-id-0001" targetRef="ExclusiveGateway-CanReturnToWork-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-DisputeYesToOrderIME-id-0001" name="Dispute Arises" sourceRef="ExclusiveGateway-DisputeArises-id-0001" targetRef="UserTask-OrderIME-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-OrderIMEToSecondOpinion-id-0001" sourceRef="UserTask-OrderIME-id-0001" targetRef="UserTask-IMESecondOpinion-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SecondOpinionToReturnCheck-id-0001" sourceRef="UserTask-IMESecondOpinion-id-0001" targetRef="ExclusiveGateway-CanReturnToWork-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReturnYesToCoordination-id-0001" name="Can Return" sourceRef="ExclusiveGateway-CanReturnToWork-id-0001" targetRef="SubProcess-ReturnToWorkCoordination-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReturnNoToStateReport-id-0001" name="Cannot Return" sourceRef="ExclusiveGateway-CanReturnToWork-id-0001" targetRef="ServiceTask-SubmitStateReportNoReturn-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CoordinationToComplete-id-0001" sourceRef="SubProcess-ReturnToWorkCoordination-id-0001" targetRef="EndEvent-TreatmentAuthComplete-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-StateReportToComplete-id-0001" sourceRef="ServiceTask-SubmitStateReportNoReturn-id-0001" targetRef="EndEvent-TreatmentAuthComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:userTask id="UserTask-AuthorizeMedicalOnly-id-0001" name="Adjuster Authorizes Medical Treatment (Medical Only)">
+      <bpmn:incoming>SequenceFlow-BenefitsMedicalToMedicalOnly-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MedicalOnlyToMMI-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-CalculateDisability-id-0001" name="Calculate Disability Income Benefits">
+      <bpmn:incoming>SequenceFlow-BenefitsDisabilityToCalculate-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DisabilityToMMI-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-EvaluateMMI-id-0001" name="Adjuster Evaluates Maximum Medical Improvement">
+      <bpmn:incoming>SequenceFlow-MedicalAuthToMMI-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-MedicalOnlyToMMI-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-DisabilityToMMI-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MMIToPermanentCheck-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-PermanentDisability-id-0001" name="Permanent Disability?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-MMIToPermanentCheck-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PermanentYesToCalculateAward-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-PermanentNoToClose-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-CalculatePermanentAward-id-0001" name="Adjuster Calculates Permanent Disability Award">
+      <bpmn:incoming>SequenceFlow-PermanentYesToCalculateAward-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CalculateAwardToClose-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-CloseClaimFile-id-0001" name="Close Claim File">
+      <bpmn:incoming>SequenceFlow-PermanentNoToClose-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-CalculateAwardToClose-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CloseToEnd-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-ClaimClosed-id-0001" name="Claim Closed">
+      <bpmn:incoming>SequenceFlow-CloseToEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="SendTask-NonCoverageNotice-id-0001" name="Send: Non-Coverage Notification">
+      <bpmn:incoming>SequenceFlow-WorkRelatedNoToNonCoverage-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NonCoverageToClose-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-CloseNonCovered-id-0001" name="Close Claim File (Non-Covered)">
+      <bpmn:incoming>SequenceFlow-NonCoverageToClose-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CloseNonCoveredToEnd-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-NonCoveredClosed-id-0001" name="Claim Closed (Non-Covered)">
+      <bpmn:incoming>SequenceFlow-CloseNonCoveredToEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-WorkRelatedConverge-id-0001" name="Work-Related Convergence" gatewayDirection="Converging" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway-BenefitsTypeConverge-id-0001" name="Benefits Type Convergence" gatewayDirection="Converging" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway-PermanentDisabilityConverge-id-0001" name="Permanent Disability Convergence" gatewayDirection="Converging" />
+    <bpmn:sequenceFlow id="SequenceFlow-InjuryToReport-id-0001" sourceRef="StartEvent-WorkplaceInjuryOccurs-id-0001" targetRef="UserTask-ReportInjuryToEmployer-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReportToSubmit-id-0001" sourceRef="UserTask-ReportInjuryToEmployer-id-0001" targetRef="ServiceTask-EmployerSubmitsInjuryReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubmitToContact-id-0001" sourceRef="ServiceTask-EmployerSubmitsInjuryReport-id-0001" targetRef="UserTask-AdjusterContactsWorker-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ContactToWorkRelated-id-0001" sourceRef="UserTask-AdjusterContactsWorker-id-0001" targetRef="UserTask-DetermineWorkRelatedness-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-WorkRelatedToGateway-id-0001" sourceRef="UserTask-DetermineWorkRelatedness-id-0001" targetRef="ExclusiveGateway-WorkRelated-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-WorkRelatedYesToVerify-id-0001" name="Work-Related" sourceRef="ExclusiveGateway-WorkRelated-id-0001" targetRef="UserTask-VerifyWageHistory-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-WorkRelatedNoToNonCoverage-id-0001" name="Not Work-Related" sourceRef="ExclusiveGateway-WorkRelated-id-0001" targetRef="SendTask-NonCoverageNotice-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerifyToBenefits-id-0001" sourceRef="UserTask-VerifyWageHistory-id-0001" targetRef="UserTask-DetermineBenefits-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BenefitsToBenefitsGateway-id-0001" sourceRef="UserTask-DetermineBenefits-id-0001" targetRef="ExclusiveGateway-BenefitsType-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BenefitsBothToMedicalAuth-id-0001" name="Medical + Disability" sourceRef="ExclusiveGateway-BenefitsType-id-0001" targetRef="SubProcess-MedicalTreatmentAuthorization-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BenefitsMedicalToMedicalOnly-id-0001" name="Medical Only" sourceRef="ExclusiveGateway-BenefitsType-id-0001" targetRef="UserTask-AuthorizeMedicalOnly-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BenefitsDisabilityToCalculate-id-0001" name="Disability Only" sourceRef="ExclusiveGateway-BenefitsType-id-0001" targetRef="UserTask-CalculateDisability-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MedicalAuthToMMI-id-0001" sourceRef="SubProcess-MedicalTreatmentAuthorization-id-0001" targetRef="UserTask-EvaluateMMI-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MedicalOnlyToMMI-id-0001" sourceRef="UserTask-AuthorizeMedicalOnly-id-0001" targetRef="UserTask-EvaluateMMI-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DisabilityToMMI-id-0001" sourceRef="UserTask-CalculateDisability-id-0001" targetRef="UserTask-EvaluateMMI-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MMIToPermanentCheck-id-0001" sourceRef="UserTask-EvaluateMMI-id-0001" targetRef="ExclusiveGateway-PermanentDisability-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PermanentYesToCalculateAward-id-0001" name="Permanent Disability" sourceRef="ExclusiveGateway-PermanentDisability-id-0001" targetRef="UserTask-CalculatePermanentAward-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PermanentNoToClose-id-0001" name="No Permanent Disability" sourceRef="ExclusiveGateway-PermanentDisability-id-0001" targetRef="ServiceTask-CloseClaimFile-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CalculateAwardToClose-id-0001" sourceRef="UserTask-CalculatePermanentAward-id-0001" targetRef="ServiceTask-CloseClaimFile-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CloseToEnd-id-0001" sourceRef="ServiceTask-CloseClaimFile-id-0001" targetRef="EndEvent-ClaimClosed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NonCoverageToClose-id-0001" sourceRef="SendTask-NonCoverageNotice-id-0001" targetRef="ServiceTask-CloseNonCovered-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CloseNonCoveredToEnd-id-0001" sourceRef="ServiceTask-CloseNonCovered-id-0001" targetRef="EndEvent-NonCoveredClosed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryTimerToSendNotice-id-0001" sourceRef="BoundaryEvent-Timer24H-EmployerSubmitsReport-id-0001" targetRef="SendTask-SendSLANotice-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendNoticeToEnd-id-0001" sourceRef="SendTask-SendSLANotice-id-0001" targetRef="EndEvent-ReportingDeadlineMissed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryErrorToAlternativeContact-id-0001" sourceRef="BoundaryEvent-Error-ContactWorker-id-0001" targetRef="UserTask-AlternativeContactMethods-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AlternativeContactToWorkRelated-id-0001" sourceRef="UserTask-AlternativeContactMethods-id-0001" targetRef="UserTask-DetermineWorkRelatedness-id-0001" />
+  </bpmn:process>
+  <bpmn:error id="CONTACT_ERROR" name="CONTACT_ERROR" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_WorkersCompensationClaimProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_WorkersCompensationClaimProcess-id-0001" bpmnElement="WorkersCompensationClaimProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-WorkplaceInjuryOccurs-id-0001_di" bpmnElement="StartEvent-WorkplaceInjuryOccurs-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReportInjuryToEmployer-id-0001_di" bpmnElement="UserTask-ReportInjuryToEmployer-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-EmployerSubmitsInjuryReport-id-0001_di" bpmnElement="ServiceTask-EmployerSubmitsInjuryReport-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer24H-EmployerSubmitsReport-id-0001_di" bpmnElement="BoundaryEvent-Timer24H-EmployerSubmitsReport-id-0001">
+        <dc:Bounds x="357" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AdjusterContactsWorker-id-0001_di" bpmnElement="UserTask-AdjusterContactsWorker-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Error-ContactWorker-id-0001_di" bpmnElement="BoundaryEvent-Error-ContactWorker-id-0001">
+        <dc:Bounds x="507" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-DetermineWorkRelatedness-id-0001_di" bpmnElement="UserTask-DetermineWorkRelatedness-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-WorkRelated-id-0001_di" bpmnElement="ExclusiveGateway-WorkRelated-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-VerifyWageHistory-id-0001_di" bpmnElement="UserTask-VerifyWageHistory-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-DetermineBenefits-id-0001_di" bpmnElement="UserTask-DetermineBenefits-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-BenefitsType-id-0001_di" bpmnElement="ExclusiveGateway-BenefitsType-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-MedicalTreatmentAuthorization-id-0001_di" bpmnElement="SubProcess-MedicalTreatmentAuthorization-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EvaluateMMI-id-0001_di" bpmnElement="UserTask-EvaluateMMI-id-0001">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PermanentDisability-id-0001_di" bpmnElement="ExclusiveGateway-PermanentDisability-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1850" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CalculatePermanentAward-id-0001_di" bpmnElement="UserTask-CalculatePermanentAward-id-0001">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CloseClaimFile-id-0001_di" bpmnElement="ServiceTask-CloseClaimFile-id-0001">
+        <dc:Bounds x="2125" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ClaimClosed-id-0001_di" bpmnElement="EndEvent-ClaimClosed-id-0001">
+        <dc:Bounds x="2307" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AlternativeContactMethods-id-0001_di" bpmnElement="UserTask-AlternativeContactMethods-id-0001">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-NonCoverageNotice-id-0001_di" bpmnElement="SendTask-NonCoverageNotice-id-0001">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CloseNonCovered-id-0001_di" bpmnElement="ServiceTask-CloseNonCovered-id-0001">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-NonCoveredClosed-id-0001_di" bpmnElement="EndEvent-NonCoveredClosed-id-0001">
+        <dc:Bounds x="1407" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AuthorizeMedicalOnly-id-0001_di" bpmnElement="UserTask-AuthorizeMedicalOnly-id-0001">
+        <dc:Bounds x="1825" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-WorkRelatedConverge-id-0001_di" bpmnElement="ExclusiveGateway-WorkRelatedConverge-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="50" y="325" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendSLANotice-id-0001_di" bpmnElement="SendTask-SendSLANotice-id-0001">
+        <dc:Bounds x="475" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ReportingDeadlineMissed-id-0001_di" bpmnElement="EndEvent-ReportingDeadlineMissed-id-0001">
+        <dc:Bounds x="657" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CalculateDisability-id-0001_di" bpmnElement="UserTask-CalculateDisability-id-0001">
+        <dc:Bounds x="1525" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-BenefitsTypeConverge-id-0001_di" bpmnElement="ExclusiveGateway-BenefitsTypeConverge-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="50" y="465" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PermanentDisabilityConverge-id-0001_di" bpmnElement="ExclusiveGateway-PermanentDisabilityConverge-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="50" y="605" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-InjuryToReport-id-0001_di" bpmnElement="SequenceFlow-InjuryToReport-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReportToSubmit-id-0001_di" bpmnElement="SequenceFlow-ReportToSubmit-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubmitToContact-id-0001_di" bpmnElement="SequenceFlow-SubmitToContact-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryTimerToSendNotice-id-0001_di" bpmnElement="SequenceFlow-BoundaryTimerToSendNotice-id-0001">
+        <di:waypoint x="375" y="128" />
+        <di:waypoint x="375" y="350" />
+        <di:waypoint x="475" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ContactToWorkRelated-id-0001_di" bpmnElement="SequenceFlow-ContactToWorkRelated-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryErrorToAlternativeContact-id-0001_di" bpmnElement="SequenceFlow-BoundaryErrorToAlternativeContact-id-0001">
+        <di:waypoint x="525" y="128" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WorkRelatedToGateway-id-0001_di" bpmnElement="SequenceFlow-WorkRelatedToGateway-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WorkRelatedYesToVerify-id-0001_di" bpmnElement="SequenceFlow-WorkRelatedYesToVerify-id-0001">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WorkRelatedNoToNonCoverage-id-0001_di" bpmnElement="SequenceFlow-WorkRelatedNoToNonCoverage-id-0001">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyToBenefits-id-0001_di" bpmnElement="SequenceFlow-VerifyToBenefits-id-0001">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BenefitsToBenefitsGateway-id-0001_di" bpmnElement="SequenceFlow-BenefitsToBenefitsGateway-id-0001">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BenefitsBothToMedicalAuth-id-0001_di" bpmnElement="SequenceFlow-BenefitsBothToMedicalAuth-id-0001">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BenefitsMedicalToMedicalOnly-id-0001_di" bpmnElement="SequenceFlow-BenefitsMedicalToMedicalOnly-id-0001">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1500" y="70" />
+        <di:waypoint x="1500" y="140" />
+        <di:waypoint x="1800" y="140" />
+        <di:waypoint x="1800" y="210" />
+        <di:waypoint x="1825" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BenefitsDisabilityToCalculate-id-0001_di" bpmnElement="SequenceFlow-BenefitsDisabilityToCalculate-id-0001">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1500" y="70" />
+        <di:waypoint x="1500" y="280" />
+        <di:waypoint x="1500" y="280" />
+        <di:waypoint x="1500" y="350" />
+        <di:waypoint x="1525" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MedicalAuthToMMI-id-0001_di" bpmnElement="SequenceFlow-MedicalAuthToMMI-id-0001">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MMIToPermanentCheck-id-0001_di" bpmnElement="SequenceFlow-MMIToPermanentCheck-id-0001">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1850" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PermanentYesToCalculateAward-id-0001_di" bpmnElement="SequenceFlow-PermanentYesToCalculateAward-id-0001">
+        <di:waypoint x="1900" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PermanentNoToClose-id-0001_di" bpmnElement="SequenceFlow-PermanentNoToClose-id-0001">
+        <di:waypoint x="1875" y="95" />
+        <di:waypoint x="1875" y="140" />
+        <di:waypoint x="2175" y="140" />
+        <di:waypoint x="2175" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculateAwardToClose-id-0001_di" bpmnElement="SequenceFlow-CalculateAwardToClose-id-0001">
+        <di:waypoint x="2075" y="70" />
+        <di:waypoint x="2125" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CloseToEnd-id-0001_di" bpmnElement="SequenceFlow-CloseToEnd-id-0001">
+        <di:waypoint x="2225" y="70" />
+        <di:waypoint x="2307" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlternativeContactToWorkRelated-id-0001_di" bpmnElement="SequenceFlow-AlternativeContactToWorkRelated-id-0001">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="825" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NonCoverageToClose-id-0001_di" bpmnElement="SequenceFlow-NonCoverageToClose-id-0001">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CloseNonCoveredToEnd-id-0001_di" bpmnElement="SequenceFlow-CloseNonCoveredToEnd-id-0001">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1407" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MedicalOnlyToMMI-id-0001_di" bpmnElement="SequenceFlow-MedicalOnlyToMMI-id-0001">
+        <di:waypoint x="1875" y="250" />
+        <di:waypoint x="1875" y="280" />
+        <di:waypoint x="1725" y="280" />
+        <di:waypoint x="1725" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendNoticeToEnd-id-0001_di" bpmnElement="SequenceFlow-SendNoticeToEnd-id-0001">
+        <di:waypoint x="575" y="350" />
+        <di:waypoint x="657" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DisabilityToMMI-id-0001_di" bpmnElement="SequenceFlow-DisabilityToMMI-id-0001">
+        <di:waypoint x="1625" y="350" />
+        <di:waypoint x="1725" y="350" />
+        <di:waypoint x="1725" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-MedicalTreatmentAuthorization-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-MedicalTreatmentAuthorization-id-0001" bpmnElement="SubProcess-MedicalTreatmentAuthorization-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-TreatmentAuthBegins-id-0001_di" bpmnElement="StartEvent-TreatmentAuthBegins-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AuthorizeMedicalTreatment-id-0001_di" bpmnElement="UserTask-AuthorizeMedicalTreatment-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewMedicalReports-id-0001_di" bpmnElement="UserTask-ReviewMedicalReports-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-MonitorReturnToWork-id-0001_di" bpmnElement="UserTask-MonitorReturnToWork-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-DisputeArises-id-0001_di" bpmnElement="ExclusiveGateway-DisputeArises-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CanReturnToWork-id-0001_di" bpmnElement="ExclusiveGateway-CanReturnToWork-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-ReturnToWorkCoordination-id-0001_di" bpmnElement="SubProcess-ReturnToWorkCoordination-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-TreatmentAuthComplete-id-0001_di" bpmnElement="EndEvent-TreatmentAuthComplete-id-0001">
+        <dc:Bounds x="1407" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-OrderIME-id-0001_di" bpmnElement="UserTask-OrderIME-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-IMESecondOpinion-id-0001_di" bpmnElement="UserTask-IMESecondOpinion-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SubmitStateReportNoReturn-id-0001_di" bpmnElement="ServiceTask-SubmitStateReportNoReturn-id-0001">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-TreatmentAuthStartToAuthorize-id-0001_di" bpmnElement="SequenceFlow-TreatmentAuthStartToAuthorize-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AuthorizeToReview-id-0001_di" bpmnElement="SequenceFlow-AuthorizeToReview-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToMonitor-id-0001_di" bpmnElement="SequenceFlow-ReviewToMonitor-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MonitorToDisputeCheck-id-0001_di" bpmnElement="SequenceFlow-MonitorToDisputeCheck-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DisputeNoToReturnCheck-id-0001_di" bpmnElement="SequenceFlow-DisputeNoToReturnCheck-id-0001">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DisputeYesToOrderIME-id-0001_di" bpmnElement="SequenceFlow-DisputeYesToOrderIME-id-0001">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReturnYesToCoordination-id-0001_di" bpmnElement="SequenceFlow-ReturnYesToCoordination-id-0001">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReturnNoToStateReport-id-0001_di" bpmnElement="SequenceFlow-ReturnNoToStateReport-id-0001">
+        <di:waypoint x="1125" y="95" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CoordinationToComplete-id-0001_di" bpmnElement="SequenceFlow-CoordinationToComplete-id-0001">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1407" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderIMEToSecondOpinion-id-0001_di" bpmnElement="SequenceFlow-OrderIMEToSecondOpinion-id-0001">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SecondOpinionToReturnCheck-id-0001_di" bpmnElement="SequenceFlow-SecondOpinionToReturnCheck-id-0001">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StateReportToComplete-id-0001_di" bpmnElement="SequenceFlow-StateReportToComplete-id-0001">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1425" y="88" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-ReturnToWorkCoordination-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-ReturnToWorkCoordination-id-0001" bpmnElement="SubProcess-ReturnToWorkCoordination-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ReturnToWorkPlanning-id-0001_di" bpmnElement="StartEvent-ReturnToWorkPlanning-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CoordinateJobPlacement-id-0001_di" bpmnElement="UserTask-CoordinateJobPlacement-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SubmitStateReport-id-0001_di" bpmnElement="ServiceTask-SubmitStateReport-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ReturnToWorkComplete-id-0001_di" bpmnElement="EndEvent-ReturnToWorkComplete-id-0001">
+        <dc:Bounds x="507" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReturnPlanningToPlacement-id-0001_di" bpmnElement="SequenceFlow-ReturnPlanningToPlacement-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PlacementToReport-id-0001_di" bpmnElement="SequenceFlow-PlacementToReport-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReportToComplete-id-0001_di" bpmnElement="SequenceFlow-ReportToComplete-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="507" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="appointment-booking-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="AppointmentBookingProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-PatientRequestsAppointment-id-0001" name="Patient requests appointment">
+      <bpmn:outgoing>SequenceFlow-StartToCheckSlots-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-CheckAvailableSlots-id-0001" name="Receptionist checks available time slots">
+      <bpmn:incoming>SequenceFlow-StartToCheckSlots-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckSlotsToGateway-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-SlotsAvailable-id-0001" name="Slots Available?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CheckSlotsToGateway-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToBook-id-0003</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToWaitlist-id-0006</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-BookAppointment-id-0002" name="Receptionist books appointment">
+      <bpmn:incoming>SequenceFlow-GatewayToBook-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BookToConfirmation-id-0004</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="SendTask-AppointmentConfirmation-id-0001" name="Send: appointment confirmation">
+      <bpmn:incoming>SequenceFlow-BookToConfirmation-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmationToEnd-id-0005</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-AppointmentBooked-id-0001" name="Appointment booked">
+      <bpmn:incoming>SequenceFlow-ConfirmationToEnd-id-0005</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-AddToWaitlist-id-0001" name="Add patient to waitlist">
+      <bpmn:incoming>SequenceFlow-GatewayToWaitlist-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-WaitlistToEnd-id-0007</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-AddedToWaitlist-id-0002" name="Added to waitlist">
+      <bpmn:incoming>SequenceFlow-WaitlistToEnd-id-0007</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:startEvent id="StartEvent-CancellationOccurs-id-0002" name="Cancellation occurs">
+      <bpmn:outgoing>SequenceFlow-CancellationStartToReceive-id-0008</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:receiveTask id="ReceiveTask-CancellationNotification-id-0001" name="Receive: cancellation notification">
+      <bpmn:incoming>SequenceFlow-CancellationStartToReceive-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveToCallPatient-id-0009</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:userTask id="UserTask-CallWaitlistPatient-id-0003" name="Call waitlist patient">
+      <bpmn:incoming>SequenceFlow-ReceiveToCallPatient-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CallToPatientDecision-id-0010</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-PatientAcceptsRejects-id-0004" name="Patient accepts/rejects slot">
+      <bpmn:incoming>SequenceFlow-CallToPatientDecision-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PatientDecisionToGateway-id-0011</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-PatientAccepts-id-0002" name="Patient Accepts?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-PatientDecisionToGateway-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToBookWaitlist-id-0012</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToReturnSlot-id-0015</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-BookWaitlistAppointment-id-0005" name="Receptionist books appointment">
+      <bpmn:incoming>SequenceFlow-GatewayToBookWaitlist-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BookWaitlistToConfirmation-id-0013</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="SendTask-WaitlistConfirmation-id-0002" name="Send: appointment confirmation">
+      <bpmn:incoming>SequenceFlow-BookWaitlistToConfirmation-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmationToEndWaitlist-id-0014</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-WaitlistPatientProcessed-id-0003" name="Waitlist patient processed">
+      <bpmn:incoming>SequenceFlow-ConfirmationToEndWaitlist-id-0014</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ReturnSlotToEnd-id-0016</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-ReturnSlotToPool-id-0002" name="Return slot to availability pool">
+      <bpmn:incoming>SequenceFlow-GatewayToReturnSlot-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReturnSlotToEnd-id-0016</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToCheckSlots-id-0001" sourceRef="StartEvent-PatientRequestsAppointment-id-0001" targetRef="UserTask-CheckAvailableSlots-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckSlotsToGateway-id-0002" sourceRef="UserTask-CheckAvailableSlots-id-0001" targetRef="ExclusiveGateway-SlotsAvailable-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToBook-id-0003" name="slots_available" sourceRef="ExclusiveGateway-SlotsAvailable-id-0001" targetRef="UserTask-BookAppointment-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-BookToConfirmation-id-0004" sourceRef="UserTask-BookAppointment-id-0002" targetRef="SendTask-AppointmentConfirmation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmationToEnd-id-0005" sourceRef="SendTask-AppointmentConfirmation-id-0001" targetRef="EndEvent-AppointmentBooked-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToWaitlist-id-0006" name="no_slots_available" sourceRef="ExclusiveGateway-SlotsAvailable-id-0001" targetRef="ServiceTask-AddToWaitlist-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-WaitlistToEnd-id-0007" sourceRef="ServiceTask-AddToWaitlist-id-0001" targetRef="EndEvent-AddedToWaitlist-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-CancellationStartToReceive-id-0008" sourceRef="StartEvent-CancellationOccurs-id-0002" targetRef="ReceiveTask-CancellationNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveToCallPatient-id-0009" sourceRef="ReceiveTask-CancellationNotification-id-0001" targetRef="UserTask-CallWaitlistPatient-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-CallToPatientDecision-id-0010" sourceRef="UserTask-CallWaitlistPatient-id-0003" targetRef="UserTask-PatientAcceptsRejects-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-PatientDecisionToGateway-id-0011" sourceRef="UserTask-PatientAcceptsRejects-id-0004" targetRef="ExclusiveGateway-PatientAccepts-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToBookWaitlist-id-0012" name="patient_accepts" sourceRef="ExclusiveGateway-PatientAccepts-id-0002" targetRef="UserTask-BookWaitlistAppointment-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-BookWaitlistToConfirmation-id-0013" sourceRef="UserTask-BookWaitlistAppointment-id-0005" targetRef="SendTask-WaitlistConfirmation-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmationToEndWaitlist-id-0014" sourceRef="SendTask-WaitlistConfirmation-id-0002" targetRef="EndEvent-WaitlistPatientProcessed-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToReturnSlot-id-0015" name="patient_rejects" sourceRef="ExclusiveGateway-PatientAccepts-id-0002" targetRef="ServiceTask-ReturnSlotToPool-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReturnSlotToEnd-id-0016" sourceRef="ServiceTask-ReturnSlotToPool-id-0002" targetRef="EndEvent-WaitlistPatientProcessed-id-0003" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_AppointmentBookingProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_AppointmentBookingProcess" bpmnElement="AppointmentBookingProcess">
+      <bpmndi:BPMNShape id="StartEvent-PatientRequestsAppointment-id-0001_di" bpmnElement="StartEvent-PatientRequestsAppointment-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CheckAvailableSlots-id-0001_di" bpmnElement="UserTask-CheckAvailableSlots-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SlotsAvailable-id-0001_di" bpmnElement="ExclusiveGateway-SlotsAvailable-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-BookAppointment-id-0002_di" bpmnElement="UserTask-BookAppointment-id-0002">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-AppointmentConfirmation-id-0001_di" bpmnElement="SendTask-AppointmentConfirmation-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AppointmentBooked-id-0001_di" bpmnElement="EndEvent-AppointmentBooked-id-0001">
+        <dc:Bounds x="1707" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent-CancellationOccurs-id-0002_di" bpmnElement="StartEvent-CancellationOccurs-id-0002">
+        <dc:Bounds x="57" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-CancellationNotification-id-0001_di" bpmnElement="ReceiveTask-CancellationNotification-id-0001">
+        <dc:Bounds x="175" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CallWaitlistPatient-id-0003_di" bpmnElement="UserTask-CallWaitlistPatient-id-0003">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PatientAcceptsRejects-id-0004_di" bpmnElement="UserTask-PatientAcceptsRejects-id-0004">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PatientAccepts-id-0002_di" bpmnElement="ExclusiveGateway-PatientAccepts-id-0002" isMarkerVisible="true">
+        <dc:Bounds x="650" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-BookWaitlistAppointment-id-0005_di" bpmnElement="UserTask-BookWaitlistAppointment-id-0005">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-WaitlistConfirmation-id-0002_di" bpmnElement="SendTask-WaitlistConfirmation-id-0002">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-WaitlistPatientProcessed-id-0003_di" bpmnElement="EndEvent-WaitlistPatientProcessed-id-0003">
+        <dc:Bounds x="1107" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AddToWaitlist-id-0001_di" bpmnElement="ServiceTask-AddToWaitlist-id-0001">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AddedToWaitlist-id-0002_di" bpmnElement="EndEvent-AddedToWaitlist-id-0002">
+        <dc:Bounds x="1557" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ReturnSlotToPool-id-0002_di" bpmnElement="ServiceTask-ReturnSlotToPool-id-0002">
+        <dc:Bounds x="775" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToCheckSlots-id-0001_di" bpmnElement="SequenceFlow-StartToCheckSlots-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckSlotsToGateway-id-0002_di" bpmnElement="SequenceFlow-CheckSlotsToGateway-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToBook-id-0003_di" bpmnElement="SequenceFlow-GatewayToBook-id-0003">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToWaitlist-id-0006_di" bpmnElement="SequenceFlow-GatewayToWaitlist-id-0006">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BookToConfirmation-id-0004_di" bpmnElement="SequenceFlow-BookToConfirmation-id-0004">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmationToEnd-id-0005_di" bpmnElement="SequenceFlow-ConfirmationToEnd-id-0005">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1707" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CancellationStartToReceive-id-0008_di" bpmnElement="SequenceFlow-CancellationStartToReceive-id-0008">
+        <di:waypoint x="93" y="210" />
+        <di:waypoint x="175" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToCallPatient-id-0009_di" bpmnElement="SequenceFlow-ReceiveToCallPatient-id-0009">
+        <di:waypoint x="275" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CallToPatientDecision-id-0010_di" bpmnElement="SequenceFlow-CallToPatientDecision-id-0010">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PatientDecisionToGateway-id-0011_di" bpmnElement="SequenceFlow-PatientDecisionToGateway-id-0011">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="650" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToBookWaitlist-id-0012_di" bpmnElement="SequenceFlow-GatewayToBookWaitlist-id-0012">
+        <di:waypoint x="700" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToReturnSlot-id-0015_di" bpmnElement="SequenceFlow-GatewayToReturnSlot-id-0015">
+        <di:waypoint x="675" y="235" />
+        <di:waypoint x="675" y="350" />
+        <di:waypoint x="775" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BookWaitlistToConfirmation-id-0013_di" bpmnElement="SequenceFlow-BookWaitlistToConfirmation-id-0013">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmationToEndWaitlist-id-0014_di" bpmnElement="SequenceFlow-ConfirmationToEndWaitlist-id-0014">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1107" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WaitlistToEnd-id-0007_di" bpmnElement="SequenceFlow-WaitlistToEnd-id-0007">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1557" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReturnSlotToEnd-id-0016_di" bpmnElement="SequenceFlow-ReturnSlotToEnd-id-0016">
+        <di:waypoint x="875" y="350" />
+        <di:waypoint x="1125" y="350" />
+        <di:waypoint x="1125" y="228" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

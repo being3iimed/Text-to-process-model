@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_PacketLossIncidentResponse" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="Process_PacketLossIncidentResponse-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-HighPacketLossDetected-id-0001" name="High Packet Loss Detected">
+      <bpmn:outgoing>SequenceFlow-StartToAnalyzeTowers-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-AnalyzeAffectedTowers-id-0001" name="Analyze Affected Towers">
+      <bpmn:incoming>SequenceFlow-StartToAnalyzeTowers-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AnalyzeTowersToServices-id-0002</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-AnalyzeImpactedServices-id-0002" name="Analyze Impacted Services">
+      <bpmn:incoming>SequenceFlow-AnalyzeTowersToServices-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AnalyzeServicesToCustomers-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-AnalyzeCustomerImpact-id-0003" name="Analyze Customer Impact">
+      <bpmn:incoming>SequenceFlow-AnalyzeServicesToCustomers-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AnalyzeCustomersToSwitchTraffic-id-0004</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-SwitchTrafficToAdjacentTowers-id-0004" name="Switch Traffic to Adjacent Towers">
+      <bpmn:incoming>SequenceFlow-AnalyzeCustomersToSwitchTraffic-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SwitchTrafficToAlertEngineers-id-0005</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendIncidentAlertToEngineers-id-0001" name="Send: Incident Alert to Engineers">
+      <bpmn:incoming>SequenceFlow-SwitchTrafficToAlertEngineers-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AlertEngineersToAlertNOC-id-0006</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="SendTask-SendIncidentAlertToNOCTeam-id-0002" name="Send: Incident Alert to NOC Team">
+      <bpmn:incoming>SequenceFlow-AlertEngineersToAlertNOC-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AlertNOCToDispatch-id-0007</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-DispatchFieldEngineers-id-0005" name="Dispatch Field Engineers">
+      <bpmn:incoming>SequenceFlow-AlertNOCToDispatch-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DispatchToRootCauseAnalysis-id-0008</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-AnalyzeRootCauseFromLogs-id-0006" name="Analyze Root Cause from Logs">
+      <bpmn:incoming>SequenceFlow-DispatchToRootCauseAnalysis-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RootCauseToGateway-id-0009</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-RootCauseAnalysis-id-0001" name="Root Cause Analysis" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-RootCauseToGateway-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToSpareParts-id-0010</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToPrioritizeTraffic-id-0011</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayDefaultToMerge-id-0012</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-RetrieveSparePartsFromInventory-id-0007" name="Retrieve Spare Parts from Inventory">
+      <bpmn:incoming>SequenceFlow-GatewayToSpareParts-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SparePartsToMerge-id-0013</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-PrioritizeTrafficToCriticalServices-id-0008" name="Prioritize Traffic to Critical Services">
+      <bpmn:incoming>SequenceFlow-GatewayToPrioritizeTraffic-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PrioritizeTrafficToMerge-id-0014</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-RootCauseMerge-id-0002" name="Root Cause Merge" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-GatewayDefaultToMerge-id-0012</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-SparePartsToMerge-id-0013</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-PrioritizeTrafficToMerge-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MergeToFieldConnect-id-0015</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-FieldTeamConnectsDiagnosticEquipment-id-0001" name="Field Team Connects Diagnostic Equipment">
+      <bpmn:incoming>SequenceFlow-MergeToFieldConnect-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FieldConnectToConfirm-id-0016</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-FieldTeamConfirmsHypothesis-id-0002" name="Field Team Confirms Hypothesis">
+      <bpmn:incoming>SequenceFlow-FieldConnectToConfirm-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmToPerformFix-id-0017</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-FieldTeamPerformsFix-id-0003" name="Field Team Performs Fix">
+      <bpmn:incoming>SequenceFlow-ConfirmToPerformFix-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PerformFixToReroute-id-0018</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-RerouteTrafficDuringMaintenance-id-0009" name="Reroute Traffic During Maintenance">
+      <bpmn:incoming>SequenceFlow-PerformFixToReroute-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RerouteToNotifyCustomers-id-0019</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendMaintenanceNotificationToCustomers-id-0003" name="Send: Maintenance Notification to Customers">
+      <bpmn:incoming>SequenceFlow-RerouteToNotifyCustomers-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotifyToValidateMetrics-id-0020</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-ValidateNetworkMetrics-id-0010" name="Validate Network Metrics">
+      <bpmn:incoming>SequenceFlow-NotifyToValidateMetrics-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidateToFixValidation-id-0021</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-FixValidation-id-0003" name="Fix Validation" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ValidateToFixValidation-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FixValidationToLogIncident-id-0022</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-FixValidationToEscalate-id-0023</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-LogIncidentSummary-id-0011" name="Log Incident Summary">
+      <bpmn:incoming>SequenceFlow-FixValidationToLogIncident-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogIncidentToEndResolved-id-0024</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-IncidentResolved-id-0001" name="Incident Resolved">
+      <bpmn:incoming>SequenceFlow-LogIncidentToEndResolved-id-0024</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-EscalateForFurtherInvestigation-id-0012" name="Escalate for Further Investigation">
+      <bpmn:incoming>SequenceFlow-FixValidationToEscalate-id-0023</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EscalateToEndEscalated-id-0025</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-IncidentEscalated-id-0002" name="Incident Escalated">
+      <bpmn:incoming>SequenceFlow-EscalateToEndEscalated-id-0025</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToAnalyzeTowers-id-0001" sourceRef="StartEvent-HighPacketLossDetected-id-0001" targetRef="ServiceTask-AnalyzeAffectedTowers-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AnalyzeTowersToServices-id-0002" sourceRef="ServiceTask-AnalyzeAffectedTowers-id-0001" targetRef="ServiceTask-AnalyzeImpactedServices-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-AnalyzeServicesToCustomers-id-0003" sourceRef="ServiceTask-AnalyzeImpactedServices-id-0002" targetRef="ServiceTask-AnalyzeCustomerImpact-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-AnalyzeCustomersToSwitchTraffic-id-0004" sourceRef="ServiceTask-AnalyzeCustomerImpact-id-0003" targetRef="ServiceTask-SwitchTrafficToAdjacentTowers-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-SwitchTrafficToAlertEngineers-id-0005" sourceRef="ServiceTask-SwitchTrafficToAdjacentTowers-id-0004" targetRef="SendTask-SendIncidentAlertToEngineers-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AlertEngineersToAlertNOC-id-0006" sourceRef="SendTask-SendIncidentAlertToEngineers-id-0001" targetRef="SendTask-SendIncidentAlertToNOCTeam-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-AlertNOCToDispatch-id-0007" sourceRef="SendTask-SendIncidentAlertToNOCTeam-id-0002" targetRef="ServiceTask-DispatchFieldEngineers-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-DispatchToRootCauseAnalysis-id-0008" sourceRef="ServiceTask-DispatchFieldEngineers-id-0005" targetRef="ServiceTask-AnalyzeRootCauseFromLogs-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-RootCauseToGateway-id-0009" sourceRef="ServiceTask-AnalyzeRootCauseFromLogs-id-0006" targetRef="ExclusiveGateway-RootCauseAnalysis-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToSpareParts-id-0010" name="root_cause == &#34;hardware_failure&#34;" sourceRef="ExclusiveGateway-RootCauseAnalysis-id-0001" targetRef="ServiceTask-RetrieveSparePartsFromInventory-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToPrioritizeTraffic-id-0011" name="root_cause == &#34;capacity_overload&#34;" sourceRef="ExclusiveGateway-RootCauseAnalysis-id-0001" targetRef="ServiceTask-PrioritizeTrafficToCriticalServices-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayDefaultToMerge-id-0012" sourceRef="ExclusiveGateway-RootCauseAnalysis-id-0001" targetRef="ExclusiveGateway-RootCauseMerge-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SparePartsToMerge-id-0013" sourceRef="ServiceTask-RetrieveSparePartsFromInventory-id-0007" targetRef="ExclusiveGateway-RootCauseMerge-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrioritizeTrafficToMerge-id-0014" sourceRef="ServiceTask-PrioritizeTrafficToCriticalServices-id-0008" targetRef="ExclusiveGateway-RootCauseMerge-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-MergeToFieldConnect-id-0015" sourceRef="ExclusiveGateway-RootCauseMerge-id-0002" targetRef="UserTask-FieldTeamConnectsDiagnosticEquipment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FieldConnectToConfirm-id-0016" sourceRef="UserTask-FieldTeamConnectsDiagnosticEquipment-id-0001" targetRef="UserTask-FieldTeamConfirmsHypothesis-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmToPerformFix-id-0017" sourceRef="UserTask-FieldTeamConfirmsHypothesis-id-0002" targetRef="UserTask-FieldTeamPerformsFix-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-PerformFixToReroute-id-0018" sourceRef="UserTask-FieldTeamPerformsFix-id-0003" targetRef="ServiceTask-RerouteTrafficDuringMaintenance-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-RerouteToNotifyCustomers-id-0019" sourceRef="ServiceTask-RerouteTrafficDuringMaintenance-id-0009" targetRef="SendTask-SendMaintenanceNotificationToCustomers-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotifyToValidateMetrics-id-0020" sourceRef="SendTask-SendMaintenanceNotificationToCustomers-id-0003" targetRef="ServiceTask-ValidateNetworkMetrics-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidateToFixValidation-id-0021" sourceRef="ServiceTask-ValidateNetworkMetrics-id-0010" targetRef="ExclusiveGateway-FixValidation-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-FixValidationToLogIncident-id-0022" name="metrics_normal" sourceRef="ExclusiveGateway-FixValidation-id-0003" targetRef="ServiceTask-LogIncidentSummary-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-FixValidationToEscalate-id-0023" sourceRef="ExclusiveGateway-FixValidation-id-0003" targetRef="ServiceTask-EscalateForFurtherInvestigation-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogIncidentToEndResolved-id-0024" sourceRef="ServiceTask-LogIncidentSummary-id-0011" targetRef="EndEvent-IncidentResolved-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EscalateToEndEscalated-id-0025" sourceRef="ServiceTask-EscalateForFurtherInvestigation-id-0012" targetRef="EndEvent-IncidentEscalated-id-0002" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process_PacketLossIncidentResponse-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process_PacketLossIncidentResponse-id-0001" bpmnElement="Process_PacketLossIncidentResponse-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-HighPacketLossDetected-id-0001_di" bpmnElement="StartEvent-HighPacketLossDetected-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AnalyzeAffectedTowers-id-0001_di" bpmnElement="ServiceTask-AnalyzeAffectedTowers-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AnalyzeImpactedServices-id-0002_di" bpmnElement="ServiceTask-AnalyzeImpactedServices-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AnalyzeCustomerImpact-id-0003_di" bpmnElement="ServiceTask-AnalyzeCustomerImpact-id-0003">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SwitchTrafficToAdjacentTowers-id-0004_di" bpmnElement="ServiceTask-SwitchTrafficToAdjacentTowers-id-0004">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendIncidentAlertToEngineers-id-0001_di" bpmnElement="SendTask-SendIncidentAlertToEngineers-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendIncidentAlertToNOCTeam-id-0002_di" bpmnElement="SendTask-SendIncidentAlertToNOCTeam-id-0002">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DispatchFieldEngineers-id-0005_di" bpmnElement="ServiceTask-DispatchFieldEngineers-id-0005">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AnalyzeRootCauseFromLogs-id-0006_di" bpmnElement="ServiceTask-AnalyzeRootCauseFromLogs-id-0006">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RootCauseAnalysis-id-0001_di" bpmnElement="ExclusiveGateway-RootCauseAnalysis-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RetrieveSparePartsFromInventory-id-0007_di" bpmnElement="ServiceTask-RetrieveSparePartsFromInventory-id-0007">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RootCauseMerge-id-0002_di" bpmnElement="ExclusiveGateway-RootCauseMerge-id-0002" isMarkerVisible="true">
+        <dc:Bounds x="1700" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-FieldTeamConnectsDiagnosticEquipment-id-0001_di" bpmnElement="UserTask-FieldTeamConnectsDiagnosticEquipment-id-0001">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-FieldTeamConfirmsHypothesis-id-0002_di" bpmnElement="UserTask-FieldTeamConfirmsHypothesis-id-0002">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-FieldTeamPerformsFix-id-0003_di" bpmnElement="UserTask-FieldTeamPerformsFix-id-0003">
+        <dc:Bounds x="2125" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RerouteTrafficDuringMaintenance-id-0009_di" bpmnElement="ServiceTask-RerouteTrafficDuringMaintenance-id-0009">
+        <dc:Bounds x="2275" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendMaintenanceNotificationToCustomers-id-0003_di" bpmnElement="SendTask-SendMaintenanceNotificationToCustomers-id-0003">
+        <dc:Bounds x="2425" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ValidateNetworkMetrics-id-0010_di" bpmnElement="ServiceTask-ValidateNetworkMetrics-id-0010">
+        <dc:Bounds x="2575" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-FixValidation-id-0003_di" bpmnElement="ExclusiveGateway-FixValidation-id-0003" isMarkerVisible="true">
+        <dc:Bounds x="2750" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogIncidentSummary-id-0011_di" bpmnElement="ServiceTask-LogIncidentSummary-id-0011">
+        <dc:Bounds x="2875" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-IncidentResolved-id-0001_di" bpmnElement="EndEvent-IncidentResolved-id-0001">
+        <dc:Bounds x="3057" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrioritizeTrafficToCriticalServices-id-0008_di" bpmnElement="ServiceTask-PrioritizeTrafficToCriticalServices-id-0008">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-EscalateForFurtherInvestigation-id-0012_di" bpmnElement="ServiceTask-EscalateForFurtherInvestigation-id-0012">
+        <dc:Bounds x="2875" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-IncidentEscalated-id-0002_di" bpmnElement="EndEvent-IncidentEscalated-id-0002">
+        <dc:Bounds x="3057" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToAnalyzeTowers-id-0001_di" bpmnElement="SequenceFlow-StartToAnalyzeTowers-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AnalyzeTowersToServices-id-0002_di" bpmnElement="SequenceFlow-AnalyzeTowersToServices-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AnalyzeServicesToCustomers-id-0003_di" bpmnElement="SequenceFlow-AnalyzeServicesToCustomers-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AnalyzeCustomersToSwitchTraffic-id-0004_di" bpmnElement="SequenceFlow-AnalyzeCustomersToSwitchTraffic-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SwitchTrafficToAlertEngineers-id-0005_di" bpmnElement="SequenceFlow-SwitchTrafficToAlertEngineers-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlertEngineersToAlertNOC-id-0006_di" bpmnElement="SequenceFlow-AlertEngineersToAlertNOC-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlertNOCToDispatch-id-0007_di" bpmnElement="SequenceFlow-AlertNOCToDispatch-id-0007">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DispatchToRootCauseAnalysis-id-0008_di" bpmnElement="SequenceFlow-DispatchToRootCauseAnalysis-id-0008">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RootCauseToGateway-id-0009_di" bpmnElement="SequenceFlow-RootCauseToGateway-id-0009">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToSpareParts-id-0010_di" bpmnElement="SequenceFlow-GatewayToSpareParts-id-0010">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToPrioritizeTraffic-id-0011_di" bpmnElement="SequenceFlow-GatewayToPrioritizeTraffic-id-0011">
+        <di:waypoint x="1425" y="95" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayDefaultToMerge-id-0012_di" bpmnElement="SequenceFlow-GatewayDefaultToMerge-id-0012">
+        <di:waypoint x="1425" y="95" />
+        <di:waypoint x="1425" y="140" />
+        <di:waypoint x="1725" y="140" />
+        <di:waypoint x="1725" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SparePartsToMerge-id-0013_di" bpmnElement="SequenceFlow-SparePartsToMerge-id-0013">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1700" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MergeToFieldConnect-id-0015_di" bpmnElement="SequenceFlow-MergeToFieldConnect-id-0015">
+        <di:waypoint x="1750" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FieldConnectToConfirm-id-0016_di" bpmnElement="SequenceFlow-FieldConnectToConfirm-id-0016">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmToPerformFix-id-0017_di" bpmnElement="SequenceFlow-ConfirmToPerformFix-id-0017">
+        <di:waypoint x="2075" y="70" />
+        <di:waypoint x="2125" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PerformFixToReroute-id-0018_di" bpmnElement="SequenceFlow-PerformFixToReroute-id-0018">
+        <di:waypoint x="2225" y="70" />
+        <di:waypoint x="2275" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RerouteToNotifyCustomers-id-0019_di" bpmnElement="SequenceFlow-RerouteToNotifyCustomers-id-0019">
+        <di:waypoint x="2375" y="70" />
+        <di:waypoint x="2425" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotifyToValidateMetrics-id-0020_di" bpmnElement="SequenceFlow-NotifyToValidateMetrics-id-0020">
+        <di:waypoint x="2525" y="70" />
+        <di:waypoint x="2575" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidateToFixValidation-id-0021_di" bpmnElement="SequenceFlow-ValidateToFixValidation-id-0021">
+        <di:waypoint x="2675" y="70" />
+        <di:waypoint x="2750" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FixValidationToLogIncident-id-0022_di" bpmnElement="SequenceFlow-FixValidationToLogIncident-id-0022">
+        <di:waypoint x="2800" y="70" />
+        <di:waypoint x="2875" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FixValidationToEscalate-id-0023_di" bpmnElement="SequenceFlow-FixValidationToEscalate-id-0023">
+        <di:waypoint x="2775" y="95" />
+        <di:waypoint x="2775" y="210" />
+        <di:waypoint x="2875" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogIncidentToEndResolved-id-0024_di" bpmnElement="SequenceFlow-LogIncidentToEndResolved-id-0024">
+        <di:waypoint x="2975" y="70" />
+        <di:waypoint x="3057" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrioritizeTrafficToMerge-id-0014_di" bpmnElement="SequenceFlow-PrioritizeTrafficToMerge-id-0014">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1725" y="210" />
+        <di:waypoint x="1725" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EscalateToEndEscalated-id-0025_di" bpmnElement="SequenceFlow-EscalateToEndEscalated-id-0025">
+        <di:waypoint x="2975" y="210" />
+        <di:waypoint x="3057" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

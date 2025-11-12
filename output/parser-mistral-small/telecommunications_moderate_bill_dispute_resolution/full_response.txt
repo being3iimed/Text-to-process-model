@@ -1,0 +1,68 @@
+### Summary of Elements
+
+**TASKS:**
+- `userTask("Support Agent Reviews Dispute")` - Support agent reviews account history, usage records, and service logs
+- `serviceTask("Issue Credit")` - System issues credit if error confirmed
+- `sendTask("Send: Credit Notification")` - Notify customer of credit issued
+- `userTask("Explain Billing Logic")` - Agent explains billing logic to customer
+- `userTask("Escalate to Billing Specialist")` - Agent escalates case to specialist
+- `userTask("Specialist Investigates Dispute")` - Specialist performs deep investigation
+- `serviceTask("Issue Retroactive Credit")` - System issues retroactive credit
+- `sendTask("Send: Goodwill Offer")` - Offer service credits for future bills
+- `serviceTask("Close Case")` - System closes the case
+
+**GATEWAYS:**
+- XOR at point after initial review with conditions: error confirmed, charges correct
+- XOR at point after specialist investigation with conditions: error confirmed, charges correct
+
+**EVENTS:**
+- `startEvent("Customer Dispute Initiated")` - Trigger: Customer submits dispute ticket
+- `endEvent("Case Closed")` - Normal completion
+
+**BOUNDARY EVENTS:**
+- None identified (no explicit SLAs or error scenarios mentioned)
+
+**SUBPROCESSES:**
+- None identified (no cohesive logical grouping or repeated structures)
+
+### BPMN Pseudocode
+
+```pseudocode
+startEvent("Customer Dispute Initiated")
+
+userTask("Support Agent Reviews Dispute")
+
+if (error_confirmed):
+    serviceTask("Issue Credit")
+    sendTask("Send: Credit Notification")
+    serviceTask("Close Case")
+    endEvent("Case Closed")
+else:
+    userTask("Explain Billing Logic")
+    if (customer_still_disputes):
+        userTask("Escalate to Billing Specialist")
+        userTask("Specialist Investigates Dispute")
+        if (error_confirmed):
+            serviceTask("Issue Retroactive Credit")
+            sendTask("Send: Goodwill Offer")
+            serviceTask("Close Case")
+            endEvent("Case Closed")
+        else:
+            sendTask("Send: Goodwill Offer")
+            serviceTask("Close Case")
+            endEvent("Case Closed")
+    else:
+        serviceTask("Close Case")
+        endEvent("Case Closed")
+```
+
+### Compliance Checks and Corrections
+
+- **Timer Events:** No timer events mentioned in the description.
+- **Gateways:** All diverging gateways have corresponding converging gateways.
+- **Sequence Flows:** All flows are traceable and have descriptive labels.
+- **Boundary Events:** No boundary events are needed as there are no explicit SLAs or error scenarios mentioned.
+- **Subprocesses:** No subprocesses are needed as there are no cohesive logical groupings or repeated structures.
+- **Flow Paths:** All paths are traceable from start to end with no orphaned flows.
+
+This pseudocode adheres to the BPMN 2.0 specification and includes all necessary elements for a clear and structured process flow.

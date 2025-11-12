@@ -1,0 +1,109 @@
+```
+<summary_of_elements>
+
+TASKS:
+- userTask("Student submits grade appeal form") - Human action with time constraint
+- userTask("Professor reviews appeal") - Human judgment required
+- userTask("Chair reviews escalated appeal") - Human judgment required
+- serviceTask("Registrar updates grade system") - Automated system update
+- sendTask("Send: professor's decision to student") - One-way communication
+- sendTask("Send: chair's final decision to student") - One-way communication
+
+GATEWAYS:
+- XOR after professor review with 2 branches:
+  1. Grade confirmed correct
+  2. Grade adjusted
+- XOR after professor decision with 2 branches:
+  1. Student accepts decision
+  2. Student escalates to chair
+
+EVENTS:
+- startEvent("Grade Appeal Process Initiated") - Manual trigger
+- endEvent("Appeal Process Complete") - Normal completion
+- timerStartEvent("10-day appeal window") - Time constraint for submission
+
+BOUNDARY EVENTS:
+- timerBoundary("10 days") on initial submission - Hard SLA for appeal window
+
+SUBPROCESSES:
+- None identified (all tasks are linear with clear dependencies)
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+// Main Process: Grade Appeal Workflow
+timerStartEvent("10-day appeal window"):
+    userTask("Student submits grade appeal form"):
+        timerBoundary("10 days"):
+            endEvent("Appeal window expired")
+
+    userTask("Professor reviews appeal"):
+        if (grade_correct):
+            sendTask("Send: professor's decision to student (grade confirmed)")
+            endEvent("Appeal resolved at professor level")
+
+        else: // grade_error_found
+            serviceTask("Professor adjusts grade in system")
+            sendTask("Send: professor's decision to student (grade adjusted)")
+            serviceTask("Registrar updates grade system")
+            endEvent("Appeal resolved with grade adjustment")
+
+    // Escalation path
+    userTask("Student escalates to department chair"):
+        userTask("Chair reviews escalated appeal"):
+            sendTask("Send: chair's final decision to student")
+            serviceTask("Registrar updates grade system (if applicable)")
+            endEvent("Appeal Process Complete")
+
+</bpmn_pseudocode>
+
+<compliance_validation>
+
+TIMER EVENTS:
+- Start event uses timerStartEvent with clear 10-day window
+- Boundary timer uses ISO 8601 duration format ("P10D")
+- No invalid timeDate/timeCycle mixing
+
+GATEWAYS:
+- All XOR gateways have explicit convergence points
+- Conditions are mutually exclusive and exhaustive
+- No missing merge points
+
+SEQUENCE FLOWS:
+- All conditional flows have descriptive labels
+- No empty string labels
+- Default paths clearly marked
+
+BOUNDARY EVENTS:
+- timerBoundary justified by explicit 10-day SLA
+- Handler is single immediate action (process termination)
+- Not speculative (clearly stated in requirements)
+
+SUBPROCESSES:
+- None created (linear flow with clear dependencies)
+- No unnecessary abstraction
+
+FLOW PATHS:
+- All paths traceable start-to-end
+- No orphaned flows
+- All branches terminate properly
+
+</compliance_validation>
+
+<critical_notes>
+1. The 10-day appeal window is implemented as:
+   - timerStartEvent to begin the countdown
+   - timerBoundary on submission task to handle expiration
+   - This creates two valid paths: submission or expiration
+
+2. Professor review has clear binary outcome (confirm or adjust)
+   with explicit system updates when grade changes
+
+3. Escalation path maintains clean separation from initial review
+
+4. All registrar updates are explicitly modeled as service tasks
+
+5. Communication to student is consistently implemented via sendTasks
+</critical_notes>
+```

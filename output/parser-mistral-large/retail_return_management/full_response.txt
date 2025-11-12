@@ -1,0 +1,239 @@
+```
+<summary_of_elements>
+
+## Summary of Elements
+
+### TASKS:
+- **userTask("Initiate Return Request")** - Customer provides order number and reason
+- **serviceTask("Validate Return Eligibility")** - System checks 30-day window and item condition
+- **sendTask("Send: return shipping label")** - System generates and sends label to customer
+- **userTask("Ship Item Back")** - Customer action (external to system)
+- **userTask("Verify Item Condition")** - Warehouse staff inspection
+- **serviceTask("Process Refund")** - Automated refund execution
+- **sendTask("Send: refund confirmation email")** - System notification
+- **sendTask("Send: return denial notification")** - System notification for damaged items
+
+### GATEWAYS:
+- **XOR** after eligibility check with conditions:
+  - `eligible == true`
+  - `eligible == false` (default)
+- **XOR** after condition verification with conditions:
+  - `condition == acceptable`
+  - `condition == damaged` (default)
+
+### EVENTS:
+- **startEvent("Return Process Initiated")** - Manual trigger by customer
+- **endEvent("Return Process Complete")** - Normal completion
+- **endEvent("Return Denied")** - Early termination path
+
+### BOUNDARY EVENTS:
+- **None** (No explicit SLA requirements or expected error scenarios mentioned)
+
+### SUBPROCESSES:
+- **None** (All tasks are linear/sequential with simple decision points; no cohesive grouping needed)
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+```pseudocode
+startEvent("Return Process Initiated")
+
+// Customer initiates return
+userTask("Initiate Return Request")
+  name: "Customer submits order number and reason"
+  inputs:
+    - order_number
+    - return_reason
+
+// System validation
+serviceTask("Validate Return Eligibility")
+  name: "System checks 30-day window and item condition"
+  inputs:
+    - order_number
+    - return_reason
+  outputs:
+    - eligible (boolean)
+    - validation_message
+
+// Eligibility decision
+if (eligible == true):
+    sendTask("Send: return shipping label")
+      name: "System generates and emails return label"
+      inputs:
+        - order_number
+      outputs:
+        - shipping_label_sent (boolean)
+
+    userTask("Ship Item Back")
+      name: "Customer ships item using provided label"
+      inputs:
+        - shipping_label_sent
+
+    userTask("Verify Item Condition")
+      name: "Warehouse staff inspects returned item"
+      inputs:
+        - returned_item
+      outputs:
+        - condition (enum: acceptable/damaged)
+        - verification_notes
+
+    // Condition decision
+    if (condition == acceptable):
+        serviceTask("Process Refund")
+          name: "System issues refund to original payment method"
+          inputs:
+            - order_number
+            - refund_amount
+          outputs:
+            - refund_processed (boolean)
+
+        sendTask("Send: refund confirmation email")
+          name: "System sends confirmation to customer"
+          inputs:
+            - order_number
+            - refund_amount
+          outputs:
+            - confirmation_sent (boolean)
+
+        endEvent("Return Process Complete")
+
+    else: // condition == damaged
+        sendTask("Send: return denial notification")
+          name: "System notifies customer of damaged item"
+          inputs:
+            - order_number
+            - verification_notes
+          outputs:
+            - denial_sent (boolean)
+
+        endEvent("Return Denied")
+
+else: // eligible == false
+    endEvent("Return Denied")
+      name: "Ineligible return request terminated"
+```
+
+</bpmn_pseudocode>
+
+<compliance_validation>
+
+## BPMN Compliance Validation
+
+### 1. Timer Events
+✅ **PASS**: No timer events used (none mentioned in requirements)
+
+### 2. Gateway Convergence
+✅ **PASS**:
+- First XOR (eligibility) has implicit convergence via end events
+- Second XOR (condition) has explicit end events for each branch
+- No orphaned paths
+
+### 3. Sequence Flow Labels
+✅ **PASS**:
+- All conditional flows have clear labels:
+  - `eligible == true`
+  - `condition == acceptable`
+- Default flows explicitly marked
+
+### 4. Boundary Events
+✅ **PASS**:
+- No boundary events added (no SLA requirements or expected errors mentioned)
+- Avoids speculative error handling
+
+### 5. Subprocesses
+✅ **PASS**:
+- No subprocesses created (linear flow with simple decisions)
+- Meets "dissolve into inline tasks" guideline
+
+### 6. Flow Consistency
+✅ **PASS**:
+- All paths traceable start-to-end:
+  1. Eligible + Acceptable → Refund → Complete
+  2. Eligible + Damaged → Denial → Denied
+  3. Ineligible → Denied
+- No unreachable elements
+
+### 7. Element Balance
+✅ **PASS**:
+- Core elements (tasks/gateways/events) = 100% of design
+- No over-engineering
+- Clean, minimal structure
+
+### 8. Timer Property Compliance
+✅ **N/A**: No timer events present
+
+</compliance_validation>
+
+<critical_success_verification>
+
+## Critical Success Criteria Verification
+
+| Criterion                          | Status  | Evidence |
+|------------------------------------|---------|----------|
+| No invalid BPMN properties        | ✅ PASS | No timer properties used; all elements valid |
+| No unreachable elements           | ✅ PASS | All paths traceable; no timers in sequential flow |
+| No missing convergence points      | ✅ PASS | XOR branches terminate at end events |
+| No orphaned flows                  | ✅ PASS | Every path starts at startEvent and ends at endEvent |
+| No speculative boundary events     | ✅ PASS | No boundary events added (none justified) |
+| No unjustified subprocesses        | ✅ PASS | No subprocesses (not needed for this simplicity) |
+| All labels present                | ✅ PASS | All conditional flows have descriptive labels |
+| Balanced design (≥85% core elements) | ✅ PASS | 100% core elements (0% boundary/subprocess overhead) |
+
+</critical_success_verification>
+
+<assumptions>
+
+## Documented Assumptions
+
+1. **No SLA Requirements**: No hard time constraints mentioned for any task (e.g., "must verify condition within 24 hours"), so no timer boundary events added.
+2. **No Expected Errors**: No explicit error scenarios (e.g., "system fails to validate") mentioned, so no error boundary events added.
+3. **Linear Workflow**: All tasks are sequential with simple binary decisions; no parallel paths needed.
+4. **End Events**: Used distinct end events for "Complete" vs. "Denied" for clarity in analytics/tracking.
+5. **Customer Shipping**: "Ship Item Back" is a userTask (customer action) but occurs outside the system; included for flow completeness.
+
+</assumptions>
+
+<recommended_improvements>
+
+## Recommended Improvements (If Requirements Evolve)
+
+1. **Add Timer Boundary**:
+   - *If* business requires "condition verification must complete within 48 hours," add:
+     ```pseudocode
+     userTask("Verify Item Condition"):
+         timerBoundary("PT48H"):
+             sendTask("Send: verification overdue alert")
+     ```
+
+2. **Add Error Boundary**:
+   - *If* "Validate Return Eligibility" has known failure modes (e.g., database timeout), add:
+     ```pseudocode
+     serviceTask("Validate Return Eligibility"):
+         errorBoundary():
+             userTask("Manual Eligibility Review")
+     ```
+
+3. **Create Subprocess**:
+   - *If* refund processing involves multiple steps (e.g., "Calculate Refund Amount" + "Update Inventory" + "Issue Refund"), group into:
+     ```pseudocode
+     subProcess("Process Refund"):
+         startEvent("Refund Started")
+         serviceTask("Calculate Refund Amount")
+         serviceTask("Update Inventory")
+         serviceTask("Issue Refund")
+         endEvent("Refund Complete")
+     endSubProcess
+     ```
+
+4. **Add Parallel Gateway**:
+   - *If* post-refund actions are independent (e.g., send email AND update CRM), use:
+     ```pseudocode
+     AND:
+         sendTask("Send: refund confirmation email")
+         serviceTask("Update CRM with refund status")
+     END_AND
+     ```
+
+</recommended_improvements>
+```

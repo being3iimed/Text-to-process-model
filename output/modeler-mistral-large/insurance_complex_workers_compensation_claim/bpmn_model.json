@@ -1,0 +1,525 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "WorkersCompensationClaimProcess",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "WorkersCompensationClaimProcess-id-0001",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-WorkplaceInjuryOccurs-id-0001",
+          "name": "Workplace Injury Occurs"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ReportInjuryToEmployer-id-0001",
+          "name": "Report Injury to Employer"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-EmployerSubmitsInjuryReport-id-0001",
+          "name": "Employer Submits Injury Report to Insurer"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-Timer24H-EmployerSubmitsReport-id-0001",
+          "name": "24 Hour SLA Violation",
+          "attachedToRef": "ServiceTask-EmployerSubmitsInjuryReport-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT24H"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendSLANotice-id-0001",
+          "name": "Send: SLA Violation Notice to Employer"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ReportingDeadlineMissed-id-0001",
+          "name": "Reporting Deadline Missed"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-AdjusterContactsWorker-id-0001",
+          "name": "Adjuster Contacts Injured Worker"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-Error-ContactWorker-id-0001",
+          "name": "Worker Unreachable",
+          "attachedToRef": "UserTask-AdjusterContactsWorker-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:ErrorEventDefinition",
+              "errorRef": "CONTACT_ERROR"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-AlternativeContactMethods-id-0001",
+          "name": "Attempt Alternative Contact Methods"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-DetermineWorkRelatedness-id-0001",
+          "name": "Adjuster Determines Work-Relatedness"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-WorkRelated-id-0001",
+          "name": "Work-Related?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-VerifyWageHistory-id-0001",
+          "name": "Adjuster Verifies Wage/Employment History"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-DetermineBenefits-id-0001",
+          "name": "Adjuster Determines Applicable Benefits"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-BenefitsType-id-0001",
+          "name": "Benefits Type",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-MedicalTreatmentAuthorization-id-0001",
+          "name": "Medical Treatment Authorization",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-TreatmentAuthBegins-id-0001",
+              "name": "Treatment Authorization Begins"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-AuthorizeMedicalTreatment-id-0001",
+              "name": "Adjuster Authorizes Medical Treatment"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ReviewMedicalReports-id-0001",
+              "name": "Adjuster Reviews Medical Reports"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-MonitorReturnToWork-id-0001",
+              "name": "Adjuster Monitors Return-to-Work Status"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-DisputeArises-id-0001",
+              "name": "Dispute Arises?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-OrderIME-id-0001",
+              "name": "Order Independent Medical Examination"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-IMESecondOpinion-id-0001",
+              "name": "IME Physician Provides Second Opinion"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-CanReturnToWork-id-0001",
+              "name": "Can Return to Work?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:SubProcess",
+              "id": "SubProcess-ReturnToWorkCoordination-id-0001",
+              "name": "Return-to-Work Coordination",
+              "flowElements": [
+                {
+                  "$type": "bpmn:StartEvent",
+                  "id": "StartEvent-ReturnToWorkPlanning-id-0001",
+                  "name": "Return-to-Work Planning Begins"
+                },
+                {
+                  "$type": "bpmn:UserTask",
+                  "id": "UserTask-CoordinateJobPlacement-id-0001",
+                  "name": "Adjuster Coordinates Job Placement"
+                },
+                {
+                  "$type": "bpmn:ServiceTask",
+                  "id": "ServiceTask-SubmitStateReport-id-0001",
+                  "name": "Submit Status Report to State Board"
+                },
+                {
+                  "$type": "bpmn:EndEvent",
+                  "id": "EndEvent-ReturnToWorkComplete-id-0001",
+                  "name": "Return-to-Work Coordination Complete"
+                },
+                {
+                  "$type": "bpmn:SequenceFlow",
+                  "id": "SequenceFlow-ReturnPlanningToPlacement-id-0001",
+                  "sourceRef": "StartEvent-ReturnToWorkPlanning-id-0001",
+                  "targetRef": "UserTask-CoordinateJobPlacement-id-0001"
+                },
+                {
+                  "$type": "bpmn:SequenceFlow",
+                  "id": "SequenceFlow-PlacementToReport-id-0001",
+                  "sourceRef": "UserTask-CoordinateJobPlacement-id-0001",
+                  "targetRef": "ServiceTask-SubmitStateReport-id-0001"
+                },
+                {
+                  "$type": "bpmn:SequenceFlow",
+                  "id": "SequenceFlow-ReportToComplete-id-0001",
+                  "sourceRef": "ServiceTask-SubmitStateReport-id-0001",
+                  "targetRef": "EndEvent-ReturnToWorkComplete-id-0001"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-SubmitStateReportNoReturn-id-0001",
+              "name": "Submit Status Report to State Board"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-TreatmentAuthComplete-id-0001",
+              "name": "Treatment Authorization Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-TreatmentAuthStartToAuthorize-id-0001",
+              "sourceRef": "StartEvent-TreatmentAuthBegins-id-0001",
+              "targetRef": "UserTask-AuthorizeMedicalTreatment-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-AuthorizeToReview-id-0001",
+              "sourceRef": "UserTask-AuthorizeMedicalTreatment-id-0001",
+              "targetRef": "UserTask-ReviewMedicalReports-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReviewToMonitor-id-0001",
+              "sourceRef": "UserTask-ReviewMedicalReports-id-0001",
+              "targetRef": "UserTask-MonitorReturnToWork-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MonitorToDisputeCheck-id-0001",
+              "sourceRef": "UserTask-MonitorReturnToWork-id-0001",
+              "targetRef": "ExclusiveGateway-DisputeArises-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-DisputeNoToReturnCheck-id-0001",
+              "sourceRef": "ExclusiveGateway-DisputeArises-id-0001",
+              "targetRef": "ExclusiveGateway-CanReturnToWork-id-0001",
+              "name": "No Dispute",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-DisputeYesToOrderIME-id-0001",
+              "sourceRef": "ExclusiveGateway-DisputeArises-id-0001",
+              "targetRef": "UserTask-OrderIME-id-0001",
+              "name": "Dispute Arises"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-OrderIMEToSecondOpinion-id-0001",
+              "sourceRef": "UserTask-OrderIME-id-0001",
+              "targetRef": "UserTask-IMESecondOpinion-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SecondOpinionToReturnCheck-id-0001",
+              "sourceRef": "UserTask-IMESecondOpinion-id-0001",
+              "targetRef": "ExclusiveGateway-CanReturnToWork-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReturnYesToCoordination-id-0001",
+              "sourceRef": "ExclusiveGateway-CanReturnToWork-id-0001",
+              "targetRef": "SubProcess-ReturnToWorkCoordination-id-0001",
+              "name": "Can Return"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReturnNoToStateReport-id-0001",
+              "sourceRef": "ExclusiveGateway-CanReturnToWork-id-0001",
+              "targetRef": "ServiceTask-SubmitStateReportNoReturn-id-0001",
+              "name": "Cannot Return",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CoordinationToComplete-id-0001",
+              "sourceRef": "SubProcess-ReturnToWorkCoordination-id-0001",
+              "targetRef": "EndEvent-TreatmentAuthComplete-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StateReportToComplete-id-0001",
+              "sourceRef": "ServiceTask-SubmitStateReportNoReturn-id-0001",
+              "targetRef": "EndEvent-TreatmentAuthComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-AuthorizeMedicalOnly-id-0001",
+          "name": "Adjuster Authorizes Medical Treatment (Medical Only)"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CalculateDisability-id-0001",
+          "name": "Calculate Disability Income Benefits"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-EvaluateMMI-id-0001",
+          "name": "Adjuster Evaluates Maximum Medical Improvement"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-PermanentDisability-id-0001",
+          "name": "Permanent Disability?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CalculatePermanentAward-id-0001",
+          "name": "Adjuster Calculates Permanent Disability Award"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CloseClaimFile-id-0001",
+          "name": "Close Claim File"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ClaimClosed-id-0001",
+          "name": "Claim Closed"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-NonCoverageNotice-id-0001",
+          "name": "Send: Non-Coverage Notification"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CloseNonCovered-id-0001",
+          "name": "Close Claim File (Non-Covered)"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-NonCoveredClosed-id-0001",
+          "name": "Claim Closed (Non-Covered)"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-WorkRelatedConverge-id-0001",
+          "name": "Work-Related Convergence",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-BenefitsTypeConverge-id-0001",
+          "name": "Benefits Type Convergence",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-PermanentDisabilityConverge-id-0001",
+          "name": "Permanent Disability Convergence",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InjuryToReport-id-0001",
+          "sourceRef": "StartEvent-WorkplaceInjuryOccurs-id-0001",
+          "targetRef": "UserTask-ReportInjuryToEmployer-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReportToSubmit-id-0001",
+          "sourceRef": "UserTask-ReportInjuryToEmployer-id-0001",
+          "targetRef": "ServiceTask-EmployerSubmitsInjuryReport-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SubmitToContact-id-0001",
+          "sourceRef": "ServiceTask-EmployerSubmitsInjuryReport-id-0001",
+          "targetRef": "UserTask-AdjusterContactsWorker-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ContactToWorkRelated-id-0001",
+          "sourceRef": "UserTask-AdjusterContactsWorker-id-0001",
+          "targetRef": "UserTask-DetermineWorkRelatedness-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-WorkRelatedToGateway-id-0001",
+          "sourceRef": "UserTask-DetermineWorkRelatedness-id-0001",
+          "targetRef": "ExclusiveGateway-WorkRelated-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-WorkRelatedYesToVerify-id-0001",
+          "sourceRef": "ExclusiveGateway-WorkRelated-id-0001",
+          "targetRef": "UserTask-VerifyWageHistory-id-0001",
+          "name": "Work-Related",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-WorkRelatedNoToNonCoverage-id-0001",
+          "sourceRef": "ExclusiveGateway-WorkRelated-id-0001",
+          "targetRef": "SendTask-NonCoverageNotice-id-0001",
+          "name": "Not Work-Related",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-VerifyToBenefits-id-0001",
+          "sourceRef": "UserTask-VerifyWageHistory-id-0001",
+          "targetRef": "UserTask-DetermineBenefits-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BenefitsToBenefitsGateway-id-0001",
+          "sourceRef": "UserTask-DetermineBenefits-id-0001",
+          "targetRef": "ExclusiveGateway-BenefitsType-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BenefitsBothToMedicalAuth-id-0001",
+          "sourceRef": "ExclusiveGateway-BenefitsType-id-0001",
+          "targetRef": "SubProcess-MedicalTreatmentAuthorization-id-0001",
+          "name": "Medical + Disability",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BenefitsMedicalToMedicalOnly-id-0001",
+          "sourceRef": "ExclusiveGateway-BenefitsType-id-0001",
+          "targetRef": "UserTask-AuthorizeMedicalOnly-id-0001",
+          "name": "Medical Only",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BenefitsDisabilityToCalculate-id-0001",
+          "sourceRef": "ExclusiveGateway-BenefitsType-id-0001",
+          "targetRef": "UserTask-CalculateDisability-id-0001",
+          "name": "Disability Only",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MedicalAuthToMMI-id-0001",
+          "sourceRef": "SubProcess-MedicalTreatmentAuthorization-id-0001",
+          "targetRef": "UserTask-EvaluateMMI-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MedicalOnlyToMMI-id-0001",
+          "sourceRef": "UserTask-AuthorizeMedicalOnly-id-0001",
+          "targetRef": "UserTask-EvaluateMMI-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DisabilityToMMI-id-0001",
+          "sourceRef": "UserTask-CalculateDisability-id-0001",
+          "targetRef": "UserTask-EvaluateMMI-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MMIToPermanentCheck-id-0001",
+          "sourceRef": "UserTask-EvaluateMMI-id-0001",
+          "targetRef": "ExclusiveGateway-PermanentDisability-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PermanentYesToCalculateAward-id-0001",
+          "sourceRef": "ExclusiveGateway-PermanentDisability-id-0001",
+          "targetRef": "UserTask-CalculatePermanentAward-id-0001",
+          "name": "Permanent Disability",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PermanentNoToClose-id-0001",
+          "sourceRef": "ExclusiveGateway-PermanentDisability-id-0001",
+          "targetRef": "ServiceTask-CloseClaimFile-id-0001",
+          "name": "No Permanent Disability",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CalculateAwardToClose-id-0001",
+          "sourceRef": "UserTask-CalculatePermanentAward-id-0001",
+          "targetRef": "ServiceTask-CloseClaimFile-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CloseToEnd-id-0001",
+          "sourceRef": "ServiceTask-CloseClaimFile-id-0001",
+          "targetRef": "EndEvent-ClaimClosed-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NonCoverageToClose-id-0001",
+          "sourceRef": "SendTask-NonCoverageNotice-id-0001",
+          "targetRef": "ServiceTask-CloseNonCovered-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CloseNonCoveredToEnd-id-0001",
+          "sourceRef": "ServiceTask-CloseNonCovered-id-0001",
+          "targetRef": "EndEvent-NonCoveredClosed-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryTimerToSendNotice-id-0001",
+          "sourceRef": "BoundaryEvent-Timer24H-EmployerSubmitsReport-id-0001",
+          "targetRef": "SendTask-SendSLANotice-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendNoticeToEnd-id-0001",
+          "sourceRef": "SendTask-SendSLANotice-id-0001",
+          "targetRef": "EndEvent-ReportingDeadlineMissed-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryErrorToAlternativeContact-id-0001",
+          "sourceRef": "BoundaryEvent-Error-ContactWorker-id-0001",
+          "targetRef": "UserTask-AlternativeContactMethods-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AlternativeContactToWorkRelated-id-0001",
+          "sourceRef": "UserTask-AlternativeContactMethods-id-0001",
+          "targetRef": "UserTask-DetermineWorkRelatedness-id-0001"
+        }
+      ]
+    }
+  ]
+}

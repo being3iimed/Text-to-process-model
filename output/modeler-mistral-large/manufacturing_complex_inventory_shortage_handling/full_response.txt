@@ -1,0 +1,495 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "Definitions_ComponentShortageProcess",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process_ComponentShortageResolution",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-ShortageDetected-id-0001",
+          "name": "Component X Shortage Detected"
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-QueryDeliverySchedule-id-0001",
+          "name": "Query Supplier Delivery Schedule"
+        },
+
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-DeliveryETA-id-0001",
+          "name": "Next Delivery ETA ≤ 24h?",
+          "gatewayDirection": "Diverging"
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-LogMinorDelay-id-0002",
+          "name": "Log: Minor Production Delay"
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-AdjustSchedule-id-0003",
+          "name": "Adjust Production Schedule"
+        },
+
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ResumedOriginal-id-0001",
+          "name": "Production Resumes with Original Components"
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-QueryAlternatives-id-0004",
+          "name": "Query Alternative Components Database"
+        },
+
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-AlternativeAvailable-id-0002",
+          "name": "Alternative Component Available?",
+          "gatewayDirection": "Diverging"
+        },
+
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-UseAlternative-id-0001",
+          "name": "Send: Use Alternative Component to Production"
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-LogAlternativeUsed-id-0005",
+          "name": "Log: Alternative Component Used"
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-AdjustParameters-id-0006",
+          "name": "Adjust Production Parameters if Needed"
+        },
+
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ResumedAlternative-id-0002",
+          "name": "Production Resumes with Alternative"
+        },
+
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-ExpediteShipment-id-0001",
+          "name": "Expedite Shipment",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-ExpediteInitiated-id-0001",
+              "name": "Expedite Request Initiated"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ManagerApproval-id-0001",
+              "name": "Production Manager Approves Expedite Premium Cost"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-SendExpediteRequest-id-0001",
+              "name": "Send Expedite Request to Supplier"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-SupplierAgrees-id-0001",
+              "name": "Supplier Agrees to Expedite?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-ConfirmToProduction-id-0001",
+              "name": "Send: Confirmation to Production Line"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-DelayNotice-id-0002",
+              "name": "Send: Delay Notice to Dependent Lines"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-ExpediteConfirmed-id-0001",
+              "name": "Expedite Confirmed"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-ExpediteRejected-id-0002",
+              "name": "Expedite Rejected"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ExpediteStartToApproval-id-0001",
+              "sourceRef": "StartEvent-ExpediteInitiated-id-0001",
+              "targetRef": "UserTask-ManagerApproval-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ApprovalToRequest-id-0002",
+              "sourceRef": "UserTask-ManagerApproval-id-0001",
+              "targetRef": "ServiceTask-SendExpediteRequest-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RequestToGateway-id-0003",
+              "sourceRef": "ServiceTask-SendExpediteRequest-id-0001",
+              "targetRef": "ExclusiveGateway-SupplierAgrees-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToConfirmation-id-0004",
+              "name": "Supplier Agrees",
+              "sourceRef": "ExclusiveGateway-SupplierAgrees-id-0001",
+              "targetRef": "SendTask-ConfirmToProduction-id-0001",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ConfirmationToDelay-id-0005",
+              "sourceRef": "SendTask-ConfirmToProduction-id-0001",
+              "targetRef": "SendTask-DelayNotice-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-DelayToExpediteConfirmed-id-0006",
+              "sourceRef": "SendTask-DelayNotice-id-0002",
+              "targetRef": "EndEvent-ExpediteConfirmed-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToRejected-id-0007",
+              "name": "Supplier Rejects",
+              "sourceRef": "ExclusiveGateway-SupplierAgrees-id-0001",
+              "targetRef": "EndEvent-ExpediteRejected-id-0002",
+              "isDefault": true
+            }
+          ]
+        },
+
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-BackupSupplier-id-0002",
+          "name": "Procure Backup Supplier",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-EscalationInitiated-id-0001",
+              "name": "Escalation to Procurement"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-SelectBackupSupplier-id-0001",
+              "name": "Procurement Manager Selects Backup Supplier"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-VerifyBackupStock-id-0001",
+              "name": "Verify Backup Supplier Stock"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-NegotiateDelivery-id-0002",
+              "name": "Negotiate Same-Day Delivery"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-BackupConfirmed-id-0001",
+              "name": "Backup Supplier Confirmed?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-CreatePO-id-0003",
+              "name": "Create Purchase Order for Backup Supplier"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-LogCostVariance-id-0004",
+              "name": "Log: Backup Supplier Cost Variance"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-BackupSecured-id-0001",
+              "name": "Backup Supplier Secured"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-NoBackup-id-0002",
+              "name": "No Backup Available"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-EscalationToSelect-id-0001",
+              "sourceRef": "StartEvent-EscalationInitiated-id-0001",
+              "targetRef": "UserTask-SelectBackupSupplier-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SelectToVerify-id-0002",
+              "sourceRef": "UserTask-SelectBackupSupplier-id-0001",
+              "targetRef": "ServiceTask-VerifyBackupStock-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-VerifyToNegotiate-id-0003",
+              "sourceRef": "ServiceTask-VerifyBackupStock-id-0001",
+              "targetRef": "ServiceTask-NegotiateDelivery-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-NegotiateToGateway-id-0004",
+              "sourceRef": "ServiceTask-NegotiateDelivery-id-0002",
+              "targetRef": "ExclusiveGateway-BackupConfirmed-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToCreatePO-id-0005",
+              "name": "Backup Confirmed",
+              "sourceRef": "ExclusiveGateway-BackupConfirmed-id-0001",
+              "targetRef": "ServiceTask-CreatePO-id-0003",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CreatePOToLog-id-0006",
+              "sourceRef": "ServiceTask-CreatePO-id-0003",
+              "targetRef": "ServiceTask-LogCostVariance-id-0004"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-LogToBackupSecured-id-0007",
+              "sourceRef": "ServiceTask-LogCostVariance-id-0004",
+              "targetRef": "EndEvent-BackupSecured-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToNoBackup-id-0008",
+              "name": "No Backup Available",
+              "sourceRef": "ExclusiveGateway-BackupConfirmed-id-0001",
+              "targetRef": "EndEvent-NoBackup-id-0002",
+              "isDefault": true
+            }
+          ]
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-UpdateETA-id-0007",
+          "name": "Update Delivery ETA"
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-LogExpediteCost-id-0008",
+          "name": "Log: Expedite Cost Variance"
+        },
+
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ResumedExpedited-id-0003",
+          "name": "Production Resumes with Expedited Components"
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-UpdateSchedule-id-0009",
+          "name": "Update Production Schedule"
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-UpdateMetrics-id-0010",
+          "name": "Update Supplier Performance Metrics"
+        },
+
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ResumedBackup-id-0004",
+          "name": "Production Resumes with Backup Components"
+        },
+
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ManualResolution-id-0001",
+          "name": "Manual Resolution Required"
+        },
+
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-Terminated-id-0005",
+          "name": "Process Terminated: No Resolution"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToQueryDelivery-id-0001",
+          "sourceRef": "StartEvent-ShortageDetected-id-0001",
+          "targetRef": "ServiceTask-QueryDeliverySchedule-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-QueryToETAGateway-id-0002",
+          "sourceRef": "ServiceTask-QueryDeliverySchedule-id-0001",
+          "targetRef": "ExclusiveGateway-DeliveryETA-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ETAGatewayToLogMinor-id-0003",
+          "name": "ETA ≤ 24h",
+          "sourceRef": "ExclusiveGateway-DeliveryETA-id-0001",
+          "targetRef": "ServiceTask-LogMinorDelay-id-0002",
+          "isDefault": false
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LogMinorToAdjust-id-0004",
+          "sourceRef": "ServiceTask-LogMinorDelay-id-0002",
+          "targetRef": "ServiceTask-AdjustSchedule-id-0003"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AdjustToEndOriginal-id-0005",
+          "sourceRef": "ServiceTask-AdjustSchedule-id-0003",
+          "targetRef": "EndEvent-ResumedOriginal-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ETAGatewayToQueryAlternatives-id-0006",
+          "name": "ETA > 24h",
+          "sourceRef": "ExclusiveGateway-DeliveryETA-id-0001",
+          "targetRef": "ServiceTask-QueryAlternatives-id-0004",
+          "isDefault": true
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-QueryAlternativesToGateway-id-0007",
+          "sourceRef": "ServiceTask-QueryAlternatives-id-0004",
+          "targetRef": "ExclusiveGateway-AlternativeAvailable-id-0002"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AlternativeGatewayToUseAlternative-id-0008",
+          "name": "Alternative Available",
+          "sourceRef": "ExclusiveGateway-AlternativeAvailable-id-0002",
+          "targetRef": "SendTask-UseAlternative-id-0001",
+          "isDefault": false
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-UseAlternativeToLog-id-0009",
+          "sourceRef": "SendTask-UseAlternative-id-0001",
+          "targetRef": "ServiceTask-LogAlternativeUsed-id-0005"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LogToAdjustParameters-id-0010",
+          "sourceRef": "ServiceTask-LogAlternativeUsed-id-0005",
+          "targetRef": "ServiceTask-AdjustParameters-id-0006"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AdjustParametersToEndAlternative-id-0011",
+          "sourceRef": "ServiceTask-AdjustParameters-id-0006",
+          "targetRef": "EndEvent-ResumedAlternative-id-0002"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AlternativeGatewayToExpedite-id-0012",
+          "name": "No Alternative Available",
+          "sourceRef": "ExclusiveGateway-AlternativeAvailable-id-0002",
+          "targetRef": "SubProcess-ExpediteShipment-id-0001",
+          "isDefault": true
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ExpediteConfirmedToUpdateETA-id-0013",
+          "sourceRef": "EndEvent-ExpediteConfirmed-id-0001",
+          "targetRef": "ServiceTask-UpdateETA-id-0007"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-UpdateETAToLogExpedite-id-0014",
+          "sourceRef": "ServiceTask-UpdateETA-id-0007",
+          "targetRef": "ServiceTask-LogExpediteCost-id-0008"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LogExpediteToEndExpedited-id-0015",
+          "sourceRef": "ServiceTask-LogExpediteCost-id-0008",
+          "targetRef": "EndEvent-ResumedExpedited-id-0003"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ExpediteRejectedToBackup-id-0016",
+          "sourceRef": "EndEvent-ExpediteRejected-id-0002",
+          "targetRef": "SubProcess-BackupSupplier-id-0002"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BackupSecuredToUpdateSchedule-id-0017",
+          "sourceRef": "EndEvent-BackupSecured-id-0001",
+          "targetRef": "ServiceTask-UpdateSchedule-id-0009"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-UpdateScheduleToUpdateMetrics-id-0018",
+          "sourceRef": "ServiceTask-UpdateSchedule-id-0009",
+          "targetRef": "ServiceTask-UpdateMetrics-id-0010"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-UpdateMetricsToEndBackup-id-0019",
+          "sourceRef": "ServiceTask-UpdateMetrics-id-0010",
+          "targetRef": "EndEvent-ResumedBackup-id-0004"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NoBackupToManualResolution-id-0020",
+          "sourceRef": "EndEvent-NoBackup-id-0002",
+          "targetRef": "UserTask-ManualResolution-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ManualResolutionToTerminated-id-0021",
+          "sourceRef": "UserTask-ManualResolution-id-0001",
+          "targetRef": "EndEvent-Terminated-id-0005"
+        }
+      ]
+    }
+  ]
+}
+```

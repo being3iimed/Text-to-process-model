@@ -1,0 +1,194 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "Definitions-1",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process_CustomerDisputeHandling",
+      "name": "Customer Dispute Handling",
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent_CustomerDisputeInitiated",
+          "name": "Customer Dispute Initiated"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask_SupportAgentReviewsDispute",
+          "name": "Support Agent Reviews Dispute"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway_ErrorConfirmed",
+          "name": "Error Confirmed?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask_IssueCredit",
+          "name": "Issue Credit"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask_SendCreditNotification",
+          "name": "Send: Credit Notification"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask_CloseCase",
+          "name": "Close Case"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent_CaseClosed",
+          "name": "Case Closed"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask_ExplainBillingLogic",
+          "name": "Explain Billing Logic"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway_CustomerStillDisputes",
+          "name": "Customer Still Disputes?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask_EscalateToBillingSpecialist",
+          "name": "Escalate to Billing Specialist"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask_SpecialistInvestigatesDispute",
+          "name": "Specialist Investigates Dispute"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway_ErrorConfirmedSpecialist",
+          "name": "Error Confirmed?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask_IssueRetroactiveCredit",
+          "name": "Issue Retroactive Credit"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask_SendGoodwillOffer",
+          "name": "Send: Goodwill Offer"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_StartToReviewDispute",
+          "sourceRef": "StartEvent_CustomerDisputeInitiated",
+          "targetRef": "UserTask_SupportAgentReviewsDispute"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_ReviewDisputeToErrorConfirmed",
+          "sourceRef": "UserTask_SupportAgentReviewsDispute",
+          "targetRef": "ExclusiveGateway_ErrorConfirmed",
+          "name": "error_confirmed"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_ErrorConfirmedToIssueCredit",
+          "sourceRef": "ExclusiveGateway_ErrorConfirmed",
+          "targetRef": "ServiceTask_IssueCredit",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_IssueCreditToSendNotification",
+          "sourceRef": "ServiceTask_IssueCredit",
+          "targetRef": "SendTask_SendCreditNotification"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_SendNotificationToCloseCase",
+          "sourceRef": "SendTask_SendCreditNotification",
+          "targetRef": "ServiceTask_CloseCase"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_CloseCaseToEnd",
+          "sourceRef": "ServiceTask_CloseCase",
+          "targetRef": "EndEvent_CaseClosed"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_ErrorConfirmedToExplainBilling",
+          "sourceRef": "ExclusiveGateway_ErrorConfirmed",
+          "targetRef": "UserTask_ExplainBillingLogic",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_ExplainBillingToCustomerStillDisputes",
+          "sourceRef": "UserTask_ExplainBillingLogic",
+          "targetRef": "ExclusiveGateway_CustomerStillDisputes",
+          "name": "customer_still_disputes"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_CustomerStillDisputesToEscalate",
+          "sourceRef": "ExclusiveGateway_CustomerStillDisputes",
+          "targetRef": "UserTask_EscalateToBillingSpecialist",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_EscalateToInvestigate",
+          "sourceRef": "UserTask_EscalateToBillingSpecialist",
+          "targetRef": "UserTask_SpecialistInvestigatesDispute"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_InvestigateToErrorConfirmedSpecialist",
+          "sourceRef": "UserTask_SpecialistInvestigatesDispute",
+          "targetRef": "ExclusiveGateway_ErrorConfirmedSpecialist"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_ErrorConfirmedSpecialistToIssueRetroactiveCredit",
+          "sourceRef": "ExclusiveGateway_ErrorConfirmedSpecialist",
+          "targetRef": "ServiceTask_IssueRetroactiveCredit",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_IssueRetroactiveCreditToSendGoodwillOffer",
+          "sourceRef": "ServiceTask_IssueRetroactiveCredit",
+          "targetRef": "SendTask_SendGoodwillOffer"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_SendGoodwillOfferToCloseCase",
+          "sourceRef": "SendTask_SendGoodwillOffer",
+          "targetRef": "ServiceTask_CloseCase"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_ErrorConfirmedSpecialistToSendGoodwillOffer",
+          "sourceRef": "ExclusiveGateway_ErrorConfirmedSpecialist",
+          "targetRef": "SendTask_SendGoodwillOffer",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_CustomerStillDisputesToCloseCase",
+          "sourceRef": "ExclusiveGateway_CustomerStillDisputes",
+          "targetRef": "ServiceTask_CloseCase",
+          "isDefault": true
+        }
+      ],
+      "isExecutable": true
+    }
+  ]
+}

@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions-ClientRequestProcess-id-0001" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process-ClientRequestProcess-id-0001" name="Client Request Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ClientRequest-id-0001" name="Client Requests Conference Room and Catering">
+      <bpmn:outgoing>SequenceFlow-StartToClientRequest-id-0033</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-ClientRequest-id-0002" name="Client Requests Conference Room and Catering">
+      <bpmn:incoming>SequenceFlow-StartToClientRequest-id-0033</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ClientRequestToSystemCalculatesSetup-id-0034</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-SystemCalculatesSetup-id-0003" name="System Calculates Setup Requirements">
+      <bpmn:incoming>SequenceFlow-ClientRequestToSystemCalculatesSetup-id-0034</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SystemCalculatesSetupToAvailabilityCheck-id-0035</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-AvailabilityCheck-id-0004" name="Availability Check" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-SystemCalculatesSetupToAvailabilityCheck-id-0035</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AvailabilityCheckToUnavailabilityNotice-id-0036</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-AvailabilityCheckToEventDetailsToCatering-id-0038</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-UnavailabilityNotice-id-0005" name="Send: Unavailability Notice to Client">
+      <bpmn:incoming>SequenceFlow-AvailabilityCheckToUnavailabilityNotice-id-0036</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UnavailabilityNoticeToEventUnavailable-id-0037</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-EventUnavailable-id-0006" name="Event Unavailable">
+      <bpmn:incoming>SequenceFlow-UnavailabilityNoticeToEventUnavailable-id-0037</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="SendTask-EventDetailsToCatering-id-0007" name="Send: Event Details to Catering">
+      <bpmn:incoming>SequenceFlow-AvailabilityCheckToEventDetailsToCatering-id-0038</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EventDetailsToCateringToClientApprovesMenu-id-0039</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-ClientApprovesMenu-id-0008" name="Client Approves Menu and Headcount">
+      <bpmn:incoming>SequenceFlow-EventDetailsToCateringToClientApprovesMenu-id-0039</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ClientApprovesMenuToApprovalCheck-id-0040</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ApprovalCheck-id-0009" name="Approval Check" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ClientApprovesMenuToApprovalCheck-id-0040</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ApprovalCheckToRejectionNotice-id-0041</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ApprovalCheckToCateringPreparation-id-0043</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-RejectionNotice-id-0010" name="Send: Rejection Notice to Client">
+      <bpmn:incoming>SequenceFlow-ApprovalCheckToRejectionNotice-id-0041</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RejectionNoticeToEventRejected-id-0042</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-EventRejected-id-0011" name="Event Rejected">
+      <bpmn:incoming>SequenceFlow-RejectionNoticeToEventRejected-id-0042</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:subProcess id="SubProcess-CateringPreparation-id-0012" name="Catering Preparation">
+      <bpmn:incoming>SequenceFlow-ApprovalCheckToCateringPreparation-id-0043</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CateringPreparationToRoomSetup-id-0044</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-CateringPreparationStart-id-0013" name="Catering Preparation Start">
+        <bpmn:outgoing>SequenceFlow-CateringPreparationStartToPreparesFood-id-0018</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-CateringPreparesFood-id-0014" name="Catering Prepares Food Day Before">
+        <bpmn:incoming>SequenceFlow-CateringPreparationStartToPreparesFood-id-0018</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CateringPreparesFoodToStoresFood-id-0019</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-CateringStoresFood-id-0015" name="Catering Stores Food Appropriately">
+        <bpmn:incoming>SequenceFlow-CateringPreparesFoodToStoresFood-id-0019</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CateringStoresFoodToPreparesSupplies-id-0020</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-CateringPreparesSupplies-id-0016" name="Catering Prepares Serving Supplies">
+        <bpmn:incoming>SequenceFlow-CateringStoresFoodToPreparesSupplies-id-0020</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CateringPreparesSuppliesToComplete-id-0021</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-CateringPreparationComplete-id-0017" name="Catering Preparation Complete">
+        <bpmn:incoming>SequenceFlow-CateringPreparesSuppliesToComplete-id-0021</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-CateringPreparationStartToPreparesFood-id-0018" sourceRef="StartEvent-CateringPreparationStart-id-0013" targetRef="ServiceTask-CateringPreparesFood-id-0014" />
+      <bpmn:sequenceFlow id="SequenceFlow-CateringPreparesFoodToStoresFood-id-0019" sourceRef="ServiceTask-CateringPreparesFood-id-0014" targetRef="ServiceTask-CateringStoresFood-id-0015" />
+      <bpmn:sequenceFlow id="SequenceFlow-CateringStoresFoodToPreparesSupplies-id-0020" sourceRef="ServiceTask-CateringStoresFood-id-0015" targetRef="ServiceTask-CateringPreparesSupplies-id-0016" />
+      <bpmn:sequenceFlow id="SequenceFlow-CateringPreparesSuppliesToComplete-id-0021" sourceRef="ServiceTask-CateringPreparesSupplies-id-0016" targetRef="EndEvent-CateringPreparationComplete-id-0017" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-RoomSetup-id-0022" name="Room Setup">
+      <bpmn:incoming>SequenceFlow-CateringPreparationToRoomSetup-id-0044</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RoomSetupToEventComplete-id-0045</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-RoomSetupStart-id-0023" name="Room Setup Start">
+        <bpmn:outgoing>SequenceFlow-RoomSetupStartToSetsUpRoom-id-0028</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-HousekeepingSetsUpRoom-id-0024" name="Housekeeping Sets Up Room">
+        <bpmn:incoming>SequenceFlow-RoomSetupStartToSetsUpRoom-id-0028</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-HousekeepingSetsUpRoomToTestsAV-id-0029</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-ITTeamTestsAV-id-0025" name="IT Team Tests AV Equipment">
+        <bpmn:incoming>SequenceFlow-HousekeepingSetsUpRoomToTestsAV-id-0029</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ITTeamTestsAVToDeliversBuffet-id-0030</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-CateringDeliversBuffet-id-0026" name="Catering Delivers and Sets Up Buffet">
+        <bpmn:incoming>SequenceFlow-ITTeamTestsAVToDeliversBuffet-id-0030</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CateringDeliversBuffetToComplete-id-0031</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-RoomSetupComplete-id-0027" name="Room Setup Complete">
+        <bpmn:incoming>SequenceFlow-CateringDeliversBuffetToComplete-id-0031</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-RoomSetupStartToSetsUpRoom-id-0028" sourceRef="StartEvent-RoomSetupStart-id-0023" targetRef="ServiceTask-HousekeepingSetsUpRoom-id-0024" />
+      <bpmn:sequenceFlow id="SequenceFlow-HousekeepingSetsUpRoomToTestsAV-id-0029" sourceRef="ServiceTask-HousekeepingSetsUpRoom-id-0024" targetRef="ServiceTask-ITTeamTestsAV-id-0025" />
+      <bpmn:sequenceFlow id="SequenceFlow-ITTeamTestsAVToDeliversBuffet-id-0030" sourceRef="ServiceTask-ITTeamTestsAV-id-0025" targetRef="ServiceTask-CateringDeliversBuffet-id-0026" />
+      <bpmn:sequenceFlow id="SequenceFlow-CateringDeliversBuffetToComplete-id-0031" sourceRef="ServiceTask-CateringDeliversBuffet-id-0026" targetRef="EndEvent-RoomSetupComplete-id-0027" />
+    </bpmn:subProcess>
+    <bpmn:endEvent id="EndEvent-EventComplete-id-0032" name="Event Complete">
+      <bpmn:incoming>SequenceFlow-RoomSetupToEventComplete-id-0045</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToClientRequest-id-0033" sourceRef="StartEvent-ClientRequest-id-0001" targetRef="UserTask-ClientRequest-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ClientRequestToSystemCalculatesSetup-id-0034" sourceRef="UserTask-ClientRequest-id-0002" targetRef="ServiceTask-SystemCalculatesSetup-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-SystemCalculatesSetupToAvailabilityCheck-id-0035" name="room_available AND catering_available" sourceRef="ServiceTask-SystemCalculatesSetup-id-0003" targetRef="ExclusiveGateway-AvailabilityCheck-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-AvailabilityCheckToUnavailabilityNotice-id-0036" sourceRef="ExclusiveGateway-AvailabilityCheck-id-0004" targetRef="SendTask-UnavailabilityNotice-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-UnavailabilityNoticeToEventUnavailable-id-0037" sourceRef="SendTask-UnavailabilityNotice-id-0005" targetRef="EndEvent-EventUnavailable-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-AvailabilityCheckToEventDetailsToCatering-id-0038" sourceRef="ExclusiveGateway-AvailabilityCheck-id-0004" targetRef="SendTask-EventDetailsToCatering-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-EventDetailsToCateringToClientApprovesMenu-id-0039" sourceRef="SendTask-EventDetailsToCatering-id-0007" targetRef="UserTask-ClientApprovesMenu-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-ClientApprovesMenuToApprovalCheck-id-0040" sourceRef="UserTask-ClientApprovesMenu-id-0008" targetRef="ExclusiveGateway-ApprovalCheck-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApprovalCheckToRejectionNotice-id-0041" sourceRef="ExclusiveGateway-ApprovalCheck-id-0009" targetRef="SendTask-RejectionNotice-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-RejectionNoticeToEventRejected-id-0042" sourceRef="SendTask-RejectionNotice-id-0010" targetRef="EndEvent-EventRejected-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApprovalCheckToCateringPreparation-id-0043" sourceRef="ExclusiveGateway-ApprovalCheck-id-0009" targetRef="SubProcess-CateringPreparation-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-CateringPreparationToRoomSetup-id-0044" sourceRef="SubProcess-CateringPreparation-id-0012" targetRef="SubProcess-RoomSetup-id-0022" />
+    <bpmn:sequenceFlow id="SequenceFlow-RoomSetupToEventComplete-id-0045" sourceRef="SubProcess-RoomSetup-id-0022" targetRef="EndEvent-EventComplete-id-0032" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process-ClientRequestProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process-ClientRequestProcess-id-0001" bpmnElement="Process-ClientRequestProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ClientRequest-id-0001_di" bpmnElement="StartEvent-ClientRequest-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ClientRequest-id-0002_di" bpmnElement="UserTask-ClientRequest-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SystemCalculatesSetup-id-0003_di" bpmnElement="ServiceTask-SystemCalculatesSetup-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-AvailabilityCheck-id-0004_di" bpmnElement="ExclusiveGateway-AvailabilityCheck-id-0004" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-UnavailabilityNotice-id-0005_di" bpmnElement="SendTask-UnavailabilityNotice-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-EventUnavailable-id-0006_di" bpmnElement="EndEvent-EventUnavailable-id-0006">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-EventDetailsToCatering-id-0007_di" bpmnElement="SendTask-EventDetailsToCatering-id-0007">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ClientApprovesMenu-id-0008_di" bpmnElement="UserTask-ClientApprovesMenu-id-0008">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ApprovalCheck-id-0009_di" bpmnElement="ExclusiveGateway-ApprovalCheck-id-0009" isMarkerVisible="true">
+        <dc:Bounds x="950" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RejectionNotice-id-0010_di" bpmnElement="SendTask-RejectionNotice-id-0010">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-EventRejected-id-0011_di" bpmnElement="EndEvent-EventRejected-id-0011">
+        <dc:Bounds x="1257" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-CateringPreparation-id-0012_di" bpmnElement="SubProcess-CateringPreparation-id-0012">
+        <dc:Bounds x="1075" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-RoomSetup-id-0022_di" bpmnElement="SubProcess-RoomSetup-id-0022">
+        <dc:Bounds x="1225" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-EventComplete-id-0032_di" bpmnElement="EndEvent-EventComplete-id-0032">
+        <dc:Bounds x="1407" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToClientRequest-id-0033_di" bpmnElement="SequenceFlow-StartToClientRequest-id-0033">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ClientRequestToSystemCalculatesSetup-id-0034_di" bpmnElement="SequenceFlow-ClientRequestToSystemCalculatesSetup-id-0034">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SystemCalculatesSetupToAvailabilityCheck-id-0035_di" bpmnElement="SequenceFlow-SystemCalculatesSetupToAvailabilityCheck-id-0035">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AvailabilityCheckToUnavailabilityNotice-id-0036_di" bpmnElement="SequenceFlow-AvailabilityCheckToUnavailabilityNotice-id-0036">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AvailabilityCheckToEventDetailsToCatering-id-0038_di" bpmnElement="SequenceFlow-AvailabilityCheckToEventDetailsToCatering-id-0038">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UnavailabilityNoticeToEventUnavailable-id-0037_di" bpmnElement="SequenceFlow-UnavailabilityNoticeToEventUnavailable-id-0037">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EventDetailsToCateringToClientApprovesMenu-id-0039_di" bpmnElement="SequenceFlow-EventDetailsToCateringToClientApprovesMenu-id-0039">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ClientApprovesMenuToApprovalCheck-id-0040_di" bpmnElement="SequenceFlow-ClientApprovesMenuToApprovalCheck-id-0040">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="950" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalCheckToRejectionNotice-id-0041_di" bpmnElement="SequenceFlow-ApprovalCheckToRejectionNotice-id-0041">
+        <di:waypoint x="1000" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalCheckToCateringPreparation-id-0043_di" bpmnElement="SequenceFlow-ApprovalCheckToCateringPreparation-id-0043">
+        <di:waypoint x="975" y="235" />
+        <di:waypoint x="975" y="350" />
+        <di:waypoint x="1075" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RejectionNoticeToEventRejected-id-0042_di" bpmnElement="SequenceFlow-RejectionNoticeToEventRejected-id-0042">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1257" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CateringPreparationToRoomSetup-id-0044_di" bpmnElement="SequenceFlow-CateringPreparationToRoomSetup-id-0044">
+        <di:waypoint x="1175" y="350" />
+        <di:waypoint x="1225" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RoomSetupToEventComplete-id-0045_di" bpmnElement="SequenceFlow-RoomSetupToEventComplete-id-0045">
+        <di:waypoint x="1325" y="350" />
+        <di:waypoint x="1407" y="350" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-RoomSetup-id-0022">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-RoomSetup-id-0022" bpmnElement="SubProcess-RoomSetup-id-0022">
+      <bpmndi:BPMNShape id="StartEvent-RoomSetupStart-id-0023_di" bpmnElement="StartEvent-RoomSetupStart-id-0023">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-HousekeepingSetsUpRoom-id-0024_di" bpmnElement="ServiceTask-HousekeepingSetsUpRoom-id-0024">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ITTeamTestsAV-id-0025_di" bpmnElement="ServiceTask-ITTeamTestsAV-id-0025">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CateringDeliversBuffet-id-0026_di" bpmnElement="ServiceTask-CateringDeliversBuffet-id-0026">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-RoomSetupComplete-id-0027_di" bpmnElement="EndEvent-RoomSetupComplete-id-0027">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-RoomSetupStartToSetsUpRoom-id-0028_di" bpmnElement="SequenceFlow-RoomSetupStartToSetsUpRoom-id-0028">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HousekeepingSetsUpRoomToTestsAV-id-0029_di" bpmnElement="SequenceFlow-HousekeepingSetsUpRoomToTestsAV-id-0029">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ITTeamTestsAVToDeliversBuffet-id-0030_di" bpmnElement="SequenceFlow-ITTeamTestsAVToDeliversBuffet-id-0030">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CateringDeliversBuffetToComplete-id-0031_di" bpmnElement="SequenceFlow-CateringDeliversBuffetToComplete-id-0031">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-CateringPreparation-id-0012">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-CateringPreparation-id-0012" bpmnElement="SubProcess-CateringPreparation-id-0012">
+      <bpmndi:BPMNShape id="StartEvent-CateringPreparationStart-id-0013_di" bpmnElement="StartEvent-CateringPreparationStart-id-0013">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CateringPreparesFood-id-0014_di" bpmnElement="ServiceTask-CateringPreparesFood-id-0014">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CateringStoresFood-id-0015_di" bpmnElement="ServiceTask-CateringStoresFood-id-0015">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CateringPreparesSupplies-id-0016_di" bpmnElement="ServiceTask-CateringPreparesSupplies-id-0016">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CateringPreparationComplete-id-0017_di" bpmnElement="EndEvent-CateringPreparationComplete-id-0017">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-CateringPreparationStartToPreparesFood-id-0018_di" bpmnElement="SequenceFlow-CateringPreparationStartToPreparesFood-id-0018">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CateringPreparesFoodToStoresFood-id-0019_di" bpmnElement="SequenceFlow-CateringPreparesFoodToStoresFood-id-0019">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CateringStoresFoodToPreparesSupplies-id-0020_di" bpmnElement="SequenceFlow-CateringStoresFoodToPreparesSupplies-id-0020">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CateringPreparesSuppliesToComplete-id-0021_di" bpmnElement="SequenceFlow-CateringPreparesSuppliesToComplete-id-0021">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

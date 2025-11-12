@@ -1,0 +1,102 @@
+### SUMMARY OF ELEMENTS
+--------------------------------------------------------------------------------
+startEvent("Network Monitoring Alert")
+
+serviceTask("Analyze: affected towers and services")
+serviceTask("Calculate: customer impact")
+serviceTask("Reroute: traffic to adjacent towers")
+sendTask("Send: incident alert to on-call engineers and NOC team")
+serviceTask("Dispatch: field engineers to affected towers")
+
+subProcess("Root Cause Analysis"):
+    startEvent("Root Cause Analysis Start")
+    serviceTask("Analyze: root cause from logs")
+
+    if (hardware_failure_suspected):
+        serviceTask("Retrieve: spare parts from inventory")
+    else if (capacity_overload_suspected):
+        serviceTask("Prioritize: traffic to critical services")
+    else:
+        serviceTask("Rollback: software to previous version")
+    endEvent("Root Cause Analysis Complete")
+endSubProcess
+
+intermediateEvent(timerBoundary("2 hours"))
+
+subProcess("Field Team Actions"):
+    startEvent("Field Team Actions Start")
+    userTask("Connect: diagnostic equipment")
+    userTask("Confirm: system hypothesis")
+
+    userTask("Perform: fix (replace hardware, rollback software, or activate backup circuit)") [
+        timerBoundary("4 hours"):
+            sendTask("Send: escalation to senior engineer")
+        errorBoundary():
+            serviceTask("Escalate: for further investigation")
+    ]
+
+    serviceTask("Reroute: traffic during maintenance")
+    sendTask("Send: notifications to affected customers")
+    serviceTask("Validate: network metrics returned to normal")
+
+    if (metrics_normal):
+        endEvent("Field Team Actions Complete")
+    else:
+        serviceTask("Escalate: for further investigation")
+        endEvent("Field Team Actions Failed")
+endSubProcess
+
+serviceTask("Log: incident summary for post-mortem analysis")
+endEvent("Incident Resolved")
+
+### BPMN PSEUDOCODE
+--------------------------------------------------------------------------------
+startEvent("Network Monitoring Alert")
+
+serviceTask("Analyze: affected towers and services")
+serviceTask("Calculate: customer impact")
+serviceTask("Reroute: traffic to adjacent towers")
+sendTask("Send: incident alert to on-call engineers and NOC team")
+serviceTask("Dispatch: field engineers to affected towers")
+
+subProcess("Root Cause Analysis"):
+    startEvent("Root Cause Analysis Start")
+    serviceTask("Analyze: root cause from logs")
+
+    if (hardware_failure_suspected):
+        serviceTask("Retrieve: spare parts from inventory")
+    else if (capacity_overload_suspected):
+        serviceTask("Prioritize: traffic to critical services")
+    else:
+        serviceTask("Rollback: software to previous version")
+    endEvent("Root Cause Analysis Complete")
+endSubProcess
+
+intermediateEvent(timerBoundary("2 hours"))
+
+subProcess("Field Team Actions"):
+    startEvent("Field Team Actions Start")
+    userTask("Connect: diagnostic equipment")
+    userTask("Confirm: system hypothesis")
+
+    userTask("Perform: fix (replace hardware, rollback software, or activate backup circuit)") [
+        timerBoundary("4 hours"):
+            sendTask("Send: escalation to senior engineer")
+        errorBoundary():
+            serviceTask("Escalate: for further investigation")
+    ]
+
+    serviceTask("Reroute: traffic during maintenance")
+    sendTask("Send: notifications to affected customers")
+    serviceTask("Validate: network metrics returned to normal")
+
+    if (metrics_normal):
+        endEvent("Field Team Actions Complete")
+    else:
+        serviceTask("Escalate: for further investigation")
+        endEvent("Field Team Actions Failed")
+endSubProcess
+
+serviceTask("Log: incident summary for post-mortem analysis")
+endEvent("Incident Resolved")
+

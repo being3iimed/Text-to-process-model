@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_CorporateEventCoordination" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="Process_CorporateEventCoordination" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ClientRequestsConferenceRoom-id-0001" name="Client Requests Conference Room">
+      <bpmn:outgoing>SequenceFlow-StartToConfirmDates-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-ConfirmDatesAndRoomAvailability-id-0001" name="Confirm Dates and Room Availability">
+      <bpmn:incoming>SequenceFlow-StartToConfirmDates-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmDatesToCalculateSetup-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-CalculateRequiredSetup-id-0001" name="Calculate Required Setup">
+      <bpmn:incoming>SequenceFlow-ConfirmDatesToCalculateSetup-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CalculateSetupToSendDetails-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendEventDetailsToCatering-id-0001" name="Send: Event Details to Catering">
+      <bpmn:incoming>SequenceFlow-CalculateSetupToSendDetails-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendDetailsToCateringSubprocess-id-0004</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:subProcess id="SubProcess-CateringPreparation-id-0001" name="Catering Preparation">
+      <bpmn:incoming>SequenceFlow-SendDetailsToCateringSubprocess-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CateringSubprocessToRoomSetup-id-0005</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-CateringWorkflowStart-id-0001" name="Catering Workflow Start">
+        <bpmn:outgoing>SequenceFlow-CateringStartToReceiveDetails-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:receiveTask id="ReceiveTask-ReceiveEventDetails-id-0001" name="Receive: Event Details">
+        <bpmn:incoming>SequenceFlow-CateringStartToReceiveDetails-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReceiveDetailsToClientApproval-id-0002</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:userTask id="UserTask-ClientApprovesMenuAndHeadcount-id-0001" name="Client Approves Menu and Headcount">
+        <bpmn:incoming>SequenceFlow-ReceiveDetailsToClientApproval-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ClientApprovalToFoodPrep-id-0003</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:serviceTask id="ServiceTask-PrepareFoodDayBefore-id-0001" name="Prepare Food Day-Before">
+        <bpmn:incoming>SequenceFlow-ClientApprovalToFoodPrep-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-FoodPrepToServingSupplies-id-0004</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-Timer24Hour-PrepareFood-id-0001" name="24 Hour SLA Alert" attachedToRef="ServiceTask-PrepareFoodDayBefore-id-0001">
+        <bpmn:outgoing>SequenceFlow-TimerBoundaryToAlert-id-0008</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="BoundaryEvent-Timer24Hour-PrepareFood-id-0001_EventDef">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P1D</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:boundaryEvent>
+      <bpmn:sendTask id="SendTask-SendUrgentAlertToCateringManager-id-0001" name="Send: Urgent Alert to Catering Manager">
+        <bpmn:incoming>SequenceFlow-TimerBoundaryToAlert-id-0008</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AlertToServingSupplies-id-0009</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:serviceTask id="ServiceTask-PrepareServingSupplies-id-0001" name="Prepare Serving Supplies">
+        <bpmn:incoming>SequenceFlow-FoodPrepToServingSupplies-id-0004</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-AlertToServingSupplies-id-0009</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ServingSuppliesToFoodDelivery-id-0005</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-CateringDeliversFood-id-0001" name="Catering Delivers Food">
+        <bpmn:incoming>SequenceFlow-ServingSuppliesToFoodDelivery-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-FoodDeliveryToBuffetSetup-id-0006</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-CateringSetsUpBuffet-id-0001" name="Catering Sets Up Buffet">
+        <bpmn:incoming>SequenceFlow-FoodDeliveryToBuffetSetup-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-BuffetSetupToCateringComplete-id-0007</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-CateringWorkflowComplete-id-0001" name="Catering Workflow Complete">
+        <bpmn:incoming>SequenceFlow-BuffetSetupToCateringComplete-id-0007</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-CateringStartToReceiveDetails-id-0001" sourceRef="StartEvent-CateringWorkflowStart-id-0001" targetRef="ReceiveTask-ReceiveEventDetails-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReceiveDetailsToClientApproval-id-0002" sourceRef="ReceiveTask-ReceiveEventDetails-id-0001" targetRef="UserTask-ClientApprovesMenuAndHeadcount-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ClientApprovalToFoodPrep-id-0003" sourceRef="UserTask-ClientApprovesMenuAndHeadcount-id-0001" targetRef="ServiceTask-PrepareFoodDayBefore-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-FoodPrepToServingSupplies-id-0004" sourceRef="ServiceTask-PrepareFoodDayBefore-id-0001" targetRef="ServiceTask-PrepareServingSupplies-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ServingSuppliesToFoodDelivery-id-0005" sourceRef="ServiceTask-PrepareServingSupplies-id-0001" targetRef="ServiceTask-CateringDeliversFood-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-FoodDeliveryToBuffetSetup-id-0006" sourceRef="ServiceTask-CateringDeliversFood-id-0001" targetRef="ServiceTask-CateringSetsUpBuffet-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BuffetSetupToCateringComplete-id-0007" sourceRef="ServiceTask-CateringSetsUpBuffet-id-0001" targetRef="EndEvent-CateringWorkflowComplete-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-TimerBoundaryToAlert-id-0008" sourceRef="BoundaryEvent-Timer24Hour-PrepareFood-id-0001" targetRef="SendTask-SendUrgentAlertToCateringManager-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-AlertToServingSupplies-id-0009" sourceRef="SendTask-SendUrgentAlertToCateringManager-id-0001" targetRef="ServiceTask-PrepareServingSupplies-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:parallelGateway id="ParallelGateway-RoomSetupSplit-id-0001" name="Parallel Room Setup" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CateringSubprocessToRoomSetup-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RoomSetupSplitToHousekeeping-id-0006</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-RoomSetupSplitToIT-id-0007</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-HousekeepingSetsUpRoom-id-0001" name="Housekeeping Sets Up Room">
+      <bpmn:incoming>SequenceFlow-RoomSetupSplitToHousekeeping-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-HousekeepingToRoomSetupJoin-id-0008</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ITTestsAVEquipment-id-0001" name="IT Tests AV Equipment">
+      <bpmn:incoming>SequenceFlow-RoomSetupSplitToIT-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ITToRoomSetupJoin-id-0009</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-RoomSetupJoin-id-0002" name="Room Setup Complete" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-HousekeepingToRoomSetupJoin-id-0008</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ITToRoomSetupJoin-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RoomSetupJoinToEventDuration-id-0010</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-EventDuration-id-0001" name="Event Duration">
+      <bpmn:incoming>SequenceFlow-RoomSetupJoinToEventDuration-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EventDurationToHousekeepingBreakdown-id-0011</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="ServiceTask-HousekeepingBreaksDownSetup-id-0001" name="Housekeeping Breaks Down Setup">
+      <bpmn:incoming>SequenceFlow-EventDurationToHousekeepingBreakdown-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-HousekeepingBreakdownToEnd-id-0012</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-RoomRestoredToStandardConfiguration-id-0001" name="Room Restored to Standard Configuration">
+      <bpmn:incoming>SequenceFlow-HousekeepingBreakdownToEnd-id-0012</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToConfirmDates-id-0001" sourceRef="StartEvent-ClientRequestsConferenceRoom-id-0001" targetRef="UserTask-ConfirmDatesAndRoomAvailability-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmDatesToCalculateSetup-id-0002" sourceRef="UserTask-ConfirmDatesAndRoomAvailability-id-0001" targetRef="ServiceTask-CalculateRequiredSetup-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CalculateSetupToSendDetails-id-0003" sourceRef="ServiceTask-CalculateRequiredSetup-id-0001" targetRef="SendTask-SendEventDetailsToCatering-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendDetailsToCateringSubprocess-id-0004" sourceRef="SendTask-SendEventDetailsToCatering-id-0001" targetRef="SubProcess-CateringPreparation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CateringSubprocessToRoomSetup-id-0005" sourceRef="SubProcess-CateringPreparation-id-0001" targetRef="ParallelGateway-RoomSetupSplit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RoomSetupSplitToHousekeeping-id-0006" sourceRef="ParallelGateway-RoomSetupSplit-id-0001" targetRef="ServiceTask-HousekeepingSetsUpRoom-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RoomSetupSplitToIT-id-0007" sourceRef="ParallelGateway-RoomSetupSplit-id-0001" targetRef="ServiceTask-ITTestsAVEquipment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-HousekeepingToRoomSetupJoin-id-0008" sourceRef="ServiceTask-HousekeepingSetsUpRoom-id-0001" targetRef="ParallelGateway-RoomSetupJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ITToRoomSetupJoin-id-0009" sourceRef="ServiceTask-ITTestsAVEquipment-id-0001" targetRef="ParallelGateway-RoomSetupJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-RoomSetupJoinToEventDuration-id-0010" sourceRef="ParallelGateway-RoomSetupJoin-id-0002" targetRef="IntermediateCatchEvent-EventDuration-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EventDurationToHousekeepingBreakdown-id-0011" sourceRef="IntermediateCatchEvent-EventDuration-id-0001" targetRef="ServiceTask-HousekeepingBreaksDownSetup-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-HousekeepingBreakdownToEnd-id-0012" sourceRef="ServiceTask-HousekeepingBreaksDownSetup-id-0001" targetRef="EndEvent-RoomRestoredToStandardConfiguration-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process_CorporateEventCoordination">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process_CorporateEventCoordination" bpmnElement="Process_CorporateEventCoordination">
+      <bpmndi:BPMNShape id="StartEvent-ClientRequestsConferenceRoom-id-0001_di" bpmnElement="StartEvent-ClientRequestsConferenceRoom-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConfirmDatesAndRoomAvailability-id-0001_di" bpmnElement="UserTask-ConfirmDatesAndRoomAvailability-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CalculateRequiredSetup-id-0001_di" bpmnElement="ServiceTask-CalculateRequiredSetup-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendEventDetailsToCatering-id-0001_di" bpmnElement="SendTask-SendEventDetailsToCatering-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-CateringPreparation-id-0001_di" bpmnElement="SubProcess-CateringPreparation-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-RoomSetupSplit-id-0001_di" bpmnElement="ParallelGateway-RoomSetupSplit-id-0001">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-HousekeepingSetsUpRoom-id-0001_di" bpmnElement="ServiceTask-HousekeepingSetsUpRoom-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-RoomSetupJoin-id-0002_di" bpmnElement="ParallelGateway-RoomSetupJoin-id-0002">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-EventDuration-id-0001_di" bpmnElement="IntermediateCatchEvent-EventDuration-id-0001">
+        <dc:Bounds x="1257" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-HousekeepingBreaksDownSetup-id-0001_di" bpmnElement="ServiceTask-HousekeepingBreaksDownSetup-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-RoomRestoredToStandardConfiguration-id-0001_di" bpmnElement="EndEvent-RoomRestoredToStandardConfiguration-id-0001">
+        <dc:Bounds x="1557" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ITTestsAVEquipment-id-0001_di" bpmnElement="ServiceTask-ITTestsAVEquipment-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToConfirmDates-id-0001_di" bpmnElement="SequenceFlow-StartToConfirmDates-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmDatesToCalculateSetup-id-0002_di" bpmnElement="SequenceFlow-ConfirmDatesToCalculateSetup-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculateSetupToSendDetails-id-0003_di" bpmnElement="SequenceFlow-CalculateSetupToSendDetails-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendDetailsToCateringSubprocess-id-0004_di" bpmnElement="SequenceFlow-SendDetailsToCateringSubprocess-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CateringSubprocessToRoomSetup-id-0005_di" bpmnElement="SequenceFlow-CateringSubprocessToRoomSetup-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RoomSetupSplitToHousekeeping-id-0006_di" bpmnElement="SequenceFlow-RoomSetupSplitToHousekeeping-id-0006">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RoomSetupSplitToIT-id-0007_di" bpmnElement="SequenceFlow-RoomSetupSplitToIT-id-0007">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HousekeepingToRoomSetupJoin-id-0008_di" bpmnElement="SequenceFlow-HousekeepingToRoomSetupJoin-id-0008">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RoomSetupJoinToEventDuration-id-0010_di" bpmnElement="SequenceFlow-RoomSetupJoinToEventDuration-id-0010">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1257" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EventDurationToHousekeepingBreakdown-id-0011_di" bpmnElement="SequenceFlow-EventDurationToHousekeepingBreakdown-id-0011">
+        <di:waypoint x="1293" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HousekeepingBreakdownToEnd-id-0012_di" bpmnElement="SequenceFlow-HousekeepingBreakdownToEnd-id-0012">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1557" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ITToRoomSetupJoin-id-0009_di" bpmnElement="SequenceFlow-ITToRoomSetupJoin-id-0009">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-CateringPreparation-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-CateringPreparation-id-0001" bpmnElement="SubProcess-CateringPreparation-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-CateringWorkflowStart-id-0001_di" bpmnElement="StartEvent-CateringWorkflowStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveEventDetails-id-0001_di" bpmnElement="ReceiveTask-ReceiveEventDetails-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ClientApprovesMenuAndHeadcount-id-0001_di" bpmnElement="UserTask-ClientApprovesMenuAndHeadcount-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareFoodDayBefore-id-0001_di" bpmnElement="ServiceTask-PrepareFoodDayBefore-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer24Hour-PrepareFood-id-0001_di" bpmnElement="BoundaryEvent-Timer24Hour-PrepareFood-id-0001">
+        <dc:Bounds x="507" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareServingSupplies-id-0001_di" bpmnElement="ServiceTask-PrepareServingSupplies-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CateringDeliversFood-id-0001_di" bpmnElement="ServiceTask-CateringDeliversFood-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CateringSetsUpBuffet-id-0001_di" bpmnElement="ServiceTask-CateringSetsUpBuffet-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CateringWorkflowComplete-id-0001_di" bpmnElement="EndEvent-CateringWorkflowComplete-id-0001">
+        <dc:Bounds x="1257" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendUrgentAlertToCateringManager-id-0001_di" bpmnElement="SendTask-SendUrgentAlertToCateringManager-id-0001">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-CateringStartToReceiveDetails-id-0001_di" bpmnElement="SequenceFlow-CateringStartToReceiveDetails-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveDetailsToClientApproval-id-0002_di" bpmnElement="SequenceFlow-ReceiveDetailsToClientApproval-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ClientApprovalToFoodPrep-id-0003_di" bpmnElement="SequenceFlow-ClientApprovalToFoodPrep-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FoodPrepToServingSupplies-id-0004_di" bpmnElement="SequenceFlow-FoodPrepToServingSupplies-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TimerBoundaryToAlert-id-0008_di" bpmnElement="SequenceFlow-TimerBoundaryToAlert-id-0008">
+        <di:waypoint x="525" y="128" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ServingSuppliesToFoodDelivery-id-0005_di" bpmnElement="SequenceFlow-ServingSuppliesToFoodDelivery-id-0005">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FoodDeliveryToBuffetSetup-id-0006_di" bpmnElement="SequenceFlow-FoodDeliveryToBuffetSetup-id-0006">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BuffetSetupToCateringComplete-id-0007_di" bpmnElement="SequenceFlow-BuffetSetupToCateringComplete-id-0007">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1257" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlertToServingSupplies-id-0009_di" bpmnElement="SequenceFlow-AlertToServingSupplies-id-0009">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="825" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

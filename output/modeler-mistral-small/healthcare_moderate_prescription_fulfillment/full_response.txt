@@ -1,0 +1,219 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "Definitions-PrescriptionProcess-id-0001",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process-PrescriptionProcess-id-0001",
+      "name": "Prescription Process",
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-PrescriptionProcess-id-0001",
+          "name": "Prescription Process"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-SendPrescriptionToPharmacy-id-0001",
+          "name": "Send prescription to pharmacy"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-ReceivePrescription-id-0002",
+          "name": "Receive: prescription"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CheckInsuranceEligibility-id-0003",
+          "name": "Check insurance eligibility"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-PriorAuthorizationRequired-id-0001",
+          "name": "Prior authorization required?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ContactInsuranceCompany-id-0004",
+          "name": "Contact insurance company"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-InsuranceResponse-id-0002",
+          "name": "Insurance response",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-FillPrescription-id-0005",
+          "name": "Fill prescription"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendNotificationToPatient-id-0006",
+          "name": "Send: notification to patient"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SignReceipt-id-0007",
+          "name": "Sign receipt"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProcessComplete-id-0001",
+          "name": "Process Complete"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendDenialNotification-id-0008",
+          "name": "Send: denial notification"
+        },
+        {
+          "$type": "bpmn:InclusiveGateway",
+          "id": "InclusiveGateway-ProcessDenial-id-0001",
+          "name": "Process denial",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ProcessAppeal-id-0009",
+          "name": "Process appeal"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-PrescribeAlternative-id-0010",
+          "name": "Prescribe alternative"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-DenialProcessed-id-0002",
+          "name": "Denial Processed"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-Join-id-0001",
+          "name": "Join",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToSendPrescription-id-0001",
+          "sourceRef": "StartEvent-PrescriptionProcess-id-0001",
+          "targetRef": "ServiceTask-SendPrescriptionToPharmacy-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendToReceive-id-0002",
+          "sourceRef": "ServiceTask-SendPrescriptionToPharmacy-id-0001",
+          "targetRef": "ReceiveTask-ReceivePrescription-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReceiveToCheckEligibility-id-0003",
+          "sourceRef": "ReceiveTask-ReceivePrescription-id-0002",
+          "targetRef": "UserTask-CheckInsuranceEligibility-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CheckToGateway-id-0004",
+          "sourceRef": "UserTask-CheckInsuranceEligibility-id-0003",
+          "targetRef": "ExclusiveGateway-PriorAuthorizationRequired-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToContactInsurance-id-0005",
+          "name": "prior_authorization_required",
+          "sourceRef": "ExclusiveGateway-PriorAuthorizationRequired-id-0001",
+          "targetRef": "UserTask-ContactInsuranceCompany-id-0004",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToFillPrescription-id-0006",
+          "name": "",
+          "sourceRef": "ExclusiveGateway-PriorAuthorizationRequired-id-0001",
+          "targetRef": "ServiceTask-FillPrescription-id-0005",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ContactToInsuranceResponse-id-0007",
+          "sourceRef": "UserTask-ContactInsuranceCompany-id-0004",
+          "targetRef": "ExclusiveGateway-InsuranceResponse-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InsuranceResponseToFillPrescription-id-0008",
+          "name": "insurance_approved",
+          "sourceRef": "ExclusiveGateway-InsuranceResponse-id-0002",
+          "targetRef": "ServiceTask-FillPrescription-id-0005",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InsuranceResponseToDenialNotification-id-0009",
+          "name": "",
+          "sourceRef": "ExclusiveGateway-InsuranceResponse-id-0002",
+          "targetRef": "SendTask-SendDenialNotification-id-0008",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FillToNotification-id-0010",
+          "sourceRef": "ServiceTask-FillPrescription-id-0005",
+          "targetRef": "SendTask-SendNotificationToPatient-id-0006"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NotificationToSignReceipt-id-0011",
+          "sourceRef": "SendTask-SendNotificationToPatient-id-0006",
+          "targetRef": "UserTask-SignReceipt-id-0007"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SignToComplete-id-0012",
+          "sourceRef": "UserTask-SignReceipt-id-0007",
+          "targetRef": "EndEvent-ProcessComplete-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DenialNotificationToGateway-id-0013",
+          "sourceRef": "SendTask-SendDenialNotification-id-0008",
+          "targetRef": "InclusiveGateway-ProcessDenial-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToProcessAppeal-id-0014",
+          "name": "Process appeal",
+          "sourceRef": "InclusiveGateway-ProcessDenial-id-0001",
+          "targetRef": "UserTask-ProcessAppeal-id-0009"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProcessAppealToFillPrescription-id-0015",
+          "sourceRef": "UserTask-ProcessAppeal-id-0009",
+          "targetRef": "ServiceTask-FillPrescription-id-0005"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToPrescribeAlternative-id-0016",
+          "name": "Prescribe alternative",
+          "sourceRef": "InclusiveGateway-ProcessDenial-id-0001",
+          "targetRef": "UserTask-PrescribeAlternative-id-0010"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PrescribeAlternativeToDenialProcessed-id-0017",
+          "sourceRef": "UserTask-PrescribeAlternative-id-0010",
+          "targetRef": "EndEvent-DenialProcessed-id-0002"
+        }
+      ]
+    }
+  ]
+}
+```

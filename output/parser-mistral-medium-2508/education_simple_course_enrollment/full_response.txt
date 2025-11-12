@@ -1,0 +1,87 @@
+```
+<summary_of_elements>
+
+### TASKS:
+- **userTask("Search for Courses")** - Student actively searches available courses
+- **userTask("Check Course Details")** - Student reviews time, location, professor, prerequisites, enrollment cap
+- **serviceTask("Validate Prerequisites")** - System checks if student meets prerequisites
+- **serviceTask("Check Seat Availability")** - System verifies available seats
+- **userTask("Confirm Enrollment")** - Student clicks enroll button
+- **serviceTask("Generate Course Schedule")** - System creates updated schedule
+- **serviceTask("Update Course Roster")** - System adds student to course roster
+
+### GATEWAYS:
+- **XOR** after prerequisites/seats check with 2 conditions:
+  1. `prerequisites_met AND seats_available`
+  2. Default: `prerequisites_not_met OR no_seats_available`
+
+### EVENTS:
+- **startEvent("Course Enrollment Process Started")** - Manual trigger
+- **endEvent("Enrollment Complete")** - Successful path
+- **endEvent("Enrollment Failed")** - Failed path
+
+### BOUNDARY EVENTS:
+- **None** (No explicit SLA requirements or error scenarios mentioned)
+
+### SUBPROCESSES:
+- **None** (All tasks are linear and cohesive in main process)
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+```
+startEvent("Course Enrollment Process Started")
+
+userTask("Search for Courses")
+userTask("Check Course Details")
+
+serviceTask("Validate Prerequisites")
+serviceTask("Check Seat Availability")
+
+if (prerequisites_met AND seats_available):
+    userTask("Confirm Enrollment")
+    serviceTask("Generate Course Schedule")
+    serviceTask("Update Course Roster")
+    endEvent("Enrollment Complete")
+else:
+    endEvent("Enrollment Failed")
+
+</bpmn_pseudocode>
+
+<compliance_verification>
+
+### TIMER EVENTS:
+✅ No timer events used (none required)
+
+### GATEWAYS:
+✅ XOR gateway with:
+   - Explicit condition: `prerequisites_met AND seats_available`
+   - Explicit default flow: `prerequisites_not_met OR no_seats_available`
+✅ No convergence needed (linear paths to end events)
+
+### SEQUENCE FLOWS:
+✅ All conditional flows have descriptive labels
+✅ Default flow properly marked
+✅ No empty string labels
+
+### BOUNDARY EVENTS:
+✅ None added (no SLA/error scenarios mentioned)
+
+### SUBPROCESSES:
+✅ None created (all tasks are linear and cohesive)
+
+### FLOW PATHS:
+✅ All paths traceable start-to-end:
+   1. Success: start → search → check → validate → check seats → enroll → generate → update → complete
+   2. Failure: start → search → check → validate → check seats → fail
+✅ No orphaned flows
+✅ No unreachable tasks
+
+### BALANCE:
+✅ Core elements (tasks/gateways/events) = 100% of design
+✅ No over-engineering
+✅ Clean, minimal structure
+
+</compliance_verification>
+```

@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="GraduationProcessDefinitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0.0">
+  <bpmn:process id="GraduationProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-GraduationCheckRequested-id-0001" name="Graduation Check Requested">
+      <bpmn:outgoing>SequenceFlow-StartToValidateRequirements-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:subProcess id="SubProcess-ValidateGraduationRequirements-id-0001" name="Validate Graduation Requirements">
+      <bpmn:incoming>SequenceFlow-StartToValidateRequirements-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidateRequirementsToValidationResult-id-0002</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-ValidationStart-id-0001" name="Validation Start">
+        <bpmn:outgoing>SequenceFlow-StartToSplit-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:parallelGateway id="ParallelGateway-SplitRequirements-id-0001" name="Split Requirements Check" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-StartToSplit-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SplitToSumCredits-id-0002</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToVerifyCumulativeGPA-id-0005</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToVerifyMajorGPA-id-0007</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToCheckDisciplinaryHolds-id-0009</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToCheckLibraryFees-id-0011</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:scriptTask id="ScriptTask-SumTotalCredits-id-0001" name="Sum total credits">
+        <bpmn:incoming>SequenceFlow-SplitToSumCredits-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SumToVerify120-id-0003</bpmn:outgoing>
+      </bpmn:scriptTask>
+      <bpmn:scriptTask id="ScriptTask-Verify120Credits-id-0002" name="Verify ≥120 credits">
+        <bpmn:incoming>SequenceFlow-SumToVerify120-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-Verify120ToJoin-id-0004</bpmn:outgoing>
+      </bpmn:scriptTask>
+      <bpmn:scriptTask id="ScriptTask-VerifyCumulativeGPA-id-0003" name="Verify cumulative GPA ≥ 2.0">
+        <bpmn:incoming>SequenceFlow-SplitToVerifyCumulativeGPA-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-VerifyCumulativeGPAToJoin-id-0006</bpmn:outgoing>
+      </bpmn:scriptTask>
+      <bpmn:scriptTask id="ScriptTask-VerifyMajorGPA-id-0004" name="Verify major GPA ≥ [major_threshold]">
+        <bpmn:incoming>SequenceFlow-SplitToVerifyMajorGPA-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-VerifyMajorGPAToJoin-id-0008</bpmn:outgoing>
+      </bpmn:scriptTask>
+      <bpmn:serviceTask id="ServiceTask-CheckDisciplinaryHolds-id-0005" name="Check disciplinary holds">
+        <bpmn:incoming>SequenceFlow-SplitToCheckDisciplinaryHolds-id-0009</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CheckDisciplinaryHoldsToJoin-id-0010</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-CheckLibraryFees-id-0006" name="Check library fees">
+        <bpmn:incoming>SequenceFlow-SplitToCheckLibraryFees-id-0011</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CheckLibraryFeesToIsInternational-id-0012</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-IsInternational-id-0001" name="Is International Student?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-CheckLibraryFeesToIsInternational-id-0012</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-IsInternationalToVerifyVisa-id-0013</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-IsInternationalToVerifyMajorCourses-id-0014</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-VerifyVisaStatus-id-0007" name="Verify visa status">
+        <bpmn:incoming>SequenceFlow-IsInternationalToVerifyVisa-id-0013</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-VerifyVisaToVerifyMajorCourses-id-0015</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-VerifyMajorCourses-id-0008" name="Verify all major courses completed">
+        <bpmn:incoming>SequenceFlow-IsInternationalToVerifyMajorCourses-id-0014</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-VerifyVisaToVerifyMajorCourses-id-0015</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-VerifyMajorCoursesToVerifyGeneralEducation-id-0016</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-VerifyGeneralEducation-id-0009" name="Verify all general education requirements met">
+        <bpmn:incoming>SequenceFlow-VerifyMajorCoursesToVerifyGeneralEducation-id-0016</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-VerifyGeneralEducationToJoin-id-0017</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:parallelGateway id="ParallelGateway-JoinRequirements-id-0002" name="Join Requirements Check" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-Verify120ToJoin-id-0004</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-VerifyCumulativeGPAToJoin-id-0006</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-VerifyMajorGPAToJoin-id-0008</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-CheckDisciplinaryHoldsToJoin-id-0010</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-VerifyGeneralEducationToJoin-id-0017</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-JoinToAllRequirementsMet-id-0018</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-AllRequirementsMet-id-0001" name="All Requirements Met?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-JoinToAllRequirementsMet-id-0018</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AllRequirementsMetToApproved-id-0019</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-AllRequirementsMetToGenerateReport-id-0020</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="EndEvent-ValidationCompleteApproved-id-0001" name="Validation Complete - Approved">
+        <bpmn:incoming>SequenceFlow-AllRequirementsMetToApproved-id-0019</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:serviceTask id="ServiceTask-GenerateDeficiencyReport-id-0001" name="Generate Detailed Deficiency Report">
+        <bpmn:incoming>SequenceFlow-AllRequirementsMetToGenerateReport-id-0020</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GenerateReportToDeficiencies-id-0021</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-Timer30Day-GenerateReport-id-0001" name="30-Day Deadline" attachedToRef="ServiceTask-GenerateDeficiencyReport-id-0001">
+        <bpmn:outgoing>SequenceFlow-BoundaryToUrgentNotification-id-0022</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="BoundaryEvent-Timer30Day-GenerateReport-id-0001_EventDef">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P30D</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:boundaryEvent>
+      <bpmn:sendTask id="SendTask-UrgentDeadlineMissed-id-0001" name="Send: Urgent - Deadline Missed Notification">
+        <bpmn:incoming>SequenceFlow-BoundaryToUrgentNotification-id-0022</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-UrgentNotificationToDeficiencies-id-0023</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:endEvent id="EndEvent-ValidationCompleteDeficiencies-id-0002" name="Validation Complete - Deficiencies Found">
+        <bpmn:incoming>SequenceFlow-GenerateReportToDeficiencies-id-0021</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-UrgentNotificationToDeficiencies-id-0023</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToSplit-id-0001" sourceRef="StartEvent-ValidationStart-id-0001" targetRef="ParallelGateway-SplitRequirements-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToSumCredits-id-0002" sourceRef="ParallelGateway-SplitRequirements-id-0001" targetRef="ScriptTask-SumTotalCredits-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SumToVerify120-id-0003" sourceRef="ScriptTask-SumTotalCredits-id-0001" targetRef="ScriptTask-Verify120Credits-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-Verify120ToJoin-id-0004" sourceRef="ScriptTask-Verify120Credits-id-0002" targetRef="ParallelGateway-JoinRequirements-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToVerifyCumulativeGPA-id-0005" sourceRef="ParallelGateway-SplitRequirements-id-0001" targetRef="ScriptTask-VerifyCumulativeGPA-id-0003" />
+      <bpmn:sequenceFlow id="SequenceFlow-VerifyCumulativeGPAToJoin-id-0006" sourceRef="ScriptTask-VerifyCumulativeGPA-id-0003" targetRef="ParallelGateway-JoinRequirements-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToVerifyMajorGPA-id-0007" sourceRef="ParallelGateway-SplitRequirements-id-0001" targetRef="ScriptTask-VerifyMajorGPA-id-0004" />
+      <bpmn:sequenceFlow id="SequenceFlow-VerifyMajorGPAToJoin-id-0008" sourceRef="ScriptTask-VerifyMajorGPA-id-0004" targetRef="ParallelGateway-JoinRequirements-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToCheckDisciplinaryHolds-id-0009" sourceRef="ParallelGateway-SplitRequirements-id-0001" targetRef="ServiceTask-CheckDisciplinaryHolds-id-0005" />
+      <bpmn:sequenceFlow id="SequenceFlow-CheckDisciplinaryHoldsToJoin-id-0010" sourceRef="ServiceTask-CheckDisciplinaryHolds-id-0005" targetRef="ParallelGateway-JoinRequirements-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToCheckLibraryFees-id-0011" sourceRef="ParallelGateway-SplitRequirements-id-0001" targetRef="ServiceTask-CheckLibraryFees-id-0006" />
+      <bpmn:sequenceFlow id="SequenceFlow-CheckLibraryFeesToIsInternational-id-0012" sourceRef="ServiceTask-CheckLibraryFees-id-0006" targetRef="ExclusiveGateway-IsInternational-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-IsInternationalToVerifyVisa-id-0013" name="is_international" sourceRef="ExclusiveGateway-IsInternational-id-0001" targetRef="ServiceTask-VerifyVisaStatus-id-0007" />
+      <bpmn:sequenceFlow id="SequenceFlow-IsInternationalToVerifyMajorCourses-id-0014" sourceRef="ExclusiveGateway-IsInternational-id-0001" targetRef="ServiceTask-VerifyMajorCourses-id-0008" />
+      <bpmn:sequenceFlow id="SequenceFlow-VerifyVisaToVerifyMajorCourses-id-0015" sourceRef="ServiceTask-VerifyVisaStatus-id-0007" targetRef="ServiceTask-VerifyMajorCourses-id-0008" />
+      <bpmn:sequenceFlow id="SequenceFlow-VerifyMajorCoursesToVerifyGeneralEducation-id-0016" sourceRef="ServiceTask-VerifyMajorCourses-id-0008" targetRef="ServiceTask-VerifyGeneralEducation-id-0009" />
+      <bpmn:sequenceFlow id="SequenceFlow-VerifyGeneralEducationToJoin-id-0017" sourceRef="ServiceTask-VerifyGeneralEducation-id-0009" targetRef="ParallelGateway-JoinRequirements-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-JoinToAllRequirementsMet-id-0018" sourceRef="ParallelGateway-JoinRequirements-id-0002" targetRef="ExclusiveGateway-AllRequirementsMet-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-AllRequirementsMetToApproved-id-0019" name="all_requirements_met" sourceRef="ExclusiveGateway-AllRequirementsMet-id-0001" targetRef="EndEvent-ValidationCompleteApproved-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-AllRequirementsMetToGenerateReport-id-0020" sourceRef="ExclusiveGateway-AllRequirementsMet-id-0001" targetRef="ServiceTask-GenerateDeficiencyReport-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GenerateReportToDeficiencies-id-0021" sourceRef="ServiceTask-GenerateDeficiencyReport-id-0001" targetRef="EndEvent-ValidationCompleteDeficiencies-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-BoundaryToUrgentNotification-id-0022" sourceRef="BoundaryEvent-Timer30Day-GenerateReport-id-0001" targetRef="SendTask-UrgentDeadlineMissed-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-UrgentNotificationToDeficiencies-id-0023" sourceRef="SendTask-UrgentDeadlineMissed-id-0001" targetRef="EndEvent-ValidationCompleteDeficiencies-id-0002" />
+    </bpmn:subProcess>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ValidationResult-id-0001" name="Validation Result" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ValidateRequirementsToValidationResult-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidationResultToFulfillGraduation-id-0003</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ValidationResultToDeficiencyReport-id-0004</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:subProcess id="SubProcess-FulfillGraduation-id-0001" name="Fulfill Graduation">
+      <bpmn:incoming>SequenceFlow-ValidationResultToFulfillGraduation-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FulfillGraduationToProcessComplete-id-0006</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-FulfillmentStart-id-0001" name="Fulfillment Start">
+        <bpmn:outgoing>SequenceFlow-FulfillmentStartToSplit-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:parallelGateway id="ParallelGateway-SplitFulfillment-id-0001" name="Split Fulfillment Tasks" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-FulfillmentStartToSplit-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SplitToPrepareDiploma-id-0002</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToOrderCapAndGown-id-0004</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToAssignCeremonySlot-id-0006</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:serviceTask id="ServiceTask-PrepareDiploma-id-0001" name="Prepare Diploma">
+        <bpmn:incoming>SequenceFlow-SplitToPrepareDiploma-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PrepareDiplomaToJoin-id-0003</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-OrderCapAndGown-id-0002" name="Order Cap and Gown">
+        <bpmn:incoming>SequenceFlow-SplitToOrderCapAndGown-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-OrderCapAndGownToJoin-id-0005</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-AssignCeremonySlot-id-0003" name="Assign Ceremony Slot">
+        <bpmn:incoming>SequenceFlow-SplitToAssignCeremonySlot-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AssignCeremonySlotToJoin-id-0007</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:parallelGateway id="ParallelGateway-JoinFulfillment-id-0002" name="Join Fulfillment Tasks" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-PrepareDiplomaToJoin-id-0003</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-OrderCapAndGownToJoin-id-0005</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-AssignCeremonySlotToJoin-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-JoinToVerifyAttendance-id-0008</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:userTask id="UserTask-VerifyAttendance-id-0001" name="Verify Attendance at Ceremony">
+        <bpmn:incoming>SequenceFlow-JoinToVerifyAttendance-id-0008</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-VerifyAttendanceToConferDegree-id-0009</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:serviceTask id="ServiceTask-ConferDegree-id-0001" name="Confer Degree">
+        <bpmn:incoming>SequenceFlow-VerifyAttendanceToConferDegree-id-0009</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ConferDegreeToIssueTranscript-id-0010</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-IssueTranscript-id-0002" name="Issue Transcript">
+        <bpmn:incoming>SequenceFlow-ConferDegreeToIssueTranscript-id-0010</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-IssueTranscriptToComplete-id-0011</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-FulfillmentComplete-id-0001" name="Fulfillment Complete">
+        <bpmn:incoming>SequenceFlow-IssueTranscriptToComplete-id-0011</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-FulfillmentStartToSplit-id-0001" sourceRef="StartEvent-FulfillmentStart-id-0001" targetRef="ParallelGateway-SplitFulfillment-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToPrepareDiploma-id-0002" sourceRef="ParallelGateway-SplitFulfillment-id-0001" targetRef="ServiceTask-PrepareDiploma-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-PrepareDiplomaToJoin-id-0003" sourceRef="ServiceTask-PrepareDiploma-id-0001" targetRef="ParallelGateway-JoinFulfillment-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToOrderCapAndGown-id-0004" sourceRef="ParallelGateway-SplitFulfillment-id-0001" targetRef="ServiceTask-OrderCapAndGown-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-OrderCapAndGownToJoin-id-0005" sourceRef="ServiceTask-OrderCapAndGown-id-0002" targetRef="ParallelGateway-JoinFulfillment-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToAssignCeremonySlot-id-0006" sourceRef="ParallelGateway-SplitFulfillment-id-0001" targetRef="ServiceTask-AssignCeremonySlot-id-0003" />
+      <bpmn:sequenceFlow id="SequenceFlow-AssignCeremonySlotToJoin-id-0007" sourceRef="ServiceTask-AssignCeremonySlot-id-0003" targetRef="ParallelGateway-JoinFulfillment-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-JoinToVerifyAttendance-id-0008" sourceRef="ParallelGateway-JoinFulfillment-id-0002" targetRef="UserTask-VerifyAttendance-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-VerifyAttendanceToConferDegree-id-0009" sourceRef="UserTask-VerifyAttendance-id-0001" targetRef="ServiceTask-ConferDegree-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ConferDegreeToIssueTranscript-id-0010" sourceRef="ServiceTask-ConferDegree-id-0001" targetRef="ServiceTask-IssueTranscript-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-IssueTranscriptToComplete-id-0011" sourceRef="ServiceTask-IssueTranscript-id-0002" targetRef="EndEvent-FulfillmentComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:sendTask id="SendTask-DeficiencyReportToStudent-id-0001" name="Send: Deficiency Report to Student">
+      <bpmn:incoming>SequenceFlow-ValidationResultToDeficiencyReport-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DeficiencyReportToGraduationDenied-id-0005</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-GraduationDenied-id-0001" name="Graduation Denied">
+      <bpmn:incoming>SequenceFlow-DeficiencyReportToGraduationDenied-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GraduationDeniedToProcessComplete-id-0007</bpmn:outgoing>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0001" name="Process Complete">
+      <bpmn:incoming>SequenceFlow-FulfillGraduationToProcessComplete-id-0006</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-GraduationDeniedToProcessComplete-id-0007</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToValidateRequirements-id-0001" sourceRef="StartEvent-GraduationCheckRequested-id-0001" targetRef="SubProcess-ValidateGraduationRequirements-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidateRequirementsToValidationResult-id-0002" sourceRef="SubProcess-ValidateGraduationRequirements-id-0001" targetRef="ExclusiveGateway-ValidationResult-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidationResultToFulfillGraduation-id-0003" name="approved" sourceRef="ExclusiveGateway-ValidationResult-id-0001" targetRef="SubProcess-FulfillGraduation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidationResultToDeficiencyReport-id-0004" sourceRef="ExclusiveGateway-ValidationResult-id-0001" targetRef="SendTask-DeficiencyReportToStudent-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DeficiencyReportToGraduationDenied-id-0005" sourceRef="SendTask-DeficiencyReportToStudent-id-0001" targetRef="EndEvent-GraduationDenied-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FulfillGraduationToProcessComplete-id-0006" sourceRef="SubProcess-FulfillGraduation-id-0001" targetRef="EndEvent-ProcessComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GraduationDeniedToProcessComplete-id-0007" sourceRef="EndEvent-GraduationDenied-id-0001" targetRef="EndEvent-ProcessComplete-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_GraduationProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_GraduationProcess" bpmnElement="GraduationProcess">
+      <bpmndi:BPMNShape id="StartEvent-GraduationCheckRequested-id-0001_di" bpmnElement="StartEvent-GraduationCheckRequested-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-ValidateGraduationRequirements-id-0001_di" bpmnElement="SubProcess-ValidateGraduationRequirements-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ValidationResult-id-0001_di" bpmnElement="ExclusiveGateway-ValidationResult-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-FulfillGraduation-id-0001_di" bpmnElement="SubProcess-FulfillGraduation-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0001_di" bpmnElement="EndEvent-ProcessComplete-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-DeficiencyReportToStudent-id-0001_di" bpmnElement="SendTask-DeficiencyReportToStudent-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-GraduationDenied-id-0001_di" bpmnElement="EndEvent-GraduationDenied-id-0001">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToValidateRequirements-id-0001_di" bpmnElement="SequenceFlow-StartToValidateRequirements-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidateRequirementsToValidationResult-id-0002_di" bpmnElement="SequenceFlow-ValidateRequirementsToValidationResult-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidationResultToFulfillGraduation-id-0003_di" bpmnElement="SequenceFlow-ValidationResultToFulfillGraduation-id-0003">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidationResultToDeficiencyReport-id-0004_di" bpmnElement="SequenceFlow-ValidationResultToDeficiencyReport-id-0004">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FulfillGraduationToProcessComplete-id-0006_di" bpmnElement="SequenceFlow-FulfillGraduationToProcessComplete-id-0006">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DeficiencyReportToGraduationDenied-id-0005_di" bpmnElement="SequenceFlow-DeficiencyReportToGraduationDenied-id-0005">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GraduationDeniedToProcessComplete-id-0007_di" bpmnElement="SequenceFlow-GraduationDeniedToProcessComplete-id-0007">
+        <di:waypoint x="693" y="210" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="825" y="88" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-FulfillGraduation-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-FulfillGraduation-id-0001" bpmnElement="SubProcess-FulfillGraduation-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-FulfillmentStart-id-0001_di" bpmnElement="StartEvent-FulfillmentStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-SplitFulfillment-id-0001_di" bpmnElement="ParallelGateway-SplitFulfillment-id-0001">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareDiploma-id-0001_di" bpmnElement="ServiceTask-PrepareDiploma-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-JoinFulfillment-id-0002_di" bpmnElement="ParallelGateway-JoinFulfillment-id-0002">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-VerifyAttendance-id-0001_di" bpmnElement="UserTask-VerifyAttendance-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ConferDegree-id-0001_di" bpmnElement="ServiceTask-ConferDegree-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-IssueTranscript-id-0002_di" bpmnElement="ServiceTask-IssueTranscript-id-0002">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-FulfillmentComplete-id-0001_di" bpmnElement="EndEvent-FulfillmentComplete-id-0001">
+        <dc:Bounds x="1107" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-OrderCapAndGown-id-0002_di" bpmnElement="ServiceTask-OrderCapAndGown-id-0002">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AssignCeremonySlot-id-0003_di" bpmnElement="ServiceTask-AssignCeremonySlot-id-0003">
+        <dc:Bounds x="325" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-FulfillmentStartToSplit-id-0001_di" bpmnElement="SequenceFlow-FulfillmentStartToSplit-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToPrepareDiploma-id-0002_di" bpmnElement="SequenceFlow-SplitToPrepareDiploma-id-0002">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToOrderCapAndGown-id-0004_di" bpmnElement="SequenceFlow-SplitToOrderCapAndGown-id-0004">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToAssignCeremonySlot-id-0006_di" bpmnElement="SequenceFlow-SplitToAssignCeremonySlot-id-0006">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="350" />
+        <di:waypoint x="325" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrepareDiplomaToJoin-id-0003_di" bpmnElement="SequenceFlow-PrepareDiplomaToJoin-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToVerifyAttendance-id-0008_di" bpmnElement="SequenceFlow-JoinToVerifyAttendance-id-0008">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyAttendanceToConferDegree-id-0009_di" bpmnElement="SequenceFlow-VerifyAttendanceToConferDegree-id-0009">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConferDegreeToIssueTranscript-id-0010_di" bpmnElement="SequenceFlow-ConferDegreeToIssueTranscript-id-0010">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IssueTranscriptToComplete-id-0011_di" bpmnElement="SequenceFlow-IssueTranscriptToComplete-id-0011">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1107" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderCapAndGownToJoin-id-0005_di" bpmnElement="SequenceFlow-OrderCapAndGownToJoin-id-0005">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AssignCeremonySlotToJoin-id-0007_di" bpmnElement="SequenceFlow-AssignCeremonySlotToJoin-id-0007">
+        <di:waypoint x="425" y="350" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-ValidateGraduationRequirements-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-ValidateGraduationRequirements-id-0001" bpmnElement="SubProcess-ValidateGraduationRequirements-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ValidationStart-id-0001_di" bpmnElement="StartEvent-ValidationStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-SplitRequirements-id-0001_di" bpmnElement="ParallelGateway-SplitRequirements-id-0001">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-SumTotalCredits-id-0001_di" bpmnElement="ScriptTask-SumTotalCredits-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-Verify120Credits-id-0002_di" bpmnElement="ScriptTask-Verify120Credits-id-0002">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-JoinRequirements-id-0002_di" bpmnElement="ParallelGateway-JoinRequirements-id-0002">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-AllRequirementsMet-id-0001_di" bpmnElement="ExclusiveGateway-AllRequirementsMet-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ValidationCompleteApproved-id-0001_di" bpmnElement="EndEvent-ValidationCompleteApproved-id-0001">
+        <dc:Bounds x="1407" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-VerifyCumulativeGPA-id-0003_di" bpmnElement="ScriptTask-VerifyCumulativeGPA-id-0003">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateDeficiencyReport-id-0001_di" bpmnElement="ServiceTask-GenerateDeficiencyReport-id-0001">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer30Day-GenerateReport-id-0001_di" bpmnElement="BoundaryEvent-Timer30Day-GenerateReport-id-0001">
+        <dc:Bounds x="1407" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ValidationCompleteDeficiencies-id-0002_di" bpmnElement="EndEvent-ValidationCompleteDeficiencies-id-0002">
+        <dc:Bounds x="1707" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-VerifyMajorGPA-id-0004_di" bpmnElement="ScriptTask-VerifyMajorGPA-id-0004">
+        <dc:Bounds x="325" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-UrgentDeadlineMissed-id-0001_di" bpmnElement="SendTask-UrgentDeadlineMissed-id-0001">
+        <dc:Bounds x="1525" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckDisciplinaryHolds-id-0005_di" bpmnElement="ServiceTask-CheckDisciplinaryHolds-id-0005">
+        <dc:Bounds x="325" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckLibraryFees-id-0006_di" bpmnElement="ServiceTask-CheckLibraryFees-id-0006">
+        <dc:Bounds x="325" y="590" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-IsInternational-id-0001_di" bpmnElement="ExclusiveGateway-IsInternational-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="605" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-VerifyVisaStatus-id-0007_di" bpmnElement="ServiceTask-VerifyVisaStatus-id-0007">
+        <dc:Bounds x="625" y="590" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-VerifyMajorCourses-id-0008_di" bpmnElement="ServiceTask-VerifyMajorCourses-id-0008">
+        <dc:Bounds x="775" y="590" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-VerifyGeneralEducation-id-0009_di" bpmnElement="ServiceTask-VerifyGeneralEducation-id-0009">
+        <dc:Bounds x="925" y="590" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSplit-id-0001_di" bpmnElement="SequenceFlow-StartToSplit-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToSumCredits-id-0002_di" bpmnElement="SequenceFlow-SplitToSumCredits-id-0002">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToVerifyCumulativeGPA-id-0005_di" bpmnElement="SequenceFlow-SplitToVerifyCumulativeGPA-id-0005">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToVerifyMajorGPA-id-0007_di" bpmnElement="SequenceFlow-SplitToVerifyMajorGPA-id-0007">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="350" />
+        <di:waypoint x="325" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToCheckDisciplinaryHolds-id-0009_di" bpmnElement="SequenceFlow-SplitToCheckDisciplinaryHolds-id-0009">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="490" />
+        <di:waypoint x="325" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToCheckLibraryFees-id-0011_di" bpmnElement="SequenceFlow-SplitToCheckLibraryFees-id-0011">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="630" />
+        <di:waypoint x="325" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SumToVerify120-id-0003_di" bpmnElement="SequenceFlow-SumToVerify120-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Verify120ToJoin-id-0004_di" bpmnElement="SequenceFlow-Verify120ToJoin-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToAllRequirementsMet-id-0018_di" bpmnElement="SequenceFlow-JoinToAllRequirementsMet-id-0018">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AllRequirementsMetToApproved-id-0019_di" bpmnElement="SequenceFlow-AllRequirementsMetToApproved-id-0019">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1407" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AllRequirementsMetToGenerateReport-id-0020_di" bpmnElement="SequenceFlow-AllRequirementsMetToGenerateReport-id-0020">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyCumulativeGPAToJoin-id-0006_di" bpmnElement="SequenceFlow-VerifyCumulativeGPAToJoin-id-0006">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateReportToDeficiencies-id-0021_di" bpmnElement="SequenceFlow-GenerateReportToDeficiencies-id-0021">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1707" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToUrgentNotification-id-0022_di" bpmnElement="SequenceFlow-BoundaryToUrgentNotification-id-0022">
+        <di:waypoint x="1425" y="268" />
+        <di:waypoint x="1425" y="350" />
+        <di:waypoint x="1525" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyMajorGPAToJoin-id-0008_di" bpmnElement="SequenceFlow-VerifyMajorGPAToJoin-id-0008">
+        <di:waypoint x="425" y="350" />
+        <di:waypoint x="1125" y="350" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UrgentNotificationToDeficiencies-id-0023_di" bpmnElement="SequenceFlow-UrgentNotificationToDeficiencies-id-0023">
+        <di:waypoint x="1625" y="350" />
+        <di:waypoint x="1725" y="350" />
+        <di:waypoint x="1725" y="228" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckDisciplinaryHoldsToJoin-id-0010_di" bpmnElement="SequenceFlow-CheckDisciplinaryHoldsToJoin-id-0010">
+        <di:waypoint x="425" y="490" />
+        <di:waypoint x="1125" y="490" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckLibraryFeesToIsInternational-id-0012_di" bpmnElement="SequenceFlow-CheckLibraryFeesToIsInternational-id-0012">
+        <di:waypoint x="425" y="630" />
+        <di:waypoint x="500" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IsInternationalToVerifyVisa-id-0013_di" bpmnElement="SequenceFlow-IsInternationalToVerifyVisa-id-0013">
+        <di:waypoint x="550" y="630" />
+        <di:waypoint x="625" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IsInternationalToVerifyMajorCourses-id-0014_di" bpmnElement="SequenceFlow-IsInternationalToVerifyMajorCourses-id-0014">
+        <di:waypoint x="525" y="655" />
+        <di:waypoint x="525" y="700" />
+        <di:waypoint x="825" y="700" />
+        <di:waypoint x="825" y="670" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyVisaToVerifyMajorCourses-id-0015_di" bpmnElement="SequenceFlow-VerifyVisaToVerifyMajorCourses-id-0015">
+        <di:waypoint x="725" y="630" />
+        <di:waypoint x="775" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyMajorCoursesToVerifyGeneralEducation-id-0016_di" bpmnElement="SequenceFlow-VerifyMajorCoursesToVerifyGeneralEducation-id-0016">
+        <di:waypoint x="875" y="630" />
+        <di:waypoint x="925" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyGeneralEducationToJoin-id-0017_di" bpmnElement="SequenceFlow-VerifyGeneralEducationToJoin-id-0017">
+        <di:waypoint x="1025" y="630" />
+        <di:waypoint x="1125" y="630" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

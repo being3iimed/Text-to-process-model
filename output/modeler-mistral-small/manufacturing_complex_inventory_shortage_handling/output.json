@@ -1,0 +1,223 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "Definitions-InventoryCheckProcess-id-0001",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler",
+    "exporterVersion": "1.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "Process-InventoryCheckProcess-id-0001",
+        "name": "Inventory Check Process",
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-InventoryCheckTriggered-id-0001",
+            "name": "Inventory Check Triggered"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-CheckInventoryForComponentX-id-0001",
+            "name": "Check Inventory for Component X"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-InventoryCheck-id-0001",
+            "name": "Inventory Check",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ProductionProceeds-id-0001",
+            "name": "Production Proceeds"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-CheckNextSupplierDelivery-id-0001",
+            "name": "Check Next Supplier Delivery"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-DeliveryTimeCheck-id-0001",
+            "name": "Delivery Time Check",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:IntermediateCatchEvent",
+            "id": "IntermediateCatchEvent-WaitForDelivery-id-0001",
+            "name": "Wait for Delivery",
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:TimerEventDefinition",
+                "timeDuration": "P1D"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ProductionResumes-id-0001",
+            "name": "Production Resumes"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-CheckForAlternativeComponents-id-0001",
+            "name": "Check for Alternative Components"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-AlternativeComponentCheck-id-0001",
+            "name": "Alternative Component Check",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-NotifyProductionToUseAlternative-id-0001",
+            "name": "Notify Production to Use Alternative"
+          },
+          {
+            "$type": "bpmn:SubProcess",
+            "id": "SubProcess-ExpediteHandling-id-0001",
+            "name": "Expedite Handling",
+            "flowElements": [
+              {
+                "$type": "bpmn:StartEvent",
+                "id": "StartEvent-ExpediteStart-id-0001",
+                "name": "Expedite Start"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-RequestSupplierExpedite-id-0001",
+                "name": "Request Supplier Expedite"
+              },
+              {
+                "$type": "bpmn:BoundaryEvent",
+                "id": "BoundaryEvent-SupplierExpediteError-id-0001",
+                "name": "Supplier Expedite Error",
+                "attachedToRef": "ServiceTask-RequestSupplierExpedite-id-0001",
+                "cancelActivity": true,
+                "eventDefinitions": [
+                  {
+                    "$type": "bpmn:ErrorEventDefinition",
+                    "errorRef": "SUPPLIER_EXPEDITE_ERROR"
+                  }
+                ]
+              },
+              {
+                "$type": "bpmn:SubProcess",
+                "id": "SubProcess-BackupSupplierProcess-id-0001",
+                "name": "Backup Supplier Process",
+                "flowElements": [
+                  {
+                    "$type": "bpmn:StartEvent",
+                    "id": "StartEvent-BackupSupplierStart-id-0001",
+                    "name": "Backup Supplier Start"
+                  },
+                  {
+                    "$type": "bpmn:UserTask",
+                    "id": "UserTask-ProcurementManagerFindsBackupSupplier-id-0001",
+                    "name": "Procurement Manager Finds Backup Supplier"
+                  },
+                  {
+                    "$type": "bpmn:ServiceTask",
+                    "id": "ServiceTask-CreatePurchaseOrder-id-0001",
+                    "name": "Create Purchase Order"
+                  },
+                  {
+                    "$type": "bpmn:BoundaryEvent",
+                    "id": "BoundaryEvent-BackupSupplierUnavailable-id-0001",
+                    "name": "Backup Supplier Unavailable",
+                    "attachedToRef": "ServiceTask-CreatePurchaseOrder-id-0001",
+                    "cancelActivity": true,
+                    "eventDefinitions": [
+                      {
+                        "$type": "bpmn:ErrorEventDefinition",
+                        "errorRef": "BACKUP_SUPPLIER_UNAVAILABLE"
+                      }
+                    ]
+                  },
+                  {
+                    "$type": "bpmn:UserTask",
+                    "id": "UserTask-ProcurementManagerFindsAlternativeBackupSupplier-id-0001",
+                    "name": "Procurement Manager Finds Alternative Backup Supplier"
+                  },
+                  {
+                    "$type": "bpmn:SendTask",
+                    "id": "SendTask-ConfirmBackupSupplierDelivery-id-0001",
+                    "name": "Confirm Backup Supplier Delivery"
+                  },
+                  {
+                    "$type": "bpmn:EndEvent",
+                    "id": "EndEvent-BackupSupplierProcessComplete-id-0001",
+                    "name": "Backup Supplier Process Complete"
+                  }
+                ]
+              },
+              {
+                "$type": "bpmn:SendTask",
+                "id": "SendTask-NotifyProductionOfExpedite-id-0001",
+                "name": "Notify Production of Expedite"
+              },
+              {
+                "$type": "bpmn:ExclusiveGateway",
+                "id": "ExclusiveGateway-ExpediteSuccessCheck-id-0001",
+                "name": "Expedite Success Check",
+                "gatewayDirection": "Diverging"
+              },
+              {
+                "$type": "bpmn:EndEvent",
+                "id": "EndEvent-ExpediteComplete-id-0001",
+                "name": "Expedite Complete"
+              },
+              {
+                "$type": "bpmn:EndEvent",
+                "id": "EndEvent-ProceedToBackupSupplier-id-0001",
+                "name": "Proceed to Backup Supplier"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-NotifyDependentProductionLines-id-0001",
+            "name": "Notify Dependent Production Lines of Potential Delay"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-LogCostVariance-id-0001",
+            "name": "Log Cost Variance"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-UpdateSupplierMetrics-id-0001",
+            "name": "Update Supplier Metrics"
+          }
+        ],
+        "isExecutable": true
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-small-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11621,
+        "total_tokens": 13373,
+        "completion_tokens": 1752
+      },
+      "model_name": "mistral-small-latest",
+      "model": "mistral-small-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11621,
+      "output_tokens": 1752,
+      "total_tokens": 13373
+    },
+    "id": "lc_run--6e923c43-61b1-4b20-90fd-c043348b9201-0"
+  },
+  "status": "success"
+}

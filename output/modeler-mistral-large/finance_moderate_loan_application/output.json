@@ -1,0 +1,271 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "LoanApplicationProcess-Definitions-id-0001",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler",
+    "exporterVersion": "1.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "LoanApplicationProcess-id-0001",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-LoanApplicationSubmitted-id-0001",
+            "name": "Loan Application Submitted"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-PerformInitialValidation-id-0001",
+            "name": "Perform Initial Validation"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-InitialValidation-id-0001",
+            "name": "Initial Validation Result?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-ValidationFailureNotice-id-0001",
+            "name": "Send: validation failure notice"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ApplicationRejected-id-0001",
+            "name": "Application Rejected"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-LoanOfficerReview-id-0001",
+            "name": "Loan Officer Review"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-DocumentsRequired-id-0001",
+            "name": "Documents Required?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-RequestAdditionalDocuments-id-0001",
+            "name": "Send: request for additional documents"
+          },
+          {
+            "$type": "bpmn:ReceiveTask",
+            "id": "ReceiveTask-AdditionalDocuments-id-0001",
+            "name": "Receive: additional documents"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-RunRiskAssessment-id-0001",
+            "name": "Run Risk Assessment"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-RiskAssessment-id-0001",
+            "name": "Risk Assessment Result?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-LoanTermsForAcceptance-id-0001",
+            "name": "Send: loan terms for acceptance"
+          },
+          {
+            "$type": "bpmn:ReceiveTask",
+            "id": "ReceiveTask-CustomerAcceptance-id-0001",
+            "name": "Receive: customer acceptance"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-CustomerDecision-id-0001",
+            "name": "Customer Decision?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-FundAndDisburseLoan-id-0001",
+            "name": "Fund and Disburse Loan"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-LoanFunded-id-0001",
+            "name": "Loan Funded"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-RejectionNotice-id-0001",
+            "name": "Send: rejection notice with reason"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ApplicationRejectedAfterReview-id-0001",
+            "name": "Application Rejected After Review"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-LoanDeclinedByCustomer-id-0001",
+            "name": "Loan Declined by Customer"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToInitialValidation-id-0001",
+            "sourceRef": "StartEvent-LoanApplicationSubmitted-id-0001",
+            "targetRef": "ServiceTask-PerformInitialValidation-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-InitialValidationToGateway-id-0002",
+            "sourceRef": "ServiceTask-PerformInitialValidation-id-0001",
+            "targetRef": "ExclusiveGateway-InitialValidation-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ValidationPassedToReview-id-0003",
+            "name": "validation_passed",
+            "sourceRef": "ExclusiveGateway-InitialValidation-id-0001",
+            "targetRef": "UserTask-LoanOfficerReview-id-0001",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ValidationFailedToNotice-id-0004",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-InitialValidation-id-0001",
+            "targetRef": "SendTask-ValidationFailureNotice-id-0001",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-FailureNoticeToRejected-id-0005",
+            "sourceRef": "SendTask-ValidationFailureNotice-id-0001",
+            "targetRef": "EndEvent-ApplicationRejected-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReviewToDocumentsGateway-id-0006",
+            "sourceRef": "UserTask-LoanOfficerReview-id-0001",
+            "targetRef": "ExclusiveGateway-DocumentsRequired-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DocumentsRequiredToRequest-id-0007",
+            "name": "documents_required",
+            "sourceRef": "ExclusiveGateway-DocumentsRequired-id-0001",
+            "targetRef": "SendTask-RequestAdditionalDocuments-id-0001",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-NoDocumentsToAssessment-id-0008",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-DocumentsRequired-id-0001",
+            "targetRef": "ServiceTask-RunRiskAssessment-id-0001",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RequestToReceiveDocuments-id-0009",
+            "sourceRef": "SendTask-RequestAdditionalDocuments-id-0001",
+            "targetRef": "ReceiveTask-AdditionalDocuments-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReceiveDocumentsToAssessment-id-0010",
+            "sourceRef": "ReceiveTask-AdditionalDocuments-id-0001",
+            "targetRef": "ServiceTask-RunRiskAssessment-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AssessmentToRiskGateway-id-0011",
+            "sourceRef": "ServiceTask-RunRiskAssessment-id-0001",
+            "targetRef": "ExclusiveGateway-RiskAssessment-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RiskApprovedToTerms-id-0012",
+            "name": "risk_approved",
+            "sourceRef": "ExclusiveGateway-RiskAssessment-id-0001",
+            "targetRef": "SendTask-LoanTermsForAcceptance-id-0001",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RiskRejectedToNotice-id-0013",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-RiskAssessment-id-0001",
+            "targetRef": "SendTask-RejectionNotice-id-0001",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-TermsToCustomerAcceptance-id-0014",
+            "sourceRef": "SendTask-LoanTermsForAcceptance-id-0001",
+            "targetRef": "ReceiveTask-CustomerAcceptance-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CustomerAcceptanceToDecision-id-0015",
+            "sourceRef": "ReceiveTask-CustomerAcceptance-id-0001",
+            "targetRef": "ExclusiveGateway-CustomerDecision-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CustomerAcceptedToFund-id-0016",
+            "name": "customer_accepted",
+            "sourceRef": "ExclusiveGateway-CustomerDecision-id-0001",
+            "targetRef": "ServiceTask-FundAndDisburseLoan-id-0001",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CustomerDeclinedToEnd-id-0017",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-CustomerDecision-id-0001",
+            "targetRef": "EndEvent-LoanDeclinedByCustomer-id-0001",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-FundToFundedEnd-id-0018",
+            "sourceRef": "ServiceTask-FundAndDisburseLoan-id-0001",
+            "targetRef": "EndEvent-LoanFunded-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RejectionNoticeToRejectedEnd-id-0019",
+            "sourceRef": "SendTask-RejectionNotice-id-0001",
+            "targetRef": "EndEvent-ApplicationRejectedAfterReview-id-0001"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-large-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 12385,
+        "total_tokens": 14955,
+        "completion_tokens": 2570
+      },
+      "model_name": "mistral-large-latest",
+      "model": "mistral-large-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 12385,
+      "output_tokens": 2570,
+      "total_tokens": 14955
+    },
+    "id": "lc_run--120d1890-5860-45cd-b934-b6f1eeed2c0e-0"
+  },
+  "status": "success"
+}

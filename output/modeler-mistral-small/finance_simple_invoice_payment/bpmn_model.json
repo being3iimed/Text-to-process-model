@@ -1,0 +1,115 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "empty-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "bpmn-js (https://demo.bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "VendorPaymentProcess-id-0001",
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-ProcessInitiated-id-0001",
+          "name": "Process Initiated"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-ReceiveVendorInvoice-id-0002",
+          "name": "Receive: vendor invoice"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-LogInvoice-id-0003",
+          "name": "Log invoice in accounting system"
+        },
+        {
+          "$type": "bpmn:ScriptTask",
+          "id": "ScriptTask-CalculateDueDate-id-0004",
+          "name": "Computation: calculate payment due date"
+        },
+        {
+          "$type": "bpmn:IntermediateCatchEvent",
+          "id": "IntermediateCatchEvent-DueDateTrigger-id-0005",
+          "name": "Due Date Trigger",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDate": "due date"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ManagerApprovesPayment-id-0006",
+          "name": "Manager Approves Payment"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProcessBankTransfer-id-0007",
+          "name": "Process bank transfer"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendPaymentConfirmation-id-0008",
+          "name": "Send: payment confirmation"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProcessComplete-id-0009",
+          "name": "Process Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToReceive-id-0001",
+          "sourceRef": "StartEvent-ProcessInitiated-id-0001",
+          "targetRef": "ReceiveTask-ReceiveVendorInvoice-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReceiveToLog-id-0002",
+          "sourceRef": "ReceiveTask-ReceiveVendorInvoice-id-0002",
+          "targetRef": "ServiceTask-LogInvoice-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LogToCalculate-id-0003",
+          "sourceRef": "ServiceTask-LogInvoice-id-0003",
+          "targetRef": "ScriptTask-CalculateDueDate-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CalculateToTimer-id-0004",
+          "sourceRef": "ScriptTask-CalculateDueDate-id-0004",
+          "targetRef": "IntermediateCatchEvent-DueDateTrigger-id-0005"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TimerToApprove-id-0005",
+          "sourceRef": "IntermediateCatchEvent-DueDateTrigger-id-0005",
+          "targetRef": "UserTask-ManagerApprovesPayment-id-0006"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ApproveToTransfer-id-0006",
+          "sourceRef": "UserTask-ManagerApprovesPayment-id-0006",
+          "targetRef": "ServiceTask-ProcessBankTransfer-id-0007"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TransferToSend-id-0007",
+          "sourceRef": "ServiceTask-ProcessBankTransfer-id-0007",
+          "targetRef": "SendTask-SendPaymentConfirmation-id-0008"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendToEnd-id-0008",
+          "sourceRef": "SendTask-SendPaymentConfirmation-id-0008",
+          "targetRef": "EndEvent-ProcessComplete-id-0009"
+        }
+      ],
+      "isExecutable": true
+    }
+  ]
+}

@@ -1,0 +1,190 @@
+```
+<summary_of_elements>
+
+## Summary of Elements
+
+### TASKS:
+- **userTask("Customer Submits Dispute")** - Customer initiates dispute via support channel
+- **serviceTask("Retrieve Account History")** - Automated retrieval of billing records
+- **serviceTask("Retrieve Usage Records")** - Automated retrieval of usage data
+- **serviceTask("Retrieve Service Logs")** - Automated retrieval of technical logs
+- **userTask("Agent Reviews Charges")** - Human judgment to verify billing accuracy
+- **serviceTask("Issue Credit")** - Automated credit processing
+- **sendTask("Send: Credit Confirmation")** - One-way notification to customer
+- **sendTask("Send: Billing Explanation")** - One-way communication of billing logic
+- **userTask("Customer Accepts/Rejects Explanation")** - Customer decision point
+- **userTask("Specialist Investigates")** - Deep technical/billing review
+- **serviceTask("Issue Retroactive Credit")** - Automated credit for past charges
+- **serviceTask("Apply Goodwill Credits")** - Automated future credit application
+- **sendTask("Send: Resolution Notification")** - Final communication to customer
+
+### GATEWAYS:
+- **XOR after "Agent Reviews Charges"**:
+  - Condition A: `charges_incorrect == true`
+  - Condition B: `charges_correct == true` (default)
+- **XOR after "Customer Accepts/Rejects Explanation"**:
+  - Condition A: `customer_accepts == false` (escalation path)
+  - Condition B: `customer_accepts == true` (default, close case)
+- **XOR after "Specialist Investigates"**:
+  - Condition A: `specialist_confirms_error == true`
+  - Condition B: `specialist_confirms_correct == true` (default)
+
+### EVENTS:
+- **startEvent("Dispute Initiated")** - Trigger: Customer contact
+- **endEvent("Case Closed - Credit Issued")** - Path 1 termination
+- **endEvent("Case Closed - Explained")** - Path 2 termination
+- **endEvent("Case Closed - Retroactive Credit")** - Path 3 termination
+- **endEvent("Case Closed - Goodwill Offered")** - Path 4 termination
+
+### BOUNDARY EVENTS:
+- **NONE** - No explicit SLA requirements or expected error scenarios mentioned in description
+
+### SUBPROCESSES:
+- **NONE** - All tasks are linear or simple branches; no cohesive grouping meets necessity test
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+## BPMN Pseudocode
+
+```pseudocode
+startEvent("Dispute Initiated")
+
+// Customer initiates dispute
+userTask("Customer Submits Dispute")
+
+// Automated data collection
+AND:
+    serviceTask("Retrieve Account History")
+    serviceTask("Retrieve Usage Records")
+    serviceTask("Retrieve Service Logs")
+END_AND
+
+// Agent review decision point
+userTask("Agent Reviews Charges")
+
+if (charges_incorrect == true):
+    // Error confirmed path
+    serviceTask("Issue Credit")
+    sendTask("Send: Credit Confirmation")
+    endEvent("Case Closed - Credit Issued")
+
+else:  // charges_correct == true (default)
+    // Charges correct path
+    sendTask("Send: Billing Explanation")
+    userTask("Customer Accepts/Rejects Explanation")
+
+    if (customer_accepts == false):
+        // Escalation path
+        userTask("Specialist Investigates")
+
+        if (specialist_confirms_error == true):
+            serviceTask("Issue Retroactive Credit")
+            sendTask("Send: Resolution Notification")
+            endEvent("Case Closed - Retroactive Credit")
+
+        else:  // specialist_confirms_correct == true (default)
+            serviceTask("Apply Goodwill Credits")
+            sendTask("Send: Resolution Notification")
+            endEvent("Case Closed - Goodwill Offered")
+
+    else:  // customer_accepts == true (default)
+        // Acceptance path
+        sendTask("Send: Resolution Notification")
+        endEvent("Case Closed - Explained")
+```
+
+</bpmn_pseudocode>
+
+<compliance_validation>
+
+## Compliance Validation Results
+
+### TIMER EVENTS:
+✅ **PASS** - No timer events used (none mentioned in requirements)
+
+### GATEWAYS:
+✅ **PASS** -
+- All XOR gateways have:
+  - Mutually exclusive conditions
+  - Explicit default paths
+  - Corresponding convergence via endEvents
+- No OR gateways (appropriate for this workflow)
+- Parallel AND gateway properly converged
+
+### SEQUENCE FLOWS:
+✅ **PASS** -
+- All conditional flows have descriptive labels:
+  - `charges_incorrect == true`
+  - `customer_accepts == false`
+  - `specialist_confirms_error == true`
+- Default flows explicitly marked in pseudocode comments
+- No empty string labels
+
+### BOUNDARY EVENTS:
+✅ **PASS** -
+- No boundary events added (none justified by requirements)
+- No speculative error handling
+- No defensive timer boundaries
+
+### SUBPROCESSES:
+✅ **PASS** -
+- No subprocesses created
+- All tasks are appropriately linear/branched
+- No artificial grouping
+
+### FLOW PATHS:
+✅ **PASS** -
+- All 4 termination paths traceable:
+  1. Credit issued → closed
+  2. Explained and accepted → closed
+  3. Retroactive credit → closed
+  4. Goodwill credits → closed
+- No orphaned elements
+- No unreachable tasks
+
+### BALANCE METRICS:
+✅ **PASS** -
+- Core elements (tasks/gateways/events): 13/13 = 100%
+- Boundary events: 0/13 = 0% (appropriate)
+- Subprocesses: 0/13 = 0% (appropriate)
+- Clean, minimalist design
+
+</compliance_validation>
+
+<assumptions>
+
+## Documented Assumptions
+
+1. **No SLA Requirements**: Description mentions no hard time constraints for any task, so no timer boundary events added
+2. **No Error Scenarios**: No expected system failures or data retrieval errors mentioned, so no error boundary events
+3. **Customer Acceptance**: Assumed "Customer Accepts/Rejects Explanation" is binary decision (no partial acceptance)
+4. **Specialist Access**: Assumed specialist has access to all required data (no additional retrieval tasks needed)
+5. **Notification Content**: Assumed all "Send: ..." tasks include complete resolution details without needing separate explanation tasks
+
+</assumptions>
+
+<recommended_improvements>
+
+## Recommended Process Improvements
+
+1. **Add SLA Metrics**:
+   - Consider adding timer boundaries if business requires:
+     - Agent review completion within 24 hours
+     - Specialist investigation within 48 hours
+
+2. **Customer Feedback Loop**:
+   - Add post-resolution survey task to capture dispute resolution satisfaction
+
+3. **Automated Pre-Check**:
+   - Add `serviceTask("Automated Billing Validation")` before agent review to catch obvious errors
+
+4. **Escalation Tracking**:
+   - Add data object to track escalation reasons for process improvement
+
+5. **Goodwill Policy**:
+   - Explicitly define goodwill credit amounts/rules in a business rule task
+
+</recommended_improvements>
+```

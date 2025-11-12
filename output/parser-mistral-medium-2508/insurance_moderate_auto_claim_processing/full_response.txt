@@ -1,0 +1,172 @@
+```
+<summary_of_elements>
+
+### TASKS:
+- **userTask("Assign Claim Agent")** - Human assignment of agent to new claim
+- **userTask("Contact Claimant for Details")** - Agent collects accident specifics (date/time/location, parties, police report)
+- **userTask("Request Documentation")** - Agent requests photos, police report, medical records
+- **userTask("Review Documentation for Coverage")** - Agent validates policy period and coverage type
+- **serviceTask("Forward to Appraiser")** - System routes claim to appraisal team
+- **userTask("Inspect Vehicle and Estimate Costs")** - Appraiser physically examines vehicle
+- **userTask("Review Appraiser Report")** - Adjuster evaluates repair cost estimate
+- **sendTask("Send: Approval Notification")** - System notifies insured of approval
+- **sendTask("Send: Cost Exceeds Limit Notification")** - System notifies insured of denial
+- **userTask("Select Repair Shop")** - Insured chooses from approved providers
+- **sendTask("Send: Repair Authorization")** - System authorizes shop to begin work
+- **receiveTask("Receive: Repair Completion Invoice")** - System receives shop invoice (SLA: 5 business days)
+- **userTask("Verify Invoice Against Estimate")** - Adjuster checks cost alignment
+- **sendTask("Send: Payment to Shop")** - System processes payment
+- **sendTask("Send: Repair Completion Notification")** - System notifies insured
+
+### GATEWAYS:
+- **XOR** after "Review Appraiser Report":
+  - Condition A: `repair_cost <= policy_limit` → Approval path
+  - Condition B: `repair_cost > policy_limit` → Denial path
+- **XOR** after "Verify Invoice Against Estimate":
+  - Condition A: `variation <= 10%` → Payment path
+  - Condition B: `variation > 10%` → Rejection path (assumed business rule)
+
+### EVENTS:
+- **startEvent("New Claim Filed")** - Trigger: Manual (claimant submission)
+- **endEvent("Claim Closed - Paid")** - Successful completion
+- **endEvent("Claim Closed - Denied")** - Cost exceeds limit
+- **endEvent("Claim Closed - Rejected Invoice")** - Invoice variation >10%
+- **intermediateEvent(timerBoundary("5 business days"))** - After "Receive: Repair Completion Invoice" (SLA for invoice submission)
+
+### BOUNDARY EVENTS:
+- **timerBoundary("5 business days")** on `receiveTask("Receive: Repair Completion Invoice")`
+  - **Justification**: Explicit SLA mentioned in description ("Insurer verifies invoice... if variation is reasonable")
+  - **Handler**: `sendTask("Send: Overdue Invoice Reminder")`
+
+### SUBPROCESSES:
+- **Subprocess: "Document Collection"**
+  - **Purpose**: Cohesive grouping of documentation requests and validation
+  - **Justification**:
+    1. Single sentence purpose: "Collect and validate all required claim documentation"
+    2. Contains 3+ related tasks (request, receive, review)
+    3. Improves main flow readability by isolating documentation logic
+    4. Potential for reuse across claim types
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+```
+startEvent("New Claim Filed")
+
+// Main Process Flow
+userTask("Assign Claim Agent")
+userTask("Contact Claimant for Details")
+
+subProcess("Document Collection"):
+    startEvent("Document Collection Start")
+    userTask("Request Documentation")
+    receiveTask("Receive: Photos/Police Report/Medical Records")
+    userTask("Review Documentation for Coverage")
+    if (accident_during_policy_period AND policy_covers_damage_type):
+        endEvent("Documentation Valid")
+    else:
+        sendTask("Send: Coverage Denial Notice")
+        endEvent("Claim Closed - No Coverage")
+    endIf
+endSubProcess
+
+serviceTask("Forward to Appraiser")
+userTask("Inspect Vehicle and Estimate Costs")
+userTask("Review Appraiser Report")
+
+if (repair_cost <= policy_limit):
+    sendTask("Send: Approval Notification")
+    userTask("Select Repair Shop")
+    sendTask("Send: Repair Authorization")
+
+    receiveTask("Receive: Repair Completion Invoice"):
+        timerBoundary("5 business days"):
+            sendTask("Send: Overdue Invoice Reminder")
+
+    userTask("Verify Invoice Against Estimate")
+
+    if (invoice_variation <= 10%):
+        sendTask("Send: Payment to Shop")
+        sendTask("Send: Repair Completion Notification")
+        endEvent("Claim Closed - Paid")
+    else:
+        sendTask("Send: Invoice Rejection Notice")
+        endEvent("Claim Closed - Rejected Invoice")
+    endIf
+
+else:
+    sendTask("Send: Cost Exceeds Limit Notification")
+    endEvent("Claim Closed - Denied")
+endIf
+```
+
+</bpmn_pseudocode>
+
+<compliance_validation>
+
+### TIMER EVENTS:
+✅ **Valid**: `timerBoundary("5 business days")` on invoice receipt
+- **Property**: `timeDuration: "P5D"` (ISO 8601)
+- **Justification**: Explicit SLA in description ("Insurer verifies invoice...")
+- **Handler**: Single immediate action (`sendTask`)
+
+### GATEWAYS:
+✅ **Valid XOR** after "Review Appraiser Report":
+- Mutually exclusive conditions (`<=` vs `>`)
+- Exhaustive coverage (all cases handled)
+- **Convergence**: Not needed (paths terminate at endEvents)
+
+✅ **Valid XOR** after "Verify Invoice Against Estimate":
+- Mutually exclusive conditions (`<=10%` vs `>10%`)
+- Exhaustive coverage
+- **Convergence**: Not needed (paths terminate at endEvents)
+
+### SEQUENCE FLOWS:
+✅ **All labeled**:
+- Decision flows have clear conditions (`repair_cost <= policy_limit`)
+- No empty strings on conditionals
+
+### BOUNDARY EVENTS:
+✅ **Valid timerBoundary**:
+- Meets 3-criteria gating:
+  1. Hard SLA explicitly stated (5 business days)
+  2. Handler is single/immediate (`sendTask`)
+  3. Business requirement (invoice processing)
+
+### SUBPROCESSES:
+✅ **Valid "Document Collection"**:
+- Passes Three-Question Test:
+  1. Purpose: "Collect and validate all required claim documentation"
+  2. Contains 3+ related tasks
+  3. Improves main flow readability
+  4. Potential reuse
+- **Structure**: 1 startEvent, 2 endEvents, all paths terminate
+
+### FLOW PATHS:
+✅ **All traceable**:
+- 4 distinct end states:
+  1. Paid (successful)
+  2. Denied (cost exceeds limit)
+  3. No Coverage (validation failure)
+  4. Rejected Invoice (variation >10%)
+- No orphaned flows
+- No unreachable tasks
+
+### BALANCE:
+✅ **Core elements dominate**:
+- 14 tasks (12 user/service + 2 send)
+- 2 gateways (both XOR)
+- 1 subprocess (justified)
+- 1 boundary event (justified)
+- **Ratio**: 88% core elements
+
+</compliance_validation>
+
+<assumptions>
+1. **Invoice Variation Threshold**: Assumed 10% reasonable variation based on industry standards (not explicitly stated in description)
+2. **Overdue Invoice Handler**: Added reminder for SLA breach (defensive but justified by explicit timing requirement)
+3. **Coverage Denial Path**: Added explicit denial path for failed validation (implied by "reviews for coverage validation")
+4. **Business Days**: Interpreted "5 business days" as `P5D` (ISO 8601) for timer boundary
+</assumptions>
+```

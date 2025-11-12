@@ -1,0 +1,99 @@
+```
+<summary_of_elements>
+
+TASKS:
+- userTask("Add Items to Cart") - Customer action
+- serviceTask("Validate Inventory") - System checks stock
+- serviceTask("Process Payment") - Automated payment handling
+- sendTask("Send: order confirmation") - Success notification
+- sendTask("Send: payment failure notice") - Failure notification
+- userTask("Customer Retry Payment") - Manual retry option
+
+GATEWAYS:
+- XOR after payment processing with conditions:
+  - payment_success == true
+  - payment_success == false (default)
+
+EVENTS:
+- startEvent("Checkout Process Initiated") - Manual trigger
+- endEvent("Order Completed") - Success path
+- endEvent("Payment Failed") - Failure path
+
+BOUNDARY EVENTS:
+- None (no explicit SLA or error handling mentioned)
+
+SUBPROCESSES:
+- None (no cohesive grouping needed)
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+startEvent("Checkout Process Initiated")
+    userTask("Add Items to Cart")
+    serviceTask("Validate Inventory")
+    serviceTask("Process Payment")
+
+    if (payment_success == true):
+        sendTask("Send: order confirmation")
+        endEvent("Order Completed")
+    else:  # payment_success == false (default)
+        sendTask("Send: payment failure notice")
+        userTask("Customer Retry Payment")
+        serviceTask("Process Payment")  # Retry attempt
+
+        if (payment_success == true):
+            sendTask("Send: order confirmation")
+            endEvent("Order Completed")
+        else:  # payment_success == false (default)
+            endEvent("Payment Failed")
+
+</bpmn_pseudocode>
+
+<compliance_verification>
+
+TIMER EVENTS:
+- None used (no scheduling requirements)
+
+GATEWAYS:
+- XOR gateway after payment processing
+- All conditions mutually exclusive
+- Default flow properly marked
+- Convergence: Not needed (linear retry path)
+
+SEQUENCE FLOWS:
+- All conditional flows have descriptive labels
+- No empty string labels
+- Default flows properly marked
+
+BOUNDARY EVENTS:
+- None added (no explicit SLA or error handling mentioned)
+
+SUBPROCESSES:
+- None created (no cohesive grouping needed)
+
+FLOW PATHS:
+- All paths traceable start to end
+- No orphaned flows
+- No unreachable tasks
+- Retry path properly terminates
+
+DATA FLOW:
+- Payment success status used consistently
+- No missing dependencies
+
+</compliance_verification>
+
+<critical_success_check>
+
+✅ NO invalid BPMN properties
+✅ NO unreachable elements
+✅ NO missing convergence points (linear retry path)
+✅ NO orphaned flows
+✅ NO speculative boundary events
+✅ NO unjustified subprocesses
+✅ All labels present
+✅ Balanced design (100% core elements)
+
+</critical_success_check>
+```

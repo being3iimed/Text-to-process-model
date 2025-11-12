@@ -1,0 +1,135 @@
+```
+<validation_summary>
+**Input Analysis**:
+- Clear linear workflow with one explicit timer trigger ("On due date")
+- No error scenarios mentioned → NO errorBoundary events
+- No hard SLAs mentioned → NO timerBoundary events
+- No parallel tasks → NO AND gateways
+- No complex decisions → NO OR gateways
+- No subprocess candidates (all tasks are sequential and simple)
+
+**Timer Compliance**:
+- "On due date" is one-time specific date → requires `timeDate` property
+- Will use ISO 8601 format: "YYYY-MM-DD" (date portion only, as time is implied as 00:00:00 start of day)
+
+**Element Classification**:
+1. Receive invoice → `receiveTask` (external trigger)
+2. Log into system → `serviceTask` (automated)
+3. Calculate due date → `scriptTask` (computation)
+4. Due date timer → `intermediateEvent(timer)` with `timeDate`
+5. Generate payment → `serviceTask` (automated)
+6. Manager approval → `userTask` (human judgment)
+7. Process payment → `serviceTask` (bank transfer)
+8. Send confirmation → `sendTask` (one-way communication)
+</validation_summary>
+
+<element_justification>
+**TASKS**:
+- `receiveTask("Receive: vendor invoice")` - External document receipt (no timerBoundary as no SLA mentioned)
+- `serviceTask("Log invoice in accounting system")` - System action
+- `scriptTask("Computation: calculate payment due date")` - Date calculation logic
+- `serviceTask("Generate payment request")` - Automated document creation
+- `userTask("Finance Manager approves payment")` - Human approval required
+- `serviceTask("Process bank transfer")` - Automated payment execution
+- `sendTask("Send: payment confirmation to vendor")` - One-way notification
+
+**EVENTS**:
+- `startEvent("Invoice Received")` - Manual trigger (receipt of invoice)
+- `intermediateEvent(timer("due_date"))` - One-time schedule trigger
+- `endEvent("Payment Process Complete")` - Normal termination
+
+**GATEWAYS**: None required (linear flow)
+
+**BOUNDARY EVENTS**: None (no SLAs or error scenarios mentioned)
+
+**SUBPROCESSES**: None (no logical grouping needed)
+</element_justification>
+
+<bpmn_pseudocode>
+```
+startEvent("Invoice Received")
+
+// Phase 1: Invoice Intake
+receiveTask("Receive: vendor invoice")
+serviceTask("Log invoice in accounting system")
+scriptTask("Computation: calculate payment due date")
+  // Output: due_date in YYYY-MM-DD format
+
+// Phase 2: Scheduled Payment Generation
+intermediateEvent(timer("due_date"))
+  // Timer property: {"$type": "bpmn:TimerEventDefinition", "timeDate": "2024-12-15"}  // Example date; actual would use calculated due_date
+
+// Phase 3: Payment Execution
+serviceTask("Generate payment request")
+userTask("Finance Manager approves payment")
+serviceTask("Process bank transfer")
+sendTask("Send: payment confirmation to vendor")
+
+endEvent("Payment Process Complete")
+```
+</bpmn_pseudocode>
+
+<compliance_verification>
+✅ **Timer Validation**:
+   - Uses `timeDate` for one-time due date (correct property)
+   - Value will be ISO 8601 date format (YYYY-MM-DD)
+   - Positioned as intermediate catch event (correct BPMN pattern)
+
+✅ **Flow Validation**:
+   - Single start event
+   - All paths reach end event
+   - No orphaned elements
+   - Linear progression with one timer interruption
+
+✅ **Label Validation**:
+   - All tasks have descriptive names
+   - Timer event clearly labeled with purpose
+   - No empty/missing labels
+
+✅ **Boundary Event Validation**:
+   - None added (correct - no SLAs/errors mentioned)
+
+✅ **Subprocess Validation**:
+   - None added (correct - no logical grouping needed)
+
+✅ **Gateway Validation**:
+   - None needed (correct - linear flow)
+
+✅ **BPMN Spec Compliance**:
+   - All elements map to valid BPMN 2.0 constructs
+   - No invalid timer properties
+   - No unreachable flows
+   - No speculative patterns
+</compliance_verification>
+
+<implementation_notes>
+1. **Due Date Handling**:
+   - The `scriptTask("Computation: calculate payment due date")` must output the due date in `YYYY-MM-DD` format
+   - This value is used by the intermediate timer event's `timeDate` property
+
+2. **Timer Configuration**:
+   - For implementation, replace `"2024-12-15"` with the actual calculated due date variable
+   - Example JSON snippet for timer:
+     ```json
+     {
+       "$type": "bpmn:TimerEventDefinition",
+       "timeDate": "2024-12-15"  // Dynamically set to calculated due_date
+     }
+     ```
+
+3. **Error Handling**:
+   - If payment processing failures should be handled, would need explicit requirements to add:
+     ```pseudocode
+     serviceTask("Process bank transfer"):
+       errorBoundary():
+         userTask("Investigate payment failure")
+     ```
+
+4. **SLA Requirements**:
+   - If manager approval has a time limit, would need explicit SLA to add:
+     ```pseudocode
+     userTask("Finance Manager approves payment"):
+       timerBoundary("PT24H"):
+         sendTask("Send: approval reminder")
+     ```
+</implementation_notes>

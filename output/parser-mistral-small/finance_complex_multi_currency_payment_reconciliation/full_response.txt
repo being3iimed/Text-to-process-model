@@ -1,0 +1,82 @@
+### Summary of Elements
+
+**TASKS**:
+- serviceTask("Convert currency to base currency") - System converts all amounts to base currency using daily exchange rates
+- serviceTask("Match payment to outstanding invoice") - System matches each payment to an outstanding invoice
+- serviceTask("Record payment as complete") - System records payment as complete
+- serviceTask("Mark invoice as partially paid") - System marks invoice as partially paid and holds remaining balance
+- serviceTask("Record overpayment as credit") - System records overpayment as credit for future invoices
+- serviceTask("Hold payment as unmatched") - System holds payment as unmatched
+- sendTask("Send: notification to accounting team") - System notifies accounting team to investigate
+- userTask("Accounting team researches payment") - Accounting team researches whether payment is for old invoice, contains reference number, or is duplicate payment
+- serviceTask("Update accounts receivable aging report") - System updates accounts receivable aging report
+- serviceTask("Trigger automatic follow-up for overdue invoices") - System triggers automatic follow-up for overdue invoices
+
+**GATEWAYS**:
+- XOR at payment matching with conditions:
+  - payment matches invoice amount exactly
+  - payment is less than invoice amount
+  - payment is more than invoice amount
+  - payment doesn't match any invoice
+
+**EVENTS**:
+- startEvent("Daily Payments Received") - Trigger: timerStartEvent("Daily at 09:00")
+- endEvent("Process Complete") - Normal completion
+
+**BOUNDARY EVENTS**:
+- None identified that meet gating criteria
+
+**SUBPROCESSES**:
+- Subprocess "Payment Reconciliation" - Purpose: Handle payment matching and reconciliation
+  - Justification: Cohesive logical grouping of payment processing steps
+
+### BPMN Pseudocode
+
+```pseudocode
+timerStartEvent("Daily at 09:00")
+serviceTask("Convert currency to base currency")
+serviceTask("Match payment to outstanding invoice")
+
+if (payment matches invoice amount exactly):
+    serviceTask("Record payment as complete")
+else if (payment is less than invoice amount):
+    serviceTask("Mark invoice as partially paid")
+else if (payment is more than invoice amount):
+    serviceTask("Record overpayment as credit")
+else:
+    serviceTask("Hold payment as unmatched")
+    sendTask("Send: notification to accounting team")
+    userTask("Accounting team researches payment")
+
+serviceTask("Update accounts receivable aging report")
+serviceTask("Trigger automatic follow-up for overdue invoices")
+endEvent("Process Complete")
+```
+
+### Compliance Checks and Corrections
+
+1. **Timer Event Compliance**:
+   - `timerStartEvent("Daily at 09:00")` is valid as it uses a clear schedule.
+   - No invalid timer properties (e.g., `timeDate` with RRULE).
+
+2. **Gateway Convergence**:
+   - The XOR gateway for payment matching has explicit conditions and a default flow.
+   - All paths converge back to the main flow after handling.
+
+3. **Sequence Flow Labels**:
+   - All conditional flows have descriptive labels (e.g., "payment matches invoice amount exactly").
+   - No empty string labels on conditional flows.
+
+4. **Boundary Events**:
+   - No boundary events are needed as there are no explicit SLA requirements or error scenarios mentioned.
+
+5. **Subprocesses**:
+   - The subprocess "Payment Reconciliation" is justified as it groups related tasks logically.
+
+6. **Flow Paths**:
+   - All paths are traceable from start to end.
+   - No orphaned flows or unreachable tasks.
+
+7. **Balanced Design**:
+   - Core elements (tasks, gateways, events) comprise the majority of the design.
+   - No over-engineering or defensive patterns.

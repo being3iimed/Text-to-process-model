@@ -1,0 +1,130 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "empty-definitions",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "bpmn-js (https://demo.bpmn.io)",
+    "exporterVersion": "18.0.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "CustomerCheckoutProcess-id-0001",
+        "name": "Customer Checkout Process",
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-CustomerCheckout-id-0001",
+            "name": "Customer Checkout"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ValidateInventory-id-0001",
+            "name": "Validate Inventory"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ProcessPayment-id-0002",
+            "name": "Process Payment"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-PaymentResult-id-0001",
+            "name": "Payment Result",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-SendOrderConfirmation-id-0001",
+            "name": "Send: order confirmation"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-OrderComplete-id-0001",
+            "name": "Order Complete"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-SendPaymentFailed-id-0002",
+            "name": "Send: payment failed"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-PaymentFailed-id-0002",
+            "name": "Payment Failed"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToValidateInventory-id-0001",
+            "sourceRef": "StartEvent-CustomerCheckout-id-0001",
+            "targetRef": "ServiceTask-ValidateInventory-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ValidateToProcessPayment-id-0002",
+            "sourceRef": "ServiceTask-ValidateInventory-id-0001",
+            "targetRef": "ServiceTask-ProcessPayment-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ProcessPaymentToGateway-id-0003",
+            "sourceRef": "ServiceTask-ProcessPayment-id-0002",
+            "targetRef": "ExclusiveGateway-PaymentResult-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToConfirmation-id-0004",
+            "sourceRef": "ExclusiveGateway-PaymentResult-id-0001",
+            "targetRef": "SendTask-SendOrderConfirmation-id-0001",
+            "name": "payment_success",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ConfirmationToEnd-id-0005",
+            "sourceRef": "SendTask-SendOrderConfirmation-id-0001",
+            "targetRef": "EndEvent-OrderComplete-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToFailed-id-0006",
+            "sourceRef": "ExclusiveGateway-PaymentResult-id-0001",
+            "targetRef": "SendTask-SendPaymentFailed-id-0002",
+            "name": "payment_failure",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-FailedToEnd-id-0007",
+            "sourceRef": "SendTask-SendPaymentFailed-id-0002",
+            "targetRef": "EndEvent-PaymentFailed-id-0002"
+          }
+        ],
+        "isExecutable": true
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-small-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11092,
+        "total_tokens": 12102,
+        "completion_tokens": 1010
+      },
+      "model_name": "mistral-small-latest",
+      "model": "mistral-small-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11092,
+      "output_tokens": 1010,
+      "total_tokens": 12102
+    },
+    "id": "lc_run--7b22ed70-0b33-42b9-8b28-73823fae0d8c-0"
+  },
+  "status": "success"
+}

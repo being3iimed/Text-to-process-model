@@ -1,0 +1,238 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "Definitions_1",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process_1",
+      "name": "Appointment Booking Process",
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent_PatientRequestsAppointment_id_0001",
+          "name": "Patient Requests Appointment"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask_ReceiveAppointmentRequest_id_0001",
+          "name": "Receive: appointment request"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask_ReceptionistChecksAvailability_id_0001",
+          "name": "Receptionist checks availability"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway_SlotsAvailable_id_0001",
+          "name": "Slots Available?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask_BookAppointment_id_0001",
+          "name": "Book appointment"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask_SendConfirmationEmail_id_0001",
+          "name": "Send: confirmation email"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent_AppointmentBooked_id_0001",
+          "name": "Appointment Booked"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask_AddToWaitlist_id_0001",
+          "name": "Add to waitlist"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent_PatientWaitlisted_id_0001",
+          "name": "Patient Waitlisted"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess_WaitlistManagement_id_0001",
+          "name": "Waitlist Management",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent_WaitlistStart_id_0001",
+              "name": "Waitlist Start"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask_MonitorCancellations_id_0001",
+              "name": "Monitor cancellations"
+            },
+            {
+              "$type": "bpmn:IntermediateCatchEvent",
+              "id": "IntermediateCatchEvent_TimerBoundary_id_0001",
+              "name": "1 Hour Timer",
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:TimerEventDefinition",
+                  "timeDuration": "PT1H"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask_SendCancellationOffer_id_0001",
+              "name": "Send: cancellation offer"
+            },
+            {
+              "$type": "bpmn:ReceiveTask",
+              "id": "ReceiveTask_ReceivePatientConfirmation_id_0001",
+              "name": "Receive: patient confirmation"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway_PatientAccepts_id_0001",
+              "name": "Patient Accepts?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask_BookAppointmentFromWaitlist_id_0001",
+              "name": "Book appointment"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask_SendConfirmationEmailFromWaitlist_id_0001",
+              "name": "Send: confirmation email"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent_AppointmentBookedFromWaitlist_id_0001",
+              "name": "Appointment Booked"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent_WaitlistContinues_id_0001",
+              "name": "Waitlist Continues"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow_StartEventToReceiveTask_id_0001",
+              "sourceRef": "StartEvent_WaitlistStart_id_0001",
+              "targetRef": "ServiceTask_MonitorCancellations_id_0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow_MonitorToTimer_id_0001",
+              "sourceRef": "ServiceTask_MonitorCancellations_id_0001",
+              "targetRef": "IntermediateCatchEvent_TimerBoundary_id_0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow_TimerToSendTask_id_0001",
+              "sourceRef": "IntermediateCatchEvent_TimerBoundary_id_0001",
+              "targetRef": "SendTask_SendCancellationOffer_id_0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow_SendToReceiveTask_id_0001",
+              "sourceRef": "SendTask_SendCancellationOffer_id_0001",
+              "targetRef": "ReceiveTask_ReceivePatientConfirmation_id_0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow_ReceiveToGateway_id_0001",
+              "sourceRef": "ReceiveTask_ReceivePatientConfirmation_id_0001",
+              "targetRef": "ExclusiveGateway_PatientAccepts_id_0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow_GatewayToBookAppointment_id_0001",
+              "name": "patient_accepts",
+              "sourceRef": "ExclusiveGateway_PatientAccepts_id_0001",
+              "targetRef": "ServiceTask_BookAppointmentFromWaitlist_id_0001",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow_BookToSendTask_id_0001",
+              "sourceRef": "ServiceTask_BookAppointmentFromWaitlist_id_0001",
+              "targetRef": "SendTask_SendConfirmationEmailFromWaitlist_id_0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow_SendToEndEvent_id_0001",
+              "sourceRef": "SendTask_SendConfirmationEmailFromWaitlist_id_0001",
+              "targetRef": "EndEvent_AppointmentBookedFromWaitlist_id_0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow_GatewayToEndEvent_id_0001",
+              "name": "",
+              "sourceRef": "ExclusiveGateway_PatientAccepts_id_0001",
+              "targetRef": "EndEvent_WaitlistContinues_id_0001",
+              "isDefault": true
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_StartEventToReceiveTask_id_0001",
+          "sourceRef": "StartEvent_PatientRequestsAppointment_id_0001",
+          "targetRef": "ReceiveTask_ReceiveAppointmentRequest_id_0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_ReceiveToUserTask_id_0001",
+          "sourceRef": "ReceiveTask_ReceiveAppointmentRequest_id_0001",
+          "targetRef": "UserTask_ReceptionistChecksAvailability_id_0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_UserTaskToGateway_id_0001",
+          "sourceRef": "UserTask_ReceptionistChecksAvailability_id_0001",
+          "targetRef": "ExclusiveGateway_SlotsAvailable_id_0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_GatewayToBookAppointment_id_0001",
+          "name": "slots_available",
+          "sourceRef": "ExclusiveGateway_SlotsAvailable_id_0001",
+          "targetRef": "ServiceTask_BookAppointment_id_0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_BookToSendTask_id_0001",
+          "sourceRef": "ServiceTask_BookAppointment_id_0001",
+          "targetRef": "SendTask_SendConfirmationEmail_id_0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_SendToEndEvent_id_0001",
+          "sourceRef": "SendTask_SendConfirmationEmail_id_0001",
+          "targetRef": "EndEvent_AppointmentBooked_id_0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_GatewayToUserTask_id_0001",
+          "name": "",
+          "sourceRef": "ExclusiveGateway_SlotsAvailable_id_0001",
+          "targetRef": "UserTask_AddToWaitlist_id_0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow_UserTaskToEndEvent_id_0001",
+          "sourceRef": "UserTask_AddToWaitlist_id_0001",
+          "targetRef": "EndEvent_PatientWaitlisted_id_0001"
+        }
+      ]
+    }
+  ]
+}
+```

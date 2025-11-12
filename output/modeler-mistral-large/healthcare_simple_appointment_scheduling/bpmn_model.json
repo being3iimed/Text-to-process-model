@@ -1,0 +1,207 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "appointment-booking-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "bpmn-js (https://demo.bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "AppointmentBookingProcess",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-PatientRequestsAppointment-id-0001",
+          "name": "Patient requests appointment"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CheckAvailableSlots-id-0001",
+          "name": "Receptionist checks available time slots"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-SlotsAvailable-id-0001",
+          "name": "Slots Available?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-BookAppointment-id-0002",
+          "name": "Receptionist books appointment"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-AppointmentConfirmation-id-0001",
+          "name": "Send: appointment confirmation"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-AppointmentBooked-id-0001",
+          "name": "Appointment booked"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-AddToWaitlist-id-0001",
+          "name": "Add patient to waitlist"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-AddedToWaitlist-id-0002",
+          "name": "Added to waitlist"
+        },
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-CancellationOccurs-id-0002",
+          "name": "Cancellation occurs"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-CancellationNotification-id-0001",
+          "name": "Receive: cancellation notification"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CallWaitlistPatient-id-0003",
+          "name": "Call waitlist patient"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-PatientAcceptsRejects-id-0004",
+          "name": "Patient accepts/rejects slot"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-PatientAccepts-id-0002",
+          "name": "Patient Accepts?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-BookWaitlistAppointment-id-0005",
+          "name": "Receptionist books appointment"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-WaitlistConfirmation-id-0002",
+          "name": "Send: appointment confirmation"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-WaitlistPatientProcessed-id-0003",
+          "name": "Waitlist patient processed"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ReturnSlotToPool-id-0002",
+          "name": "Return slot to availability pool"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToCheckSlots-id-0001",
+          "sourceRef": "StartEvent-PatientRequestsAppointment-id-0001",
+          "targetRef": "UserTask-CheckAvailableSlots-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CheckSlotsToGateway-id-0002",
+          "sourceRef": "UserTask-CheckAvailableSlots-id-0001",
+          "targetRef": "ExclusiveGateway-SlotsAvailable-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToBook-id-0003",
+          "sourceRef": "ExclusiveGateway-SlotsAvailable-id-0001",
+          "targetRef": "UserTask-BookAppointment-id-0002",
+          "name": "slots_available",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BookToConfirmation-id-0004",
+          "sourceRef": "UserTask-BookAppointment-id-0002",
+          "targetRef": "SendTask-AppointmentConfirmation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmationToEnd-id-0005",
+          "sourceRef": "SendTask-AppointmentConfirmation-id-0001",
+          "targetRef": "EndEvent-AppointmentBooked-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToWaitlist-id-0006",
+          "sourceRef": "ExclusiveGateway-SlotsAvailable-id-0001",
+          "targetRef": "ServiceTask-AddToWaitlist-id-0001",
+          "name": "no_slots_available",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-WaitlistToEnd-id-0007",
+          "sourceRef": "ServiceTask-AddToWaitlist-id-0001",
+          "targetRef": "EndEvent-AddedToWaitlist-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CancellationStartToReceive-id-0008",
+          "sourceRef": "StartEvent-CancellationOccurs-id-0002",
+          "targetRef": "ReceiveTask-CancellationNotification-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReceiveToCallPatient-id-0009",
+          "sourceRef": "ReceiveTask-CancellationNotification-id-0001",
+          "targetRef": "UserTask-CallWaitlistPatient-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CallToPatientDecision-id-0010",
+          "sourceRef": "UserTask-CallWaitlistPatient-id-0003",
+          "targetRef": "UserTask-PatientAcceptsRejects-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PatientDecisionToGateway-id-0011",
+          "sourceRef": "UserTask-PatientAcceptsRejects-id-0004",
+          "targetRef": "ExclusiveGateway-PatientAccepts-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToBookWaitlist-id-0012",
+          "sourceRef": "ExclusiveGateway-PatientAccepts-id-0002",
+          "targetRef": "UserTask-BookWaitlistAppointment-id-0005",
+          "name": "patient_accepts",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BookWaitlistToConfirmation-id-0013",
+          "sourceRef": "UserTask-BookWaitlistAppointment-id-0005",
+          "targetRef": "SendTask-WaitlistConfirmation-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmationToEndWaitlist-id-0014",
+          "sourceRef": "SendTask-WaitlistConfirmation-id-0002",
+          "targetRef": "EndEvent-WaitlistPatientProcessed-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToReturnSlot-id-0015",
+          "sourceRef": "ExclusiveGateway-PatientAccepts-id-0002",
+          "targetRef": "ServiceTask-ReturnSlotToPool-id-0002",
+          "name": "patient_rejects",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReturnSlotToEnd-id-0016",
+          "sourceRef": "ServiceTask-ReturnSlotToPool-id-0002",
+          "targetRef": "EndEvent-WaitlistPatientProcessed-id-0003"
+        }
+      ]
+    }
+  ]
+}

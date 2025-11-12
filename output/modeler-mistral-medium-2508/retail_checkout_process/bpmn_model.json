@@ -1,0 +1,158 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "checkout-process-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "CheckoutProcess",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-CheckoutProcessInitiated-id-0001",
+          "name": "Checkout Process Initiated"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-AddItemsToCart-id-0001",
+          "name": "Add Items to Cart"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ValidateInventory-id-0001",
+          "name": "Validate Inventory"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProcessPayment-id-0001",
+          "name": "Process Payment"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-PaymentSuccess-id-0001",
+          "name": "Payment Success?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendOrderConfirmation-id-0001",
+          "name": "Send: order confirmation"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-OrderCompleted-id-0001",
+          "name": "Order Completed"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendPaymentFailureNotice-id-0001",
+          "name": "Send: payment failure notice"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CustomerRetryPayment-id-0001",
+          "name": "Customer Retry Payment"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProcessPayment-id-0002",
+          "name": "Process Payment"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-PaymentSuccess-id-0002",
+          "name": "Payment Success?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-PaymentFailed-id-0001",
+          "name": "Payment Failed"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToAddItems-id-0001",
+          "sourceRef": "StartEvent-CheckoutProcessInitiated-id-0001",
+          "targetRef": "UserTask-AddItemsToCart-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AddItemsToValidate-id-0002",
+          "sourceRef": "UserTask-AddItemsToCart-id-0001",
+          "targetRef": "ServiceTask-ValidateInventory-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ValidateToProcessPayment-id-0003",
+          "sourceRef": "ServiceTask-ValidateInventory-id-0001",
+          "targetRef": "ServiceTask-ProcessPayment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProcessPaymentToGateway-id-0004",
+          "sourceRef": "ServiceTask-ProcessPayment-id-0001",
+          "targetRef": "ExclusiveGateway-PaymentSuccess-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToSuccess-id-0005",
+          "name": "payment_success == true",
+          "sourceRef": "ExclusiveGateway-PaymentSuccess-id-0001",
+          "targetRef": "SendTask-SendOrderConfirmation-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SuccessToEnd-id-0006",
+          "sourceRef": "SendTask-SendOrderConfirmation-id-0001",
+          "targetRef": "EndEvent-OrderCompleted-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToFailure-id-0007",
+          "name": "payment_success == false",
+          "sourceRef": "ExclusiveGateway-PaymentSuccess-id-0001",
+          "targetRef": "SendTask-SendPaymentFailureNotice-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FailureToRetry-id-0008",
+          "sourceRef": "SendTask-SendPaymentFailureNotice-id-0001",
+          "targetRef": "UserTask-CustomerRetryPayment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RetryToProcessPayment-id-0009",
+          "sourceRef": "UserTask-CustomerRetryPayment-id-0001",
+          "targetRef": "ServiceTask-ProcessPayment-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProcessPaymentToGateway2-id-0010",
+          "sourceRef": "ServiceTask-ProcessPayment-id-0002",
+          "targetRef": "ExclusiveGateway-PaymentSuccess-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-Gateway2ToSuccess-id-0011",
+          "name": "payment_success == true",
+          "sourceRef": "ExclusiveGateway-PaymentSuccess-id-0002",
+          "targetRef": "SendTask-SendOrderConfirmation-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-Gateway2ToFailure-id-0012",
+          "name": "payment_success == false",
+          "sourceRef": "ExclusiveGateway-PaymentSuccess-id-0002",
+          "targetRef": "EndEvent-PaymentFailed-id-0001",
+          "isDefault": true
+        }
+      ]
+    }
+  ]
+}

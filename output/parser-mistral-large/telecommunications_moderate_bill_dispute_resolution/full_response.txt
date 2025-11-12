@@ -1,0 +1,138 @@
+```
+<summary_of_elements>
+
+### TASKS:
+- **userTask("Submit Dispute Ticket")** - Customer initiates dispute with issue description
+- **serviceTask("Review Account History")** - Agent examines transaction records
+- **serviceTask("Verify Usage Records")** - Agent checks usage data
+- **serviceTask("Check Service Logs")** - Agent validates system logs
+- **userTask("Explain Billing Logic")** - Agent clarifies charges to customer
+- **userTask("Escalate to Billing Specialist")** - Manual handoff for complex cases
+- **serviceTask("Deep Investigation")** - Specialist examines detailed records
+- **serviceTask("Issue Credit")** - System applies credit to account
+- **sendTask("Send: Credit Notification")** - Customer informed of resolution
+- **sendTask("Send: Goodwill Offer")** - Customer receives future credit offer
+
+### GATEWAYS:
+- **XOR Gateway 1**: Agent decision (error confirmed vs. charges correct)
+- **XOR Gateway 2**: Customer acceptance (accepts explanation vs. still disputes)
+- **XOR Gateway 3**: Specialist decision (error confirmed vs. charges correct)
+
+### EVENTS:
+- **startEvent("Dispute Initiated")** - Trigger: Customer contact
+- **endEvent("Case Closed")** - Normal completion
+
+### BOUNDARY EVENTS:
+- **None** - No explicit SLA requirements or expected error scenarios mentioned
+
+### SUBPROCESSES:
+- **None** - Linear flow with clear decision points; no cohesive grouping needed
+
+</summary_of_elements>
+
+<pseudocode>
+startEvent("Dispute Initiated")
+
+// Customer initiates dispute
+userTask("Submit Dispute Ticket")
+
+// Agent investigation
+serviceTask("Review Account History")
+serviceTask("Verify Usage Records")
+serviceTask("Check Service Logs")
+
+// First decision point
+if (agent_confirms_error):
+    serviceTask("Issue Credit")
+    sendTask("Send: Credit Notification")
+    endEvent("Case Closed")
+else:
+    userTask("Explain Billing Logic")
+
+    // Customer response
+    if (customer_accepts_explanation):
+        endEvent("Case Closed")
+    else:
+        userTask("Escalate to Billing Specialist")
+
+        // Specialist investigation
+        serviceTask("Deep Investigation")
+
+        // Final decision point
+        if (specialist_confirms_error):
+            serviceTask("Issue Credit")
+            sendTask("Send: Credit Notification")
+            endEvent("Case Closed")
+        else:
+            sendTask("Send: Goodwill Offer")
+            endEvent("Case Closed")
+
+endEvent("Case Closed")
+</pseudocode>
+
+<compliance_verification>
+
+### TIMER EVENTS:
+✅ No timer events used (none required)
+
+### GATEWAYS:
+✅ All XOR gateways have:
+   - Mutually exclusive conditions
+   - Exhaustive coverage (default paths implicit)
+   - Explicit convergence via endEvent
+
+### SEQUENCE FLOWS:
+✅ All conditional flows have descriptive labels:
+   - "agent_confirms_error"
+   - "customer_accepts_explanation"
+   - "specialist_confirms_error"
+
+### BOUNDARY EVENTS:
+✅ None added (no SLA requirements or expected errors mentioned)
+
+### SUBPROCESSES:
+✅ None created (linear flow with clear decision points; no cohesive grouping needed)
+
+### FLOW PATHS:
+✅ All paths traceable start-to-end:
+   1. Error confirmed → Credit → Notification → Close
+   2. Charges correct → Explanation → Customer accepts → Close
+   3. Charges correct → Explanation → Customer disputes → Escalation → Error found → Credit → Close
+   4. Charges correct → Explanation → Customer disputes → Escalation → No error → Goodwill → Close
+
+### LABEL VALIDATION:
+✅ No empty strings on conditional flows
+✅ All task names are exact and descriptive
+✅ All event names are clear
+
+</compliance_verification>
+
+<design_rationale>
+
+### Why No Boundary Events?
+- Original description mentioned no:
+  - Hard SLAs ("must respond within X hours")
+  - Expected system errors ("API might fail")
+  - Timeout requirements
+- Added only what was explicitly described
+
+### Why No Subprocesses?
+- All tasks are part of single dispute resolution flow
+- No repeated patterns or cohesive groupings
+- Linear progression with clear decision points
+- Adding subprocesses would add complexity without value
+
+### Gateway Selection:
+- Used XOR exclusively because:
+  - Decisions are binary/mutually exclusive
+  - No parallel processing needed
+  - Clear "either/or" logic at each point
+
+### End Event Strategy:
+- Single "Case Closed" end event suffices because:
+  - All paths represent successful case resolution
+  - No error/exception paths exist
+  - Business outcome is identical (case closure)
+
+</design_rationale>
+```

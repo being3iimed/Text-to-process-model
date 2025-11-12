@@ -1,0 +1,104 @@
+### SUMMARY OF ELEMENTS
+--------------------------------------------------------------------------------
+startEvent("Patient Arrives at Emergency Department")
+
+userTask("Triage Assessment")
+
+if (acuity <= 2 AND bed_available):
+    userTask("Admit to Monitored Bed")
+else:
+    userTask("Wait in ED Area")
+        timerBoundary("4 hours"):
+            userTask("Reassess Patient")
+
+userTask("Physician Assessment")
+serviceTask("Order Tests")
+
+businessRuleTask("Rule: Determine Admission")
+
+if (needs_admission):
+    serviceTask("Check Bed Types")
+
+    if (icu_bed_available):
+        userTask("Assign ICU Bed")
+    else if (ward_bed_available):
+        userTask("Assign General Ward Bed")
+    else:
+        sendTask("Send: Notify Nursing Manager")
+        userTask("Place in Waiting Queue")
+
+    userTask("Transfer Patient")
+
+    subProcess("Admission Protocols"):
+        startEvent("Protocols Start")
+        serviceTask("Medication Reconciliation")
+        serviceTask("Allergy Verification")
+        serviceTask("Pharmacy Review")
+            errorBoundary():
+                sendTask("Send: Notify Prescribing Physician")
+                userTask("Adjust Medication Regimen")
+        endEvent("Protocols Complete")
+    endSubProcess
+
+    subProcess("Insurance Authorization"):
+        startEvent("Authorization Start")
+        serviceTask("Track Insurance Authorization")
+        if (not_covered):
+            sendTask("Send: Contact Patient for Approval")
+        endEvent("Authorization Complete")
+    endSubProcess
+else:
+    endEvent("Patient Discharged")
+
+### BPMN PSEUDOCODE
+--------------------------------------------------------------------------------
+startEvent("Patient Arrives at Emergency Department")
+
+userTask("Triage Assessment")
+
+if (acuity <= 2 AND bed_available):
+    userTask("Admit to Monitored Bed")
+else:
+    userTask("Wait in ED Area")
+        timerBoundary("4 hours"):
+            userTask("Reassess Patient")
+
+userTask("Physician Assessment")
+serviceTask("Order Tests")
+
+businessRuleTask("Rule: Determine Admission")
+
+if (needs_admission):
+    serviceTask("Check Bed Types")
+
+    if (icu_bed_available):
+        userTask("Assign ICU Bed")
+    else if (ward_bed_available):
+        userTask("Assign General Ward Bed")
+    else:
+        sendTask("Send: Notify Nursing Manager")
+        userTask("Place in Waiting Queue")
+
+    userTask("Transfer Patient")
+
+    subProcess("Admission Protocols"):
+        startEvent("Protocols Start")
+        serviceTask("Medication Reconciliation")
+        serviceTask("Allergy Verification")
+        serviceTask("Pharmacy Review")
+            errorBoundary():
+                sendTask("Send: Notify Prescribing Physician")
+                userTask("Adjust Medication Regimen")
+        endEvent("Protocols Complete")
+    endSubProcess
+
+    subProcess("Insurance Authorization"):
+        startEvent("Authorization Start")
+        serviceTask("Track Insurance Authorization")
+        if (not_covered):
+            sendTask("Send: Contact Patient for Approval")
+        endEvent("Authorization Complete")
+    endSubProcess
+else:
+    endEvent("Patient Discharged")
+

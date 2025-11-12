@@ -1,0 +1,274 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "GradeAppealProcess-Definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "GradeAppealProcess-id-0001",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-GradePosted-id-0001",
+          "name": "Grade posted"
+        },
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-AppealWindowStart-id-0002",
+          "name": "Appeal window opens",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "P10D"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-SubmitAppealForm-id-0001",
+          "name": "Student submits grade appeal form"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-AppealDeadline-id-0001",
+          "name": "10 Day Appeal Deadline",
+          "attachedToRef": "ReceiveTask-SubmitAppealForm-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "P10D"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-AppealDeadlineMissed-id-0001",
+          "name": "Appeal deadline missed"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ProfessorReviewsAppeal-id-0001",
+          "name": "Professor reviews appeal"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-GradeDecision-id-0001",
+          "name": "Grade Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ProfessorResponds-id-0001",
+          "name": "Professor responds to student"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-GradeConfirmed-id-0001",
+          "name": "Appeal process complete - grade confirmed"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-AdjustGrade-id-0001",
+          "name": "Professor adjusts grade in system"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-NotifyRegistrar-id-0001",
+          "name": "Notify registrar of grade change"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-StudentReviewsResponse-id-0001",
+          "name": "Student reviews professor's response"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-StudentDecision-id-0001",
+          "name": "Student Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ResolutionAccepted-id-0001",
+          "name": "Appeal process complete - resolution accepted"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ChairReviews-id-0001",
+          "name": "Chair reviews escalated appeal"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ChairDetermination-id-0001",
+          "name": "Chair makes final determination"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-UpdateRegistrarFinal-id-0001",
+          "name": "Update registrar system with final grade"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-FinalOutcome-id-0001",
+          "name": "Send: final outcome to student"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ChairDecision-id-0001",
+          "name": "Appeal process complete - chair decision"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ConvergePaths-id-0001",
+          "name": "Converge All Paths",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-AppealComplete-id-0001",
+          "name": "Appeal process complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToTimerStart-id-0001",
+          "sourceRef": "StartEvent-GradePosted-id-0001",
+          "targetRef": "StartEvent-AppealWindowStart-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TimerToReceiveTask-id-0001",
+          "sourceRef": "StartEvent-AppealWindowStart-id-0002",
+          "targetRef": "ReceiveTask-SubmitAppealForm-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryToEnd-id-0001",
+          "sourceRef": "BoundaryEvent-AppealDeadline-id-0001",
+          "targetRef": "EndEvent-AppealDeadlineMissed-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReceiveToProfessorReview-id-0001",
+          "sourceRef": "ReceiveTask-SubmitAppealForm-id-0001",
+          "targetRef": "UserTask-ProfessorReviewsAppeal-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProfessorToGateway-id-0001",
+          "sourceRef": "UserTask-ProfessorReviewsAppeal-id-0001",
+          "targetRef": "ExclusiveGateway-GradeDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GradeConfirmed-id-0001",
+          "name": "grade_confirmed",
+          "sourceRef": "ExclusiveGateway-GradeDecision-id-0001",
+          "targetRef": "UserTask-ProfessorResponds-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GradeAdjusted-id-0001",
+          "name": "grade_adjusted",
+          "sourceRef": "ExclusiveGateway-GradeDecision-id-0001",
+          "targetRef": "ServiceTask-AdjustGrade-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AdjustToNotify-id-0001",
+          "sourceRef": "ServiceTask-AdjustGrade-id-0001",
+          "targetRef": "ServiceTask-NotifyRegistrar-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NotifyToProfessorResponse-id-0001",
+          "sourceRef": "ServiceTask-NotifyRegistrar-id-0001",
+          "targetRef": "UserTask-ProfessorResponds-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProfessorResponseToStudent-id-0001",
+          "sourceRef": "UserTask-ProfessorResponds-id-0001",
+          "targetRef": "UserTask-StudentReviewsResponse-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StudentToDecision-id-0001",
+          "sourceRef": "UserTask-StudentReviewsResponse-id-0001",
+          "targetRef": "ExclusiveGateway-StudentDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StudentAccepts-id-0001",
+          "name": "student_accepts",
+          "sourceRef": "ExclusiveGateway-StudentDecision-id-0001",
+          "targetRef": "EndEvent-ResolutionAccepted-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StudentEscalates-id-0001",
+          "name": "student_escalates",
+          "sourceRef": "ExclusiveGateway-StudentDecision-id-0001",
+          "targetRef": "UserTask-ChairReviews-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ChairReviewToDetermination-id-0001",
+          "sourceRef": "UserTask-ChairReviews-id-0001",
+          "targetRef": "UserTask-ChairDetermination-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DeterminationToUpdate-id-0001",
+          "sourceRef": "UserTask-ChairDetermination-id-0001",
+          "targetRef": "ServiceTask-UpdateRegistrarFinal-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-UpdateToSend-id-0001",
+          "sourceRef": "ServiceTask-UpdateRegistrarFinal-id-0001",
+          "targetRef": "SendTask-FinalOutcome-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendToEnd-id-0001",
+          "sourceRef": "SendTask-FinalOutcome-id-0001",
+          "targetRef": "EndEvent-ChairDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GradeConfirmedToConverge-id-0001",
+          "sourceRef": "EndEvent-GradeConfirmed-id-0001",
+          "targetRef": "ExclusiveGateway-ConvergePaths-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ResolutionAcceptedToConverge-id-0001",
+          "sourceRef": "EndEvent-ResolutionAccepted-id-0001",
+          "targetRef": "ExclusiveGateway-ConvergePaths-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ChairDecisionToConverge-id-0001",
+          "sourceRef": "EndEvent-ChairDecision-id-0001",
+          "targetRef": "ExclusiveGateway-ConvergePaths-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConvergeToFinalEnd-id-0001",
+          "sourceRef": "ExclusiveGateway-ConvergePaths-id-0001",
+          "targetRef": "EndEvent-AppealComplete-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

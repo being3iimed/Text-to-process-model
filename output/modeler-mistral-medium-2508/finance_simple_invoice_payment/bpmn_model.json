@@ -1,0 +1,128 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "invoice-payment-process",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "InvoicePaymentProcess",
+      "name": "Invoice Payment Process",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-InvoiceReceived-id-0001",
+          "name": "Invoice Received"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-ReceiveVendorInvoice-id-0001",
+          "name": "Receive: vendor invoice"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-LogInvoice-id-0001",
+          "name": "Log invoice in accounting system"
+        },
+        {
+          "$type": "bpmn:ScriptTask",
+          "id": "ScriptTask-CalculateDueDate-id-0001",
+          "name": "Computation: calculate payment due date"
+        },
+        {
+          "$type": "bpmn:IntermediateCatchEvent",
+          "id": "IntermediateCatchEvent-DueDateTimer-id-0001",
+          "name": "Payment Due Date Reached",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "id": "TimerEventDefinition-DueDate-id-0001",
+              "timeDate": "2024-12-15"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GeneratePaymentRequest-id-0001",
+          "name": "Generate payment request"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-FinanceApproval-id-0001",
+          "name": "Finance Manager approves payment"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProcessBankTransfer-id-0001",
+          "name": "Process bank transfer"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-PaymentConfirmation-id-0001",
+          "name": "Send: payment confirmation to vendor"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-PaymentComplete-id-0001",
+          "name": "Payment Process Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToReceive-id-0001",
+          "sourceRef": "StartEvent-InvoiceReceived-id-0001",
+          "targetRef": "ReceiveTask-ReceiveVendorInvoice-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReceiveToLog-id-0002",
+          "sourceRef": "ReceiveTask-ReceiveVendorInvoice-id-0001",
+          "targetRef": "ServiceTask-LogInvoice-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LogToCalculate-id-0003",
+          "sourceRef": "ServiceTask-LogInvoice-id-0001",
+          "targetRef": "ScriptTask-CalculateDueDate-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CalculateToTimer-id-0004",
+          "sourceRef": "ScriptTask-CalculateDueDate-id-0001",
+          "targetRef": "IntermediateCatchEvent-DueDateTimer-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TimerToGenerate-id-0005",
+          "sourceRef": "IntermediateCatchEvent-DueDateTimer-id-0001",
+          "targetRef": "ServiceTask-GeneratePaymentRequest-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GenerateToApproval-id-0006",
+          "sourceRef": "ServiceTask-GeneratePaymentRequest-id-0001",
+          "targetRef": "UserTask-FinanceApproval-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ApprovalToTransfer-id-0007",
+          "sourceRef": "UserTask-FinanceApproval-id-0001",
+          "targetRef": "ServiceTask-ProcessBankTransfer-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TransferToConfirm-id-0008",
+          "sourceRef": "ServiceTask-ProcessBankTransfer-id-0001",
+          "targetRef": "SendTask-PaymentConfirmation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmToEnd-id-0009",
+          "sourceRef": "SendTask-PaymentConfirmation-id-0001",
+          "targetRef": "EndEvent-PaymentComplete-id-0001"
+        }
+      ]
+    }
+  ]
+}

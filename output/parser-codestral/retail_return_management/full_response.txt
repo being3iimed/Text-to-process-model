@@ -1,0 +1,98 @@
+```
+<summary_of_elements>
+
+TASKS:
+- userTask("Customer Initiates Return") - Human action to start process
+- serviceTask("Validate Return Eligibility") - Automated system check
+- sendTask("Send: return shipping label") - System-generated communication
+- userTask("Customer Ships Item") - Human action (external to system)
+- userTask("Warehouse Staff Verifies Condition") - Human inspection
+- serviceTask("Process Refund") - Automated financial transaction
+- sendTask("Send: refund confirmation email") - System-generated communication
+- sendTask("Send: return denial notification") - System-generated communication
+
+GATEWAYS:
+- XOR after eligibility check (eligible/ineligible)
+- XOR after condition verification (acceptable/damaged)
+
+EVENTS:
+- startEvent("Return Process Initiated") - Manual trigger
+- endEvent("Return Process Complete") - Normal completion
+- endEvent("Return Denied") - Early termination
+
+BOUNDARY EVENTS:
+- None (no explicit SLA requirements or expected error scenarios mentioned)
+
+SUBPROCESSES:
+- None (all tasks are linear with simple decision points; no cohesive grouping)
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+startEvent("Return Process Initiated")
+
+userTask("Customer Initiates Return")
+serviceTask("Validate Return Eligibility")
+
+if (return_eligible):
+    sendTask("Send: return shipping label")
+    userTask("Customer Ships Item")
+    userTask("Warehouse Staff Verifies Condition")
+
+    if (item_condition_acceptable):
+        serviceTask("Process Refund")
+        sendTask("Send: refund confirmation email")
+        endEvent("Return Process Complete")
+    else:
+        sendTask("Send: return denial notification")
+        endEvent("Return Denied")
+else:
+    sendTask("Send: return denial notification")
+    endEvent("Return Denied")
+
+</bpmn_pseudocode>
+
+<compliance_validation>
+
+TIMER EVENTS:
+- None used (no scheduling requirements mentioned)
+
+GATEWAYS:
+- All XOR gateways have explicit conditions
+- All branches are mutually exclusive
+- Default paths not needed (all cases covered)
+- Convergence points implicit in linear flow (no parallel branches)
+
+SEQUENCE FLOWS:
+- All conditional flows have descriptive labels
+- No empty string labels
+- All paths traceable start-to-end
+
+BOUNDARY EVENTS:
+- None added (no SLA requirements or expected error scenarios)
+
+SUBPROCESSES:
+- None created (no cohesive grouping needed; linear flow)
+
+FLOW PATHS:
+- All paths validated:
+  1. Eligible → Label → Ship → Acceptable → Refund → Confirmation → Complete
+  2. Eligible → Label → Ship → Damaged → Denial → Denied
+  3. Ineligible → Denial → Denied
+
+</compliance_validation>
+
+<critical_success_verification>
+
+✅ NO invalid BPMN properties
+✅ NO unreachable elements
+✅ NO missing convergence points (linear flow)
+✅ NO orphaned flows (all paths terminate)
+✅ NO speculative boundary events
+✅ NO unjustified subprocesses
+✅ All labels present and descriptive
+✅ Balanced design (100% core elements)
+
+</critical_success_verification>
+```

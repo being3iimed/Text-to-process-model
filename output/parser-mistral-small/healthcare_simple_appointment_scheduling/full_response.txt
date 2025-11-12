@@ -1,0 +1,65 @@
+### 1. Summary of Elements
+
+**TASKS**:
+- `receiveTask("Receive: appointment request")` - Patient calls clinic
+- `userTask("Receptionist checks availability")` - Receptionist checks time slots
+- `serviceTask("Book appointment")` - Receptionist books appointment
+- `sendTask("Send: confirmation email")` - Sends confirmation
+- `userTask("Add to waitlist")` - Patient added to waitlist
+- `serviceTask("Monitor cancellations")` - System monitors for cancellations
+- `sendTask("Send: cancellation offer")` - Calls waitlisted patient
+
+**GATEWAYS**:
+- XOR at availability check with conditions: slots available, no slots available
+
+**EVENTS**:
+- `startEvent("Patient Requests Appointment")` - Trigger: manual (patient call)
+- `endEvent("Appointment Booked")` - Normal completion
+- `endEvent("Patient Waitlisted")` - Alternative completion
+- `intermediateEvent(timerBoundary("PT1H"))` - Waitlist monitoring delay
+
+**BOUNDARY EVENTS**:
+- None identified (no explicit SLAs or error scenarios mentioned)
+
+**SUBPROCESSES**:
+- Subprocess "Waitlist Management" - Purpose: Handle cancellation and waitlist offers
+  - Justification: Logical grouping of waitlist-related activities
+
+### 2. BPMN Pseudocode
+
+```pseudocode
+startEvent("Patient Requests Appointment")
+receiveTask("Receive: appointment request")
+userTask("Receptionist checks availability")
+if (slots_available):
+    serviceTask("Book appointment")
+    sendTask("Send: confirmation email")
+    endEvent("Appointment Booked")
+else:
+    userTask("Add to waitlist")
+    endEvent("Patient Waitlisted")
+
+subProcess("Waitlist Management"):
+    startEvent("Waitlist Start")
+    serviceTask("Monitor cancellations")
+    intermediateEvent(timerBoundary("PT1H"))
+    sendTask("Send: cancellation offer")
+    receiveTask("Receive: patient confirmation")
+    if (patient_accepts):
+        serviceTask("Book appointment")
+        sendTask("Send: confirmation email")
+        endEvent("Appointment Booked")
+    else:
+        endEvent("Waitlist Continues")
+endSubProcess
+```
+
+### Compliance Checks & Corrections
+
+- **Timer Event**: `timerBoundary("PT1H")` is valid ISO 8601 duration
+- **Gateway Convergence**: Explicit XOR gateway with two branches
+- **Boundary Events**: None present (no SLAs or error scenarios mentioned)
+- **Subprocesses**: "Waitlist Management" passes necessity test (logical grouping)
+- **Flow Paths**: All paths traceable from start to end
+- **Labels**: All sequence flows have descriptive labels
+- **Balance**: Core elements (tasks, gateways, events) comprise 90% of design

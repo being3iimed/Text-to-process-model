@@ -1,0 +1,615 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "ED-Admission-Process",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "EmergencyDepartmentAdmissionProcess",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-PatientArrival-id-0001",
+          "name": "Patient Arrival in ED"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-TriageNurseAssessesPatient-id-0001",
+          "name": "Triage Nurse Assesses Patient"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-Timer15Min-TriageNurseAssessesPatient-id-0001",
+          "name": "15 Minute Triage SLA",
+          "attachedToRef": "UserTask-TriageNurseAssessesPatient-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT15M"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-TriageDelayAlert-id-0001",
+          "name": "Send: Triage Delay Alert to Charge Nurse"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-AcuityBedDecision-id-0001",
+          "name": "Acuity and Bed Availability Check",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-AdmitToMonitoredBed-id-0001",
+          "name": "Admit to Monitored Bed"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-PatientWaitsInEDArea-id-0001",
+          "name": "Patient Waits in ED Area"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-AdmitToStandardEDBay-id-0001",
+          "name": "Admit to Standard ED Bay"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-PhysicianPerformsAssessment-id-0001",
+          "name": "Physician Performs Assessment"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-Timer4Hour-PhysicianPerformsAssessment-id-0001",
+          "name": "4 Hour Assessment SLA",
+          "attachedToRef": "UserTask-PhysicianPerformsAssessment-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT4H"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-EscalationToDepartmentHead-id-0001",
+          "name": "Send: Escalation to Department Head"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-Error-PhysicianPerformsAssessment-id-0001",
+          "name": "Assessment Error",
+          "attachedToRef": "UserTask-PhysicianPerformsAssessment-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:ErrorEventDefinition",
+              "errorRef": "ASSESSMENT_ERROR"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SeniorPhysicianTakesOverAssessment-id-0001",
+          "name": "Senior Physician Takes Over Assessment"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-OrderDiagnosticTests-id-0001",
+          "name": "Order Diagnostic Tests"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-AdmissionDecision-id-0001",
+          "name": "Admission Required?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-AdmissionWorkflow-id-0001",
+          "name": "Admission Workflow",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-AdmissionInitiated-id-0001",
+              "name": "Admission Initiated"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-CheckBedAvailability-id-0001",
+              "name": "Check Bed Availability"
+            },
+            {
+              "$type": "bpmn:BoundaryEvent",
+              "id": "BoundaryEvent-Error-CheckBedAvailability-id-0001",
+              "name": "Bed Availability System Error",
+              "attachedToRef": "ServiceTask-CheckBedAvailability-id-0001",
+              "cancelActivity": true,
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:ErrorEventDefinition",
+                  "errorRef": "BED_SYSTEM_ERROR"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ManualBedAssignmentByAdmissions-id-0001",
+              "name": "Manual Bed Assignment by Admissions"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-BedTypeDecision-id-0001",
+              "name": "Bed Type Decision",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-AssignICUBed-id-0001",
+              "name": "Assign ICU Bed"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-AssignGeneralWardBed-id-0001",
+              "name": "Assign General Ward Bed"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-PlaceInWaitingQueue-id-0001",
+              "name": "Place in Waiting Queue"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-NotificationToNursingManager-id-0001",
+              "name": "Send: Notification to Nursing Manager"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-WaitingQueuePlacement-id-0001",
+              "name": "Waiting Queue Placement"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-TransferPatientToAssignedBed-id-0001",
+              "name": "Transfer Patient to Assigned Bed"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-InitiateAdmissionProtocols-id-0001",
+              "name": "Initiate Admission Protocols"
+            },
+            {
+              "$type": "bpmn:SubProcess",
+              "id": "SubProcess-MedicationReconciliation-id-0001",
+              "name": "Medication Reconciliation",
+              "flowElements": [
+                {
+                  "$type": "bpmn:StartEvent",
+                  "id": "StartEvent-MedRecStarted-id-0001",
+                  "name": "Med Rec Started"
+                },
+                {
+                  "$type": "bpmn:ServiceTask",
+                  "id": "ServiceTask-VerifyAllergies-id-0001",
+                  "name": "Verify Allergies"
+                },
+                {
+                  "$type": "bpmn:ServiceTask",
+                  "id": "ServiceTask-PharmacyReviewsMedications-id-0001",
+                  "name": "Pharmacy Reviews Medications"
+                },
+                {
+                  "$type": "bpmn:BoundaryEvent",
+                  "id": "BoundaryEvent-Timer4Hour-PharmacyReviewsMedications-id-0001",
+                  "name": "4 Hour Pharmacy Review SLA",
+                  "attachedToRef": "ServiceTask-PharmacyReviewsMedications-id-0001",
+                  "cancelActivity": true,
+                  "eventDefinitions": [
+                    {
+                      "$type": "bpmn:TimerEventDefinition",
+                      "timeDuration": "PT4H"
+                    }
+                  ]
+                },
+                {
+                  "$type": "bpmn:SendTask",
+                  "id": "SendTask-UrgentPharmacyAlert-id-0001",
+                  "name": "Send: Urgent Pharmacy Alert"
+                },
+                {
+                  "$type": "bpmn:ExclusiveGateway",
+                  "id": "ExclusiveGateway-MedicationInteraction-id-0001",
+                  "name": "Medication Interaction Found?",
+                  "gatewayDirection": "Diverging"
+                },
+                {
+                  "$type": "bpmn:UserTask",
+                  "id": "UserTask-PrescribingPhysicianAdjustsMedicationRegimen-id-0001",
+                  "name": "Prescribing Physician Adjusts Medication Regimen"
+                },
+                {
+                  "$type": "bpmn:EndEvent",
+                  "id": "EndEvent-RegimenAdjusted-id-0001",
+                  "name": "Regimen Adjusted"
+                },
+                {
+                  "$type": "bpmn:EndEvent",
+                  "id": "EndEvent-NoInteractions-id-0001",
+                  "name": "No Interactions"
+                },
+                {
+                  "$type": "bpmn:SequenceFlow",
+                  "id": "SequenceFlow-MedRecStartToVerifyAllergies-id-0001",
+                  "sourceRef": "StartEvent-MedRecStarted-id-0001",
+                  "targetRef": "ServiceTask-VerifyAllergies-id-0001"
+                },
+                {
+                  "$type": "bpmn:SequenceFlow",
+                  "id": "SequenceFlow-VerifyAllergiesToPharmacyReview-id-0001",
+                  "sourceRef": "ServiceTask-VerifyAllergies-id-0001",
+                  "targetRef": "ServiceTask-PharmacyReviewsMedications-id-0001"
+                },
+                {
+                  "$type": "bpmn:SequenceFlow",
+                  "id": "SequenceFlow-PharmacyReviewToInteractionCheck-id-0001",
+                  "sourceRef": "ServiceTask-PharmacyReviewsMedications-id-0001",
+                  "targetRef": "ExclusiveGateway-MedicationInteraction-id-0001"
+                },
+                {
+                  "$type": "bpmn:SequenceFlow",
+                  "id": "SequenceFlow-InteractionCheckToAdjustment-id-0001",
+                  "sourceRef": "ExclusiveGateway-MedicationInteraction-id-0001",
+                  "targetRef": "UserTask-PrescribingPhysicianAdjustsMedicationRegimen-id-0001",
+                  "name": "interaction_found == true"
+                },
+                {
+                  "$type": "bpmn:SequenceFlow",
+                  "id": "SequenceFlow-InteractionCheckToNoInteractions-id-0001",
+                  "sourceRef": "ExclusiveGateway-MedicationInteraction-id-0001",
+                  "targetRef": "EndEvent-NoInteractions-id-0001",
+                  "name": "ELSE",
+                  "isDefault": true
+                },
+                {
+                  "$type": "bpmn:SequenceFlow",
+                  "id": "SequenceFlow-AdjustmentToRegimenAdjusted-id-0001",
+                  "sourceRef": "UserTask-PrescribingPhysicianAdjustsMedicationRegimen-id-0001",
+                  "targetRef": "EndEvent-RegimenAdjusted-id-0001"
+                },
+                {
+                  "$type": "bpmn:SequenceFlow",
+                  "id": "SequenceFlow-BoundaryToUrgentAlert-id-0001",
+                  "sourceRef": "BoundaryEvent-Timer4Hour-PharmacyReviewsMedications-id-0001",
+                  "targetRef": "SendTask-UrgentPharmacyAlert-id-0001"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-TrackInsuranceAuthorization-id-0001",
+              "name": "Track Insurance Authorization"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-InsuranceApproval-id-0001",
+              "name": "Insurance Approval Check",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-BillingTeamContactsPatient-id-0001",
+              "name": "Billing Team Contacts Patient"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-AdmissionComplete-id-0001",
+              "name": "Admission Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-AdmissionStartToBedCheck-id-0001",
+              "sourceRef": "StartEvent-AdmissionInitiated-id-0001",
+              "targetRef": "ServiceTask-CheckBedAvailability-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BedCheckToBedTypeDecision-id-0001",
+              "sourceRef": "ServiceTask-CheckBedAvailability-id-0001",
+              "targetRef": "ExclusiveGateway-BedTypeDecision-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BedTypeDecisionToICUBed-id-0001",
+              "sourceRef": "ExclusiveGateway-BedTypeDecision-id-0001",
+              "targetRef": "ServiceTask-AssignICUBed-id-0001",
+              "name": "icu_bed_available == true AND acuity == 1"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BedTypeDecisionToGeneralBed-id-0001",
+              "sourceRef": "ExclusiveGateway-BedTypeDecision-id-0001",
+              "targetRef": "ServiceTask-AssignGeneralWardBed-id-0001",
+              "name": "general_bed_available == true AND acuity <= 3"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BedTypeDecisionToWaitingQueue-id-0001",
+              "sourceRef": "ExclusiveGateway-BedTypeDecision-id-0001",
+              "targetRef": "ServiceTask-PlaceInWaitingQueue-id-0001",
+              "name": "ELSE",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-WaitingQueueToNotification-id-0001",
+              "sourceRef": "ServiceTask-PlaceInWaitingQueue-id-0001",
+              "targetRef": "SendTask-NotificationToNursingManager-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-NotificationToWaitingEnd-id-0001",
+              "sourceRef": "SendTask-NotificationToNursingManager-id-0001",
+              "targetRef": "EndEvent-WaitingQueuePlacement-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ICUBedToTransfer-id-0001",
+              "sourceRef": "ServiceTask-AssignICUBed-id-0001",
+              "targetRef": "ServiceTask-TransferPatientToAssignedBed-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GeneralBedToTransfer-id-0001",
+              "sourceRef": "ServiceTask-AssignGeneralWardBed-id-0001",
+              "targetRef": "ServiceTask-TransferPatientToAssignedBed-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-TransferToProtocols-id-0001",
+              "sourceRef": "ServiceTask-TransferPatientToAssignedBed-id-0001",
+              "targetRef": "ServiceTask-InitiateAdmissionProtocols-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ProtocolsToMedRec-id-0001",
+              "sourceRef": "ServiceTask-InitiateAdmissionProtocols-id-0001",
+              "targetRef": "SubProcess-MedicationReconciliation-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MedRecToInsuranceCheck-id-0001",
+              "sourceRef": "SubProcess-MedicationReconciliation-id-0001",
+              "targetRef": "ServiceTask-TrackInsuranceAuthorization-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-InsuranceCheckToApprovalCheck-id-0001",
+              "sourceRef": "ServiceTask-TrackInsuranceAuthorization-id-0001",
+              "targetRef": "ExclusiveGateway-InsuranceApproval-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ApprovalCheckToBillingContact-id-0001",
+              "sourceRef": "ExclusiveGateway-InsuranceApproval-id-0001",
+              "targetRef": "UserTask-BillingTeamContactsPatient-id-0001",
+              "name": "authorization_approved == false"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ApprovalCheckToAdmissionComplete-id-0001",
+              "sourceRef": "ExclusiveGateway-InsuranceApproval-id-0001",
+              "targetRef": "EndEvent-AdmissionComplete-id-0001",
+              "name": "ELSE",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BillingContactToAdmissionComplete-id-0001",
+              "sourceRef": "UserTask-BillingTeamContactsPatient-id-0001",
+              "targetRef": "EndEvent-AdmissionComplete-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BedCheckErrorToManualAssignment-id-0001",
+              "sourceRef": "BoundaryEvent-Error-CheckBedAvailability-id-0001",
+              "targetRef": "UserTask-ManualBedAssignmentByAdmissions-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ManualAssignmentToBedTypeDecision-id-0001",
+              "sourceRef": "UserTask-ManualBedAssignmentByAdmissions-id-0001",
+              "targetRef": "ExclusiveGateway-BedTypeDecision-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-PhysicianDocumentsDischargeInstructions-id-0001",
+          "name": "Physician Documents Discharge Instructions"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-DischargeComplete-id-0001",
+          "name": "Discharge Complete"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-MonitorPhysicianOrders-id-0001",
+          "name": "Monitor Physician Orders"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-CriticalLabValue-id-0001",
+          "name": "Critical Lab Value Detected?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-CriticalLabAlertToPhysician-id-0001",
+          "name": "Send: Critical Lab Alert to Physician"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-PhysicianReviewsAlert-id-0001",
+          "name": "Physician Reviews Alert"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-AlertReviewed-id-0001",
+          "name": "Alert Reviewed"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PatientArrivalToTriage-id-0001",
+          "sourceRef": "StartEvent-PatientArrival-id-0001",
+          "targetRef": "UserTask-TriageNurseAssessesPatient-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TriageToAcuityBedDecision-id-0001",
+          "sourceRef": "UserTask-TriageNurseAssessesPatient-id-0001",
+          "targetRef": "ExclusiveGateway-AcuityBedDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AcuityBedDecisionToMonitoredBed-id-0001",
+          "sourceRef": "ExclusiveGateway-AcuityBedDecision-id-0001",
+          "targetRef": "ServiceTask-AdmitToMonitoredBed-id-0001",
+          "name": "acuity == 1 AND bed_available == true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AcuityBedDecisionToEDWait-id-0001",
+          "sourceRef": "ExclusiveGateway-AcuityBedDecision-id-0001",
+          "targetRef": "UserTask-PatientWaitsInEDArea-id-0001",
+          "name": "acuity <= 5 AND bed_available == false"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AcuityBedDecisionToStandardEDBay-id-0001",
+          "sourceRef": "ExclusiveGateway-AcuityBedDecision-id-0001",
+          "targetRef": "ServiceTask-AdmitToStandardEDBay-id-0001",
+          "name": "ELSE",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-EDWaitToPhysicianAssessment-id-0001",
+          "sourceRef": "UserTask-PatientWaitsInEDArea-id-0001",
+          "targetRef": "UserTask-PhysicianPerformsAssessment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StandardEDBayToPhysicianAssessment-id-0001",
+          "sourceRef": "ServiceTask-AdmitToStandardEDBay-id-0001",
+          "targetRef": "UserTask-PhysicianPerformsAssessment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MonitoredBedToPhysicianAssessment-id-0001",
+          "sourceRef": "ServiceTask-AdmitToMonitoredBed-id-0001",
+          "targetRef": "UserTask-PhysicianPerformsAssessment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PhysicianAssessmentToOrderTests-id-0001",
+          "sourceRef": "UserTask-PhysicianPerformsAssessment-id-0001",
+          "targetRef": "ServiceTask-OrderDiagnosticTests-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OrderTestsToAdmissionDecision-id-0001",
+          "sourceRef": "ServiceTask-OrderDiagnosticTests-id-0001",
+          "targetRef": "ExclusiveGateway-AdmissionDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AdmissionDecisionToAdmissionWorkflow-id-0001",
+          "sourceRef": "ExclusiveGateway-AdmissionDecision-id-0001",
+          "targetRef": "SubProcess-AdmissionWorkflow-id-0001",
+          "name": "admission_required == true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AdmissionDecisionToDischarge-id-0001",
+          "sourceRef": "ExclusiveGateway-AdmissionDecision-id-0001",
+          "targetRef": "UserTask-PhysicianDocumentsDischargeInstructions-id-0001",
+          "name": "ELSE",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DischargeToDischargeComplete-id-0001",
+          "sourceRef": "UserTask-PhysicianDocumentsDischargeInstructions-id-0001",
+          "targetRef": "EndEvent-DischargeComplete-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PhysicianAssessmentToEscalation-id-0001",
+          "sourceRef": "BoundaryEvent-Timer4Hour-PhysicianPerformsAssessment-id-0001",
+          "targetRef": "SendTask-EscalationToDepartmentHead-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PhysicianAssessmentToSeniorPhysician-id-0001",
+          "sourceRef": "BoundaryEvent-Error-PhysicianPerformsAssessment-id-0001",
+          "targetRef": "UserTask-SeniorPhysicianTakesOverAssessment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SeniorPhysicianToOrderTests-id-0001",
+          "sourceRef": "UserTask-SeniorPhysicianTakesOverAssessment-id-0001",
+          "targetRef": "ServiceTask-OrderDiagnosticTests-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OrderTestsToMonitorOrders-id-0001",
+          "sourceRef": "ServiceTask-OrderDiagnosticTests-id-0001",
+          "targetRef": "ServiceTask-MonitorPhysicianOrders-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MonitorOrdersToCriticalLabCheck-id-0001",
+          "sourceRef": "ServiceTask-MonitorPhysicianOrders-id-0001",
+          "targetRef": "ExclusiveGateway-CriticalLabValue-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CriticalLabCheckToAlert-id-0001",
+          "sourceRef": "ExclusiveGateway-CriticalLabValue-id-0001",
+          "targetRef": "SendTask-CriticalLabAlertToPhysician-id-0001",
+          "name": "critical_lab_value_detected == true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CriticalLabCheckToContinue-id-0001",
+          "sourceRef": "ExclusiveGateway-CriticalLabValue-id-0001",
+          "targetRef": "EndEvent-AlertReviewed-id-0001",
+          "name": "ELSE",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AlertToPhysicianReview-id-0001",
+          "sourceRef": "SendTask-CriticalLabAlertToPhysician-id-0001",
+          "targetRef": "UserTask-PhysicianReviewsAlert-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PhysicianReviewToAlertReviewed-id-0001",
+          "sourceRef": "UserTask-PhysicianReviewsAlert-id-0001",
+          "targetRef": "EndEvent-AlertReviewed-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

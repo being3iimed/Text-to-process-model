@@ -1,0 +1,90 @@
+```
+<summary_of_elements>
+
+### TASKS:
+- **userTask("Create Work Order")** - Manual initiation by production manager
+- **serviceTask("Pull Bill of Materials")** - Automated BOM retrieval
+- **serviceTask("Reserve Raw Materials")** - Inventory system interaction
+- **serviceTask("Schedule Production Line")** - Resource allocation
+- **serviceTask("Manufacture Components")** - Core production activity
+- **userTask("Perform Quality Check")** - Human inspection required
+- **serviceTask("Move to Finished Goods")** - Inventory update
+- **serviceTask("Scrap Defective Product")** - Waste handling
+- **serviceTask("Log Waste")** - Compliance documentation
+
+### GATEWAYS:
+- **XOR** after quality check with:
+  - Condition: "passes_quality_check"
+  - Condition: "fails_quality_check" (default)
+
+### EVENTS:
+- **startEvent("Production Process Initiated")** - Manual trigger
+- **endEvent("Production Complete")** - Normal completion
+- **endEvent("Defective Product Handled")** - Alternative completion
+
+### BOUNDARY EVENTS:
+- **None** (No explicit SLA requirements or expected error scenarios mentioned)
+
+### SUBPROCESSES:
+- **None** (All tasks are linear with single decision point; no cohesive grouping)
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+```
+startEvent("Production Process Initiated")
+
+userTask("Create Work Order")
+serviceTask("Pull Bill of Materials")
+serviceTask("Reserve Raw Materials")
+serviceTask("Schedule Production Line")
+serviceTask("Manufacture Components")
+userTask("Perform Quality Check")
+
+if (passes_quality_check):
+    serviceTask("Move to Finished Goods")
+    endEvent("Production Complete")
+else:  # fails_quality_check (default)
+    serviceTask("Scrap Defective Product")
+    serviceTask("Log Waste")
+    endEvent("Defective Product Handled")
+```
+
+</bpmn_pseudocode>
+
+<compliance_verification>
+
+### TIMER EVENTS:
+✅ **N/A** - No timer events used (compliant)
+
+### GATEWAYS:
+✅ **XOR Gateway** properly implemented with:
+   - Mutually exclusive conditions
+   - Exhaustive coverage (default path)
+   - Clear labels ("passes_quality_check"/"fails_quality_check")
+
+### SEQUENCE FLOWS:
+✅ All conditional flows have descriptive labels
+✅ Default flow explicitly marked
+✅ No empty string labels
+
+### BOUNDARY EVENTS:
+✅ **None added** (correct - no SLA/error scenarios mentioned)
+
+### SUBPROCESSES:
+✅ **None created** (correct - no cohesive grouping needed)
+
+### FLOW PATHS:
+✅ All paths traceable start-to-end:
+   1. Pass path: 7 tasks → endEvent
+   2. Fail path: 9 tasks → endEvent
+✅ No orphaned flows
+✅ No unreachable tasks
+
+### BALANCE:
+✅ Core elements (tasks/gateways/events) = 100% of design
+✅ No over-engineering (no unnecessary boundary events/subprocesses)
+
+</compliance_verification>
+```

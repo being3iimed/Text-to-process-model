@@ -1,0 +1,68 @@
+### SUMMARY OF ELEMENTS
+--------------------------------------------------------------------------------
+startEvent("Bulk Order Submitted")
+
+serviceTask("Check Inventory Availability")
+
+if (all_products_available):
+    serviceTask("Reserve Available Inventory")
+    serviceTask("Schedule Packing")
+    endEvent("Order Fulfilled")
+else if (partial_products_available):
+    sendTask("Send: Shortage Notification")
+    userTask("Manager Decides on Partial Shipment"):
+        timerBoundary("24 hours"):
+            sendTask("Send: reminder to manager")
+    if (partial_shipment_chosen):
+        serviceTask("Split Order into Shipments")
+        serviceTask("Ship Available Items")
+        serviceTask("Hold Order in Pending Status"):
+            intermediateEvent(timerBoundary("PT24H")):
+                serviceTask("Ship Backordered Items")
+        endEvent("Order Fulfilled")
+    else:
+        serviceTask("Hold Order in Pending Status"):
+            intermediateEvent(timerBoundary("PT24H")):
+                serviceTask("Ship Complete Order")
+        endEvent("Order Fulfilled")
+else:
+    sendTask("Send: Full Shortage Notification")
+    serviceTask("Hold Order in Pending Status"):
+        intermediateEvent(timerBoundary("PT24H")):
+            serviceTask("Cancel Order")
+    endEvent("Order Processed")
+
+### BPMN PSEUDOCODE
+--------------------------------------------------------------------------------
+startEvent("Bulk Order Submitted")
+
+serviceTask("Check Inventory Availability")
+
+if (all_products_available):
+    serviceTask("Reserve Available Inventory")
+    serviceTask("Schedule Packing")
+    endEvent("Order Fulfilled")
+else if (partial_products_available):
+    sendTask("Send: Shortage Notification")
+    userTask("Manager Decides on Partial Shipment"):
+        timerBoundary("24 hours"):
+            sendTask("Send: reminder to manager")
+    if (partial_shipment_chosen):
+        serviceTask("Split Order into Shipments")
+        serviceTask("Ship Available Items")
+        serviceTask("Hold Order in Pending Status"):
+            intermediateEvent(timerBoundary("PT24H")):
+                serviceTask("Ship Backordered Items")
+        endEvent("Order Fulfilled")
+    else:
+        serviceTask("Hold Order in Pending Status"):
+            intermediateEvent(timerBoundary("PT24H")):
+                serviceTask("Ship Complete Order")
+        endEvent("Order Fulfilled")
+else:
+    sendTask("Send: Full Shortage Notification")
+    serviceTask("Hold Order in Pending Status"):
+        intermediateEvent(timerBoundary("PT24H")):
+            serviceTask("Cancel Order")
+    endEvent("Order Processed")
+

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions-WorkOrderProcess-id-0001" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process-WorkOrderProcess-id-0001" name="Work Order Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-WorkOrderCreated-id-0001" name="Work Order Created">
+      <bpmn:outgoing>SequenceFlow-StartToCreateWorkOrder-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-ProductionManagerCreatesWorkOrder-id-0001" name="Production Manager Creates Work Order">
+      <bpmn:incoming>SequenceFlow-StartToCreateWorkOrder-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CreateToPullBOM-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-PullBillOfMaterials-id-0001" name="Pull Bill of Materials">
+      <bpmn:incoming>SequenceFlow-CreateToPullBOM-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PullToReserve-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ReserveRawMaterials-id-0001" name="Reserve Raw Materials">
+      <bpmn:incoming>SequenceFlow-PullToReserve-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReserveToSchedule-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ScheduleProductionLine-id-0001" name="Schedule Production Line">
+      <bpmn:incoming>SequenceFlow-ReserveToSchedule-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ScheduleToManufacture-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ManufactureComponents-id-0001" name="Manufacture Components">
+      <bpmn:incoming>SequenceFlow-ScheduleToManufacture-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ManufactureToQualityCheck-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-PerformQualityCheck-id-0001" name="Perform Quality Check">
+      <bpmn:incoming>SequenceFlow-ManufactureToQualityCheck-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-QualityCheckToGateway-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-QualityCheckResult-id-0001" name="Quality Check Result" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-QualityCheckToGateway-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToMoveToFinishedGoods-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToScrap-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-MoveToFinishedGoods-id-0001" name="Move to Finished Goods">
+      <bpmn:incoming>SequenceFlow-GatewayToMoveToFinishedGoods-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MoveToFinishedGoodsToEnd-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-ProductionComplete-id-0001" name="Production Complete">
+      <bpmn:incoming>SequenceFlow-MoveToFinishedGoodsToEnd-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-LogWasteToEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-ScrapDefectiveProduct-id-0001" name="Scrap Defective Product">
+      <bpmn:incoming>SequenceFlow-GatewayToScrap-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ScrapToLogWaste-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-LogWaste-id-0001" name="Log Waste">
+      <bpmn:incoming>SequenceFlow-ScrapToLogWaste-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogWasteToEnd-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToCreateWorkOrder-id-0001" sourceRef="StartEvent-WorkOrderCreated-id-0001" targetRef="UserTask-ProductionManagerCreatesWorkOrder-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CreateToPullBOM-id-0001" sourceRef="UserTask-ProductionManagerCreatesWorkOrder-id-0001" targetRef="ServiceTask-PullBillOfMaterials-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PullToReserve-id-0001" sourceRef="ServiceTask-PullBillOfMaterials-id-0001" targetRef="ServiceTask-ReserveRawMaterials-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReserveToSchedule-id-0001" sourceRef="ServiceTask-ReserveRawMaterials-id-0001" targetRef="ServiceTask-ScheduleProductionLine-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ScheduleToManufacture-id-0001" sourceRef="ServiceTask-ScheduleProductionLine-id-0001" targetRef="ServiceTask-ManufactureComponents-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ManufactureToQualityCheck-id-0001" sourceRef="ServiceTask-ManufactureComponents-id-0001" targetRef="UserTask-PerformQualityCheck-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-QualityCheckToGateway-id-0001" sourceRef="UserTask-PerformQualityCheck-id-0001" targetRef="ExclusiveGateway-QualityCheckResult-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToMoveToFinishedGoods-id-0001" name="quality_check_passed" sourceRef="ExclusiveGateway-QualityCheckResult-id-0001" targetRef="ServiceTask-MoveToFinishedGoods-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MoveToFinishedGoodsToEnd-id-0001" sourceRef="ServiceTask-MoveToFinishedGoods-id-0001" targetRef="EndEvent-ProductionComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToScrap-id-0001" name="quality_check_failed" sourceRef="ExclusiveGateway-QualityCheckResult-id-0001" targetRef="ServiceTask-ScrapDefectiveProduct-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ScrapToLogWaste-id-0001" sourceRef="ServiceTask-ScrapDefectiveProduct-id-0001" targetRef="ServiceTask-LogWaste-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogWasteToEnd-id-0001" sourceRef="ServiceTask-LogWaste-id-0001" targetRef="EndEvent-ProductionComplete-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process-WorkOrderProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process-WorkOrderProcess-id-0001" bpmnElement="Process-WorkOrderProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-WorkOrderCreated-id-0001_di" bpmnElement="StartEvent-WorkOrderCreated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ProductionManagerCreatesWorkOrder-id-0001_di" bpmnElement="UserTask-ProductionManagerCreatesWorkOrder-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PullBillOfMaterials-id-0001_di" bpmnElement="ServiceTask-PullBillOfMaterials-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ReserveRawMaterials-id-0001_di" bpmnElement="ServiceTask-ReserveRawMaterials-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ScheduleProductionLine-id-0001_di" bpmnElement="ServiceTask-ScheduleProductionLine-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ManufactureComponents-id-0001_di" bpmnElement="ServiceTask-ManufactureComponents-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PerformQualityCheck-id-0001_di" bpmnElement="UserTask-PerformQualityCheck-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-QualityCheckResult-id-0001_di" bpmnElement="ExclusiveGateway-QualityCheckResult-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MoveToFinishedGoods-id-0001_di" bpmnElement="ServiceTask-MoveToFinishedGoods-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProductionComplete-id-0001_di" bpmnElement="EndEvent-ProductionComplete-id-0001">
+        <dc:Bounds x="1557" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ScrapDefectiveProduct-id-0001_di" bpmnElement="ServiceTask-ScrapDefectiveProduct-id-0001">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogWaste-id-0001_di" bpmnElement="ServiceTask-LogWaste-id-0001">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToCreateWorkOrder-id-0001_di" bpmnElement="SequenceFlow-StartToCreateWorkOrder-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CreateToPullBOM-id-0001_di" bpmnElement="SequenceFlow-CreateToPullBOM-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PullToReserve-id-0001_di" bpmnElement="SequenceFlow-PullToReserve-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReserveToSchedule-id-0001_di" bpmnElement="SequenceFlow-ReserveToSchedule-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ScheduleToManufacture-id-0001_di" bpmnElement="SequenceFlow-ScheduleToManufacture-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ManufactureToQualityCheck-id-0001_di" bpmnElement="SequenceFlow-ManufactureToQualityCheck-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-QualityCheckToGateway-id-0001_di" bpmnElement="SequenceFlow-QualityCheckToGateway-id-0001">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToMoveToFinishedGoods-id-0001_di" bpmnElement="SequenceFlow-GatewayToMoveToFinishedGoods-id-0001">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToScrap-id-0001_di" bpmnElement="SequenceFlow-GatewayToScrap-id-0001">
+        <di:waypoint x="1125" y="95" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MoveToFinishedGoodsToEnd-id-0001_di" bpmnElement="SequenceFlow-MoveToFinishedGoodsToEnd-id-0001">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1557" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ScrapToLogWaste-id-0001_di" bpmnElement="SequenceFlow-ScrapToLogWaste-id-0001">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogWasteToEnd-id-0001_di" bpmnElement="SequenceFlow-LogWasteToEnd-id-0001">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1575" y="210" />
+        <di:waypoint x="1575" y="88" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

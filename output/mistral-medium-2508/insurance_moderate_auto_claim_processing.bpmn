@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="claim-processing-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="ClaimProcessing-Process-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-NewClaimFiled-id-0001" name="New Claim Filed">
+      <bpmn:outgoing>SequenceFlow-StartToAssignAgent-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-AssignClaimAgent-id-0001" name="Assign Claim Agent">
+      <bpmn:incoming>SequenceFlow-StartToAssignAgent-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AssignToContact-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ContactClaimant-id-0002" name="Contact Claimant for Details">
+      <bpmn:incoming>SequenceFlow-AssignToContact-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ContactToDocumentCollection-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="SubProcess-DocumentCollection-id-0001" name="Document Collection">
+      <bpmn:incoming>SequenceFlow-ContactToDocumentCollection-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DocValidToForward-id-0004</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-DocumentCollectionStart-id-0001" name="Document Collection Start">
+        <bpmn:outgoing>SequenceFlow-DocStartToRequest-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-RequestDocumentation-id-0001" name="Request Documentation">
+        <bpmn:incoming>SequenceFlow-DocStartToRequest-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RequestToReceive-id-0002</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:receiveTask id="ReceiveTask-ReceiveDocuments-id-0001" name="Receive: Photos/Police Report/Medical Records">
+        <bpmn:incoming>SequenceFlow-RequestToReceive-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReceiveToReview-id-0003</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:userTask id="UserTask-ReviewDocumentation-id-0001" name="Review Documentation for Coverage">
+        <bpmn:incoming>SequenceFlow-ReceiveToReview-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReviewToCoverageCheck-id-0004</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-CoverageValid-id-0001" name="Coverage Valid?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-ReviewToCoverageCheck-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CoverageValidToEnd-id-0005</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-CoverageInvalidToDenial-id-0006</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="EndEvent-DocumentationValid-id-0001" name="Documentation Valid">
+        <bpmn:incoming>SequenceFlow-CoverageValidToEnd-id-0005</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sendTask id="SendTask-CoverageDenial-id-0001" name="Send: Coverage Denial Notice">
+        <bpmn:incoming>SequenceFlow-CoverageInvalidToDenial-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-DenialToEnd-id-0007</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:endEvent id="EndEvent-ClaimClosedNoCoverage-id-0001" name="Claim Closed - No Coverage">
+        <bpmn:incoming>SequenceFlow-DenialToEnd-id-0007</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-DocStartToRequest-id-0001" sourceRef="StartEvent-DocumentCollectionStart-id-0001" targetRef="UserTask-RequestDocumentation-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RequestToReceive-id-0002" sourceRef="UserTask-RequestDocumentation-id-0001" targetRef="ReceiveTask-ReceiveDocuments-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReceiveToReview-id-0003" sourceRef="ReceiveTask-ReceiveDocuments-id-0001" targetRef="UserTask-ReviewDocumentation-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReviewToCoverageCheck-id-0004" sourceRef="UserTask-ReviewDocumentation-id-0001" targetRef="ExclusiveGateway-CoverageValid-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CoverageValidToEnd-id-0005" name="accident_during_policy_period AND policy_covers_damage_type" sourceRef="ExclusiveGateway-CoverageValid-id-0001" targetRef="EndEvent-DocumentationValid-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CoverageInvalidToDenial-id-0006" sourceRef="ExclusiveGateway-CoverageValid-id-0001" targetRef="SendTask-CoverageDenial-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-DenialToEnd-id-0007" sourceRef="SendTask-CoverageDenial-id-0001" targetRef="EndEvent-ClaimClosedNoCoverage-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:serviceTask id="ServiceTask-ForwardToAppraiser-id-0001" name="Forward to Appraiser">
+      <bpmn:incoming>SequenceFlow-DocValidToForward-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ForwardToInspect-id-0005</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-InspectVehicle-id-0001" name="Inspect Vehicle and Estimate Costs">
+      <bpmn:incoming>SequenceFlow-ForwardToInspect-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InspectToReview-id-0006</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ReviewAppraiserReport-id-0001" name="Review Appraiser Report">
+      <bpmn:incoming>SequenceFlow-InspectToReview-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToCostCheck-id-0007</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-CostWithinLimit-id-0001" name="Repair Cost Within Policy Limit?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewToCostCheck-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CostWithinLimitToApproval-id-0008</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-CostExceedsToDenial-id-0009</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-ApprovalNotification-id-0001" name="Send: Approval Notification">
+      <bpmn:incoming>SequenceFlow-CostWithinLimitToApproval-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ApprovalToSelectShop-id-0010</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-SelectRepairShop-id-0001" name="Select Repair Shop">
+      <bpmn:incoming>SequenceFlow-ApprovalToSelectShop-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectShopToAuthorization-id-0011</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="SendTask-RepairAuthorization-id-0001" name="Send: Repair Authorization">
+      <bpmn:incoming>SequenceFlow-SelectShopToAuthorization-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AuthorizationToInvoice-id-0012</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-RepairInvoice-id-0001" name="Receive: Repair Completion Invoice">
+      <bpmn:incoming>SequenceFlow-AuthorizationToInvoice-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InvoiceToVerify-id-0013</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-InvoiceOverdue-id-0001" name="5 Business Day SLA Breach" cancelActivity="false" attachedToRef="ReceiveTask-RepairInvoice-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryToReminder-id-0021</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-InvoiceOverdue-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P5D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-OverdueReminder-id-0001" name="Send: Overdue Invoice Reminder">
+      <bpmn:incoming>SequenceFlow-BoundaryToReminder-id-0021</bpmn:incoming>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-VerifyInvoice-id-0001" name="Verify Invoice Against Estimate">
+      <bpmn:incoming>SequenceFlow-InvoiceToVerify-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VerifyToInvoiceCheck-id-0014</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-InvoiceValid-id-0001" name="Invoice Variation Within 10%?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-VerifyToInvoiceCheck-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidInvoiceToPayment-id-0015</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-InvalidInvoiceToRejection-id-0016</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-PaymentToShop-id-0001" name="Send: Payment to Shop">
+      <bpmn:incoming>SequenceFlow-ValidInvoiceToPayment-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PaymentToCompletion-id-0017</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="SendTask-RepairCompletion-id-0001" name="Send: Repair Completion Notification">
+      <bpmn:incoming>SequenceFlow-PaymentToCompletion-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CompletionToEndPaid-id-0018</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ClaimClosedPaid-id-0001" name="Claim Closed - Paid">
+      <bpmn:incoming>SequenceFlow-CompletionToEndPaid-id-0018</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="SendTask-InvoiceRejection-id-0001" name="Send: Invoice Rejection Notice">
+      <bpmn:incoming>SequenceFlow-InvalidInvoiceToRejection-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RejectionToEndRejected-id-0019</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ClaimClosedRejectedInvoice-id-0001" name="Claim Closed - Rejected Invoice">
+      <bpmn:incoming>SequenceFlow-RejectionToEndRejected-id-0019</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="SendTask-CostExceedsLimit-id-0001" name="Send: Cost Exceeds Limit Notification">
+      <bpmn:incoming>SequenceFlow-CostExceedsToDenial-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DenialToEndDenied-id-0020</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ClaimClosedDenied-id-0001" name="Claim Closed - Denied">
+      <bpmn:incoming>SequenceFlow-DenialToEndDenied-id-0020</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToAssignAgent-id-0001" sourceRef="StartEvent-NewClaimFiled-id-0001" targetRef="UserTask-AssignClaimAgent-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AssignToContact-id-0002" sourceRef="UserTask-AssignClaimAgent-id-0001" targetRef="UserTask-ContactClaimant-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ContactToDocumentCollection-id-0003" sourceRef="UserTask-ContactClaimant-id-0002" targetRef="SubProcess-DocumentCollection-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DocValidToForward-id-0004" sourceRef="SubProcess-DocumentCollection-id-0001" targetRef="ServiceTask-ForwardToAppraiser-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ForwardToInspect-id-0005" sourceRef="ServiceTask-ForwardToAppraiser-id-0001" targetRef="UserTask-InspectVehicle-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InspectToReview-id-0006" sourceRef="UserTask-InspectVehicle-id-0001" targetRef="UserTask-ReviewAppraiserReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToCostCheck-id-0007" sourceRef="UserTask-ReviewAppraiserReport-id-0001" targetRef="ExclusiveGateway-CostWithinLimit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CostWithinLimitToApproval-id-0008" name="repair_cost &#60;= policy_limit" sourceRef="ExclusiveGateway-CostWithinLimit-id-0001" targetRef="SendTask-ApprovalNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CostExceedsToDenial-id-0009" name="repair_cost &#62; policy_limit" sourceRef="ExclusiveGateway-CostWithinLimit-id-0001" targetRef="SendTask-CostExceedsLimit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApprovalToSelectShop-id-0010" sourceRef="SendTask-ApprovalNotification-id-0001" targetRef="UserTask-SelectRepairShop-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectShopToAuthorization-id-0011" sourceRef="UserTask-SelectRepairShop-id-0001" targetRef="SendTask-RepairAuthorization-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AuthorizationToInvoice-id-0012" sourceRef="SendTask-RepairAuthorization-id-0001" targetRef="ReceiveTask-RepairInvoice-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InvoiceToVerify-id-0013" sourceRef="ReceiveTask-RepairInvoice-id-0001" targetRef="UserTask-VerifyInvoice-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerifyToInvoiceCheck-id-0014" sourceRef="UserTask-VerifyInvoice-id-0001" targetRef="ExclusiveGateway-InvoiceValid-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidInvoiceToPayment-id-0015" name="invoice_variation &#60;= 10%" sourceRef="ExclusiveGateway-InvoiceValid-id-0001" targetRef="SendTask-PaymentToShop-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InvalidInvoiceToRejection-id-0016" name="invoice_variation &#62; 10%" sourceRef="ExclusiveGateway-InvoiceValid-id-0001" targetRef="SendTask-InvoiceRejection-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PaymentToCompletion-id-0017" sourceRef="SendTask-PaymentToShop-id-0001" targetRef="SendTask-RepairCompletion-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CompletionToEndPaid-id-0018" sourceRef="SendTask-RepairCompletion-id-0001" targetRef="EndEvent-ClaimClosedPaid-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RejectionToEndRejected-id-0019" sourceRef="SendTask-InvoiceRejection-id-0001" targetRef="EndEvent-ClaimClosedRejectedInvoice-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DenialToEndDenied-id-0020" sourceRef="SendTask-CostExceedsLimit-id-0001" targetRef="EndEvent-ClaimClosedDenied-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToReminder-id-0021" sourceRef="BoundaryEvent-InvoiceOverdue-id-0001" targetRef="SendTask-OverdueReminder-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ClaimProcessing-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_ClaimProcessing-Process-id-0001" bpmnElement="ClaimProcessing-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-NewClaimFiled-id-0001_di" bpmnElement="StartEvent-NewClaimFiled-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AssignClaimAgent-id-0001_di" bpmnElement="UserTask-AssignClaimAgent-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ContactClaimant-id-0002_di" bpmnElement="UserTask-ContactClaimant-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-DocumentCollection-id-0001_di" bpmnElement="SubProcess-DocumentCollection-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ForwardToAppraiser-id-0001_di" bpmnElement="ServiceTask-ForwardToAppraiser-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-InspectVehicle-id-0001_di" bpmnElement="UserTask-InspectVehicle-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewAppraiserReport-id-0001_di" bpmnElement="UserTask-ReviewAppraiserReport-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CostWithinLimit-id-0001_di" bpmnElement="ExclusiveGateway-CostWithinLimit-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ApprovalNotification-id-0001_di" bpmnElement="SendTask-ApprovalNotification-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectRepairShop-id-0001_di" bpmnElement="UserTask-SelectRepairShop-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RepairAuthorization-id-0001_di" bpmnElement="SendTask-RepairAuthorization-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-RepairInvoice-id-0001_di" bpmnElement="ReceiveTask-RepairInvoice-id-0001">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-InvoiceOverdue-id-0001_di" bpmnElement="BoundaryEvent-InvoiceOverdue-id-0001">
+        <dc:Bounds x="1707" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-VerifyInvoice-id-0001_di" bpmnElement="UserTask-VerifyInvoice-id-0001">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-InvoiceValid-id-0001_di" bpmnElement="ExclusiveGateway-InvoiceValid-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="2000" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-PaymentToShop-id-0001_di" bpmnElement="SendTask-PaymentToShop-id-0001">
+        <dc:Bounds x="2125" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RepairCompletion-id-0001_di" bpmnElement="SendTask-RepairCompletion-id-0001">
+        <dc:Bounds x="2275" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ClaimClosedPaid-id-0001_di" bpmnElement="EndEvent-ClaimClosedPaid-id-0001">
+        <dc:Bounds x="2457" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-CostExceedsLimit-id-0001_di" bpmnElement="SendTask-CostExceedsLimit-id-0001">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ClaimClosedDenied-id-0001_di" bpmnElement="EndEvent-ClaimClosedDenied-id-0001">
+        <dc:Bounds x="1407" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-OverdueReminder-id-0001_di" bpmnElement="SendTask-OverdueReminder-id-0001">
+        <dc:Bounds x="1975" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-InvoiceRejection-id-0001_di" bpmnElement="SendTask-InvoiceRejection-id-0001">
+        <dc:Bounds x="2275" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ClaimClosedRejectedInvoice-id-0001_di" bpmnElement="EndEvent-ClaimClosedRejectedInvoice-id-0001">
+        <dc:Bounds x="2457" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToAssignAgent-id-0001_di" bpmnElement="SequenceFlow-StartToAssignAgent-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AssignToContact-id-0002_di" bpmnElement="SequenceFlow-AssignToContact-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ContactToDocumentCollection-id-0003_di" bpmnElement="SequenceFlow-ContactToDocumentCollection-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DocValidToForward-id-0004_di" bpmnElement="SequenceFlow-DocValidToForward-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ForwardToInspect-id-0005_di" bpmnElement="SequenceFlow-ForwardToInspect-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InspectToReview-id-0006_di" bpmnElement="SequenceFlow-InspectToReview-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToCostCheck-id-0007_di" bpmnElement="SequenceFlow-ReviewToCostCheck-id-0007">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CostWithinLimitToApproval-id-0008_di" bpmnElement="SequenceFlow-CostWithinLimitToApproval-id-0008">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CostExceedsToDenial-id-0009_di" bpmnElement="SequenceFlow-CostExceedsToDenial-id-0009">
+        <di:waypoint x="1125" y="95" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalToSelectShop-id-0010_di" bpmnElement="SequenceFlow-ApprovalToSelectShop-id-0010">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectShopToAuthorization-id-0011_di" bpmnElement="SequenceFlow-SelectShopToAuthorization-id-0011">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AuthorizationToInvoice-id-0012_di" bpmnElement="SequenceFlow-AuthorizationToInvoice-id-0012">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvoiceToVerify-id-0013_di" bpmnElement="SequenceFlow-InvoiceToVerify-id-0013">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToReminder-id-0021_di" bpmnElement="SequenceFlow-BoundaryToReminder-id-0021">
+        <di:waypoint x="1725" y="128" />
+        <di:waypoint x="1725" y="210" />
+        <di:waypoint x="1975" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyToInvoiceCheck-id-0014_di" bpmnElement="SequenceFlow-VerifyToInvoiceCheck-id-0014">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="2000" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidInvoiceToPayment-id-0015_di" bpmnElement="SequenceFlow-ValidInvoiceToPayment-id-0015">
+        <di:waypoint x="2050" y="70" />
+        <di:waypoint x="2125" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvalidInvoiceToRejection-id-0016_di" bpmnElement="SequenceFlow-InvalidInvoiceToRejection-id-0016">
+        <di:waypoint x="2050" y="70" />
+        <di:waypoint x="2100" y="70" />
+        <di:waypoint x="2100" y="140" />
+        <di:waypoint x="2250" y="140" />
+        <di:waypoint x="2250" y="210" />
+        <di:waypoint x="2275" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentToCompletion-id-0017_di" bpmnElement="SequenceFlow-PaymentToCompletion-id-0017">
+        <di:waypoint x="2225" y="70" />
+        <di:waypoint x="2275" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompletionToEndPaid-id-0018_di" bpmnElement="SequenceFlow-CompletionToEndPaid-id-0018">
+        <di:waypoint x="2375" y="70" />
+        <di:waypoint x="2457" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DenialToEndDenied-id-0020_di" bpmnElement="SequenceFlow-DenialToEndDenied-id-0020">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1407" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RejectionToEndRejected-id-0019_di" bpmnElement="SequenceFlow-RejectionToEndRejected-id-0019">
+        <di:waypoint x="2375" y="210" />
+        <di:waypoint x="2457" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-DocumentCollection-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-DocumentCollection-id-0001" bpmnElement="SubProcess-DocumentCollection-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-DocumentCollectionStart-id-0001_di" bpmnElement="StartEvent-DocumentCollectionStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-RequestDocumentation-id-0001_di" bpmnElement="UserTask-RequestDocumentation-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveDocuments-id-0001_di" bpmnElement="ReceiveTask-ReceiveDocuments-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewDocumentation-id-0001_di" bpmnElement="UserTask-ReviewDocumentation-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CoverageValid-id-0001_di" bpmnElement="ExclusiveGateway-CoverageValid-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-DocumentationValid-id-0001_di" bpmnElement="EndEvent-DocumentationValid-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-CoverageDenial-id-0001_di" bpmnElement="SendTask-CoverageDenial-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ClaimClosedNoCoverage-id-0001_di" bpmnElement="EndEvent-ClaimClosedNoCoverage-id-0001">
+        <dc:Bounds x="957" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-DocStartToRequest-id-0001_di" bpmnElement="SequenceFlow-DocStartToRequest-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RequestToReceive-id-0002_di" bpmnElement="SequenceFlow-RequestToReceive-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToReview-id-0003_di" bpmnElement="SequenceFlow-ReceiveToReview-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToCoverageCheck-id-0004_di" bpmnElement="SequenceFlow-ReviewToCoverageCheck-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CoverageValidToEnd-id-0005_di" bpmnElement="SequenceFlow-CoverageValidToEnd-id-0005">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CoverageInvalidToDenial-id-0006_di" bpmnElement="SequenceFlow-CoverageInvalidToDenial-id-0006">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DenialToEnd-id-0007_di" bpmnElement="SequenceFlow-DenialToEnd-id-0007">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="957" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

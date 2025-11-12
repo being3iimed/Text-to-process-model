@@ -1,0 +1,82 @@
+### SUMMARY OF ELEMENTS
+--------------------------------------------------------------------------------
+timerStartEvent("Monthly at 00:00")  # Monthly forecast cycle
+
+subProcess("Material Planning"):
+    startEvent("Planning Cycle Start")
+    serviceTask("Forecast Material Needs")
+    serviceTask("Generate Purchase Orders")
+    sendTask("Send: Purchase Orders to Suppliers")
+    receiveTask("Receive: Supplier Confirmation"):
+        timerBoundary("14 days"):
+            sendTask("Send: Supplier Confirmation Reminder")
+    serviceTask("Ship Materials")  # Supplier action (not our process)
+    endEvent("Planning Complete")
+endSubProcess
+
+subProcess("Material Verification"):
+    startEvent("Verification Start")
+    userTask("Verify Received Materials")
+    if (quantity matches AND quality matches AND no damage):
+        serviceTask("Log Accepted Materials")
+        serviceTask("Route to Production")
+        endEvent("Verification Complete")
+    else:
+        sendTask("Send: Return to Supplier")
+        endEvent("Verification Failed")
+endSubProcess
+
+subProcess("Invoice Processing"):
+    startEvent("Invoice Processing Start")
+    serviceTask("Match Invoice to PO and Receipt")
+    if (3-way match):
+        sendTask("Send: Payment Approval")
+        endEvent("Invoice Approved")
+    else:
+        userTask("Investigate Mismatch")
+        endEvent("Invoice Rejected")
+endSubProcess
+
+endEvent("Process Complete")
+
+### BPMN PSEUDOCODE
+--------------------------------------------------------------------------------
+timerStartEvent("Monthly at 00:00")  # Monthly forecast cycle
+
+subProcess("Material Planning"):
+    startEvent("Planning Cycle Start")
+    serviceTask("Forecast Material Needs")
+    serviceTask("Generate Purchase Orders")
+    sendTask("Send: Purchase Orders to Suppliers")
+    receiveTask("Receive: Supplier Confirmation"):
+        timerBoundary("14 days"):
+            sendTask("Send: Supplier Confirmation Reminder")
+    serviceTask("Ship Materials")  # Supplier action (not our process)
+    endEvent("Planning Complete")
+endSubProcess
+
+subProcess("Material Verification"):
+    startEvent("Verification Start")
+    userTask("Verify Received Materials")
+    if (quantity matches AND quality matches AND no damage):
+        serviceTask("Log Accepted Materials")
+        serviceTask("Route to Production")
+        endEvent("Verification Complete")
+    else:
+        sendTask("Send: Return to Supplier")
+        endEvent("Verification Failed")
+endSubProcess
+
+subProcess("Invoice Processing"):
+    startEvent("Invoice Processing Start")
+    serviceTask("Match Invoice to PO and Receipt")
+    if (3-way match):
+        sendTask("Send: Payment Approval")
+        endEvent("Invoice Approved")
+    else:
+        userTask("Investigate Mismatch")
+        endEvent("Invoice Rejected")
+endSubProcess
+
+endEvent("Process Complete")
+

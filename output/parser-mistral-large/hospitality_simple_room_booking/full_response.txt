@@ -1,0 +1,133 @@
+```
+<summary_of_elements>
+
+## Summary of Elements
+
+### TASKS:
+- **serviceTask("Search Inventory for Dates and Room Type")** - System checks availability database
+- **serviceTask("Calculate Dynamic Pricing")** - System applies pricing rules
+- **serviceTask("Display Available Rooms and Pricing")** - System renders UI
+- **userTask("Guest Selects Room")** - Human decision point
+- **serviceTask("Process Payment")** - Payment gateway integration
+- **sendTask("Send: Booking Confirmation Email")** - One-way notification
+- **serviceTask("Link Booking to Loyalty Account")** - System updates loyalty DB
+- **serviceTask("Update Housekeeping Schedule")** - System marks room reserved
+
+### GATEWAYS:
+- **XOR after "Search Inventory"** (implicit success/failure)
+  - Success: Display rooms
+  - Failure: (Not modeled - assumed system handles gracefully)
+
+### EVENTS:
+- **startEvent("Guest Initiates Search")** - Manual trigger
+- **endEvent("Booking Complete")** - Normal completion
+
+### BOUNDARY EVENTS:
+- **None** (No explicit SLA requirements or expected error scenarios mentioned)
+
+### SUBPROCESSES:
+- **None** (All tasks are linear/cohesive in main flow; no logical grouping needed)
+
+---
+## BPMN Pseudocode
+
+```pseudocode
+startEvent("Guest Initiates Search")
+
+// Core booking flow
+serviceTask("Search Inventory for Dates and Room Type")
+serviceTask("Calculate Dynamic Pricing")
+serviceTask("Display Available Rooms and Pricing")
+userTask("Guest Selects Room")
+serviceTask("Process Payment")
+
+// Post-booking actions
+AND:
+    sendTask("Send: Booking Confirmation Email")
+    serviceTask("Link Booking to Loyalty Account")
+    serviceTask("Update Housekeeping Schedule")
+END_AND
+
+endEvent("Booking Complete")
+```
+
+---
+## Compliance Validation
+
+### TIMER EVENTS:
+✅ **N/A** - No timer events used (compliant)
+
+### GATEWAYS:
+✅ **Implicit XOR** handled by linear flow (no divergence needed)
+✅ **Explicit AND** for parallel post-booking actions (correct convergence)
+
+### SEQUENCE FLOWS:
+✅ All flows labeled implicitly via task names
+✅ No empty conditionals (linear flow)
+
+### BOUNDARY EVENTS:
+✅ **None added** (no SLA/error scenarios mentioned - compliant)
+
+### SUBPROCESSES:
+✅ **None created** (all tasks cohesive in main flow - compliant)
+
+### FLOW PATHS:
+✅ Single path from start to end (no orphans)
+✅ All tasks reachable
+✅ AND gateway properly converged
+
+---
+## Critical Observations
+
+1. **No Error Handling**:
+   - Assumed system gracefully handles "no availability" (e.g., shows "no rooms" message).
+   - If explicit error scenarios exist (e.g., payment failure), they should be modeled with `errorBoundary`.
+
+2. **Parallel Actions**:
+   - Post-booking actions (email, loyalty, housekeeping) are **truly independent** → `AND` gateway justified.
+
+3. **Timer Absence**:
+   - No SLAs mentioned (e.g., "must confirm within 1 hour") → no `timerBoundary` needed.
+
+4. **Subprocess Absence**:
+   - All tasks are **part of one cohesive workflow** → no subprocess abstraction needed.
+
+---
+## Assumptions Made
+- Guest search always returns either available rooms or a "no availability" message (no explicit error flow modeled).
+- Payment processing is assumed to succeed (no retry/fallback logic).
+- Loyalty account linking is automated (no manual steps).
+- Housekeeping update is a system-to-system action (no human intervention).
+
+---
+## Recommendations for Extension
+
+If the process were to include:
+1. **Payment Failures**:
+   ```pseudocode
+   serviceTask("Process Payment"):
+       errorBoundary():
+           userTask("Guest Retries Payment")
+   ```
+2. **Availability Timeouts**:
+   ```pseudocode
+   serviceTask("Search Inventory for Dates and Room Type"):
+       timerBoundary("PT30S"):  // 30-second timeout
+           sendTask("Send: 'Search Taking Longer' Notification")
+   ```
+3. **Loyalty Validation**:
+   ```pseudocode
+   serviceTask("Validate Loyalty Account"):
+       errorBoundary():
+           userTask("Guest Provides Alternative Loyalty Info")
+   ```
+
+---
+## Final Compliance Check
+✅ **Valid BPMN**: No invalid constructs
+✅ **Balanced Design**: 100% core elements (no over-engineering)
+✅ **Traceable**: Single path with clear start/end
+✅ **Justified**: All elements comply with BPMN 2.0 spec
+
+</summary_of_elements>
+```

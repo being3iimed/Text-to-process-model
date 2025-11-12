@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="MaterialProcurementDefinitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="MaterialProcurementProcess" name="Material Procurement and Receipt" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-MaterialProcurementProcess-id-0001" name="Material Procurement Process">
+      <bpmn:outgoing>SequenceFlow-StartToGenerateForecast-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-Generate3MonthMaterialForecast-id-0001" name="Generate 3-Month Material Forecast">
+      <bpmn:incoming>SequenceFlow-StartToGenerateForecast-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GenerateForecastToCreatePO-id-0002</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-CreatePurchaseOrders-id-0002" name="Create Purchase Orders">
+      <bpmn:incoming>SequenceFlow-GenerateForecastToCreatePO-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CreatePOToSendPO-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendPOToSupplier-id-0001" name="Send: PO to Supplier">
+      <bpmn:incoming>SequenceFlow-CreatePOToSendPO-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendPOToReceiveConfirmation-id-0004</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveSupplierConfirmation-id-0001" name="Receive: Supplier Confirmation">
+      <bpmn:incoming>SequenceFlow-SendPOToReceiveConfirmation-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveConfirmationToLogShipment-id-0005</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:serviceTask id="ServiceTask-LogShipmentDetails-id-0001" name="Log Shipment Details">
+      <bpmn:incoming>SequenceFlow-ReceiveConfirmationToLogShipment-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogShipmentToWarehouseSplit-id-0006</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-WarehouseVerificationSplit-id-0001" name="Warehouse Verification" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-LogShipmentToWarehouseSplit-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToVerifyQuantity-id-0007</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToVerifyQuality-id-0008</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToVerifyCondition-id-0009</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-WarehouseVerifyQuantity-id-0001" name="Warehouse: Verify Quantity">
+      <bpmn:incoming>SequenceFlow-SplitToVerifyQuantity-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VerifyQuantityToJoin-id-0010</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-WarehouseVerifyQuality-id-0002" name="Warehouse: Verify Quality">
+      <bpmn:incoming>SequenceFlow-SplitToVerifyQuality-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VerifyQualityToJoin-id-0011</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-WarehouseVerifyCondition-id-0003" name="Warehouse: Verify Condition">
+      <bpmn:incoming>SequenceFlow-SplitToVerifyCondition-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VerifyConditionToJoin-id-0012</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-WarehouseVerificationJoin-id-0002" name="Verification Complete" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-VerifyQuantityToJoin-id-0010</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-VerifyQualityToJoin-id-0011</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-VerifyConditionToJoin-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToVerificationDecision-id-0013</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-VerificationDecision-id-0001" name="Verification Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-JoinToVerificationDecision-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VerificationDecisionToLogRejection-id-0014</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-VerificationDecisionToUpdateInventory-id-0017</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-LogRejectionReason-id-0001" name="Log Rejection Reason">
+      <bpmn:incoming>SequenceFlow-VerificationDecisionToLogRejection-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogRejectionToSendRejection-id-0015</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendRejectionNoticeToSupplier-id-0002" name="Send: Rejection Notice to Supplier">
+      <bpmn:incoming>SequenceFlow-LogRejectionToSendRejection-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendRejectionToEndRejected-id-0016</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-MaterialsRejected-id-0001" name="Materials Rejected">
+      <bpmn:incoming>SequenceFlow-SendRejectionToEndRejected-id-0016</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-UpdateInventory-id-0001" name="Update Inventory">
+      <bpmn:incoming>SequenceFlow-VerificationDecisionToUpdateInventory-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateInventoryToRouteToProduction-id-0018</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-RouteToProduction-id-0002" name="Route to Production">
+      <bpmn:incoming>SequenceFlow-UpdateInventoryToRouteToProduction-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RouteToProductionToEndInProduction-id-0019</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-MaterialsInProduction-id-0002" name="Materials in Production">
+      <bpmn:incoming>SequenceFlow-RouteToProductionToEndInProduction-id-0019</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToGenerateForecast-id-0001" sourceRef="StartEvent-MaterialProcurementProcess-id-0001" targetRef="ServiceTask-Generate3MonthMaterialForecast-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GenerateForecastToCreatePO-id-0002" sourceRef="ServiceTask-Generate3MonthMaterialForecast-id-0001" targetRef="ServiceTask-CreatePurchaseOrders-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-CreatePOToSendPO-id-0003" sourceRef="ServiceTask-CreatePurchaseOrders-id-0002" targetRef="SendTask-SendPOToSupplier-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendPOToReceiveConfirmation-id-0004" sourceRef="SendTask-SendPOToSupplier-id-0001" targetRef="ReceiveTask-ReceiveSupplierConfirmation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveConfirmationToLogShipment-id-0005" sourceRef="ReceiveTask-ReceiveSupplierConfirmation-id-0001" targetRef="ServiceTask-LogShipmentDetails-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogShipmentToWarehouseSplit-id-0006" sourceRef="ServiceTask-LogShipmentDetails-id-0001" targetRef="ParallelGateway-WarehouseVerificationSplit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToVerifyQuantity-id-0007" sourceRef="ParallelGateway-WarehouseVerificationSplit-id-0001" targetRef="UserTask-WarehouseVerifyQuantity-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToVerifyQuality-id-0008" sourceRef="ParallelGateway-WarehouseVerificationSplit-id-0001" targetRef="UserTask-WarehouseVerifyQuality-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToVerifyCondition-id-0009" sourceRef="ParallelGateway-WarehouseVerificationSplit-id-0001" targetRef="UserTask-WarehouseVerifyCondition-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerifyQuantityToJoin-id-0010" sourceRef="UserTask-WarehouseVerifyQuantity-id-0001" targetRef="ParallelGateway-WarehouseVerificationJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerifyQualityToJoin-id-0011" sourceRef="UserTask-WarehouseVerifyQuality-id-0002" targetRef="ParallelGateway-WarehouseVerificationJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerifyConditionToJoin-id-0012" sourceRef="UserTask-WarehouseVerifyCondition-id-0003" targetRef="ParallelGateway-WarehouseVerificationJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToVerificationDecision-id-0013" sourceRef="ParallelGateway-WarehouseVerificationJoin-id-0002" targetRef="ExclusiveGateway-VerificationDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerificationDecisionToLogRejection-id-0014" name="quantity_mismatch OR quality_failure OR damage_detected" sourceRef="ExclusiveGateway-VerificationDecision-id-0001" targetRef="ServiceTask-LogRejectionReason-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogRejectionToSendRejection-id-0015" sourceRef="ServiceTask-LogRejectionReason-id-0001" targetRef="SendTask-SendRejectionNoticeToSupplier-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendRejectionToEndRejected-id-0016" sourceRef="SendTask-SendRejectionNoticeToSupplier-id-0002" targetRef="EndEvent-MaterialsRejected-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerificationDecisionToUpdateInventory-id-0017" sourceRef="ExclusiveGateway-VerificationDecision-id-0001" targetRef="ServiceTask-UpdateInventory-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateInventoryToRouteToProduction-id-0018" sourceRef="ServiceTask-UpdateInventory-id-0001" targetRef="ServiceTask-RouteToProduction-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-RouteToProductionToEndInProduction-id-0019" sourceRef="ServiceTask-RouteToProduction-id-0002" targetRef="EndEvent-MaterialsInProduction-id-0002" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_MaterialProcurementProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_MaterialProcurementProcess" bpmnElement="MaterialProcurementProcess">
+      <bpmndi:BPMNShape id="StartEvent-MaterialProcurementProcess-id-0001_di" bpmnElement="StartEvent-MaterialProcurementProcess-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-Generate3MonthMaterialForecast-id-0001_di" bpmnElement="ServiceTask-Generate3MonthMaterialForecast-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CreatePurchaseOrders-id-0002_di" bpmnElement="ServiceTask-CreatePurchaseOrders-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendPOToSupplier-id-0001_di" bpmnElement="SendTask-SendPOToSupplier-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveSupplierConfirmation-id-0001_di" bpmnElement="ReceiveTask-ReceiveSupplierConfirmation-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogShipmentDetails-id-0001_di" bpmnElement="ServiceTask-LogShipmentDetails-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-WarehouseVerificationSplit-id-0001_di" bpmnElement="ParallelGateway-WarehouseVerificationSplit-id-0001">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-WarehouseVerifyQuantity-id-0001_di" bpmnElement="UserTask-WarehouseVerifyQuantity-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-WarehouseVerificationJoin-id-0002_di" bpmnElement="ParallelGateway-WarehouseVerificationJoin-id-0002">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-VerificationDecision-id-0001_di" bpmnElement="ExclusiveGateway-VerificationDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogRejectionReason-id-0001_di" bpmnElement="ServiceTask-LogRejectionReason-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendRejectionNoticeToSupplier-id-0002_di" bpmnElement="SendTask-SendRejectionNoticeToSupplier-id-0002">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-MaterialsRejected-id-0001_di" bpmnElement="EndEvent-MaterialsRejected-id-0001">
+        <dc:Bounds x="1857" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-WarehouseVerifyQuality-id-0002_di" bpmnElement="UserTask-WarehouseVerifyQuality-id-0002">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateInventory-id-0001_di" bpmnElement="ServiceTask-UpdateInventory-id-0001">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RouteToProduction-id-0002_di" bpmnElement="ServiceTask-RouteToProduction-id-0002">
+        <dc:Bounds x="1675" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-MaterialsInProduction-id-0002_di" bpmnElement="EndEvent-MaterialsInProduction-id-0002">
+        <dc:Bounds x="1857" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-WarehouseVerifyCondition-id-0003_di" bpmnElement="UserTask-WarehouseVerifyCondition-id-0003">
+        <dc:Bounds x="1075" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToGenerateForecast-id-0001_di" bpmnElement="SequenceFlow-StartToGenerateForecast-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateForecastToCreatePO-id-0002_di" bpmnElement="SequenceFlow-GenerateForecastToCreatePO-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CreatePOToSendPO-id-0003_di" bpmnElement="SequenceFlow-CreatePOToSendPO-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendPOToReceiveConfirmation-id-0004_di" bpmnElement="SequenceFlow-SendPOToReceiveConfirmation-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveConfirmationToLogShipment-id-0005_di" bpmnElement="SequenceFlow-ReceiveConfirmationToLogShipment-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogShipmentToWarehouseSplit-id-0006_di" bpmnElement="SequenceFlow-LogShipmentToWarehouseSplit-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToVerifyQuantity-id-0007_di" bpmnElement="SequenceFlow-SplitToVerifyQuantity-id-0007">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToVerifyQuality-id-0008_di" bpmnElement="SequenceFlow-SplitToVerifyQuality-id-0008">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToVerifyCondition-id-0009_di" bpmnElement="SequenceFlow-SplitToVerifyCondition-id-0009">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="350" />
+        <di:waypoint x="1075" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyQuantityToJoin-id-0010_di" bpmnElement="SequenceFlow-VerifyQuantityToJoin-id-0010">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToVerificationDecision-id-0013_di" bpmnElement="SequenceFlow-JoinToVerificationDecision-id-0013">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerificationDecisionToLogRejection-id-0014_di" bpmnElement="SequenceFlow-VerificationDecisionToLogRejection-id-0014">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerificationDecisionToUpdateInventory-id-0017_di" bpmnElement="SequenceFlow-VerificationDecisionToUpdateInventory-id-0017">
+        <di:waypoint x="1425" y="95" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogRejectionToSendRejection-id-0015_di" bpmnElement="SequenceFlow-LogRejectionToSendRejection-id-0015">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendRejectionToEndRejected-id-0016_di" bpmnElement="SequenceFlow-SendRejectionToEndRejected-id-0016">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1857" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyQualityToJoin-id-0011_di" bpmnElement="SequenceFlow-VerifyQualityToJoin-id-0011">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1275" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateInventoryToRouteToProduction-id-0018_di" bpmnElement="SequenceFlow-UpdateInventoryToRouteToProduction-id-0018">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1675" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RouteToProductionToEndInProduction-id-0019_di" bpmnElement="SequenceFlow-RouteToProductionToEndInProduction-id-0019">
+        <di:waypoint x="1775" y="210" />
+        <di:waypoint x="1857" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyConditionToJoin-id-0012_di" bpmnElement="SequenceFlow-VerifyConditionToJoin-id-0012">
+        <di:waypoint x="1175" y="350" />
+        <di:waypoint x="1275" y="350" />
+        <di:waypoint x="1275" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

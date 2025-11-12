@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" id="Definitions-GraduationProcess-id-0001" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process-GraduationProcess-id-0001" name="Graduation Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-GraduationCheckRequested-id-0001" name="Graduation Check Requested">
+      <bpmn:outgoing>SequenceFlow-StartToAcademicVerification-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:subProcess id="SubProcess-VerifyAcademicRequirements-id-0001" name="Verify Academic Requirements">
+      <bpmn:incoming>SequenceFlow-StartToAcademicVerification-id-0001</bpmn:incoming>
+      <bpmn:startEvent id="StartEvent-AcademicVerificationStart-id-0001" name="Academic Verification Start">
+        <bpmn:outgoing>SequenceFlow-StartToVerifyCourseCompletions-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-VerifyCourseCompletions-id-0001" name="Verify Course Completions">
+        <bpmn:incoming>SequenceFlow-StartToVerifyCourseCompletions-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-VerifyCourseToVerifyCredit-id-0002</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-VerifyCreditCount-id-0002" name="Verify Credit Count">
+        <bpmn:incoming>SequenceFlow-VerifyCourseToVerifyCredit-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-VerifyCreditToCumulativeGPA-id-0003</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-VerifyCumulativeGPA-id-0003" name="Verify Cumulative GPA">
+        <bpmn:incoming>SequenceFlow-VerifyCreditToCumulativeGPA-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-VerifyCumulativeToMajorGPA-id-0004</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-VerifyMajorGPA-id-0004" name="Verify Major GPA">
+        <bpmn:incoming>SequenceFlow-VerifyCumulativeToMajorGPA-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-VerifyMajorGPAToEnd-id-0005</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-AcademicVerificationComplete-id-0001" name="Academic Verification Complete">
+        <bpmn:incoming>SequenceFlow-VerifyMajorGPAToEnd-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AcademicVerificationToAdministrativeVerification-id-0002</bpmn:outgoing>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToVerifyCourseCompletions-id-0001" sourceRef="StartEvent-AcademicVerificationStart-id-0001" targetRef="ServiceTask-VerifyCourseCompletions-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-VerifyCourseToVerifyCredit-id-0002" sourceRef="ServiceTask-VerifyCourseCompletions-id-0001" targetRef="ServiceTask-VerifyCreditCount-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-VerifyCreditToCumulativeGPA-id-0003" sourceRef="ServiceTask-VerifyCreditCount-id-0002" targetRef="ServiceTask-VerifyCumulativeGPA-id-0003" />
+      <bpmn:sequenceFlow id="SequenceFlow-VerifyCumulativeToMajorGPA-id-0004" sourceRef="ServiceTask-VerifyCumulativeGPA-id-0003" targetRef="ServiceTask-VerifyMajorGPA-id-0004" />
+      <bpmn:sequenceFlow id="SequenceFlow-VerifyMajorGPAToEnd-id-0005" sourceRef="ServiceTask-VerifyMajorGPA-id-0004" targetRef="EndEvent-AcademicVerificationComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-VerifyAdministrativeRequirements-id-0001" name="Verify Administrative Requirements">
+      <bpmn:incoming>SequenceFlow-AcademicVerificationToAdministrativeVerification-id-0002</bpmn:incoming>
+      <bpmn:startEvent id="StartEvent-AdministrativeVerificationStart-id-0001" name="Administrative Verification Start">
+        <bpmn:outgoing>SequenceFlow-StartToVerifyDisciplinaryHolds-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-VerifyDisciplinaryHolds-id-0001" name="Verify Disciplinary Holds">
+        <bpmn:incoming>SequenceFlow-StartToVerifyDisciplinaryHolds-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-VerifyDisciplinaryToLibraryFees-id-0002</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-VerifyLibraryFees-id-0002" name="Verify Library Fees">
+        <bpmn:incoming>SequenceFlow-VerifyDisciplinaryToLibraryFees-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-VerifyLibraryFeesToVisaStatus-id-0003</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-VerifyVisaStatus-id-0003" name="Verify Visa Status">
+        <bpmn:incoming>SequenceFlow-VerifyLibraryFeesToVisaStatus-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-VerifyVisaStatusToEnd-id-0004</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-AdministrativeVerificationComplete-id-0001" name="Administrative Verification Complete">
+        <bpmn:incoming>SequenceFlow-VerifyVisaStatusToEnd-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AdministrativeVerificationToGateway-id-0003</bpmn:outgoing>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToVerifyDisciplinaryHolds-id-0001" sourceRef="StartEvent-AdministrativeVerificationStart-id-0001" targetRef="ServiceTask-VerifyDisciplinaryHolds-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-VerifyDisciplinaryToLibraryFees-id-0002" sourceRef="ServiceTask-VerifyDisciplinaryHolds-id-0001" targetRef="ServiceTask-VerifyLibraryFees-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-VerifyLibraryFeesToVisaStatus-id-0003" sourceRef="ServiceTask-VerifyLibraryFees-id-0002" targetRef="ServiceTask-VerifyVisaStatus-id-0003" />
+      <bpmn:sequenceFlow id="SequenceFlow-VerifyVisaStatusToEnd-id-0004" sourceRef="ServiceTask-VerifyVisaStatus-id-0003" targetRef="EndEvent-AdministrativeVerificationComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-RequirementsMet-id-0001" name="Requirements Met?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-AdministrativeVerificationToGateway-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToGraduationPreparation-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToIncompleteReport-id-0005</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:subProcess id="SubProcess-GraduationPreparation-id-0001" name="Graduation Preparation">
+      <bpmn:incoming>SequenceFlow-GatewayToGraduationPreparation-id-0004</bpmn:incoming>
+      <bpmn:startEvent id="StartEvent-GraduationPreparationStart-id-0001" name="Graduation Preparation Start">
+        <bpmn:outgoing>SequenceFlow-StartToSplit-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:parallelGateway id="ParallelGateway-Split-id-0001" name="Parallel Execution" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-StartToSplit-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SplitToPrepareDiploma-id-0002</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToPlaceOrder-id-0003</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToAssignSlot-id-0004</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:serviceTask id="ServiceTask-PrepareDiploma-id-0001" name="Prepare Diploma">
+        <bpmn:incoming>SequenceFlow-SplitToPrepareDiploma-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PrepareDiplomaToJoin-id-0005</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-PlaceCapAndGownOrder-id-0002" name="Place Cap-and-Gown Order">
+        <bpmn:incoming>SequenceFlow-SplitToPlaceOrder-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PlaceOrderToJoin-id-0006</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-AssignGraduationSlot-id-0003" name="Assign Graduation Slot">
+        <bpmn:incoming>SequenceFlow-SplitToAssignSlot-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AssignSlotToJoin-id-0007</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:parallelGateway id="ParallelGateway-Join-id-0001" name="Synchronize Branches" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-PrepareDiplomaToJoin-id-0005</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-PlaceOrderToJoin-id-0006</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-AssignSlotToJoin-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-JoinToEnd-id-0008</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:endEvent id="EndEvent-GraduationPreparationComplete-id-0001" name="Graduation Preparation Complete">
+        <bpmn:incoming>SequenceFlow-JoinToEnd-id-0008</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GraduationPreparationToVerifyAttendance-id-0006</bpmn:outgoing>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToSplit-id-0001" sourceRef="StartEvent-GraduationPreparationStart-id-0001" targetRef="ParallelGateway-Split-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToPrepareDiploma-id-0002" sourceRef="ParallelGateway-Split-id-0001" targetRef="ServiceTask-PrepareDiploma-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToPlaceOrder-id-0003" sourceRef="ParallelGateway-Split-id-0001" targetRef="ServiceTask-PlaceCapAndGownOrder-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToAssignSlot-id-0004" sourceRef="ParallelGateway-Split-id-0001" targetRef="ServiceTask-AssignGraduationSlot-id-0003" />
+      <bpmn:sequenceFlow id="SequenceFlow-PrepareDiplomaToJoin-id-0005" sourceRef="ServiceTask-PrepareDiploma-id-0001" targetRef="ParallelGateway-Join-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-PlaceOrderToJoin-id-0006" sourceRef="ServiceTask-PlaceCapAndGownOrder-id-0002" targetRef="ParallelGateway-Join-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-AssignSlotToJoin-id-0007" sourceRef="ServiceTask-AssignGraduationSlot-id-0003" targetRef="ParallelGateway-Join-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-JoinToEnd-id-0008" sourceRef="ParallelGateway-Join-id-0001" targetRef="EndEvent-GraduationPreparationComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:serviceTask id="ServiceTask-VerifyAttendance-id-0001" name="Verify Attendance">
+      <bpmn:incoming>SequenceFlow-GraduationPreparationToVerifyAttendance-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VerifyAttendanceToConferDegree-id-0007</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ConferDegree-id-0001" name="Confer Degree">
+      <bpmn:incoming>SequenceFlow-VerifyAttendanceToConferDegree-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConferDegreeToIssueTranscript-id-0008</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-IssueTranscript-id-0001" name="Issue Transcript">
+      <bpmn:incoming>SequenceFlow-ConferDegreeToIssueTranscript-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-IssueTranscriptToEnd-id-0009</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-GenerateIncompleteReport-id-0001" name="Generate Incomplete Report">
+      <bpmn:incoming>SequenceFlow-GatewayToIncompleteReport-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GenerateIncompleteReportToEnd-id-0010</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-GraduationProcessComplete-id-0001" name="Graduation Process Complete">
+      <bpmn:incoming>SequenceFlow-IssueTranscriptToEnd-id-0009</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-GenerateIncompleteReportToEnd-id-0010</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToAcademicVerification-id-0001" sourceRef="StartEvent-GraduationCheckRequested-id-0001" targetRef="SubProcess-VerifyAcademicRequirements-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AcademicVerificationToAdministrativeVerification-id-0002" sourceRef="EndEvent-AcademicVerificationComplete-id-0001" targetRef="SubProcess-VerifyAdministrativeRequirements-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AdministrativeVerificationToGateway-id-0003" sourceRef="EndEvent-AdministrativeVerificationComplete-id-0001" targetRef="ExclusiveGateway-RequirementsMet-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToGraduationPreparation-id-0004" name="all requirements met" sourceRef="ExclusiveGateway-RequirementsMet-id-0001" targetRef="SubProcess-GraduationPreparation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToIncompleteReport-id-0005" name="missing requirements" sourceRef="ExclusiveGateway-RequirementsMet-id-0001" targetRef="ServiceTask-GenerateIncompleteReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GraduationPreparationToVerifyAttendance-id-0006" sourceRef="EndEvent-GraduationPreparationComplete-id-0001" targetRef="ServiceTask-VerifyAttendance-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerifyAttendanceToConferDegree-id-0007" sourceRef="ServiceTask-VerifyAttendance-id-0001" targetRef="ServiceTask-ConferDegree-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConferDegreeToIssueTranscript-id-0008" sourceRef="ServiceTask-ConferDegree-id-0001" targetRef="ServiceTask-IssueTranscript-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-IssueTranscriptToEnd-id-0009" sourceRef="ServiceTask-IssueTranscript-id-0001" targetRef="EndEvent-GraduationProcessComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GenerateIncompleteReportToEnd-id-0010" sourceRef="ServiceTask-GenerateIncompleteReport-id-0001" targetRef="EndEvent-GraduationProcessComplete-id-0001" />
+  </bpmn:process>
+</bpmn:definitions>

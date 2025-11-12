@@ -1,0 +1,147 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "Definitions_QuoteRequestProcess",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process_QuoteRequestProcess-id-0001",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-QuoteRequestInitiated-id-0001",
+          "name": "Quote Request Initiated"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-EnterVehicleInformation-id-0001",
+          "name": "Enter Vehicle Information"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-QueryRiskDatabase-id-0001",
+          "name": "Query Risk Database"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CalculatePremium-id-0001",
+          "name": "Calculate Premium"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateQuote-id-0001",
+          "name": "Generate Quote"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ReviewQuote-id-0001",
+          "name": "Review Quote"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-CustomerDecision-id-0001",
+          "name": "Customer Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProcessPayment-id-0001",
+          "name": "Process Payment"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendPolicyDocuments-id-0001",
+          "name": "Send: Policy Documents"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-QuotePurchased-id-0001",
+          "name": "Quote Purchased"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendQuoteConfirmation-id-0001",
+          "name": "Send: Quote Confirmation"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-QuoteSaved-id-0002",
+          "name": "Quote Saved"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToEnterVehicle-id-0001",
+          "sourceRef": "StartEvent-QuoteRequestInitiated-id-0001",
+          "targetRef": "UserTask-EnterVehicleInformation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-EnterToQueryRisk-id-0002",
+          "sourceRef": "UserTask-EnterVehicleInformation-id-0001",
+          "targetRef": "ServiceTask-QueryRiskDatabase-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-QueryToCalculate-id-0003",
+          "sourceRef": "ServiceTask-QueryRiskDatabase-id-0001",
+          "targetRef": "ServiceTask-CalculatePremium-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CalculateToGenerate-id-0004",
+          "sourceRef": "ServiceTask-CalculatePremium-id-0001",
+          "targetRef": "ServiceTask-GenerateQuote-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GenerateToReview-id-0005",
+          "sourceRef": "ServiceTask-GenerateQuote-id-0001",
+          "targetRef": "UserTask-ReviewQuote-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReviewToDecision-id-0006",
+          "sourceRef": "UserTask-ReviewQuote-id-0001",
+          "targetRef": "ExclusiveGateway-CustomerDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DecisionToProcessPayment-id-0007",
+          "name": "purchase == true",
+          "sourceRef": "ExclusiveGateway-CustomerDecision-id-0001",
+          "targetRef": "ServiceTask-ProcessPayment-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProcessToSendPolicy-id-0008",
+          "sourceRef": "ServiceTask-ProcessPayment-id-0001",
+          "targetRef": "SendTask-SendPolicyDocuments-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendPolicyToPurchased-id-0009",
+          "sourceRef": "SendTask-SendPolicyDocuments-id-0001",
+          "targetRef": "EndEvent-QuotePurchased-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DecisionToSendConfirmation-id-0010",
+          "name": "",
+          "sourceRef": "ExclusiveGateway-CustomerDecision-id-0001",
+          "targetRef": "SendTask-SendQuoteConfirmation-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendConfirmationToSaved-id-0011",
+          "sourceRef": "SendTask-SendQuoteConfirmation-id-0001",
+          "targetRef": "EndEvent-QuoteSaved-id-0002"
+        }
+      ]
+    }
+  ]
+}

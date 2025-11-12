@@ -1,0 +1,415 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "empty-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "bpmn-js (https://demo.bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "ClaimProcess-id-0001",
+      "name": "Claim Process",
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-ClaimSubmitted-id-0001",
+          "name": "Claim Submitted"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CollectClaimDetails-id-0001",
+          "name": "Collect Claim Details"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-Timer4Hour-CollectClaimDetails-id-0001",
+          "name": "4 Hour Timeout",
+          "attachedToRef": "UserTask-CollectClaimDetails-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT4H"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-RequestDocumentation-id-0002",
+          "name": "Request Documentation"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ValidateCoverage-id-0003",
+          "name": "Validate Coverage"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-Error-ValidateCoverage-id-0001",
+          "name": "Policy Data Unavailable",
+          "attachedToRef": "ServiceTask-ValidateCoverage-id-0003",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:ErrorEventDefinition",
+              "errorRef": "POLICY_DATA_UNAVAILABLE"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-CoverageValid-id-0001",
+          "name": "Coverage Valid?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ForwardClaimToAppraiser-id-0004",
+          "name": "Forward Claim to Appraiser"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-AppraisalProcess-id-0001",
+          "name": "Appraisal Process",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-AppraisalStart-id-0001",
+              "name": "Appraisal Start"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-InspectVehicle-id-0001",
+              "name": "Inspect Vehicle"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-EstimateRepairCosts-id-0001",
+              "name": "Estimate Repair Costs"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-AppraisalComplete-id-0001",
+              "name": "Appraisal Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-AppraisalStartToInspect-id-0001",
+              "sourceRef": "StartEvent-AppraisalStart-id-0001",
+              "targetRef": "UserTask-InspectVehicle-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-InspectToEstimate-id-0002",
+              "sourceRef": "UserTask-InspectVehicle-id-0001",
+              "targetRef": "ServiceTask-EstimateRepairCosts-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-EstimateToEnd-id-0003",
+              "sourceRef": "ServiceTask-EstimateRepairCosts-id-0001",
+              "targetRef": "EndEvent-AppraisalComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ReviewAppraisal-id-0005",
+          "name": "Review Appraisal"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-RepairCost-id-0001",
+          "name": "Repair Cost vs. Limit",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendApprovalNotification-id-0001",
+          "name": "Send: Approval Notification"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SelectRepairShop-id-0006",
+          "name": "Select Repair Shop"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendRepairAuthorization-id-0001",
+          "name": "Send: Repair Authorization"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-RepairProcess-id-0001",
+          "name": "Repair Process",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-RepairStart-id-0001",
+              "name": "Repair Start"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-CompleteRepairs-id-0001",
+              "name": "Complete Repairs"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-SendInvoice-id-0001",
+              "name": "Send: Invoice"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-VerifyInvoice-id-0001",
+              "name": "Verify Invoice"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-InvoiceMatch-id-0001",
+              "name": "Invoice Matches Estimate?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-SendPayment-id-0001",
+              "name": "Send: Payment"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ReviewInvoiceDiscrepancy-id-0001",
+              "name": "Review Invoice Discrepancy"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-RepairComplete-id-0001",
+              "name": "Repair Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RepairStartToComplete-id-0001",
+              "sourceRef": "StartEvent-RepairStart-id-0001",
+              "targetRef": "UserTask-CompleteRepairs-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CompleteToSendInvoice-id-0002",
+              "sourceRef": "UserTask-CompleteRepairs-id-0001",
+              "targetRef": "SendTask-SendInvoice-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendInvoiceToVerify-id-0003",
+              "sourceRef": "SendTask-SendInvoice-id-0001",
+              "targetRef": "ServiceTask-VerifyInvoice-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-VerifyToGateway-id-0004",
+              "sourceRef": "ServiceTask-VerifyInvoice-id-0001",
+              "targetRef": "ExclusiveGateway-InvoiceMatch-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToPayment-id-0005",
+              "name": "invoice matches estimate",
+              "sourceRef": "ExclusiveGateway-InvoiceMatch-id-0001",
+              "targetRef": "SendTask-SendPayment-id-0001",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToReview-id-0006",
+              "name": "invoice does not match estimate",
+              "sourceRef": "ExclusiveGateway-InvoiceMatch-id-0001",
+              "targetRef": "UserTask-ReviewInvoiceDiscrepancy-id-0001",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReviewToEnd-id-0007",
+              "sourceRef": "UserTask-ReviewInvoiceDiscrepancy-id-0001",
+              "targetRef": "EndEvent-RepairComplete-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PaymentToEnd-id-0008",
+              "sourceRef": "SendTask-SendPayment-id-0001",
+              "targetRef": "EndEvent-RepairComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendRepairCompletionNotification-id-0001",
+          "name": "Send: Repair Completion Notification"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendExceedsLimitNotification-id-0001",
+          "name": "Send: Exceeds Limit Notification"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendCoverageDenialNotification-id-0001",
+          "name": "Send: Coverage Denial Notification"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendEscalationToSupervisor-id-0001",
+          "name": "Send: Escalation to Supervisor"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ManualPolicyReview-id-0001",
+          "name": "Manual Policy Review"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ClaimProcessed-id-0001",
+          "name": "Claim Processed"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToCollectClaimDetails-id-0001",
+          "sourceRef": "StartEvent-ClaimSubmitted-id-0001",
+          "targetRef": "UserTask-CollectClaimDetails-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CollectToRequest-id-0002",
+          "sourceRef": "UserTask-CollectClaimDetails-id-0001",
+          "targetRef": "UserTask-RequestDocumentation-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RequestToValidate-id-0003",
+          "sourceRef": "UserTask-RequestDocumentation-id-0002",
+          "targetRef": "ServiceTask-ValidateCoverage-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ValidateToGateway-id-0004",
+          "sourceRef": "ServiceTask-ValidateCoverage-id-0003",
+          "targetRef": "ExclusiveGateway-CoverageValid-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToForward-id-0005",
+          "name": "coverage_valid",
+          "sourceRef": "ExclusiveGateway-CoverageValid-id-0001",
+          "targetRef": "ServiceTask-ForwardClaimToAppraiser-id-0004",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToDenial-id-0006",
+          "name": "coverage_invalid",
+          "sourceRef": "ExclusiveGateway-CoverageValid-id-0001",
+          "targetRef": "SendTask-SendCoverageDenialNotification-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ForwardToAppraisalProcess-id-0007",
+          "sourceRef": "ServiceTask-ForwardClaimToAppraiser-id-0004",
+          "targetRef": "SubProcess-AppraisalProcess-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AppraisalProcessToReview-id-0008",
+          "sourceRef": "SubProcess-AppraisalProcess-id-0001",
+          "targetRef": "UserTask-ReviewAppraisal-id-0005"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReviewToCostGateway-id-0009",
+          "sourceRef": "UserTask-ReviewAppraisal-id-0005",
+          "targetRef": "ExclusiveGateway-RepairCost-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CostGatewayToApproval-id-0010",
+          "name": "repair_cost <= policy_limit",
+          "sourceRef": "ExclusiveGateway-RepairCost-id-0001",
+          "targetRef": "SendTask-SendApprovalNotification-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CostGatewayToExceeds-id-0011",
+          "name": "repair_cost > policy_limit",
+          "sourceRef": "ExclusiveGateway-RepairCost-id-0001",
+          "targetRef": "SendTask-SendExceedsLimitNotification-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ApprovalToSelectShop-id-0012",
+          "sourceRef": "SendTask-SendApprovalNotification-id-0001",
+          "targetRef": "UserTask-SelectRepairShop-id-0006"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SelectToAuthorization-id-0013",
+          "sourceRef": "UserTask-SelectRepairShop-id-0006",
+          "targetRef": "SendTask-SendRepairAuthorization-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AuthorizationToRepairProcess-id-0014",
+          "sourceRef": "SendTask-SendRepairAuthorization-id-0001",
+          "targetRef": "SubProcess-RepairProcess-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RepairProcessToCompletion-id-0015",
+          "sourceRef": "SubProcess-RepairProcess-id-0001",
+          "targetRef": "SendTask-SendRepairCompletionNotification-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CompletionToEnd-id-0016",
+          "sourceRef": "SendTask-SendRepairCompletionNotification-id-0001",
+          "targetRef": "EndEvent-ClaimProcessed-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ExceedsToEnd-id-0017",
+          "sourceRef": "SendTask-SendExceedsLimitNotification-id-0001",
+          "targetRef": "EndEvent-ClaimProcessed-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DenialToEnd-id-0018",
+          "sourceRef": "SendTask-SendCoverageDenialNotification-id-0001",
+          "targetRef": "EndEvent-ClaimProcessed-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryToEscalation-id-0001",
+          "sourceRef": "BoundaryEvent-Timer4Hour-CollectClaimDetails-id-0001",
+          "targetRef": "SendTask-SendEscalationToSupervisor-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-EscalationToEnd-id-0002",
+          "sourceRef": "SendTask-SendEscalationToSupervisor-id-0001",
+          "targetRef": "EndEvent-ClaimProcessed-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryToManualReview-id-0001",
+          "sourceRef": "BoundaryEvent-Error-ValidateCoverage-id-0001",
+          "targetRef": "UserTask-ManualPolicyReview-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ManualReviewToGateway-id-0001",
+          "sourceRef": "UserTask-ManualPolicyReview-id-0001",
+          "targetRef": "ExclusiveGateway-CoverageValid-id-0001"
+        }
+      ],
+      "isExecutable": true
+    }
+  ]
+}

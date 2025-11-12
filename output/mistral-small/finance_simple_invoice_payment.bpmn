@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="empty-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="VendorPaymentProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ProcessInitiated-id-0001" name="Process Initiated">
+      <bpmn:outgoing>SequenceFlow-StartToReceive-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveVendorInvoice-id-0002" name="Receive: vendor invoice">
+      <bpmn:incoming>SequenceFlow-StartToReceive-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveToLog-id-0002</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:serviceTask id="ServiceTask-LogInvoice-id-0003" name="Log invoice in accounting system">
+      <bpmn:incoming>SequenceFlow-ReceiveToLog-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogToCalculate-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:scriptTask id="ScriptTask-CalculateDueDate-id-0004" name="Computation: calculate payment due date">
+      <bpmn:incoming>SequenceFlow-LogToCalculate-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CalculateToTimer-id-0004</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-DueDateTrigger-id-0005" name="Due Date Trigger">
+      <bpmn:incoming>SequenceFlow-CalculateToTimer-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TimerToApprove-id-0005</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:userTask id="UserTask-ManagerApprovesPayment-id-0006" name="Manager Approves Payment">
+      <bpmn:incoming>SequenceFlow-TimerToApprove-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ApproveToTransfer-id-0006</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ProcessBankTransfer-id-0007" name="Process bank transfer">
+      <bpmn:incoming>SequenceFlow-ApproveToTransfer-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TransferToSend-id-0007</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendPaymentConfirmation-id-0008" name="Send: payment confirmation">
+      <bpmn:incoming>SequenceFlow-TransferToSend-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendToEnd-id-0008</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0009" name="Process Complete">
+      <bpmn:incoming>SequenceFlow-SendToEnd-id-0008</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToReceive-id-0001" sourceRef="StartEvent-ProcessInitiated-id-0001" targetRef="ReceiveTask-ReceiveVendorInvoice-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveToLog-id-0002" sourceRef="ReceiveTask-ReceiveVendorInvoice-id-0002" targetRef="ServiceTask-LogInvoice-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogToCalculate-id-0003" sourceRef="ServiceTask-LogInvoice-id-0003" targetRef="ScriptTask-CalculateDueDate-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-CalculateToTimer-id-0004" sourceRef="ScriptTask-CalculateDueDate-id-0004" targetRef="IntermediateCatchEvent-DueDateTrigger-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-TimerToApprove-id-0005" sourceRef="IntermediateCatchEvent-DueDateTrigger-id-0005" targetRef="UserTask-ManagerApprovesPayment-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApproveToTransfer-id-0006" sourceRef="UserTask-ManagerApprovesPayment-id-0006" targetRef="ServiceTask-ProcessBankTransfer-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-TransferToSend-id-0007" sourceRef="ServiceTask-ProcessBankTransfer-id-0007" targetRef="SendTask-SendPaymentConfirmation-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendToEnd-id-0008" sourceRef="SendTask-SendPaymentConfirmation-id-0008" targetRef="EndEvent-ProcessComplete-id-0009" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_VendorPaymentProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_VendorPaymentProcess-id-0001" bpmnElement="VendorPaymentProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ProcessInitiated-id-0001_di" bpmnElement="StartEvent-ProcessInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveVendorInvoice-id-0002_di" bpmnElement="ReceiveTask-ReceiveVendorInvoice-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogInvoice-id-0003_di" bpmnElement="ServiceTask-LogInvoice-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-CalculateDueDate-id-0004_di" bpmnElement="ScriptTask-CalculateDueDate-id-0004">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-DueDateTrigger-id-0005_di" bpmnElement="IntermediateCatchEvent-DueDateTrigger-id-0005">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ManagerApprovesPayment-id-0006_di" bpmnElement="UserTask-ManagerApprovesPayment-id-0006">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessBankTransfer-id-0007_di" bpmnElement="ServiceTask-ProcessBankTransfer-id-0007">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendPaymentConfirmation-id-0008_di" bpmnElement="SendTask-SendPaymentConfirmation-id-0008">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0009_di" bpmnElement="EndEvent-ProcessComplete-id-0009">
+        <dc:Bounds x="1257" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToReceive-id-0001_di" bpmnElement="SequenceFlow-StartToReceive-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToLog-id-0002_di" bpmnElement="SequenceFlow-ReceiveToLog-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogToCalculate-id-0003_di" bpmnElement="SequenceFlow-LogToCalculate-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculateToTimer-id-0004_di" bpmnElement="SequenceFlow-CalculateToTimer-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TimerToApprove-id-0005_di" bpmnElement="SequenceFlow-TimerToApprove-id-0005">
+        <di:waypoint x="693" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApproveToTransfer-id-0006_di" bpmnElement="SequenceFlow-ApproveToTransfer-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TransferToSend-id-0007_di" bpmnElement="SequenceFlow-TransferToSend-id-0007">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToEnd-id-0008_di" bpmnElement="SequenceFlow-SendToEnd-id-0008">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1257" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

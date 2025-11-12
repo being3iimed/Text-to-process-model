@@ -1,0 +1,347 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "empty-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "bpmn-js (https://demo.bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "MaterialPlanningProcess-id-0001",
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-MonthlyCycle-id-0001",
+          "name": "Monthly Forecast Cycle",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeCycle": "RRULE:FREQ=MONTHLY;BYHOUR=0;BYMINUTE=0;BYSECOND=0"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-MaterialPlanning-id-0001",
+          "name": "Material Planning",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-PlanningCycleStart-id-0001",
+              "name": "Planning Cycle Start"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-ForecastMaterialNeeds-id-0001",
+              "name": "Forecast Material Needs"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-GeneratePurchaseOrders-id-0002",
+              "name": "Generate Purchase Orders"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-SendPurchaseOrders-id-0003",
+              "name": "Send Purchase Orders to Suppliers"
+            },
+            {
+              "$type": "bpmn:ReceiveTask",
+              "id": "ReceiveTask-SupplierConfirmation-id-0004",
+              "name": "Receive Supplier Confirmation"
+            },
+            {
+              "$type": "bpmn:BoundaryEvent",
+              "id": "BoundaryEvent-Timer14Day-SupplierConfirmation-id-0001",
+              "name": "14 Day Timeout",
+              "attachedToRef": "ReceiveTask-SupplierConfirmation-id-0004",
+              "cancelActivity": true,
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:TimerEventDefinition",
+                  "timeDuration": "P14D"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-ShipMaterials-id-0005",
+              "name": "Ship Materials"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-PlanningComplete-id-0001",
+              "name": "Planning Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StartToForecast-id-0001",
+              "sourceRef": "StartEvent-PlanningCycleStart-id-0001",
+              "targetRef": "ServiceTask-ForecastMaterialNeeds-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ForecastToGeneratePO-id-0002",
+              "sourceRef": "ServiceTask-ForecastMaterialNeeds-id-0001",
+              "targetRef": "ServiceTask-GeneratePurchaseOrders-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GeneratePOToSend-id-0003",
+              "sourceRef": "ServiceTask-GeneratePurchaseOrders-id-0002",
+              "targetRef": "SendTask-SendPurchaseOrders-id-0003"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendToReceive-id-0004",
+              "sourceRef": "SendTask-SendPurchaseOrders-id-0003",
+              "targetRef": "ReceiveTask-SupplierConfirmation-id-0004"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReceiveToShip-id-0005",
+              "sourceRef": "ReceiveTask-SupplierConfirmation-id-0004",
+              "targetRef": "ServiceTask-ShipMaterials-id-0005"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ShipToEnd-id-0006",
+              "sourceRef": "ServiceTask-ShipMaterials-id-0005",
+              "targetRef": "EndEvent-PlanningComplete-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BoundaryToReminder-id-0007",
+              "sourceRef": "BoundaryEvent-Timer14Day-SupplierConfirmation-id-0001",
+              "targetRef": "SendTask-SendSupplierReminder-id-0006"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-SendSupplierReminder-id-0006",
+              "name": "Send Supplier Confirmation Reminder"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReminderToShip-id-0008",
+              "sourceRef": "SendTask-SendSupplierReminder-id-0006",
+              "targetRef": "ServiceTask-ShipMaterials-id-0005"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-MaterialVerification-id-0001",
+          "name": "Material Verification",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-VerificationStart-id-0001",
+              "name": "Verification Start"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-VerifyReceivedMaterials-id-0001",
+              "name": "Verify Received Materials"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-VerificationCheck-id-0001",
+              "name": "Verification Check",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-LogAcceptedMaterials-id-0001",
+              "name": "Log Accepted Materials"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-RouteToProduction-id-0001",
+              "name": "Route to Production"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-VerificationComplete-id-0001",
+              "name": "Verification Complete"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-SendReturnToSupplier-id-0001",
+              "name": "Send Return to Supplier"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-VerificationFailed-id-0001",
+              "name": "Verification Failed"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StartToVerify-id-0001",
+              "sourceRef": "StartEvent-VerificationStart-id-0001",
+              "targetRef": "UserTask-VerifyReceivedMaterials-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-VerifyToGateway-id-0002",
+              "sourceRef": "UserTask-VerifyReceivedMaterials-id-0001",
+              "targetRef": "ExclusiveGateway-VerificationCheck-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToLog-id-0003",
+              "name": "quantity matches AND quality matches AND no damage",
+              "sourceRef": "ExclusiveGateway-VerificationCheck-id-0001",
+              "targetRef": "ServiceTask-LogAcceptedMaterials-id-0001",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-LogToRoute-id-0004",
+              "sourceRef": "ServiceTask-LogAcceptedMaterials-id-0001",
+              "targetRef": "ServiceTask-RouteToProduction-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RouteToEnd-id-0005",
+              "sourceRef": "ServiceTask-RouteToProduction-id-0001",
+              "targetRef": "EndEvent-VerificationComplete-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToReturn-id-0006",
+              "name": "any mismatch",
+              "sourceRef": "ExclusiveGateway-VerificationCheck-id-0001",
+              "targetRef": "SendTask-SendReturnToSupplier-id-0001",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReturnToEnd-id-0007",
+              "sourceRef": "SendTask-SendReturnToSupplier-id-0001",
+              "targetRef": "EndEvent-VerificationFailed-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-InvoiceProcessing-id-0001",
+          "name": "Invoice Processing",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-InvoiceProcessingStart-id-0001",
+              "name": "Invoice Processing Start"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-MatchInvoiceToPO-id-0001",
+              "name": "Match Invoice to PO and Receipt"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-InvoiceCheck-id-0001",
+              "name": "Invoice Check",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-SendPaymentApproval-id-0001",
+              "name": "Send Payment Approval"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-InvoiceApproved-id-0001",
+              "name": "Invoice Approved"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-InvestigateMismatch-id-0001",
+              "name": "Investigate Mismatch"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-InvoiceRejected-id-0001",
+              "name": "Invoice Rejected"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StartToMatch-id-0001",
+              "sourceRef": "StartEvent-InvoiceProcessingStart-id-0001",
+              "targetRef": "ServiceTask-MatchInvoiceToPO-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MatchToGateway-id-0002",
+              "sourceRef": "ServiceTask-MatchInvoiceToPO-id-0001",
+              "targetRef": "ExclusiveGateway-InvoiceCheck-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToPayment-id-0003",
+              "name": "3-way match",
+              "sourceRef": "ExclusiveGateway-InvoiceCheck-id-0001",
+              "targetRef": "SendTask-SendPaymentApproval-id-0001",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PaymentToEnd-id-0004",
+              "sourceRef": "SendTask-SendPaymentApproval-id-0001",
+              "targetRef": "EndEvent-InvoiceApproved-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToInvestigate-id-0005",
+              "name": "mismatch",
+              "sourceRef": "ExclusiveGateway-InvoiceCheck-id-0001",
+              "targetRef": "UserTask-InvestigateMismatch-id-0001",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-InvestigateToEnd-id-0006",
+              "sourceRef": "UserTask-InvestigateMismatch-id-0001",
+              "targetRef": "EndEvent-InvoiceRejected-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProcessComplete-id-0001",
+          "name": "Process Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToPlanning-id-0001",
+          "sourceRef": "StartEvent-MonthlyCycle-id-0001",
+          "targetRef": "SubProcess-MaterialPlanning-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PlanningToVerification-id-0002",
+          "sourceRef": "EndEvent-PlanningComplete-id-0001",
+          "targetRef": "SubProcess-MaterialVerification-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-VerificationToInvoice-id-0003",
+          "sourceRef": "EndEvent-VerificationComplete-id-0001",
+          "targetRef": "SubProcess-InvoiceProcessing-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InvoiceToEnd-id-0004",
+          "sourceRef": "EndEvent-InvoiceApproved-id-0001",
+          "targetRef": "EndEvent-ProcessComplete-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InvoiceRejectedToEnd-id-0005",
+          "sourceRef": "EndEvent-InvoiceRejected-id-0001",
+          "targetRef": "EndEvent-ProcessComplete-id-0001"
+        }
+      ],
+      "isExecutable": true
+    }
+  ]
+}

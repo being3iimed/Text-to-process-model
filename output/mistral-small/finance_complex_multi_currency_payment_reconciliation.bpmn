@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="empty-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="PaymentProcessing-Process-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-DailyPaymentsReceived-id-0001" name="Daily Payments Received">
+      <bpmn:outgoing>SequenceFlow-StartToConvertCurrency-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-ConvertCurrency-id-0001" name="Convert currency to base currency">
+      <bpmn:incoming>SequenceFlow-StartToConvertCurrency-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConvertToMatchPayment-id-0002</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-MatchPayment-id-0002" name="Match payment to outstanding invoice">
+      <bpmn:incoming>SequenceFlow-ConvertToMatchPayment-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MatchToGateway-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-PaymentMatch-id-0001" name="Payment Match" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-MatchToGateway-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToRecordComplete-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToMarkPartiallyPaid-id-0005</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToRecordOverpayment-id-0006</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToHoldUnmatched-id-0007</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-RecordComplete-id-0003" name="Record payment as complete">
+      <bpmn:incoming>SequenceFlow-GatewayToRecordComplete-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RecordCompleteToUpdateAging-id-0008</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-MarkPartiallyPaid-id-0004" name="Mark invoice as partially paid">
+      <bpmn:incoming>SequenceFlow-GatewayToMarkPartiallyPaid-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MarkPartiallyPaidToUpdateAging-id-0009</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-RecordOverpayment-id-0005" name="Record overpayment as credit">
+      <bpmn:incoming>SequenceFlow-GatewayToRecordOverpayment-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RecordOverpaymentToUpdateAging-id-0010</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-HoldUnmatched-id-0006" name="Hold payment as unmatched">
+      <bpmn:incoming>SequenceFlow-GatewayToHoldUnmatched-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-HoldUnmatchedToNotifyAccounting-id-0011</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-NotifyAccounting-id-0001" name="Send: notification to accounting team">
+      <bpmn:incoming>SequenceFlow-HoldUnmatchedToNotifyAccounting-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotifyToResearchPayment-id-0012</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-ResearchPayment-id-0001" name="Accounting team researches payment">
+      <bpmn:incoming>SequenceFlow-NotifyToResearchPayment-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ResearchPaymentToUpdateAging-id-0013</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-UpdateAgingReport-id-0007" name="Update accounts receivable aging report">
+      <bpmn:incoming>SequenceFlow-RecordCompleteToUpdateAging-id-0008</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-MarkPartiallyPaidToUpdateAging-id-0009</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-RecordOverpaymentToUpdateAging-id-0010</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ResearchPaymentToUpdateAging-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateAgingToTriggerFollowUp-id-0014</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-TriggerFollowUp-id-0008" name="Trigger automatic follow-up for overdue invoices">
+      <bpmn:incoming>SequenceFlow-UpdateAgingToTriggerFollowUp-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TriggerFollowUpToEnd-id-0015</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0001" name="Process Complete">
+      <bpmn:incoming>SequenceFlow-TriggerFollowUpToEnd-id-0015</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToConvertCurrency-id-0001" sourceRef="StartEvent-DailyPaymentsReceived-id-0001" targetRef="ServiceTask-ConvertCurrency-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConvertToMatchPayment-id-0002" sourceRef="ServiceTask-ConvertCurrency-id-0001" targetRef="ServiceTask-MatchPayment-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-MatchToGateway-id-0003" sourceRef="ServiceTask-MatchPayment-id-0002" targetRef="ExclusiveGateway-PaymentMatch-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToRecordComplete-id-0004" name="payment matches invoice amount exactly" sourceRef="ExclusiveGateway-PaymentMatch-id-0001" targetRef="ServiceTask-RecordComplete-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToMarkPartiallyPaid-id-0005" name="payment is less than invoice amount" sourceRef="ExclusiveGateway-PaymentMatch-id-0001" targetRef="ServiceTask-MarkPartiallyPaid-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToRecordOverpayment-id-0006" name="payment is more than invoice amount" sourceRef="ExclusiveGateway-PaymentMatch-id-0001" targetRef="ServiceTask-RecordOverpayment-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToHoldUnmatched-id-0007" name="payment doesn&#39;t match any invoice" sourceRef="ExclusiveGateway-PaymentMatch-id-0001" targetRef="ServiceTask-HoldUnmatched-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-RecordCompleteToUpdateAging-id-0008" sourceRef="ServiceTask-RecordComplete-id-0003" targetRef="ServiceTask-UpdateAgingReport-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-MarkPartiallyPaidToUpdateAging-id-0009" sourceRef="ServiceTask-MarkPartiallyPaid-id-0004" targetRef="ServiceTask-UpdateAgingReport-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-RecordOverpaymentToUpdateAging-id-0010" sourceRef="ServiceTask-RecordOverpayment-id-0005" targetRef="ServiceTask-UpdateAgingReport-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-HoldUnmatchedToNotifyAccounting-id-0011" sourceRef="ServiceTask-HoldUnmatched-id-0006" targetRef="SendTask-NotifyAccounting-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotifyToResearchPayment-id-0012" sourceRef="SendTask-NotifyAccounting-id-0001" targetRef="UserTask-ResearchPayment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ResearchPaymentToUpdateAging-id-0013" sourceRef="UserTask-ResearchPayment-id-0001" targetRef="ServiceTask-UpdateAgingReport-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateAgingToTriggerFollowUp-id-0014" sourceRef="ServiceTask-UpdateAgingReport-id-0007" targetRef="ServiceTask-TriggerFollowUp-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-TriggerFollowUpToEnd-id-0015" sourceRef="ServiceTask-TriggerFollowUp-id-0008" targetRef="EndEvent-ProcessComplete-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_PaymentProcessing-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_PaymentProcessing-Process-id-0001" bpmnElement="PaymentProcessing-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-DailyPaymentsReceived-id-0001_di" bpmnElement="StartEvent-DailyPaymentsReceived-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ConvertCurrency-id-0001_di" bpmnElement="ServiceTask-ConvertCurrency-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MatchPayment-id-0002_di" bpmnElement="ServiceTask-MatchPayment-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PaymentMatch-id-0001_di" bpmnElement="ExclusiveGateway-PaymentMatch-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RecordComplete-id-0003_di" bpmnElement="ServiceTask-RecordComplete-id-0003">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateAgingReport-id-0007_di" bpmnElement="ServiceTask-UpdateAgingReport-id-0007">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-TriggerFollowUp-id-0008_di" bpmnElement="ServiceTask-TriggerFollowUp-id-0008">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0001_di" bpmnElement="EndEvent-ProcessComplete-id-0001">
+        <dc:Bounds x="1407" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MarkPartiallyPaid-id-0004_di" bpmnElement="ServiceTask-MarkPartiallyPaid-id-0004">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RecordOverpayment-id-0005_di" bpmnElement="ServiceTask-RecordOverpayment-id-0005">
+        <dc:Bounds x="625" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-HoldUnmatched-id-0006_di" bpmnElement="ServiceTask-HoldUnmatched-id-0006">
+        <dc:Bounds x="625" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-NotifyAccounting-id-0001_di" bpmnElement="SendTask-NotifyAccounting-id-0001">
+        <dc:Bounds x="775" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ResearchPayment-id-0001_di" bpmnElement="UserTask-ResearchPayment-id-0001">
+        <dc:Bounds x="925" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToConvertCurrency-id-0001_di" bpmnElement="SequenceFlow-StartToConvertCurrency-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConvertToMatchPayment-id-0002_di" bpmnElement="SequenceFlow-ConvertToMatchPayment-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MatchToGateway-id-0003_di" bpmnElement="SequenceFlow-MatchToGateway-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToRecordComplete-id-0004_di" bpmnElement="SequenceFlow-GatewayToRecordComplete-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToMarkPartiallyPaid-id-0005_di" bpmnElement="SequenceFlow-GatewayToMarkPartiallyPaid-id-0005">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToRecordOverpayment-id-0006_di" bpmnElement="SequenceFlow-GatewayToRecordOverpayment-id-0006">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="625" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToHoldUnmatched-id-0007_di" bpmnElement="SequenceFlow-GatewayToHoldUnmatched-id-0007">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="490" />
+        <di:waypoint x="625" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RecordCompleteToUpdateAging-id-0008_di" bpmnElement="SequenceFlow-RecordCompleteToUpdateAging-id-0008">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateAgingToTriggerFollowUp-id-0014_di" bpmnElement="SequenceFlow-UpdateAgingToTriggerFollowUp-id-0014">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TriggerFollowUpToEnd-id-0015_di" bpmnElement="SequenceFlow-TriggerFollowUpToEnd-id-0015">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1407" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MarkPartiallyPaidToUpdateAging-id-0009_di" bpmnElement="SequenceFlow-MarkPartiallyPaidToUpdateAging-id-0009">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1125" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RecordOverpaymentToUpdateAging-id-0010_di" bpmnElement="SequenceFlow-RecordOverpaymentToUpdateAging-id-0010">
+        <di:waypoint x="725" y="350" />
+        <di:waypoint x="1125" y="350" />
+        <di:waypoint x="1125" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HoldUnmatchedToNotifyAccounting-id-0011_di" bpmnElement="SequenceFlow-HoldUnmatchedToNotifyAccounting-id-0011">
+        <di:waypoint x="725" y="490" />
+        <di:waypoint x="775" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotifyToResearchPayment-id-0012_di" bpmnElement="SequenceFlow-NotifyToResearchPayment-id-0012">
+        <di:waypoint x="875" y="490" />
+        <di:waypoint x="925" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ResearchPaymentToUpdateAging-id-0013_di" bpmnElement="SequenceFlow-ResearchPaymentToUpdateAging-id-0013">
+        <di:waypoint x="1025" y="490" />
+        <di:waypoint x="1125" y="490" />
+        <di:waypoint x="1125" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

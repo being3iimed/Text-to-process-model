@@ -1,0 +1,174 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "return-process-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "ReturnProcess-id-0001",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-ReturnProcessInitiated-id-0001",
+          "name": "Return Process Initiated"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-InitiateReturnRequest-id-0001",
+          "name": "Customer submits order number and reason"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ValidateReturnEligibility-id-0001",
+          "name": "System checks 30-day window and item condition"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-EligibilityCheck-id-0001",
+          "name": "Eligibility Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-ReturnShippingLabel-id-0001",
+          "name": "System generates and emails return label"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ShipItemBack-id-0001",
+          "name": "Customer ships item using provided label"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-VerifyItemCondition-id-0001",
+          "name": "Warehouse staff inspects returned item"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ConditionCheck-id-0001",
+          "name": "Condition Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProcessRefund-id-0001",
+          "name": "System issues refund to original payment method"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-RefundConfirmationEmail-id-0001",
+          "name": "System sends confirmation to customer"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ReturnProcessComplete-id-0001",
+          "name": "Return Process Complete"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-ReturnDenialNotification-id-0001",
+          "name": "System notifies customer of damaged item"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ReturnDenied-id-0001",
+          "name": "Return Denied"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ReturnDeniedIneligible-id-0002",
+          "name": "Ineligible return request terminated"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToInitiate-id-0001",
+          "sourceRef": "StartEvent-ReturnProcessInitiated-id-0001",
+          "targetRef": "UserTask-InitiateReturnRequest-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InitiateToValidate-id-0002",
+          "sourceRef": "UserTask-InitiateReturnRequest-id-0001",
+          "targetRef": "ServiceTask-ValidateReturnEligibility-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ValidateToEligibilityGateway-id-0003",
+          "sourceRef": "ServiceTask-ValidateReturnEligibility-id-0001",
+          "targetRef": "ExclusiveGateway-EligibilityCheck-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-EligibleToSendLabel-id-0004",
+          "sourceRef": "ExclusiveGateway-EligibilityCheck-id-0001",
+          "targetRef": "SendTask-ReturnShippingLabel-id-0001",
+          "name": "eligible == true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-IneligibleToDenied-id-0005",
+          "sourceRef": "ExclusiveGateway-EligibilityCheck-id-0001",
+          "targetRef": "EndEvent-ReturnDeniedIneligible-id-0002",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendLabelToShip-id-0006",
+          "sourceRef": "SendTask-ReturnShippingLabel-id-0001",
+          "targetRef": "UserTask-ShipItemBack-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ShipToVerify-id-0007",
+          "sourceRef": "UserTask-ShipItemBack-id-0001",
+          "targetRef": "UserTask-VerifyItemCondition-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-VerifyToConditionGateway-id-0008",
+          "sourceRef": "UserTask-VerifyItemCondition-id-0001",
+          "targetRef": "ExclusiveGateway-ConditionCheck-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AcceptableToProcessRefund-id-0009",
+          "sourceRef": "ExclusiveGateway-ConditionCheck-id-0001",
+          "targetRef": "ServiceTask-ProcessRefund-id-0001",
+          "name": "condition == acceptable"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DamagedToDenied-id-0010",
+          "sourceRef": "ExclusiveGateway-ConditionCheck-id-0001",
+          "targetRef": "SendTask-ReturnDenialNotification-id-0001",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProcessRefundToConfirmation-id-0011",
+          "sourceRef": "ServiceTask-ProcessRefund-id-0001",
+          "targetRef": "SendTask-RefundConfirmationEmail-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmationToComplete-id-0012",
+          "sourceRef": "SendTask-RefundConfirmationEmail-id-0001",
+          "targetRef": "EndEvent-ReturnProcessComplete-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DenialToDeniedEnd-id-0013",
+          "sourceRef": "SendTask-ReturnDenialNotification-id-0001",
+          "targetRef": "EndEvent-ReturnDenied-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

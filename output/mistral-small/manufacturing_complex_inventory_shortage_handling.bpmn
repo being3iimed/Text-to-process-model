@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" id="Definitions-InventoryCheckProcess-id-0001" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process-InventoryCheckProcess-id-0001" name="Inventory Check Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-InventoryCheckTriggered-id-0001" name="Inventory Check Triggered" />
+    <bpmn:serviceTask id="ServiceTask-CheckInventoryForComponentX-id-0001" name="Check Inventory for Component X" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway-InventoryCheck-id-0001" name="Inventory Check" gatewayDirection="Diverging" />
+    <bpmn:endEvent id="EndEvent-ProductionProceeds-id-0001" name="Production Proceeds" />
+    <bpmn:serviceTask id="ServiceTask-CheckNextSupplierDelivery-id-0001" name="Check Next Supplier Delivery" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway-DeliveryTimeCheck-id-0001" name="Delivery Time Check" gatewayDirection="Diverging" />
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-WaitForDelivery-id-0001" name="Wait for Delivery" />
+    <bpmn:endEvent id="EndEvent-ProductionResumes-id-0001" name="Production Resumes" />
+    <bpmn:serviceTask id="ServiceTask-CheckForAlternativeComponents-id-0001" name="Check for Alternative Components" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway-AlternativeComponentCheck-id-0001" name="Alternative Component Check" gatewayDirection="Diverging" />
+    <bpmn:sendTask id="SendTask-NotifyProductionToUseAlternative-id-0001" name="Notify Production to Use Alternative" />
+    <bpmn:subProcess id="SubProcess-ExpediteHandling-id-0001" name="Expedite Handling">
+      <bpmn:startEvent id="StartEvent-ExpediteStart-id-0001" name="Expedite Start" />
+      <bpmn:serviceTask id="ServiceTask-RequestSupplierExpedite-id-0001" name="Request Supplier Expedite" />
+      <bpmn:boundaryEvent id="BoundaryEvent-SupplierExpediteError-id-0001" name="Supplier Expedite Error" attachedToRef="ServiceTask-RequestSupplierExpedite-id-0001">
+        <bpmn:errorEventDefinition id="BoundaryEvent-SupplierExpediteError-id-0001_EventDef" errorRef="SUPPLIER_EXPEDITE_ERROR" />
+      </bpmn:boundaryEvent>
+      <bpmn:subProcess id="SubProcess-BackupSupplierProcess-id-0001" name="Backup Supplier Process">
+        <bpmn:startEvent id="StartEvent-BackupSupplierStart-id-0001" name="Backup Supplier Start" />
+        <bpmn:userTask id="UserTask-ProcurementManagerFindsBackupSupplier-id-0001" name="Procurement Manager Finds Backup Supplier" />
+        <bpmn:serviceTask id="ServiceTask-CreatePurchaseOrder-id-0001" name="Create Purchase Order" />
+        <bpmn:boundaryEvent id="BoundaryEvent-BackupSupplierUnavailable-id-0001" name="Backup Supplier Unavailable" attachedToRef="ServiceTask-CreatePurchaseOrder-id-0001">
+          <bpmn:errorEventDefinition id="BoundaryEvent-BackupSupplierUnavailable-id-0001_EventDef" errorRef="BACKUP_SUPPLIER_UNAVAILABLE" />
+        </bpmn:boundaryEvent>
+        <bpmn:userTask id="UserTask-ProcurementManagerFindsAlternativeBackupSupplier-id-0001" name="Procurement Manager Finds Alternative Backup Supplier" />
+        <bpmn:sendTask id="SendTask-ConfirmBackupSupplierDelivery-id-0001" name="Confirm Backup Supplier Delivery" />
+        <bpmn:endEvent id="EndEvent-BackupSupplierProcessComplete-id-0001" name="Backup Supplier Process Complete" />
+      </bpmn:subProcess>
+      <bpmn:sendTask id="SendTask-NotifyProductionOfExpedite-id-0001" name="Notify Production of Expedite" />
+      <bpmn:exclusiveGateway id="ExclusiveGateway-ExpediteSuccessCheck-id-0001" name="Expedite Success Check" gatewayDirection="Diverging" />
+      <bpmn:endEvent id="EndEvent-ExpediteComplete-id-0001" name="Expedite Complete" />
+      <bpmn:endEvent id="EndEvent-ProceedToBackupSupplier-id-0001" name="Proceed to Backup Supplier" />
+    </bpmn:subProcess>
+    <bpmn:sendTask id="SendTask-NotifyDependentProductionLines-id-0001" name="Notify Dependent Production Lines of Potential Delay" />
+    <bpmn:serviceTask id="ServiceTask-LogCostVariance-id-0001" name="Log Cost Variance" />
+    <bpmn:serviceTask id="ServiceTask-UpdateSupplierMetrics-id-0001" name="Update Supplier Metrics" />
+  </bpmn:process>
+  <bpmn:error id="SUPPLIER_EXPEDITE_ERROR" name="SUPPLIER_EXPEDITE_ERROR" />
+  <bpmn:error id="BACKUP_SUPPLIER_UNAVAILABLE" name="BACKUP_SUPPLIER_UNAVAILABLE" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process-InventoryCheckProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process-InventoryCheckProcess-id-0001" bpmnElement="Process-InventoryCheckProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-InventoryCheckTriggered-id-0001_di" bpmnElement="StartEvent-InventoryCheckTriggered-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckInventoryForComponentX-id-0001_di" bpmnElement="ServiceTask-CheckInventoryForComponentX-id-0001">
+        <dc:Bounds x="25" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-InventoryCheck-id-0001_di" bpmnElement="ExclusiveGateway-InventoryCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="50" y="325" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProductionProceeds-id-0001_di" bpmnElement="EndEvent-ProductionProceeds-id-0001">
+        <dc:Bounds x="57" y="472" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckNextSupplierDelivery-id-0001_di" bpmnElement="ServiceTask-CheckNextSupplierDelivery-id-0001">
+        <dc:Bounds x="25" y="590" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-DeliveryTimeCheck-id-0001_di" bpmnElement="ExclusiveGateway-DeliveryTimeCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="50" y="745" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-WaitForDelivery-id-0001_di" bpmnElement="IntermediateCatchEvent-WaitForDelivery-id-0001">
+        <dc:Bounds x="57" y="892" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProductionResumes-id-0001_di" bpmnElement="EndEvent-ProductionResumes-id-0001">
+        <dc:Bounds x="57" y="1032" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckForAlternativeComponents-id-0001_di" bpmnElement="ServiceTask-CheckForAlternativeComponents-id-0001">
+        <dc:Bounds x="25" y="1150" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-AlternativeComponentCheck-id-0001_di" bpmnElement="ExclusiveGateway-AlternativeComponentCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="50" y="1305" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-NotifyProductionToUseAlternative-id-0001_di" bpmnElement="SendTask-NotifyProductionToUseAlternative-id-0001">
+        <dc:Bounds x="25" y="1430" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-ExpediteHandling-id-0001_di" bpmnElement="SubProcess-ExpediteHandling-id-0001">
+        <dc:Bounds x="25" y="1570" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-NotifyDependentProductionLines-id-0001_di" bpmnElement="SendTask-NotifyDependentProductionLines-id-0001">
+        <dc:Bounds x="25" y="1710" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogCostVariance-id-0001_di" bpmnElement="ServiceTask-LogCostVariance-id-0001">
+        <dc:Bounds x="25" y="1850" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateSupplierMetrics-id-0001_di" bpmnElement="ServiceTask-UpdateSupplierMetrics-id-0001">
+        <dc:Bounds x="25" y="1990" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-ExpediteHandling-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-ExpediteHandling-id-0001" bpmnElement="SubProcess-ExpediteHandling-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ExpediteStart-id-0001_di" bpmnElement="StartEvent-ExpediteStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RequestSupplierExpedite-id-0001_di" bpmnElement="ServiceTask-RequestSupplierExpedite-id-0001">
+        <dc:Bounds x="25" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-SupplierExpediteError-id-0001_di" bpmnElement="BoundaryEvent-SupplierExpediteError-id-0001">
+        <dc:Bounds x="57" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-BackupSupplierProcess-id-0001_di" bpmnElement="SubProcess-BackupSupplierProcess-id-0001">
+        <dc:Bounds x="25" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-NotifyProductionOfExpedite-id-0001_di" bpmnElement="SendTask-NotifyProductionOfExpedite-id-0001">
+        <dc:Bounds x="25" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ExpediteSuccessCheck-id-0001_di" bpmnElement="ExclusiveGateway-ExpediteSuccessCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="50" y="605" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ExpediteComplete-id-0001_di" bpmnElement="EndEvent-ExpediteComplete-id-0001">
+        <dc:Bounds x="57" y="752" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProceedToBackupSupplier-id-0001_di" bpmnElement="EndEvent-ProceedToBackupSupplier-id-0001">
+        <dc:Bounds x="57" y="892" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-BackupSupplierProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-BackupSupplierProcess-id-0001" bpmnElement="SubProcess-BackupSupplierProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-BackupSupplierStart-id-0001_di" bpmnElement="StartEvent-BackupSupplierStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ProcurementManagerFindsBackupSupplier-id-0001_di" bpmnElement="UserTask-ProcurementManagerFindsBackupSupplier-id-0001">
+        <dc:Bounds x="25" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CreatePurchaseOrder-id-0001_di" bpmnElement="ServiceTask-CreatePurchaseOrder-id-0001">
+        <dc:Bounds x="25" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-BackupSupplierUnavailable-id-0001_di" bpmnElement="BoundaryEvent-BackupSupplierUnavailable-id-0001">
+        <dc:Bounds x="57" y="372" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ProcurementManagerFindsAlternativeBackupSupplier-id-0001_di" bpmnElement="UserTask-ProcurementManagerFindsAlternativeBackupSupplier-id-0001">
+        <dc:Bounds x="25" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ConfirmBackupSupplierDelivery-id-0001_di" bpmnElement="SendTask-ConfirmBackupSupplierDelivery-id-0001">
+        <dc:Bounds x="25" y="590" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-BackupSupplierProcessComplete-id-0001_di" bpmnElement="EndEvent-BackupSupplierProcessComplete-id-0001">
+        <dc:Bounds x="57" y="752" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

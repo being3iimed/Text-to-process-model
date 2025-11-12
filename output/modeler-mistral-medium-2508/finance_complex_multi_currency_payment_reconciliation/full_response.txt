@@ -1,0 +1,429 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "InternationalPaymentReconciliation",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process-InternationalPaymentReconciliation-id-0001",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-DailyTrigger-id-0001",
+          "name": "Daily Trigger",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeCycle": "RRULE:FREQ=DAILY;BYHOUR=7;BYMINUTE=0"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-FetchExchangeRates-id-0001",
+          "name": "Fetch daily exchange rates"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-APIFailure-FetchExchangeRates-id-0001",
+          "name": "API Failure",
+          "attachedToRef": "ServiceTask-FetchExchangeRates-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:ErrorEventDefinition",
+              "errorRef": "API_CONNECTION_ERROR"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-EnterRatesManually-id-0001",
+          "name": "Enter exchange rates manually"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ConvertPayments-id-0002",
+          "name": "Convert all payments to base currency"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-ReconcilePayment-id-0001",
+          "name": "Reconcile Payment",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-ReconciliationStart-id-0001",
+              "name": "Reconciliation Start"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-MatchPayment-id-0001",
+              "name": "Match payment to invoice by invoice number or customer reference"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-PaymentMatch-id-0001",
+              "name": "Payment vs. Invoice Amount",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-MarkPaid-id-0001",
+              "name": "Mark invoice as paid"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-ReconciliationComplete-id-0001",
+              "name": "Reconciliation Complete"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-MarkPartial-id-0001",
+              "name": "Mark invoice as partially paid"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-HoldBalance-id-0001",
+              "name": "Hold remaining balance"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-RecordOverpayment-id-0001",
+              "name": "Record overpayment as customer credit"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-NotifyAccounting-id-0001",
+              "name": "Send: notification to accounting team"
+            },
+            {
+              "$type": "bpmn:CallActivity",
+              "id": "CallActivity-ResearchUnmatched-id-0001",
+              "name": "Research Unmatched Payment",
+              "calledElement": "SubProcess-ResearchUnmatchedPayment-id-0001"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-PaymentMatchMerge-id-0001",
+              "name": "Merge Reconciliation Paths",
+              "gatewayDirection": "Converging"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReconcileStartToMatch-id-0001",
+              "sourceRef": "StartEvent-ReconciliationStart-id-0001",
+              "targetRef": "ServiceTask-MatchPayment-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MatchToGateway-id-0001",
+              "sourceRef": "ServiceTask-MatchPayment-id-0001",
+              "targetRef": "ExclusiveGateway-PaymentMatch-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ExactMatch-id-0001",
+              "name": "exact_match",
+              "sourceRef": "ExclusiveGateway-PaymentMatch-id-0001",
+              "targetRef": "ServiceTask-MarkPaid-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MarkPaidToEnd-id-0001",
+              "sourceRef": "ServiceTask-MarkPaid-id-0001",
+              "targetRef": "ExclusiveGateway-PaymentMatchMerge-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-Underpayment-id-0001",
+              "name": "payment < invoice_amount",
+              "sourceRef": "ExclusiveGateway-PaymentMatch-id-0001",
+              "targetRef": "ServiceTask-MarkPartial-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MarkPartialToHold-id-0001",
+              "sourceRef": "ServiceTask-MarkPartial-id-0001",
+              "targetRef": "ServiceTask-HoldBalance-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-HoldToMerge-id-0001",
+              "sourceRef": "ServiceTask-HoldBalance-id-0001",
+              "targetRef": "ExclusiveGateway-PaymentMatchMerge-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-Overpayment-id-0001",
+              "name": "payment > invoice_amount",
+              "sourceRef": "ExclusiveGateway-PaymentMatch-id-0001",
+              "targetRef": "ServiceTask-RecordOverpayment-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RecordOverpaymentToMerge-id-0001",
+              "sourceRef": "ServiceTask-RecordOverpayment-id-0001",
+              "targetRef": "ExclusiveGateway-PaymentMatchMerge-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-Unmatched-id-0001",
+              "name": "",
+              "sourceRef": "ExclusiveGateway-PaymentMatch-id-0001",
+              "targetRef": "SendTask-NotifyAccounting-id-0001",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-NotifyToResearch-id-0001",
+              "sourceRef": "SendTask-NotifyAccounting-id-0001",
+              "targetRef": "CallActivity-ResearchUnmatched-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ResearchToMerge-id-0001",
+              "sourceRef": "CallActivity-ResearchUnmatched-id-0001",
+              "targetRef": "ExclusiveGateway-PaymentMatchMerge-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MergeToEnd-id-0001",
+              "sourceRef": "ExclusiveGateway-PaymentMatchMerge-id-0001",
+              "targetRef": "EndEvent-ReconciliationComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-ResearchUnmatchedPayment-id-0001",
+          "name": "Research Unmatched Payment",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-ResearchStart-id-0001",
+              "name": "Research Start"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-UnmatchedResearch-id-0001",
+              "name": "Unmatched Payment Research",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-LinkOldInvoice-id-0001",
+              "name": "Link to old invoice"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-MatchReference-id-0001",
+              "name": "Match using reference"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-FlagDuplicate-id-0001",
+              "name": "Flag as duplicate"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-InvestigateOther-id-0001",
+              "name": "Investigate other causes"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-ResearchComplete-id-0001",
+              "name": "Research Complete"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-ResearchMerge-id-0001",
+              "name": "Merge Research Paths",
+              "gatewayDirection": "Converging"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ResearchStartToGateway-id-0001",
+              "sourceRef": "StartEvent-ResearchStart-id-0001",
+              "targetRef": "ExclusiveGateway-UnmatchedResearch-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-OldInvoice-id-0001",
+              "name": "payment_matches_old_invoice",
+              "sourceRef": "ExclusiveGateway-UnmatchedResearch-id-0001",
+              "targetRef": "UserTask-LinkOldInvoice-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-LinkToMerge-id-0001",
+              "sourceRef": "UserTask-LinkOldInvoice-id-0001",
+              "targetRef": "ExclusiveGateway-ResearchMerge-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-HasReference-id-0001",
+              "name": "payment_has_reference_number",
+              "sourceRef": "ExclusiveGateway-UnmatchedResearch-id-0001",
+              "targetRef": "UserTask-MatchReference-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MatchReferenceToMerge-id-0001",
+              "sourceRef": "UserTask-MatchReference-id-0001",
+              "targetRef": "ExclusiveGateway-ResearchMerge-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-Duplicate-id-0001",
+              "name": "payment_is_duplicate",
+              "sourceRef": "ExclusiveGateway-UnmatchedResearch-id-0001",
+              "targetRef": "UserTask-FlagDuplicate-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-FlagDuplicateToMerge-id-0001",
+              "sourceRef": "UserTask-FlagDuplicate-id-0001",
+              "targetRef": "ExclusiveGateway-ResearchMerge-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-OtherCause-id-0001",
+              "name": "",
+              "sourceRef": "ExclusiveGateway-UnmatchedResearch-id-0001",
+              "targetRef": "UserTask-InvestigateOther-id-0001",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-InvestigateToMerge-id-0001",
+              "sourceRef": "UserTask-InvestigateOther-id-0001",
+              "targetRef": "ExclusiveGateway-ResearchMerge-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ResearchMergeToEnd-id-0001",
+              "sourceRef": "ExclusiveGateway-ResearchMerge-id-0001",
+              "targetRef": "EndEvent-ResearchComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:IntermediateCatchEvent",
+          "id": "IntermediateCatchEvent-BatchUpdate-id-0001",
+          "name": "Batch Update Trigger",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeCycle": "RRULE:FREQ=DAILY;BYHOUR=23;BYMINUTE=59"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-UpdateAgingReport-id-0001",
+          "name": "Update accounts receivable aging report"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-DBError-UpdateAgingReport-id-0001",
+          "name": "DB Error",
+          "attachedToRef": "ServiceTask-UpdateAgingReport-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:ErrorEventDefinition",
+              "errorRef": "DB_UPDATE_ERROR"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CorrectAgingReport-id-0001",
+          "name": "Correct aging report manually"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-TriggerFollowUps-id-0001",
+          "name": "Trigger automatic follow-ups for newly overdue invoices"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-PaymentsProcessed-id-0001",
+          "name": "Payments processed"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToFetchRates-id-0001",
+          "sourceRef": "StartEvent-DailyTrigger-id-0001",
+          "targetRef": "ServiceTask-FetchExchangeRates-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FetchRatesToConvert-id-0001",
+          "sourceRef": "ServiceTask-FetchExchangeRates-id-0001",
+          "targetRef": "ServiceTask-ConvertPayments-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConvertToReconcile-id-0001",
+          "sourceRef": "ServiceTask-ConvertPayments-id-0002",
+          "targetRef": "SubProcess-ReconcilePayment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReconcileToBatchUpdate-id-0001",
+          "sourceRef": "SubProcess-ReconcilePayment-id-0001",
+          "targetRef": "IntermediateCatchEvent-BatchUpdate-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BatchUpdateToAgingReport-id-0001",
+          "sourceRef": "IntermediateCatchEvent-BatchUpdate-id-0001",
+          "targetRef": "ServiceTask-UpdateAgingReport-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AgingReportToFollowUps-id-0001",
+          "sourceRef": "ServiceTask-UpdateAgingReport-id-0001",
+          "targetRef": "ServiceTask-TriggerFollowUps-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FollowUpsToEnd-id-0001",
+          "sourceRef": "ServiceTask-TriggerFollowUps-id-0001",
+          "targetRef": "EndEvent-PaymentsProcessed-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-APIFailureToManualEntry-id-0001",
+          "sourceRef": "BoundaryEvent-APIFailure-FetchExchangeRates-id-0001",
+          "targetRef": "UserTask-EnterRatesManually-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ManualEntryToConvert-id-0001",
+          "sourceRef": "UserTask-EnterRatesManually-id-0001",
+          "targetRef": "ServiceTask-ConvertPayments-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DBErrorToManualCorrection-id-0001",
+          "sourceRef": "BoundaryEvent-DBError-UpdateAgingReport-id-0001",
+          "targetRef": "UserTask-CorrectAgingReport-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ManualCorrectionToFollowUps-id-0001",
+          "sourceRef": "UserTask-CorrectAgingReport-id-0001",
+          "targetRef": "ServiceTask-TriggerFollowUps-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

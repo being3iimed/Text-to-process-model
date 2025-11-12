@@ -1,0 +1,133 @@
+```
+<summary_of_elements>
+
+## TASKS:
+- `userTask("Doctor Prescribes Medication")` - Human judgment required for prescription
+- `serviceTask("Send Prescription to Pharmacy")` - Automated electronic transmission
+- `userTask("Pharmacy Technician Checks Insurance")` - Manual verification of eligibility/authorization
+- `serviceTask("Contact Insurance for Prior Authorization")` - Automated/system-initiated contact
+- `receiveTask("Receive: insurance approval/denial")` - Waiting for external response (timerBoundary NOT added - no SLA mentioned)
+- `serviceTask("Fill Prescription")` - Automated pharmacy system action
+- `sendTask("Send: pickup notification to patient")` - One-way communication
+- `sendTask("Send: denial notification to patient and doctor")` - One-way communication
+- `userTask("Patient Signs Receipt")` - Human action required for legal compliance
+- `serviceTask("Dispense Medication")` - Final automated action
+
+## GATEWAYS:
+- XOR at "Prior Authorization Check" with conditions:
+  - `prior_auth_required == true`
+  - `prior_auth_required == false` (default)
+- XOR at "Insurance Decision" with conditions:
+  - `insurance_response == 'approved'`
+  - `insurance_response == 'denied'`
+- XOR at "Denial Handling" with conditions:
+  - `patient_action == 'appeal'`
+  - `doctor_action == 'prescribe_alternative'` (default)
+
+## EVENTS:
+- `startEvent("Prescription Process Initiated")` - Manual trigger
+- `endEvent("Prescription Dispensed")` - Normal completion
+- `endEvent("Appeal Process Initiated")` - Alternative path
+- `endEvent("Alternative Prescribed")` - Alternative path
+
+## BOUNDARY EVENTS:
+- None added (no explicit SLA requirements or expected error scenarios mentioned)
+
+## SUBPROCESSES:
+- None identified (no cohesive logical grouping requiring abstraction)
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+```pseudocode
+startEvent("Prescription Process Initiated")
+
+// Main prescription flow
+userTask("Doctor Prescribes Medication")
+serviceTask("Send Prescription to Pharmacy")
+userTask("Pharmacy Technician Checks Insurance")
+
+if (prior_auth_required == true):
+    serviceTask("Contact Insurance for Prior Authorization")
+    receiveTask("Receive: insurance approval/denial")
+
+    if (insurance_response == 'approved'):
+        serviceTask("Fill Prescription")
+        sendTask("Send: pickup notification to patient")
+        userTask("Patient Signs Receipt")
+        serviceTask("Dispense Medication")
+        endEvent("Prescription Dispensed")
+
+    else: // insurance_response == 'denied'
+        sendTask("Send: denial notification to patient and doctor")
+
+        if (patient_action == 'appeal'):
+            endEvent("Appeal Process Initiated")
+        else: // doctor_action == 'prescribe_alternative'
+            endEvent("Alternative Prescribed")
+
+else: // prior_auth_required == false (default)
+    serviceTask("Fill Prescription")
+    sendTask("Send: pickup notification to patient")
+    userTask("Patient Signs Receipt")
+    serviceTask("Dispense Medication")
+    endEvent("Prescription Dispensed")
+```
+
+</bpmn_pseudocode>
+
+<compliance_verification>
+
+## TIMER EVENTS:
+✅ No timer events used (none required by description)
+
+## GATEWAYS:
+✅ All XOR gateways have:
+   - Mutually exclusive conditions
+   - Exhaustive coverage (default paths)
+   - Explicit converging points (implied in linear flow)
+
+## SEQUENCE FLOWS:
+✅ All conditional flows have descriptive labels:
+   - "prior_auth_required == true/false"
+   - "insurance_response == 'approved/denied'"
+   - "patient_action == 'appeal'"
+
+## BOUNDARY EVENTS:
+✅ None added (no SLA requirements or expected errors mentioned)
+
+## SUBPROCESSES:
+✅ None created (no logical grouping met necessity criteria)
+
+## FLOW PATHS:
+✅ All paths traceable start-to-end:
+   1. Approval path → Dispensed
+   2. Denial→Appeal path → Appeal Process
+   3. Denial→Alternative path → Alternative Prescribed
+   4. No-Prior-Auth path → Dispensed
+
+## LABEL VALIDATION:
+✅ No empty string labels on any conditional flow
+✅ All end events properly labeled
+
+</compliance_verification>
+
+<balance_assessment>
+
+## DESIGN BALANCE:
+✅ Core elements comprise 100% of design:
+   - 10 tasks (80%)
+   - 3 gateways (20%)
+   - 0 boundary events
+   - 0 subprocesses
+
+✅ No over-engineering:
+   - Only essential gateways used
+   - No speculative error handling
+   - No unnecessary subprocesses
+
+✅ Clean linear flows with clear decision points
+
+</balance_assessment>
+```

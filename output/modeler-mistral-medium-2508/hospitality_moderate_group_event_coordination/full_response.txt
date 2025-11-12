@@ -1,0 +1,294 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "ConferencePlanningDefinitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "ConferencePlanningProcess",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-ConferenceRequestReceived-id-0001",
+          "name": "Conference Request Received"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ConfirmDatesAndRoomAvailability-id-0001",
+          "name": "Confirm Dates and Room Availability"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CalculateRoomSetupRequirements-id-0001",
+          "name": "Calculate Room Setup Requirements"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendEventDetailstoCatering-id-0001",
+          "name": "Send: Event Details to Catering"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ClientApprovesMenuandHeadcount-id-0001",
+          "name": "Client Approves Menu and Headcount"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ClientApprovalDecision-id-0001",
+          "name": "Client Approval Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendMenuRevisionRequest-id-0001",
+          "name": "Send: Menu Revision Request"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-CateringPreparation-id-0001",
+          "name": "Catering Preparation",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-CateringPrepStart-id-0001",
+              "name": "Catering Prep Start"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-CateringPreparesFood-id-0001",
+              "name": "Catering Prepares Food"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-CateringStoresFood-id-0001",
+              "name": "Catering Stores Food"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-CateringPreparesServingSupplies-id-0001",
+              "name": "Catering Prepares Serving Supplies"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-CateringPrepComplete-id-0001",
+              "name": "Catering Prep Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CateringPrepStartToPrepareFood-id-0001",
+              "sourceRef": "StartEvent-CateringPrepStart-id-0001",
+              "targetRef": "ServiceTask-CateringPreparesFood-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CateringPrepareFoodToStoreFood-id-0002",
+              "sourceRef": "ServiceTask-CateringPreparesFood-id-0001",
+              "targetRef": "ServiceTask-CateringStoresFood-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CateringStoreFoodToPrepareSupplies-id-0003",
+              "sourceRef": "ServiceTask-CateringStoresFood-id-0001",
+              "targetRef": "ServiceTask-CateringPreparesServingSupplies-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CateringPrepareSuppliesToPrepComplete-id-0004",
+              "sourceRef": "ServiceTask-CateringPreparesServingSupplies-id-0001",
+              "targetRef": "EndEvent-CateringPrepComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-DayOfExecutionSplit-id-0001",
+          "name": "Day-of Execution Split",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-HousekeepingSetsUpRoom-id-0001",
+          "name": "Housekeeping Sets Up Room"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ITTestsAVEquipment-id-0001",
+          "name": "IT Tests AV Equipment"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CateringDeliversFood-id-0001",
+          "name": "Catering Delivers Food"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CateringSetsUpBuffet-id-0001",
+          "name": "Catering Sets Up Buffet"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-DayOfExecutionJoin-id-0002",
+          "name": "Day-of Execution Join",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-HousekeepingBreaksDownSetup-id-0001",
+          "name": "Housekeeping Breaks Down Setup"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-RoomRestoredtoStandard-id-0001",
+          "name": "Room Restored to Standard"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ClientApprovalDecisionJoin-id-0002",
+          "name": "Client Approval Decision Join",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToConfirmDates-id-0001",
+          "sourceRef": "StartEvent-ConferenceRequestReceived-id-0001",
+          "targetRef": "UserTask-ConfirmDatesAndRoomAvailability-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmDatesToCalculateRequirements-id-0002",
+          "sourceRef": "UserTask-ConfirmDatesAndRoomAvailability-id-0001",
+          "targetRef": "ServiceTask-CalculateRoomSetupRequirements-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CalculateRequirementsToSendDetails-id-0003",
+          "sourceRef": "ServiceTask-CalculateRoomSetupRequirements-id-0001",
+          "targetRef": "SendTask-SendEventDetailstoCatering-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendDetailsToClientApproval-id-0004",
+          "sourceRef": "SendTask-SendEventDetailstoCatering-id-0001",
+          "targetRef": "UserTask-ClientApprovesMenuandHeadcount-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ClientApprovalToDecisionGateway-id-0005",
+          "sourceRef": "UserTask-ClientApprovesMenuandHeadcount-id-0001",
+          "targetRef": "ExclusiveGateway-ClientApprovalDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ApprovalDecisionToCateringPrep-id-0006",
+          "name": "approval == \"approved\"",
+          "sourceRef": "ExclusiveGateway-ClientApprovalDecision-id-0001",
+          "targetRef": "SubProcess-CateringPreparation-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ApprovalDecisionToRevisionRequest-id-0007",
+          "name": "approval == \"revision needed\"",
+          "sourceRef": "ExclusiveGateway-ClientApprovalDecision-id-0001",
+          "targetRef": "SendTask-SendMenuRevisionRequest-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RevisionRequestToClientApproval-id-0008",
+          "sourceRef": "SendTask-SendMenuRevisionRequest-id-0001",
+          "targetRef": "UserTask-ClientApprovesMenuandHeadcount-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CateringPrepToDayOfExecution-id-0009",
+          "sourceRef": "SubProcess-CateringPreparation-id-0001",
+          "targetRef": "ParallelGateway-DayOfExecutionSplit-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DayOfExecutionToHousekeepingSetup-id-0010",
+          "sourceRef": "ParallelGateway-DayOfExecutionSplit-id-0001",
+          "targetRef": "ServiceTask-HousekeepingSetsUpRoom-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DayOfExecutionToITTestAV-id-0011",
+          "sourceRef": "ParallelGateway-DayOfExecutionSplit-id-0001",
+          "targetRef": "ServiceTask-ITTestsAVEquipment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DayOfExecutionToCateringDeliver-id-0012",
+          "sourceRef": "ParallelGateway-DayOfExecutionSplit-id-0001",
+          "targetRef": "ServiceTask-CateringDeliversFood-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DayOfExecutionToCateringSetup-id-0013",
+          "sourceRef": "ParallelGateway-DayOfExecutionSplit-id-0001",
+          "targetRef": "ServiceTask-CateringSetsUpBuffet-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HousekeepingSetupToExecutionJoin-id-0014",
+          "sourceRef": "ServiceTask-HousekeepingSetsUpRoom-id-0001",
+          "targetRef": "ParallelGateway-DayOfExecutionJoin-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ITTestAVToExecutionJoin-id-0015",
+          "sourceRef": "ServiceTask-ITTestsAVEquipment-id-0001",
+          "targetRef": "ParallelGateway-DayOfExecutionJoin-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CateringDeliverToExecutionJoin-id-0016",
+          "sourceRef": "ServiceTask-CateringDeliversFood-id-0001",
+          "targetRef": "ParallelGateway-DayOfExecutionJoin-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CateringSetupToExecutionJoin-id-0017",
+          "sourceRef": "ServiceTask-CateringSetsUpBuffet-id-0001",
+          "targetRef": "ParallelGateway-DayOfExecutionJoin-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ExecutionJoinToHousekeepingBreakdown-id-0018",
+          "sourceRef": "ParallelGateway-DayOfExecutionJoin-id-0002",
+          "targetRef": "ServiceTask-HousekeepingBreaksDownSetup-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HousekeepingBreakdownToEnd-id-0019",
+          "sourceRef": "ServiceTask-HousekeepingBreaksDownSetup-id-0001",
+          "targetRef": "EndEvent-RoomRestoredtoStandard-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ClientApprovalToDecisionJoin-id-0020",
+          "sourceRef": "UserTask-ClientApprovesMenuandHeadcount-id-0001",
+          "targetRef": "ExclusiveGateway-ClientApprovalDecisionJoin-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CateringPrepToDecisionJoin-id-0021",
+          "sourceRef": "SubProcess-CateringPreparation-id-0001",
+          "targetRef": "ExclusiveGateway-ClientApprovalDecisionJoin-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DecisionJoinToDayOfExecution-id-0022",
+          "sourceRef": "ExclusiveGateway-ClientApprovalDecisionJoin-id-0002",
+          "targetRef": "ParallelGateway-DayOfExecutionSplit-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

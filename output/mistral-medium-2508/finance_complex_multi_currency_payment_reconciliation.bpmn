@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="InternationalPaymentReconciliation" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process-InternationalPaymentReconciliation-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-DailyTrigger-id-0001" name="Daily Trigger">
+      <bpmn:outgoing>SequenceFlow-StartToFetchRates-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-FetchExchangeRates-id-0001" name="Fetch daily exchange rates">
+      <bpmn:incoming>SequenceFlow-StartToFetchRates-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FetchRatesToConvert-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-APIFailure-FetchExchangeRates-id-0001" name="API Failure" attachedToRef="ServiceTask-FetchExchangeRates-id-0001">
+      <bpmn:outgoing>SequenceFlow-APIFailureToManualEntry-id-0001</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="BoundaryEvent-APIFailure-FetchExchangeRates-id-0001_EventDef" errorRef="API_CONNECTION_ERROR" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="UserTask-EnterRatesManually-id-0001" name="Enter exchange rates manually">
+      <bpmn:incoming>SequenceFlow-APIFailureToManualEntry-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ManualEntryToConvert-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ConvertPayments-id-0002" name="Convert all payments to base currency">
+      <bpmn:incoming>SequenceFlow-FetchRatesToConvert-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ManualEntryToConvert-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConvertToReconcile-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:subProcess id="SubProcess-ReconcilePayment-id-0001" name="Reconcile Payment">
+      <bpmn:incoming>SequenceFlow-ConvertToReconcile-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReconcileToBatchUpdate-id-0001</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-ReconciliationStart-id-0001" name="Reconciliation Start">
+        <bpmn:outgoing>SequenceFlow-ReconcileStartToMatch-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-MatchPayment-id-0001" name="Match payment to invoice by invoice number or customer reference">
+        <bpmn:incoming>SequenceFlow-ReconcileStartToMatch-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-MatchToGateway-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-PaymentMatch-id-0001" name="Payment vs. Invoice Amount" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-MatchToGateway-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ExactMatch-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-Underpayment-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-Overpayment-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-Unmatched-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-MarkPaid-id-0001" name="Mark invoice as paid">
+        <bpmn:incoming>SequenceFlow-ExactMatch-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-MarkPaidToEnd-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-ReconciliationComplete-id-0001" name="Reconciliation Complete">
+        <bpmn:incoming>SequenceFlow-MergeToEnd-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:serviceTask id="ServiceTask-MarkPartial-id-0001" name="Mark invoice as partially paid">
+        <bpmn:incoming>SequenceFlow-Underpayment-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-MarkPartialToHold-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-HoldBalance-id-0001" name="Hold remaining balance">
+        <bpmn:incoming>SequenceFlow-MarkPartialToHold-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-HoldToMerge-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-RecordOverpayment-id-0001" name="Record overpayment as customer credit">
+        <bpmn:incoming>SequenceFlow-Overpayment-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RecordOverpaymentToMerge-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-NotifyAccounting-id-0001" name="Send: notification to accounting team">
+        <bpmn:incoming>SequenceFlow-Unmatched-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-NotifyToResearch-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:callActivity id="CallActivity-ResearchUnmatched-id-0001" name="Research Unmatched Payment">
+        <bpmn:incoming>SequenceFlow-NotifyToResearch-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ResearchToMerge-id-0001</bpmn:outgoing>
+      </bpmn:callActivity>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-PaymentMatchMerge-id-0001" name="Merge Reconciliation Paths" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-MarkPaidToEnd-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-HoldToMerge-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-RecordOverpaymentToMerge-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ResearchToMerge-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-MergeToEnd-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:sequenceFlow id="SequenceFlow-ReconcileStartToMatch-id-0001" sourceRef="StartEvent-ReconciliationStart-id-0001" targetRef="ServiceTask-MatchPayment-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-MatchToGateway-id-0001" sourceRef="ServiceTask-MatchPayment-id-0001" targetRef="ExclusiveGateway-PaymentMatch-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ExactMatch-id-0001" name="exact_match" sourceRef="ExclusiveGateway-PaymentMatch-id-0001" targetRef="ServiceTask-MarkPaid-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-MarkPaidToEnd-id-0001" sourceRef="ServiceTask-MarkPaid-id-0001" targetRef="ExclusiveGateway-PaymentMatchMerge-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-Underpayment-id-0001" name="payment &#60; invoice_amount" sourceRef="ExclusiveGateway-PaymentMatch-id-0001" targetRef="ServiceTask-MarkPartial-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-MarkPartialToHold-id-0001" sourceRef="ServiceTask-MarkPartial-id-0001" targetRef="ServiceTask-HoldBalance-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-HoldToMerge-id-0001" sourceRef="ServiceTask-HoldBalance-id-0001" targetRef="ExclusiveGateway-PaymentMatchMerge-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-Overpayment-id-0001" name="payment &#62; invoice_amount" sourceRef="ExclusiveGateway-PaymentMatch-id-0001" targetRef="ServiceTask-RecordOverpayment-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RecordOverpaymentToMerge-id-0001" sourceRef="ServiceTask-RecordOverpayment-id-0001" targetRef="ExclusiveGateway-PaymentMatchMerge-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-Unmatched-id-0001" sourceRef="ExclusiveGateway-PaymentMatch-id-0001" targetRef="SendTask-NotifyAccounting-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-NotifyToResearch-id-0001" sourceRef="SendTask-NotifyAccounting-id-0001" targetRef="CallActivity-ResearchUnmatched-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ResearchToMerge-id-0001" sourceRef="CallActivity-ResearchUnmatched-id-0001" targetRef="ExclusiveGateway-PaymentMatchMerge-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-MergeToEnd-id-0001" sourceRef="ExclusiveGateway-PaymentMatchMerge-id-0001" targetRef="EndEvent-ReconciliationComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-ResearchUnmatchedPayment-id-0001" name="Research Unmatched Payment">
+      <bpmn:startEvent id="StartEvent-ResearchStart-id-0001" name="Research Start">
+        <bpmn:outgoing>SequenceFlow-ResearchStartToGateway-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-UnmatchedResearch-id-0001" name="Unmatched Payment Research" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-ResearchStartToGateway-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-OldInvoice-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-HasReference-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-Duplicate-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-OtherCause-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:userTask id="UserTask-LinkOldInvoice-id-0001" name="Link to old invoice">
+        <bpmn:incoming>SequenceFlow-OldInvoice-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-LinkToMerge-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-MatchReference-id-0001" name="Match using reference">
+        <bpmn:incoming>SequenceFlow-HasReference-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-MatchReferenceToMerge-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-FlagDuplicate-id-0001" name="Flag as duplicate">
+        <bpmn:incoming>SequenceFlow-Duplicate-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-FlagDuplicateToMerge-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-InvestigateOther-id-0001" name="Investigate other causes">
+        <bpmn:incoming>SequenceFlow-OtherCause-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-InvestigateToMerge-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:endEvent id="EndEvent-ResearchComplete-id-0001" name="Research Complete">
+        <bpmn:incoming>SequenceFlow-ResearchMergeToEnd-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-ResearchMerge-id-0001" name="Merge Research Paths" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-LinkToMerge-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-MatchReferenceToMerge-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-FlagDuplicateToMerge-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-InvestigateToMerge-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ResearchMergeToEnd-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:sequenceFlow id="SequenceFlow-ResearchStartToGateway-id-0001" sourceRef="StartEvent-ResearchStart-id-0001" targetRef="ExclusiveGateway-UnmatchedResearch-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-OldInvoice-id-0001" name="payment_matches_old_invoice" sourceRef="ExclusiveGateway-UnmatchedResearch-id-0001" targetRef="UserTask-LinkOldInvoice-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-LinkToMerge-id-0001" sourceRef="UserTask-LinkOldInvoice-id-0001" targetRef="ExclusiveGateway-ResearchMerge-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-HasReference-id-0001" name="payment_has_reference_number" sourceRef="ExclusiveGateway-UnmatchedResearch-id-0001" targetRef="UserTask-MatchReference-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-MatchReferenceToMerge-id-0001" sourceRef="UserTask-MatchReference-id-0001" targetRef="ExclusiveGateway-ResearchMerge-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-Duplicate-id-0001" name="payment_is_duplicate" sourceRef="ExclusiveGateway-UnmatchedResearch-id-0001" targetRef="UserTask-FlagDuplicate-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-FlagDuplicateToMerge-id-0001" sourceRef="UserTask-FlagDuplicate-id-0001" targetRef="ExclusiveGateway-ResearchMerge-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-OtherCause-id-0001" sourceRef="ExclusiveGateway-UnmatchedResearch-id-0001" targetRef="UserTask-InvestigateOther-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-InvestigateToMerge-id-0001" sourceRef="UserTask-InvestigateOther-id-0001" targetRef="ExclusiveGateway-ResearchMerge-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ResearchMergeToEnd-id-0001" sourceRef="ExclusiveGateway-ResearchMerge-id-0001" targetRef="EndEvent-ResearchComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-BatchUpdate-id-0001" name="Batch Update Trigger">
+      <bpmn:incoming>SequenceFlow-ReconcileToBatchUpdate-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BatchUpdateToAgingReport-id-0001</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="ServiceTask-UpdateAgingReport-id-0001" name="Update accounts receivable aging report">
+      <bpmn:incoming>SequenceFlow-BatchUpdateToAgingReport-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AgingReportToFollowUps-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-DBError-UpdateAgingReport-id-0001" name="DB Error" attachedToRef="ServiceTask-UpdateAgingReport-id-0001">
+      <bpmn:outgoing>SequenceFlow-DBErrorToManualCorrection-id-0001</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="BoundaryEvent-DBError-UpdateAgingReport-id-0001_EventDef" errorRef="DB_UPDATE_ERROR" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="UserTask-CorrectAgingReport-id-0001" name="Correct aging report manually">
+      <bpmn:incoming>SequenceFlow-DBErrorToManualCorrection-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ManualCorrectionToFollowUps-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-TriggerFollowUps-id-0001" name="Trigger automatic follow-ups for newly overdue invoices">
+      <bpmn:incoming>SequenceFlow-AgingReportToFollowUps-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ManualCorrectionToFollowUps-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FollowUpsToEnd-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-PaymentsProcessed-id-0001" name="Payments processed">
+      <bpmn:incoming>SequenceFlow-FollowUpsToEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToFetchRates-id-0001" sourceRef="StartEvent-DailyTrigger-id-0001" targetRef="ServiceTask-FetchExchangeRates-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FetchRatesToConvert-id-0001" sourceRef="ServiceTask-FetchExchangeRates-id-0001" targetRef="ServiceTask-ConvertPayments-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConvertToReconcile-id-0001" sourceRef="ServiceTask-ConvertPayments-id-0002" targetRef="SubProcess-ReconcilePayment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReconcileToBatchUpdate-id-0001" sourceRef="SubProcess-ReconcilePayment-id-0001" targetRef="IntermediateCatchEvent-BatchUpdate-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BatchUpdateToAgingReport-id-0001" sourceRef="IntermediateCatchEvent-BatchUpdate-id-0001" targetRef="ServiceTask-UpdateAgingReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AgingReportToFollowUps-id-0001" sourceRef="ServiceTask-UpdateAgingReport-id-0001" targetRef="ServiceTask-TriggerFollowUps-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FollowUpsToEnd-id-0001" sourceRef="ServiceTask-TriggerFollowUps-id-0001" targetRef="EndEvent-PaymentsProcessed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-APIFailureToManualEntry-id-0001" sourceRef="BoundaryEvent-APIFailure-FetchExchangeRates-id-0001" targetRef="UserTask-EnterRatesManually-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ManualEntryToConvert-id-0001" sourceRef="UserTask-EnterRatesManually-id-0001" targetRef="ServiceTask-ConvertPayments-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-DBErrorToManualCorrection-id-0001" sourceRef="BoundaryEvent-DBError-UpdateAgingReport-id-0001" targetRef="UserTask-CorrectAgingReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ManualCorrectionToFollowUps-id-0001" sourceRef="UserTask-CorrectAgingReport-id-0001" targetRef="ServiceTask-TriggerFollowUps-id-0001" />
+  </bpmn:process>
+  <bpmn:error id="API_CONNECTION_ERROR" name="API_CONNECTION_ERROR" />
+  <bpmn:error id="DB_UPDATE_ERROR" name="DB_UPDATE_ERROR" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process-InternationalPaymentReconciliation-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process-InternationalPaymentReconciliation-id-0001" bpmnElement="Process-InternationalPaymentReconciliation-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-DailyTrigger-id-0001_di" bpmnElement="StartEvent-DailyTrigger-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-FetchExchangeRates-id-0001_di" bpmnElement="ServiceTask-FetchExchangeRates-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-APIFailure-FetchExchangeRates-id-0001_di" bpmnElement="BoundaryEvent-APIFailure-FetchExchangeRates-id-0001">
+        <dc:Bounds x="207" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ConvertPayments-id-0002_di" bpmnElement="ServiceTask-ConvertPayments-id-0002">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-ReconcilePayment-id-0001_di" bpmnElement="SubProcess-ReconcilePayment-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-BatchUpdate-id-0001_di" bpmnElement="IntermediateCatchEvent-BatchUpdate-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateAgingReport-id-0001_di" bpmnElement="ServiceTask-UpdateAgingReport-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-DBError-UpdateAgingReport-id-0001_di" bpmnElement="BoundaryEvent-DBError-UpdateAgingReport-id-0001">
+        <dc:Bounds x="957" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-TriggerFollowUps-id-0001_di" bpmnElement="ServiceTask-TriggerFollowUps-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-PaymentsProcessed-id-0001_di" bpmnElement="EndEvent-PaymentsProcessed-id-0001">
+        <dc:Bounds x="1407" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-ResearchUnmatchedPayment-id-0001_di" bpmnElement="SubProcess-ResearchUnmatchedPayment-id-0001">
+        <dc:Bounds x="25" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterRatesManually-id-0001_di" bpmnElement="UserTask-EnterRatesManually-id-0001">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CorrectAgingReport-id-0001_di" bpmnElement="UserTask-CorrectAgingReport-id-0001">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToFetchRates-id-0001_di" bpmnElement="SequenceFlow-StartToFetchRates-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FetchRatesToConvert-id-0001_di" bpmnElement="SequenceFlow-FetchRatesToConvert-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-APIFailureToManualEntry-id-0001_di" bpmnElement="SequenceFlow-APIFailureToManualEntry-id-0001">
+        <di:waypoint x="225" y="128" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConvertToReconcile-id-0001_di" bpmnElement="SequenceFlow-ConvertToReconcile-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReconcileToBatchUpdate-id-0001_di" bpmnElement="SequenceFlow-ReconcileToBatchUpdate-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BatchUpdateToAgingReport-id-0001_di" bpmnElement="SequenceFlow-BatchUpdateToAgingReport-id-0001">
+        <di:waypoint x="843" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AgingReportToFollowUps-id-0001_di" bpmnElement="SequenceFlow-AgingReportToFollowUps-id-0001">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DBErrorToManualCorrection-id-0001_di" bpmnElement="SequenceFlow-DBErrorToManualCorrection-id-0001">
+        <di:waypoint x="975" y="128" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FollowUpsToEnd-id-0001_di" bpmnElement="SequenceFlow-FollowUpsToEnd-id-0001">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1407" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ManualEntryToConvert-id-0001_di" bpmnElement="SequenceFlow-ManualEntryToConvert-id-0001">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ManualCorrectionToFollowUps-id-0001_di" bpmnElement="SequenceFlow-ManualCorrectionToFollowUps-id-0001">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1275" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-ReconcilePayment-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-ReconcilePayment-id-0001" bpmnElement="SubProcess-ReconcilePayment-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ReconciliationStart-id-0001_di" bpmnElement="StartEvent-ReconciliationStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MatchPayment-id-0001_di" bpmnElement="ServiceTask-MatchPayment-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PaymentMatch-id-0001_di" bpmnElement="ExclusiveGateway-PaymentMatch-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MarkPaid-id-0001_di" bpmnElement="ServiceTask-MarkPaid-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PaymentMatchMerge-id-0001_di" bpmnElement="ExclusiveGateway-PaymentMatchMerge-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ReconciliationComplete-id-0001_di" bpmnElement="EndEvent-ReconciliationComplete-id-0001">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MarkPartial-id-0001_di" bpmnElement="ServiceTask-MarkPartial-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-HoldBalance-id-0001_di" bpmnElement="ServiceTask-HoldBalance-id-0001">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RecordOverpayment-id-0001_di" bpmnElement="ServiceTask-RecordOverpayment-id-0001">
+        <dc:Bounds x="475" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-NotifyAccounting-id-0001_di" bpmnElement="SendTask-NotifyAccounting-id-0001">
+        <dc:Bounds x="475" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CallActivity-ResearchUnmatched-id-0001_di" bpmnElement="CallActivity-ResearchUnmatched-id-0001">
+        <dc:Bounds x="625" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReconcileStartToMatch-id-0001_di" bpmnElement="SequenceFlow-ReconcileStartToMatch-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MatchToGateway-id-0001_di" bpmnElement="SequenceFlow-MatchToGateway-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExactMatch-id-0001_di" bpmnElement="SequenceFlow-ExactMatch-id-0001">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Underpayment-id-0001_di" bpmnElement="SequenceFlow-Underpayment-id-0001">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Overpayment-id-0001_di" bpmnElement="SequenceFlow-Overpayment-id-0001">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="350" />
+        <di:waypoint x="475" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Unmatched-id-0001_di" bpmnElement="SequenceFlow-Unmatched-id-0001">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="490" />
+        <di:waypoint x="475" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MarkPaidToEnd-id-0001_di" bpmnElement="SequenceFlow-MarkPaidToEnd-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MergeToEnd-id-0001_di" bpmnElement="SequenceFlow-MergeToEnd-id-0001">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MarkPartialToHold-id-0001_di" bpmnElement="SequenceFlow-MarkPartialToHold-id-0001">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HoldToMerge-id-0001_di" bpmnElement="SequenceFlow-HoldToMerge-id-0001">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="825" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RecordOverpaymentToMerge-id-0001_di" bpmnElement="SequenceFlow-RecordOverpaymentToMerge-id-0001">
+        <di:waypoint x="575" y="350" />
+        <di:waypoint x="825" y="350" />
+        <di:waypoint x="825" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotifyToResearch-id-0001_di" bpmnElement="SequenceFlow-NotifyToResearch-id-0001">
+        <di:waypoint x="575" y="490" />
+        <di:waypoint x="625" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ResearchToMerge-id-0001_di" bpmnElement="SequenceFlow-ResearchToMerge-id-0001">
+        <di:waypoint x="725" y="490" />
+        <di:waypoint x="825" y="490" />
+        <di:waypoint x="825" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-ResearchUnmatchedPayment-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-ResearchUnmatchedPayment-id-0001" bpmnElement="SubProcess-ResearchUnmatchedPayment-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ResearchStart-id-0001_di" bpmnElement="StartEvent-ResearchStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-UnmatchedResearch-id-0001_di" bpmnElement="ExclusiveGateway-UnmatchedResearch-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-LinkOldInvoice-id-0001_di" bpmnElement="UserTask-LinkOldInvoice-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ResearchMerge-id-0001_di" bpmnElement="ExclusiveGateway-ResearchMerge-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ResearchComplete-id-0001_di" bpmnElement="EndEvent-ResearchComplete-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-MatchReference-id-0001_di" bpmnElement="UserTask-MatchReference-id-0001">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-FlagDuplicate-id-0001_di" bpmnElement="UserTask-FlagDuplicate-id-0001">
+        <dc:Bounds x="325" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-InvestigateOther-id-0001_di" bpmnElement="UserTask-InvestigateOther-id-0001">
+        <dc:Bounds x="325" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-ResearchStartToGateway-id-0001_di" bpmnElement="SequenceFlow-ResearchStartToGateway-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OldInvoice-id-0001_di" bpmnElement="SequenceFlow-OldInvoice-id-0001">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HasReference-id-0001_di" bpmnElement="SequenceFlow-HasReference-id-0001">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Duplicate-id-0001_di" bpmnElement="SequenceFlow-Duplicate-id-0001">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="350" />
+        <di:waypoint x="325" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OtherCause-id-0001_di" bpmnElement="SequenceFlow-OtherCause-id-0001">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="490" />
+        <di:waypoint x="325" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LinkToMerge-id-0001_di" bpmnElement="SequenceFlow-LinkToMerge-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ResearchMergeToEnd-id-0001_di" bpmnElement="SequenceFlow-ResearchMergeToEnd-id-0001">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MatchReferenceToMerge-id-0001_di" bpmnElement="SequenceFlow-MatchReferenceToMerge-id-0001">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FlagDuplicateToMerge-id-0001_di" bpmnElement="SequenceFlow-FlagDuplicateToMerge-id-0001">
+        <di:waypoint x="425" y="350" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvestigateToMerge-id-0001_di" bpmnElement="SequenceFlow-InvestigateToMerge-id-0001">
+        <di:waypoint x="425" y="490" />
+        <di:waypoint x="525" y="490" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

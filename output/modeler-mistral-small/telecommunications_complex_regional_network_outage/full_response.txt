@@ -1,0 +1,400 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "Definitions-1",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process-NetworkIncidentResolution-id-0001",
+      "name": "Network Incident Resolution",
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-NetworkMonitoringAlert-id-0001",
+          "name": "Network Monitoring Alert"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-AnalyzeAffectedTowers-id-0002",
+          "name": "Analyze: affected towers and services"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CalculateCustomerImpact-id-0003",
+          "name": "Calculate: customer impact"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-RerouteTraffic-id-0004",
+          "name": "Reroute: traffic to adjacent towers"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendIncidentAlert-id-0005",
+          "name": "Send: incident alert to on-call engineers and NOC team"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-DispatchFieldEngineers-id-0006",
+          "name": "Dispatch: field engineers to affected towers"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-RootCauseAnalysis-id-0007",
+          "name": "Root Cause Analysis",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-RootCauseAnalysisStart-id-0008",
+              "name": "Root Cause Analysis Start"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-AnalyzeRootCause-id-0009",
+              "name": "Analyze: root cause from logs"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-RootCause-id-0010",
+              "name": "Root Cause",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-RetrieveSpareParts-id-0011",
+              "name": "Retrieve: spare parts from inventory"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-PrioritizeTraffic-id-0012",
+              "name": "Prioritize: traffic to critical services"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-RollbackSoftware-id-0013",
+              "name": "Rollback: software to previous version"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-RootCauseAnalysisComplete-id-0014",
+              "name": "Root Cause Analysis Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StartToAnalyzeRootCause-id-0015",
+              "sourceRef": "StartEvent-RootCauseAnalysisStart-id-0008",
+              "targetRef": "ServiceTask-AnalyzeRootCause-id-0009"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-AnalyzeRootCauseToGateway-id-0016",
+              "sourceRef": "ServiceTask-AnalyzeRootCause-id-0009",
+              "targetRef": "ExclusiveGateway-RootCause-id-0010"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToRetrieveSpareParts-id-0017",
+              "sourceRef": "ExclusiveGateway-RootCause-id-0010",
+              "targetRef": "ServiceTask-RetrieveSpareParts-id-0011",
+              "name": "hardware_failure_suspected",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToPrioritizeTraffic-id-0018",
+              "sourceRef": "ExclusiveGateway-RootCause-id-0010",
+              "targetRef": "ServiceTask-PrioritizeTraffic-id-0012",
+              "name": "capacity_overload_suspected",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToRollbackSoftware-id-0019",
+              "sourceRef": "ExclusiveGateway-RootCause-id-0010",
+              "targetRef": "ServiceTask-RollbackSoftware-id-0013",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RetrieveSparePartsToEnd-id-0020",
+              "sourceRef": "ServiceTask-RetrieveSpareParts-id-0011",
+              "targetRef": "EndEvent-RootCauseAnalysisComplete-id-0014"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PrioritizeTrafficToEnd-id-0021",
+              "sourceRef": "ServiceTask-PrioritizeTraffic-id-0012",
+              "targetRef": "EndEvent-RootCauseAnalysisComplete-id-0014"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RollbackSoftwareToEnd-id-0022",
+              "sourceRef": "ServiceTask-RollbackSoftware-id-0013",
+              "targetRef": "EndEvent-RootCauseAnalysisComplete-id-0014"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:IntermediateCatchEvent",
+          "id": "IntermediateCatchEvent-TimerBoundary-id-0023",
+          "name": "2 Hour Timeout",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT2H"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-FieldTeamActions-id-0024",
+          "name": "Field Team Actions",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-FieldTeamActionsStart-id-0025",
+              "name": "Field Team Actions Start"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ConnectDiagnosticEquipment-id-0026",
+              "name": "Connect: diagnostic equipment"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ConfirmSystemHypothesis-id-0027",
+              "name": "Confirm: system hypothesis"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-PerformFix-id-0028",
+              "name": "Perform: fix (replace hardware, rollback software, or activate backup circuit)"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-SendEscalation-id-0029",
+              "name": "Send: escalation to senior engineer"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-EscalateForInvestigation-id-0030",
+              "name": "Escalate: for further investigation"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-RerouteTrafficDuringMaintenance-id-0031",
+              "name": "Reroute: traffic during maintenance"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-SendNotifications-id-0032",
+              "name": "Send: notifications to affected customers"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-ValidateNetworkMetrics-id-0033",
+              "name": "Validate: network metrics returned to normal"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-MetricsNormal-id-0034",
+              "name": "Metrics Normal?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-FieldTeamActionsComplete-id-0035",
+              "name": "Field Team Actions Complete"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-FieldTeamActionsFailed-id-0036",
+              "name": "Field Team Actions Failed"
+            },
+            {
+              "$type": "bpmn:BoundaryEvent",
+              "id": "BoundaryEvent-TimerBoundaryOnConnect-id-0037",
+              "name": "4 Hour Timeout",
+              "attachedToRef": "UserTask-ConnectDiagnosticEquipment-id-0026",
+              "cancelActivity": true,
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:TimerEventDefinition",
+                  "timeDuration": "PT4H"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:BoundaryEvent",
+              "id": "BoundaryEvent-ErrorBoundaryOnPerformFix-id-0038",
+              "name": "Fix Failed",
+              "attachedToRef": "UserTask-PerformFix-id-0028",
+              "cancelActivity": true,
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:ErrorEventDefinition",
+                  "errorRef": "FIX_FAILED"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StartToConnectDiagnosticEquipment-id-0039",
+              "sourceRef": "StartEvent-FieldTeamActionsStart-id-0025",
+              "targetRef": "UserTask-ConnectDiagnosticEquipment-id-0026"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ConnectDiagnosticEquipmentToConfirmSystemHypothesis-id-0040",
+              "sourceRef": "UserTask-ConnectDiagnosticEquipment-id-0026",
+              "targetRef": "UserTask-ConfirmSystemHypothesis-id-0027"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ConfirmSystemHypothesisToPerformFix-id-0041",
+              "sourceRef": "UserTask-ConfirmSystemHypothesis-id-0027",
+              "targetRef": "UserTask-PerformFix-id-0028"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PerformFixToRerouteTrafficDuringMaintenance-id-0042",
+              "sourceRef": "UserTask-PerformFix-id-0028",
+              "targetRef": "ServiceTask-RerouteTrafficDuringMaintenance-id-0031"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RerouteTrafficDuringMaintenanceToSendNotifications-id-0043",
+              "sourceRef": "ServiceTask-RerouteTrafficDuringMaintenance-id-0031",
+              "targetRef": "SendTask-SendNotifications-id-0032"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendNotificationsToValidateNetworkMetrics-id-0044",
+              "sourceRef": "SendTask-SendNotifications-id-0032",
+              "targetRef": "ServiceTask-ValidateNetworkMetrics-id-0033"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ValidateNetworkMetricsToGateway-id-0045",
+              "sourceRef": "ServiceTask-ValidateNetworkMetrics-id-0033",
+              "targetRef": "ExclusiveGateway-MetricsNormal-id-0034"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToComplete-id-0046",
+              "sourceRef": "ExclusiveGateway-MetricsNormal-id-0034",
+              "targetRef": "EndEvent-FieldTeamActionsComplete-id-0035",
+              "name": "metrics_normal",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToFailed-id-0047",
+              "sourceRef": "ExclusiveGateway-MetricsNormal-id-0034",
+              "targetRef": "ServiceTask-EscalateForInvestigation-id-0030",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-EscalateForInvestigationToFailed-id-0048",
+              "sourceRef": "ServiceTask-EscalateForInvestigation-id-0030",
+              "targetRef": "EndEvent-FieldTeamActionsFailed-id-0036"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BoundaryEventToSendEscalation-id-0049",
+              "sourceRef": "BoundaryEvent-TimerBoundaryOnConnect-id-0037",
+              "targetRef": "SendTask-SendEscalation-id-0029"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendEscalationToRerouteTrafficDuringMaintenance-id-0050",
+              "sourceRef": "SendTask-SendEscalation-id-0029",
+              "targetRef": "ServiceTask-RerouteTrafficDuringMaintenance-id-0031"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BoundaryEventToEscalateForInvestigation-id-0051",
+              "sourceRef": "BoundaryEvent-ErrorBoundaryOnPerformFix-id-0038",
+              "targetRef": "ServiceTask-EscalateForInvestigation-id-0030"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-LogIncidentSummary-id-0052",
+          "name": "Log: incident summary for post-mortem analysis"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-IncidentResolved-id-0053",
+          "name": "Incident Resolved"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToAnalyzeAffectedTowers-id-0054",
+          "sourceRef": "StartEvent-NetworkMonitoringAlert-id-0001",
+          "targetRef": "ServiceTask-AnalyzeAffectedTowers-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AnalyzeAffectedTowersToCalculateCustomerImpact-id-0055",
+          "sourceRef": "ServiceTask-AnalyzeAffectedTowers-id-0002",
+          "targetRef": "ServiceTask-CalculateCustomerImpact-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CalculateCustomerImpactToRerouteTraffic-id-0056",
+          "sourceRef": "ServiceTask-CalculateCustomerImpact-id-0003",
+          "targetRef": "ServiceTask-RerouteTraffic-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RerouteTrafficToSendIncidentAlert-id-0057",
+          "sourceRef": "ServiceTask-RerouteTraffic-id-0004",
+          "targetRef": "SendTask-SendIncidentAlert-id-0005"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendIncidentAlertToDispatchFieldEngineers-id-0058",
+          "sourceRef": "SendTask-SendIncidentAlert-id-0005",
+          "targetRef": "ServiceTask-DispatchFieldEngineers-id-0006"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DispatchFieldEngineersToRootCauseAnalysis-id-0059",
+          "sourceRef": "ServiceTask-DispatchFieldEngineers-id-0006",
+          "targetRef": "SubProcess-RootCauseAnalysis-id-0007"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RootCauseAnalysisToTimerBoundary-id-0060",
+          "sourceRef": "SubProcess-RootCauseAnalysis-id-0007",
+          "targetRef": "IntermediateCatchEvent-TimerBoundary-id-0023"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TimerBoundaryToFieldTeamActions-id-0061",
+          "sourceRef": "IntermediateCatchEvent-TimerBoundary-id-0023",
+          "targetRef": "SubProcess-FieldTeamActions-id-0024"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FieldTeamActionsToLogIncidentSummary-id-0062",
+          "sourceRef": "SubProcess-FieldTeamActions-id-0024",
+          "targetRef": "ServiceTask-LogIncidentSummary-id-0052"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LogIncidentSummaryToIncidentResolved-id-0063",
+          "sourceRef": "ServiceTask-LogIncidentSummary-id-0052",
+          "targetRef": "EndEvent-IncidentResolved-id-0053"
+        }
+      ]
+    }
+  ]
+}
+```

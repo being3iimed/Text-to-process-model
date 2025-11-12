@@ -1,0 +1,162 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "course-enrollment-definitions",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "bpmn-js (https://demo.bpmn.io)",
+    "exporterVersion": "18.0.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "CourseEnrollmentProcess",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-CourseEnrollmentStarted-id-0001",
+            "name": "Course Enrollment Process Started"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-SearchForCourses-id-0001",
+            "name": "Search for Courses"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-CheckCourseDetails-id-0002",
+            "name": "Check Course Details"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ValidatePrerequisites-id-0001",
+            "name": "Validate Prerequisites"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-CheckSeatAvailability-id-0002",
+            "name": "Check Seat Availability"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-EligibilityCheck-id-0001",
+            "name": "Eligibility Check",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ConfirmEnrollment-id-0003",
+            "name": "Confirm Enrollment"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-GenerateCourseSchedule-id-0003",
+            "name": "Generate Course Schedule"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-UpdateCourseRoster-id-0004",
+            "name": "Update Course Roster"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-EnrollmentComplete-id-0001",
+            "name": "Enrollment Complete"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-EnrollmentFailed-id-0002",
+            "name": "Enrollment Failed"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToSearch-id-0001",
+            "sourceRef": "StartEvent-CourseEnrollmentStarted-id-0001",
+            "targetRef": "UserTask-SearchForCourses-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SearchToCheckDetails-id-0002",
+            "sourceRef": "UserTask-SearchForCourses-id-0001",
+            "targetRef": "UserTask-CheckCourseDetails-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CheckDetailsToValidate-id-0003",
+            "sourceRef": "UserTask-CheckCourseDetails-id-0002",
+            "targetRef": "ServiceTask-ValidatePrerequisites-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ValidateToCheckSeats-id-0004",
+            "sourceRef": "ServiceTask-ValidatePrerequisites-id-0001",
+            "targetRef": "ServiceTask-CheckSeatAvailability-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CheckSeatsToGateway-id-0005",
+            "sourceRef": "ServiceTask-CheckSeatAvailability-id-0002",
+            "targetRef": "ExclusiveGateway-EligibilityCheck-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToConfirm-id-0006",
+            "name": "prerequisites_met AND seats_available",
+            "sourceRef": "ExclusiveGateway-EligibilityCheck-id-0001",
+            "targetRef": "UserTask-ConfirmEnrollment-id-0003",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ConfirmToGenerate-id-0007",
+            "sourceRef": "UserTask-ConfirmEnrollment-id-0003",
+            "targetRef": "ServiceTask-GenerateCourseSchedule-id-0003"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GenerateToUpdate-id-0008",
+            "sourceRef": "ServiceTask-GenerateCourseSchedule-id-0003",
+            "targetRef": "ServiceTask-UpdateCourseRoster-id-0004"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-UpdateToComplete-id-0009",
+            "sourceRef": "ServiceTask-UpdateCourseRoster-id-0004",
+            "targetRef": "EndEvent-EnrollmentComplete-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToFail-id-0010",
+            "name": "prerequisites_not_met OR no_seats_available",
+            "sourceRef": "ExclusiveGateway-EligibilityCheck-id-0001",
+            "targetRef": "EndEvent-EnrollmentFailed-id-0002",
+            "isDefault": true
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-medium-2508",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11425,
+        "total_tokens": 12841,
+        "completion_tokens": 1416
+      },
+      "model_name": "mistral-medium-2508",
+      "model": "mistral-medium-2508",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11425,
+      "output_tokens": 1416,
+      "total_tokens": 12841
+    },
+    "id": "lc_run--02f0e923-ed35-49bc-955b-457a9559a8dc-0"
+  },
+  "status": "success"
+}

@@ -1,0 +1,626 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="ED-Admission-Process" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="EmergencyDepartmentAdmissionProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-PatientArrival-id-0001" name="Patient Arrival in ED">
+      <bpmn:outgoing>SequenceFlow-PatientArrivalToTriage-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-TriageNurseAssessesPatient-id-0001" name="Triage Nurse Assesses Patient">
+      <bpmn:incoming>SequenceFlow-PatientArrivalToTriage-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TriageToAcuityBedDecision-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer15Min-TriageNurseAssessesPatient-id-0001" name="15 Minute Triage SLA" attachedToRef="UserTask-TriageNurseAssessesPatient-id-0001">
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer15Min-TriageNurseAssessesPatient-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT15M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-TriageDelayAlert-id-0001" name="Send: Triage Delay Alert to Charge Nurse" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway-AcuityBedDecision-id-0001" name="Acuity and Bed Availability Check" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-TriageToAcuityBedDecision-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AcuityBedDecisionToMonitoredBed-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-AcuityBedDecisionToEDWait-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-AcuityBedDecisionToStandardEDBay-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-AdmitToMonitoredBed-id-0001" name="Admit to Monitored Bed">
+      <bpmn:incoming>SequenceFlow-AcuityBedDecisionToMonitoredBed-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MonitoredBedToPhysicianAssessment-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-PatientWaitsInEDArea-id-0001" name="Patient Waits in ED Area">
+      <bpmn:incoming>SequenceFlow-AcuityBedDecisionToEDWait-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EDWaitToPhysicianAssessment-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-AdmitToStandardEDBay-id-0001" name="Admit to Standard ED Bay">
+      <bpmn:incoming>SequenceFlow-AcuityBedDecisionToStandardEDBay-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StandardEDBayToPhysicianAssessment-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-PhysicianPerformsAssessment-id-0001" name="Physician Performs Assessment">
+      <bpmn:incoming>SequenceFlow-EDWaitToPhysicianAssessment-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-StandardEDBayToPhysicianAssessment-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-MonitoredBedToPhysicianAssessment-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PhysicianAssessmentToOrderTests-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer4Hour-PhysicianPerformsAssessment-id-0001" name="4 Hour Assessment SLA" attachedToRef="UserTask-PhysicianPerformsAssessment-id-0001">
+      <bpmn:outgoing>SequenceFlow-PhysicianAssessmentToEscalation-id-0001</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer4Hour-PhysicianPerformsAssessment-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT4H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-EscalationToDepartmentHead-id-0001" name="Send: Escalation to Department Head">
+      <bpmn:incoming>SequenceFlow-PhysicianAssessmentToEscalation-id-0001</bpmn:incoming>
+    </bpmn:sendTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Error-PhysicianPerformsAssessment-id-0001" name="Assessment Error" attachedToRef="UserTask-PhysicianPerformsAssessment-id-0001">
+      <bpmn:outgoing>SequenceFlow-PhysicianAssessmentToSeniorPhysician-id-0001</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="BoundaryEvent-Error-PhysicianPerformsAssessment-id-0001_EventDef" errorRef="ASSESSMENT_ERROR" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="UserTask-SeniorPhysicianTakesOverAssessment-id-0001" name="Senior Physician Takes Over Assessment">
+      <bpmn:incoming>SequenceFlow-PhysicianAssessmentToSeniorPhysician-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SeniorPhysicianToOrderTests-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-OrderDiagnosticTests-id-0001" name="Order Diagnostic Tests">
+      <bpmn:incoming>SequenceFlow-PhysicianAssessmentToOrderTests-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-SeniorPhysicianToOrderTests-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OrderTestsToAdmissionDecision-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-OrderTestsToMonitorOrders-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-AdmissionDecision-id-0001" name="Admission Required?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-OrderTestsToAdmissionDecision-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AdmissionDecisionToAdmissionWorkflow-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-AdmissionDecisionToDischarge-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:subProcess id="SubProcess-AdmissionWorkflow-id-0001" name="Admission Workflow">
+      <bpmn:incoming>SequenceFlow-AdmissionDecisionToAdmissionWorkflow-id-0001</bpmn:incoming>
+      <bpmn:startEvent id="StartEvent-AdmissionInitiated-id-0001" name="Admission Initiated">
+        <bpmn:outgoing>SequenceFlow-AdmissionStartToBedCheck-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-CheckBedAvailability-id-0001" name="Check Bed Availability">
+        <bpmn:incoming>SequenceFlow-AdmissionStartToBedCheck-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-BedCheckToBedTypeDecision-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-Error-CheckBedAvailability-id-0001" name="Bed Availability System Error" attachedToRef="ServiceTask-CheckBedAvailability-id-0001">
+        <bpmn:outgoing>SequenceFlow-BedCheckErrorToManualAssignment-id-0001</bpmn:outgoing>
+        <bpmn:errorEventDefinition id="BoundaryEvent-Error-CheckBedAvailability-id-0001_EventDef" errorRef="BED_SYSTEM_ERROR" />
+      </bpmn:boundaryEvent>
+      <bpmn:userTask id="UserTask-ManualBedAssignmentByAdmissions-id-0001" name="Manual Bed Assignment by Admissions">
+        <bpmn:incoming>SequenceFlow-BedCheckErrorToManualAssignment-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ManualAssignmentToBedTypeDecision-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-BedTypeDecision-id-0001" name="Bed Type Decision" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-BedCheckToBedTypeDecision-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ManualAssignmentToBedTypeDecision-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-BedTypeDecisionToICUBed-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-BedTypeDecisionToGeneralBed-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-BedTypeDecisionToWaitingQueue-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-AssignICUBed-id-0001" name="Assign ICU Bed">
+        <bpmn:incoming>SequenceFlow-BedTypeDecisionToICUBed-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ICUBedToTransfer-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-AssignGeneralWardBed-id-0001" name="Assign General Ward Bed">
+        <bpmn:incoming>SequenceFlow-BedTypeDecisionToGeneralBed-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GeneralBedToTransfer-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-PlaceInWaitingQueue-id-0001" name="Place in Waiting Queue">
+        <bpmn:incoming>SequenceFlow-BedTypeDecisionToWaitingQueue-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-WaitingQueueToNotification-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-NotificationToNursingManager-id-0001" name="Send: Notification to Nursing Manager">
+        <bpmn:incoming>SequenceFlow-WaitingQueueToNotification-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-NotificationToWaitingEnd-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:endEvent id="EndEvent-WaitingQueuePlacement-id-0001" name="Waiting Queue Placement">
+        <bpmn:incoming>SequenceFlow-NotificationToWaitingEnd-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:serviceTask id="ServiceTask-TransferPatientToAssignedBed-id-0001" name="Transfer Patient to Assigned Bed">
+        <bpmn:incoming>SequenceFlow-ICUBedToTransfer-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-GeneralBedToTransfer-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-TransferToProtocols-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-InitiateAdmissionProtocols-id-0001" name="Initiate Admission Protocols">
+        <bpmn:incoming>SequenceFlow-TransferToProtocols-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ProtocolsToMedRec-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:subProcess id="SubProcess-MedicationReconciliation-id-0001" name="Medication Reconciliation">
+        <bpmn:incoming>SequenceFlow-ProtocolsToMedRec-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-MedRecToInsuranceCheck-id-0001</bpmn:outgoing>
+        <bpmn:startEvent id="StartEvent-MedRecStarted-id-0001" name="Med Rec Started">
+          <bpmn:outgoing>SequenceFlow-MedRecStartToVerifyAllergies-id-0001</bpmn:outgoing>
+        </bpmn:startEvent>
+        <bpmn:serviceTask id="ServiceTask-VerifyAllergies-id-0001" name="Verify Allergies">
+          <bpmn:incoming>SequenceFlow-MedRecStartToVerifyAllergies-id-0001</bpmn:incoming>
+          <bpmn:outgoing>SequenceFlow-VerifyAllergiesToPharmacyReview-id-0001</bpmn:outgoing>
+        </bpmn:serviceTask>
+        <bpmn:serviceTask id="ServiceTask-PharmacyReviewsMedications-id-0001" name="Pharmacy Reviews Medications">
+          <bpmn:incoming>SequenceFlow-VerifyAllergiesToPharmacyReview-id-0001</bpmn:incoming>
+          <bpmn:outgoing>SequenceFlow-PharmacyReviewToInteractionCheck-id-0001</bpmn:outgoing>
+        </bpmn:serviceTask>
+        <bpmn:boundaryEvent id="BoundaryEvent-Timer4Hour-PharmacyReviewsMedications-id-0001" name="4 Hour Pharmacy Review SLA" attachedToRef="ServiceTask-PharmacyReviewsMedications-id-0001">
+          <bpmn:outgoing>SequenceFlow-BoundaryToUrgentAlert-id-0001</bpmn:outgoing>
+          <bpmn:timerEventDefinition id="BoundaryEvent-Timer4Hour-PharmacyReviewsMedications-id-0001_EventDef">
+            <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT4H</bpmn:timeDuration>
+          </bpmn:timerEventDefinition>
+        </bpmn:boundaryEvent>
+        <bpmn:sendTask id="SendTask-UrgentPharmacyAlert-id-0001" name="Send: Urgent Pharmacy Alert">
+          <bpmn:incoming>SequenceFlow-BoundaryToUrgentAlert-id-0001</bpmn:incoming>
+        </bpmn:sendTask>
+        <bpmn:exclusiveGateway id="ExclusiveGateway-MedicationInteraction-id-0001" name="Medication Interaction Found?" gatewayDirection="Diverging">
+          <bpmn:incoming>SequenceFlow-PharmacyReviewToInteractionCheck-id-0001</bpmn:incoming>
+          <bpmn:outgoing>SequenceFlow-InteractionCheckToAdjustment-id-0001</bpmn:outgoing>
+          <bpmn:outgoing>SequenceFlow-InteractionCheckToNoInteractions-id-0001</bpmn:outgoing>
+        </bpmn:exclusiveGateway>
+        <bpmn:userTask id="UserTask-PrescribingPhysicianAdjustsMedicationRegimen-id-0001" name="Prescribing Physician Adjusts Medication Regimen">
+          <bpmn:incoming>SequenceFlow-InteractionCheckToAdjustment-id-0001</bpmn:incoming>
+          <bpmn:outgoing>SequenceFlow-AdjustmentToRegimenAdjusted-id-0001</bpmn:outgoing>
+        </bpmn:userTask>
+        <bpmn:endEvent id="EndEvent-RegimenAdjusted-id-0001" name="Regimen Adjusted">
+          <bpmn:incoming>SequenceFlow-AdjustmentToRegimenAdjusted-id-0001</bpmn:incoming>
+        </bpmn:endEvent>
+        <bpmn:endEvent id="EndEvent-NoInteractions-id-0001" name="No Interactions">
+          <bpmn:incoming>SequenceFlow-InteractionCheckToNoInteractions-id-0001</bpmn:incoming>
+        </bpmn:endEvent>
+        <bpmn:sequenceFlow id="SequenceFlow-MedRecStartToVerifyAllergies-id-0001" sourceRef="StartEvent-MedRecStarted-id-0001" targetRef="ServiceTask-VerifyAllergies-id-0001" />
+        <bpmn:sequenceFlow id="SequenceFlow-VerifyAllergiesToPharmacyReview-id-0001" sourceRef="ServiceTask-VerifyAllergies-id-0001" targetRef="ServiceTask-PharmacyReviewsMedications-id-0001" />
+        <bpmn:sequenceFlow id="SequenceFlow-PharmacyReviewToInteractionCheck-id-0001" sourceRef="ServiceTask-PharmacyReviewsMedications-id-0001" targetRef="ExclusiveGateway-MedicationInteraction-id-0001" />
+        <bpmn:sequenceFlow id="SequenceFlow-InteractionCheckToAdjustment-id-0001" name="interaction_found == true" sourceRef="ExclusiveGateway-MedicationInteraction-id-0001" targetRef="UserTask-PrescribingPhysicianAdjustsMedicationRegimen-id-0001" />
+        <bpmn:sequenceFlow id="SequenceFlow-InteractionCheckToNoInteractions-id-0001" name="ELSE" sourceRef="ExclusiveGateway-MedicationInteraction-id-0001" targetRef="EndEvent-NoInteractions-id-0001" />
+        <bpmn:sequenceFlow id="SequenceFlow-AdjustmentToRegimenAdjusted-id-0001" sourceRef="UserTask-PrescribingPhysicianAdjustsMedicationRegimen-id-0001" targetRef="EndEvent-RegimenAdjusted-id-0001" />
+        <bpmn:sequenceFlow id="SequenceFlow-BoundaryToUrgentAlert-id-0001" sourceRef="BoundaryEvent-Timer4Hour-PharmacyReviewsMedications-id-0001" targetRef="SendTask-UrgentPharmacyAlert-id-0001" />
+      </bpmn:subProcess>
+      <bpmn:serviceTask id="ServiceTask-TrackInsuranceAuthorization-id-0001" name="Track Insurance Authorization">
+        <bpmn:incoming>SequenceFlow-MedRecToInsuranceCheck-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-InsuranceCheckToApprovalCheck-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-InsuranceApproval-id-0001" name="Insurance Approval Check" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-InsuranceCheckToApprovalCheck-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ApprovalCheckToBillingContact-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-ApprovalCheckToAdmissionComplete-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:userTask id="UserTask-BillingTeamContactsPatient-id-0001" name="Billing Team Contacts Patient">
+        <bpmn:incoming>SequenceFlow-ApprovalCheckToBillingContact-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-BillingContactToAdmissionComplete-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:endEvent id="EndEvent-AdmissionComplete-id-0001" name="Admission Complete">
+        <bpmn:incoming>SequenceFlow-ApprovalCheckToAdmissionComplete-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-BillingContactToAdmissionComplete-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-AdmissionStartToBedCheck-id-0001" sourceRef="StartEvent-AdmissionInitiated-id-0001" targetRef="ServiceTask-CheckBedAvailability-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BedCheckToBedTypeDecision-id-0001" sourceRef="ServiceTask-CheckBedAvailability-id-0001" targetRef="ExclusiveGateway-BedTypeDecision-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BedTypeDecisionToICUBed-id-0001" name="icu_bed_available == true AND acuity == 1" sourceRef="ExclusiveGateway-BedTypeDecision-id-0001" targetRef="ServiceTask-AssignICUBed-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BedTypeDecisionToGeneralBed-id-0001" name="general_bed_available == true AND acuity &#60;= 3" sourceRef="ExclusiveGateway-BedTypeDecision-id-0001" targetRef="ServiceTask-AssignGeneralWardBed-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BedTypeDecisionToWaitingQueue-id-0001" name="ELSE" sourceRef="ExclusiveGateway-BedTypeDecision-id-0001" targetRef="ServiceTask-PlaceInWaitingQueue-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-WaitingQueueToNotification-id-0001" sourceRef="ServiceTask-PlaceInWaitingQueue-id-0001" targetRef="SendTask-NotificationToNursingManager-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-NotificationToWaitingEnd-id-0001" sourceRef="SendTask-NotificationToNursingManager-id-0001" targetRef="EndEvent-WaitingQueuePlacement-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ICUBedToTransfer-id-0001" sourceRef="ServiceTask-AssignICUBed-id-0001" targetRef="ServiceTask-TransferPatientToAssignedBed-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GeneralBedToTransfer-id-0001" sourceRef="ServiceTask-AssignGeneralWardBed-id-0001" targetRef="ServiceTask-TransferPatientToAssignedBed-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-TransferToProtocols-id-0001" sourceRef="ServiceTask-TransferPatientToAssignedBed-id-0001" targetRef="ServiceTask-InitiateAdmissionProtocols-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ProtocolsToMedRec-id-0001" sourceRef="ServiceTask-InitiateAdmissionProtocols-id-0001" targetRef="SubProcess-MedicationReconciliation-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-MedRecToInsuranceCheck-id-0001" sourceRef="SubProcess-MedicationReconciliation-id-0001" targetRef="ServiceTask-TrackInsuranceAuthorization-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-InsuranceCheckToApprovalCheck-id-0001" sourceRef="ServiceTask-TrackInsuranceAuthorization-id-0001" targetRef="ExclusiveGateway-InsuranceApproval-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ApprovalCheckToBillingContact-id-0001" name="authorization_approved == false" sourceRef="ExclusiveGateway-InsuranceApproval-id-0001" targetRef="UserTask-BillingTeamContactsPatient-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ApprovalCheckToAdmissionComplete-id-0001" name="ELSE" sourceRef="ExclusiveGateway-InsuranceApproval-id-0001" targetRef="EndEvent-AdmissionComplete-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BillingContactToAdmissionComplete-id-0001" sourceRef="UserTask-BillingTeamContactsPatient-id-0001" targetRef="EndEvent-AdmissionComplete-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BedCheckErrorToManualAssignment-id-0001" sourceRef="BoundaryEvent-Error-CheckBedAvailability-id-0001" targetRef="UserTask-ManualBedAssignmentByAdmissions-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ManualAssignmentToBedTypeDecision-id-0001" sourceRef="UserTask-ManualBedAssignmentByAdmissions-id-0001" targetRef="ExclusiveGateway-BedTypeDecision-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:userTask id="UserTask-PhysicianDocumentsDischargeInstructions-id-0001" name="Physician Documents Discharge Instructions">
+      <bpmn:incoming>SequenceFlow-AdmissionDecisionToDischarge-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DischargeToDischargeComplete-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-DischargeComplete-id-0001" name="Discharge Complete">
+      <bpmn:incoming>SequenceFlow-DischargeToDischargeComplete-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-MonitorPhysicianOrders-id-0001" name="Monitor Physician Orders">
+      <bpmn:incoming>SequenceFlow-OrderTestsToMonitorOrders-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MonitorOrdersToCriticalLabCheck-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-CriticalLabValue-id-0001" name="Critical Lab Value Detected?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-MonitorOrdersToCriticalLabCheck-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CriticalLabCheckToAlert-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-CriticalLabCheckToContinue-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-CriticalLabAlertToPhysician-id-0001" name="Send: Critical Lab Alert to Physician">
+      <bpmn:incoming>SequenceFlow-CriticalLabCheckToAlert-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AlertToPhysicianReview-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-PhysicianReviewsAlert-id-0001" name="Physician Reviews Alert">
+      <bpmn:incoming>SequenceFlow-AlertToPhysicianReview-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PhysicianReviewToAlertReviewed-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-AlertReviewed-id-0001" name="Alert Reviewed">
+      <bpmn:incoming>SequenceFlow-CriticalLabCheckToContinue-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-PhysicianReviewToAlertReviewed-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-PatientArrivalToTriage-id-0001" sourceRef="StartEvent-PatientArrival-id-0001" targetRef="UserTask-TriageNurseAssessesPatient-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TriageToAcuityBedDecision-id-0001" sourceRef="UserTask-TriageNurseAssessesPatient-id-0001" targetRef="ExclusiveGateway-AcuityBedDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AcuityBedDecisionToMonitoredBed-id-0001" name="acuity == 1 AND bed_available == true" sourceRef="ExclusiveGateway-AcuityBedDecision-id-0001" targetRef="ServiceTask-AdmitToMonitoredBed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AcuityBedDecisionToEDWait-id-0001" name="acuity &#60;= 5 AND bed_available == false" sourceRef="ExclusiveGateway-AcuityBedDecision-id-0001" targetRef="UserTask-PatientWaitsInEDArea-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AcuityBedDecisionToStandardEDBay-id-0001" name="ELSE" sourceRef="ExclusiveGateway-AcuityBedDecision-id-0001" targetRef="ServiceTask-AdmitToStandardEDBay-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EDWaitToPhysicianAssessment-id-0001" sourceRef="UserTask-PatientWaitsInEDArea-id-0001" targetRef="UserTask-PhysicianPerformsAssessment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-StandardEDBayToPhysicianAssessment-id-0001" sourceRef="ServiceTask-AdmitToStandardEDBay-id-0001" targetRef="UserTask-PhysicianPerformsAssessment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MonitoredBedToPhysicianAssessment-id-0001" sourceRef="ServiceTask-AdmitToMonitoredBed-id-0001" targetRef="UserTask-PhysicianPerformsAssessment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PhysicianAssessmentToOrderTests-id-0001" sourceRef="UserTask-PhysicianPerformsAssessment-id-0001" targetRef="ServiceTask-OrderDiagnosticTests-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-OrderTestsToAdmissionDecision-id-0001" sourceRef="ServiceTask-OrderDiagnosticTests-id-0001" targetRef="ExclusiveGateway-AdmissionDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AdmissionDecisionToAdmissionWorkflow-id-0001" name="admission_required == true" sourceRef="ExclusiveGateway-AdmissionDecision-id-0001" targetRef="SubProcess-AdmissionWorkflow-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AdmissionDecisionToDischarge-id-0001" name="ELSE" sourceRef="ExclusiveGateway-AdmissionDecision-id-0001" targetRef="UserTask-PhysicianDocumentsDischargeInstructions-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DischargeToDischargeComplete-id-0001" sourceRef="UserTask-PhysicianDocumentsDischargeInstructions-id-0001" targetRef="EndEvent-DischargeComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PhysicianAssessmentToEscalation-id-0001" sourceRef="BoundaryEvent-Timer4Hour-PhysicianPerformsAssessment-id-0001" targetRef="SendTask-EscalationToDepartmentHead-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PhysicianAssessmentToSeniorPhysician-id-0001" sourceRef="BoundaryEvent-Error-PhysicianPerformsAssessment-id-0001" targetRef="UserTask-SeniorPhysicianTakesOverAssessment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SeniorPhysicianToOrderTests-id-0001" sourceRef="UserTask-SeniorPhysicianTakesOverAssessment-id-0001" targetRef="ServiceTask-OrderDiagnosticTests-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-OrderTestsToMonitorOrders-id-0001" sourceRef="ServiceTask-OrderDiagnosticTests-id-0001" targetRef="ServiceTask-MonitorPhysicianOrders-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MonitorOrdersToCriticalLabCheck-id-0001" sourceRef="ServiceTask-MonitorPhysicianOrders-id-0001" targetRef="ExclusiveGateway-CriticalLabValue-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CriticalLabCheckToAlert-id-0001" name="critical_lab_value_detected == true" sourceRef="ExclusiveGateway-CriticalLabValue-id-0001" targetRef="SendTask-CriticalLabAlertToPhysician-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CriticalLabCheckToContinue-id-0001" name="ELSE" sourceRef="ExclusiveGateway-CriticalLabValue-id-0001" targetRef="EndEvent-AlertReviewed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AlertToPhysicianReview-id-0001" sourceRef="SendTask-CriticalLabAlertToPhysician-id-0001" targetRef="UserTask-PhysicianReviewsAlert-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PhysicianReviewToAlertReviewed-id-0001" sourceRef="UserTask-PhysicianReviewsAlert-id-0001" targetRef="EndEvent-AlertReviewed-id-0001" />
+  </bpmn:process>
+  <bpmn:error id="ASSESSMENT_ERROR" name="ASSESSMENT_ERROR" />
+  <bpmn:error id="BED_SYSTEM_ERROR" name="BED_SYSTEM_ERROR" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_EmergencyDepartmentAdmissionProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_EmergencyDepartmentAdmissionProcess" bpmnElement="EmergencyDepartmentAdmissionProcess">
+      <bpmndi:BPMNShape id="StartEvent-PatientArrival-id-0001_di" bpmnElement="StartEvent-PatientArrival-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-TriageNurseAssessesPatient-id-0001_di" bpmnElement="UserTask-TriageNurseAssessesPatient-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer15Min-TriageNurseAssessesPatient-id-0001_di" bpmnElement="BoundaryEvent-Timer15Min-TriageNurseAssessesPatient-id-0001">
+        <dc:Bounds x="207" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-AcuityBedDecision-id-0001_di" bpmnElement="ExclusiveGateway-AcuityBedDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AdmitToMonitoredBed-id-0001_di" bpmnElement="ServiceTask-AdmitToMonitoredBed-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PhysicianPerformsAssessment-id-0001_di" bpmnElement="UserTask-PhysicianPerformsAssessment-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer4Hour-PhysicianPerformsAssessment-id-0001_di" bpmnElement="BoundaryEvent-Timer4Hour-PhysicianPerformsAssessment-id-0001">
+        <dc:Bounds x="640.3333333333334" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Error-PhysicianPerformsAssessment-id-0001_di" bpmnElement="BoundaryEvent-Error-PhysicianPerformsAssessment-id-0001">
+        <dc:Bounds x="673.6666666666666" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-OrderDiagnosticTests-id-0001_di" bpmnElement="ServiceTask-OrderDiagnosticTests-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-AdmissionDecision-id-0001_di" bpmnElement="ExclusiveGateway-AdmissionDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-AdmissionWorkflow-id-0001_di" bpmnElement="SubProcess-AdmissionWorkflow-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PhysicianDocumentsDischargeInstructions-id-0001_di" bpmnElement="UserTask-PhysicianDocumentsDischargeInstructions-id-0001">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-DischargeComplete-id-0001_di" bpmnElement="EndEvent-DischargeComplete-id-0001">
+        <dc:Bounds x="1407" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SeniorPhysicianTakesOverAssessment-id-0001_di" bpmnElement="UserTask-SeniorPhysicianTakesOverAssessment-id-0001">
+        <dc:Bounds x="775" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MonitorPhysicianOrders-id-0001_di" bpmnElement="ServiceTask-MonitorPhysicianOrders-id-0001">
+        <dc:Bounds x="1075" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CriticalLabValue-id-0001_di" bpmnElement="ExclusiveGateway-CriticalLabValue-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="325" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-CriticalLabAlertToPhysician-id-0001_di" bpmnElement="SendTask-CriticalLabAlertToPhysician-id-0001">
+        <dc:Bounds x="1375" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PhysicianReviewsAlert-id-0001_di" bpmnElement="UserTask-PhysicianReviewsAlert-id-0001">
+        <dc:Bounds x="1525" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AlertReviewed-id-0001_di" bpmnElement="EndEvent-AlertReviewed-id-0001">
+        <dc:Bounds x="1707" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-TriageDelayAlert-id-0001_di" bpmnElement="SendTask-TriageDelayAlert-id-0001">
+        <dc:Bounds x="25" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PatientWaitsInEDArea-id-0001_di" bpmnElement="UserTask-PatientWaitsInEDArea-id-0001">
+        <dc:Bounds x="475" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-EscalationToDepartmentHead-id-0001_di" bpmnElement="SendTask-EscalationToDepartmentHead-id-0001">
+        <dc:Bounds x="775" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AdmitToStandardEDBay-id-0001_di" bpmnElement="ServiceTask-AdmitToStandardEDBay-id-0001">
+        <dc:Bounds x="475" y="590" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-PatientArrivalToTriage-id-0001_di" bpmnElement="SequenceFlow-PatientArrivalToTriage-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TriageToAcuityBedDecision-id-0001_di" bpmnElement="SequenceFlow-TriageToAcuityBedDecision-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AcuityBedDecisionToMonitoredBed-id-0001_di" bpmnElement="SequenceFlow-AcuityBedDecisionToMonitoredBed-id-0001">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AcuityBedDecisionToEDWait-id-0001_di" bpmnElement="SequenceFlow-AcuityBedDecisionToEDWait-id-0001">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="490" />
+        <di:waypoint x="475" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AcuityBedDecisionToStandardEDBay-id-0001_di" bpmnElement="SequenceFlow-AcuityBedDecisionToStandardEDBay-id-0001">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="630" />
+        <di:waypoint x="475" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MonitoredBedToPhysicianAssessment-id-0001_di" bpmnElement="SequenceFlow-MonitoredBedToPhysicianAssessment-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PhysicianAssessmentToOrderTests-id-0001_di" bpmnElement="SequenceFlow-PhysicianAssessmentToOrderTests-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PhysicianAssessmentToEscalation-id-0001_di" bpmnElement="SequenceFlow-PhysicianAssessmentToEscalation-id-0001">
+        <di:waypoint x="658.3333333333334" y="128" />
+        <di:waypoint x="658.3333333333334" y="490" />
+        <di:waypoint x="775" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PhysicianAssessmentToSeniorPhysician-id-0001_di" bpmnElement="SequenceFlow-PhysicianAssessmentToSeniorPhysician-id-0001">
+        <di:waypoint x="691.6666666666666" y="128" />
+        <di:waypoint x="691.6666666666666" y="350" />
+        <di:waypoint x="775" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderTestsToAdmissionDecision-id-0001_di" bpmnElement="SequenceFlow-OrderTestsToAdmissionDecision-id-0001">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderTestsToMonitorOrders-id-0001_di" bpmnElement="SequenceFlow-OrderTestsToMonitorOrders-id-0001">
+        <di:waypoint x="975" y="110" />
+        <di:waypoint x="975" y="350" />
+        <di:waypoint x="1075" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AdmissionDecisionToAdmissionWorkflow-id-0001_di" bpmnElement="SequenceFlow-AdmissionDecisionToAdmissionWorkflow-id-0001">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AdmissionDecisionToDischarge-id-0001_di" bpmnElement="SequenceFlow-AdmissionDecisionToDischarge-id-0001">
+        <di:waypoint x="1125" y="95" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DischargeToDischargeComplete-id-0001_di" bpmnElement="SequenceFlow-DischargeToDischargeComplete-id-0001">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1407" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SeniorPhysicianToOrderTests-id-0001_di" bpmnElement="SequenceFlow-SeniorPhysicianToOrderTests-id-0001">
+        <di:waypoint x="875" y="350" />
+        <di:waypoint x="975" y="350" />
+        <di:waypoint x="975" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MonitorOrdersToCriticalLabCheck-id-0001_di" bpmnElement="SequenceFlow-MonitorOrdersToCriticalLabCheck-id-0001">
+        <di:waypoint x="1175" y="350" />
+        <di:waypoint x="1250" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CriticalLabCheckToAlert-id-0001_di" bpmnElement="SequenceFlow-CriticalLabCheckToAlert-id-0001">
+        <di:waypoint x="1300" y="350" />
+        <di:waypoint x="1375" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CriticalLabCheckToContinue-id-0001_di" bpmnElement="SequenceFlow-CriticalLabCheckToContinue-id-0001">
+        <di:waypoint x="1275" y="375" />
+        <di:waypoint x="1275" y="420" />
+        <di:waypoint x="1725" y="420" />
+        <di:waypoint x="1725" y="368" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlertToPhysicianReview-id-0001_di" bpmnElement="SequenceFlow-AlertToPhysicianReview-id-0001">
+        <di:waypoint x="1475" y="350" />
+        <di:waypoint x="1525" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PhysicianReviewToAlertReviewed-id-0001_di" bpmnElement="SequenceFlow-PhysicianReviewToAlertReviewed-id-0001">
+        <di:waypoint x="1625" y="350" />
+        <di:waypoint x="1707" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EDWaitToPhysicianAssessment-id-0001_di" bpmnElement="SequenceFlow-EDWaitToPhysicianAssessment-id-0001">
+        <di:waypoint x="575" y="490" />
+        <di:waypoint x="675" y="490" />
+        <di:waypoint x="675" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StandardEDBayToPhysicianAssessment-id-0001_di" bpmnElement="SequenceFlow-StandardEDBayToPhysicianAssessment-id-0001">
+        <di:waypoint x="575" y="630" />
+        <di:waypoint x="675" y="630" />
+        <di:waypoint x="675" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-AdmissionWorkflow-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-AdmissionWorkflow-id-0001" bpmnElement="SubProcess-AdmissionWorkflow-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-AdmissionInitiated-id-0001_di" bpmnElement="StartEvent-AdmissionInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckBedAvailability-id-0001_di" bpmnElement="ServiceTask-CheckBedAvailability-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Error-CheckBedAvailability-id-0001_di" bpmnElement="BoundaryEvent-Error-CheckBedAvailability-id-0001">
+        <dc:Bounds x="207" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-BedTypeDecision-id-0001_di" bpmnElement="ExclusiveGateway-BedTypeDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AssignICUBed-id-0001_di" bpmnElement="ServiceTask-AssignICUBed-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-TransferPatientToAssignedBed-id-0001_di" bpmnElement="ServiceTask-TransferPatientToAssignedBed-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-InitiateAdmissionProtocols-id-0001_di" bpmnElement="ServiceTask-InitiateAdmissionProtocols-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-MedicationReconciliation-id-0001_di" bpmnElement="SubProcess-MedicationReconciliation-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-TrackInsuranceAuthorization-id-0001_di" bpmnElement="ServiceTask-TrackInsuranceAuthorization-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-InsuranceApproval-id-0001_di" bpmnElement="ExclusiveGateway-InsuranceApproval-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-BillingTeamContactsPatient-id-0001_di" bpmnElement="UserTask-BillingTeamContactsPatient-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AdmissionComplete-id-0001_di" bpmnElement="EndEvent-AdmissionComplete-id-0001">
+        <dc:Bounds x="1707" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ManualBedAssignmentByAdmissions-id-0001_di" bpmnElement="UserTask-ManualBedAssignmentByAdmissions-id-0001">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AssignGeneralWardBed-id-0001_di" bpmnElement="ServiceTask-AssignGeneralWardBed-id-0001">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PlaceInWaitingQueue-id-0001_di" bpmnElement="ServiceTask-PlaceInWaitingQueue-id-0001">
+        <dc:Bounds x="625" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-NotificationToNursingManager-id-0001_di" bpmnElement="SendTask-NotificationToNursingManager-id-0001">
+        <dc:Bounds x="775" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-WaitingQueuePlacement-id-0001_di" bpmnElement="EndEvent-WaitingQueuePlacement-id-0001">
+        <dc:Bounds x="957" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-AdmissionStartToBedCheck-id-0001_di" bpmnElement="SequenceFlow-AdmissionStartToBedCheck-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BedCheckToBedTypeDecision-id-0001_di" bpmnElement="SequenceFlow-BedCheckToBedTypeDecision-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BedCheckErrorToManualAssignment-id-0001_di" bpmnElement="SequenceFlow-BedCheckErrorToManualAssignment-id-0001">
+        <di:waypoint x="225" y="128" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BedTypeDecisionToICUBed-id-0001_di" bpmnElement="SequenceFlow-BedTypeDecisionToICUBed-id-0001">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BedTypeDecisionToGeneralBed-id-0001_di" bpmnElement="SequenceFlow-BedTypeDecisionToGeneralBed-id-0001">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BedTypeDecisionToWaitingQueue-id-0001_di" bpmnElement="SequenceFlow-BedTypeDecisionToWaitingQueue-id-0001">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="625" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ICUBedToTransfer-id-0001_di" bpmnElement="SequenceFlow-ICUBedToTransfer-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TransferToProtocols-id-0001_di" bpmnElement="SequenceFlow-TransferToProtocols-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProtocolsToMedRec-id-0001_di" bpmnElement="SequenceFlow-ProtocolsToMedRec-id-0001">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MedRecToInsuranceCheck-id-0001_di" bpmnElement="SequenceFlow-MedRecToInsuranceCheck-id-0001">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InsuranceCheckToApprovalCheck-id-0001_di" bpmnElement="SequenceFlow-InsuranceCheckToApprovalCheck-id-0001">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalCheckToBillingContact-id-0001_di" bpmnElement="SequenceFlow-ApprovalCheckToBillingContact-id-0001">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalCheckToAdmissionComplete-id-0001_di" bpmnElement="SequenceFlow-ApprovalCheckToAdmissionComplete-id-0001">
+        <di:waypoint x="1425" y="95" />
+        <di:waypoint x="1425" y="140" />
+        <di:waypoint x="1725" y="140" />
+        <di:waypoint x="1725" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BillingContactToAdmissionComplete-id-0001_di" bpmnElement="SequenceFlow-BillingContactToAdmissionComplete-id-0001">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1707" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ManualAssignmentToBedTypeDecision-id-0001_di" bpmnElement="SequenceFlow-ManualAssignmentToBedTypeDecision-id-0001">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GeneralBedToTransfer-id-0001_di" bpmnElement="SequenceFlow-GeneralBedToTransfer-id-0001">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="825" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WaitingQueueToNotification-id-0001_di" bpmnElement="SequenceFlow-WaitingQueueToNotification-id-0001">
+        <di:waypoint x="725" y="350" />
+        <di:waypoint x="775" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotificationToWaitingEnd-id-0001_di" bpmnElement="SequenceFlow-NotificationToWaitingEnd-id-0001">
+        <di:waypoint x="875" y="350" />
+        <di:waypoint x="957" y="350" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-MedicationReconciliation-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-MedicationReconciliation-id-0001" bpmnElement="SubProcess-MedicationReconciliation-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-MedRecStarted-id-0001_di" bpmnElement="StartEvent-MedRecStarted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-VerifyAllergies-id-0001_di" bpmnElement="ServiceTask-VerifyAllergies-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PharmacyReviewsMedications-id-0001_di" bpmnElement="ServiceTask-PharmacyReviewsMedications-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer4Hour-PharmacyReviewsMedications-id-0001_di" bpmnElement="BoundaryEvent-Timer4Hour-PharmacyReviewsMedications-id-0001">
+        <dc:Bounds x="357" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-MedicationInteraction-id-0001_di" bpmnElement="ExclusiveGateway-MedicationInteraction-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PrescribingPhysicianAdjustsMedicationRegimen-id-0001_di" bpmnElement="UserTask-PrescribingPhysicianAdjustsMedicationRegimen-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-RegimenAdjusted-id-0001_di" bpmnElement="EndEvent-RegimenAdjusted-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-UrgentPharmacyAlert-id-0001_di" bpmnElement="SendTask-UrgentPharmacyAlert-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-NoInteractions-id-0001_di" bpmnElement="EndEvent-NoInteractions-id-0001">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-MedRecStartToVerifyAllergies-id-0001_di" bpmnElement="SequenceFlow-MedRecStartToVerifyAllergies-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyAllergiesToPharmacyReview-id-0001_di" bpmnElement="SequenceFlow-VerifyAllergiesToPharmacyReview-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PharmacyReviewToInteractionCheck-id-0001_di" bpmnElement="SequenceFlow-PharmacyReviewToInteractionCheck-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToUrgentAlert-id-0001_di" bpmnElement="SequenceFlow-BoundaryToUrgentAlert-id-0001">
+        <di:waypoint x="375" y="128" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InteractionCheckToAdjustment-id-0001_di" bpmnElement="SequenceFlow-InteractionCheckToAdjustment-id-0001">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InteractionCheckToNoInteractions-id-0001_di" bpmnElement="SequenceFlow-InteractionCheckToNoInteractions-id-0001">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="600" y="70" />
+        <di:waypoint x="600" y="140" />
+        <di:waypoint x="600" y="140" />
+        <di:waypoint x="600" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AdjustmentToRegimenAdjusted-id-0001_di" bpmnElement="SequenceFlow-AdjustmentToRegimenAdjusted-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

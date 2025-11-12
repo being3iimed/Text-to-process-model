@@ -1,0 +1,105 @@
+```
+<summary_of_elements>
+
+## Summary of Elements
+
+### TASKS:
+- **userTask("Search for Courses")** - Student actively searches available courses
+- **userTask("Check Course Details")** - Student reviews time, location, professor, prerequisites, enrollment cap
+- **serviceTask("Validate Prerequisites")** - System checks if student meets prerequisites
+- **serviceTask("Check Seat Availability")** - System verifies available seats
+- **userTask("Confirm Enrollment")** - Student clicks enroll button
+- **serviceTask("Process Enrollment")** - System handles enrollment logic
+- **serviceTask("Generate Course Schedule")** - System creates updated schedule
+- **serviceTask("Update Course Roster")** - System updates enrollment records
+
+### GATEWAYS:
+- **XOR after "Check Course Details"** with conditions:
+  - `prerequisites_met AND seats_available`
+  - `prerequisites_not_met OR seats_unavailable` (default)
+
+### EVENTS:
+- **startEvent("Course Enrollment Process Started")** - Manual trigger
+- **endEvent("Enrollment Complete")** - Successful completion
+- **endEvent("Enrollment Failed")** - Unsuccessful completion
+
+### BOUNDARY EVENTS:
+- None (no explicit SLA requirements or error scenarios mentioned)
+
+### SUBPROCESSES:
+- None (all tasks are linear/sequential with one decision point)
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+## BPMN Pseudocode
+
+```pseudocode
+startEvent("Course Enrollment Process Started")
+
+userTask("Search for Courses")
+userTask("Check Course Details")
+
+if (prerequisites_met AND seats_available):
+    userTask("Confirm Enrollment")
+    serviceTask("Process Enrollment")
+    serviceTask("Generate Course Schedule")
+    serviceTask("Update Course Roster")
+    endEvent("Enrollment Complete")
+else:
+    endEvent("Enrollment Failed")
+```
+
+</bpmn_pseudocode>
+
+<compliance_validation>
+
+## Compliance Validation
+
+### TIMER EVENTS:
+- ✅ No timer events used (none required)
+
+### GATEWAYS:
+- ✅ XOR gateway has:
+  - Mutually exclusive conditions
+  - Explicit default path
+  - Corresponding end events for each branch
+
+### SEQUENCE FLOWS:
+- ✅ All conditional flows have descriptive labels:
+  - `prerequisites_met AND seats_available`
+  - Default path implicit for failure case
+
+### BOUNDARY EVENTS:
+- ✅ None added (no SLA/error scenarios mentioned)
+
+### SUBPROCESSES:
+- ✅ None created (linear flow with single decision point)
+
+### FLOW PATHS:
+- ✅ All paths traceable:
+  1. Success: Start → Search → Check → Confirm → Process → Generate → Update → Complete
+  2. Failure: Start → Search → Check → Failed
+- ✅ No orphaned flows
+- ✅ No unreachable tasks
+
+### BALANCE REVIEW:
+- ✅ Core elements (tasks/gateways/events) = 100% of design
+- ✅ No over-engineering
+- ✅ Clean, readable flow
+
+</compliance_validation>
+
+<assumptions>
+
+## Assumptions Made
+
+1. **Prerequisite Validation**: System automatically checks prerequisites when student views course details
+2. **Seat Availability**: Real-time availability shown during "Check Course Details"
+3. **Enrollment Confirmation**: Single click action ("Confirm Enrollment") triggers system processing
+4. **No Timeouts**: No hard SLA for enrollment process completion
+5. **No Error Handling**: Assuming system either succeeds or fails cleanly without partial states
+
+</assumptions>
+```

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="course-enrollment-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="CourseEnrollmentProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-CourseEnrollmentStarted-id-0001" name="Course Enrollment Process Started">
+      <bpmn:outgoing>SequenceFlow-StartToSearch-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-SearchCourses-id-0001" name="Search for Courses">
+      <bpmn:incoming>SequenceFlow-StartToSearch-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SearchToCheck-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-CheckCourseDetails-id-0002" name="Check Course Details">
+      <bpmn:incoming>SequenceFlow-SearchToCheck-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckToGateway-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-CourseEligibility-id-0001" name="Course Eligibility Check" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CheckToGateway-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToConfirm-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToFailed-id-0005</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-ConfirmEnrollment-id-0003" name="Confirm Enrollment">
+      <bpmn:incoming>SequenceFlow-GatewayToConfirm-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmToProcess-id-0006</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ProcessEnrollment-id-0001" name="Process Enrollment">
+      <bpmn:incoming>SequenceFlow-ConfirmToProcess-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProcessToGenerate-id-0007</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-GenerateSchedule-id-0002" name="Generate Course Schedule">
+      <bpmn:incoming>SequenceFlow-ProcessToGenerate-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GenerateToUpdate-id-0008</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-UpdateRoster-id-0003" name="Update Course Roster">
+      <bpmn:incoming>SequenceFlow-GenerateToUpdate-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateToComplete-id-0009</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-EnrollmentComplete-id-0001" name="Enrollment Complete">
+      <bpmn:incoming>SequenceFlow-UpdateToComplete-id-0009</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-EnrollmentFailed-id-0002" name="Enrollment Failed">
+      <bpmn:incoming>SequenceFlow-GatewayToFailed-id-0005</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSearch-id-0001" sourceRef="StartEvent-CourseEnrollmentStarted-id-0001" targetRef="UserTask-SearchCourses-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SearchToCheck-id-0002" sourceRef="UserTask-SearchCourses-id-0001" targetRef="UserTask-CheckCourseDetails-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckToGateway-id-0003" sourceRef="UserTask-CheckCourseDetails-id-0002" targetRef="ExclusiveGateway-CourseEligibility-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToConfirm-id-0004" name="prerequisites_met AND seats_available" sourceRef="ExclusiveGateway-CourseEligibility-id-0001" targetRef="UserTask-ConfirmEnrollment-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToFailed-id-0005" sourceRef="ExclusiveGateway-CourseEligibility-id-0001" targetRef="EndEvent-EnrollmentFailed-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmToProcess-id-0006" sourceRef="UserTask-ConfirmEnrollment-id-0003" targetRef="ServiceTask-ProcessEnrollment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProcessToGenerate-id-0007" sourceRef="ServiceTask-ProcessEnrollment-id-0001" targetRef="ServiceTask-GenerateSchedule-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-GenerateToUpdate-id-0008" sourceRef="ServiceTask-GenerateSchedule-id-0002" targetRef="ServiceTask-UpdateRoster-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateToComplete-id-0009" sourceRef="ServiceTask-UpdateRoster-id-0003" targetRef="EndEvent-EnrollmentComplete-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_CourseEnrollmentProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_CourseEnrollmentProcess-id-0001" bpmnElement="CourseEnrollmentProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-CourseEnrollmentStarted-id-0001_di" bpmnElement="StartEvent-CourseEnrollmentStarted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SearchCourses-id-0001_di" bpmnElement="UserTask-SearchCourses-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CheckCourseDetails-id-0002_di" bpmnElement="UserTask-CheckCourseDetails-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CourseEligibility-id-0001_di" bpmnElement="ExclusiveGateway-CourseEligibility-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConfirmEnrollment-id-0003_di" bpmnElement="UserTask-ConfirmEnrollment-id-0003">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessEnrollment-id-0001_di" bpmnElement="ServiceTask-ProcessEnrollment-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateSchedule-id-0002_di" bpmnElement="ServiceTask-GenerateSchedule-id-0002">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateRoster-id-0003_di" bpmnElement="ServiceTask-UpdateRoster-id-0003">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-EnrollmentComplete-id-0001_di" bpmnElement="EndEvent-EnrollmentComplete-id-0001">
+        <dc:Bounds x="1257" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-EnrollmentFailed-id-0002_di" bpmnElement="EndEvent-EnrollmentFailed-id-0002">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSearch-id-0001_di" bpmnElement="SequenceFlow-StartToSearch-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SearchToCheck-id-0002_di" bpmnElement="SequenceFlow-SearchToCheck-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckToGateway-id-0003_di" bpmnElement="SequenceFlow-CheckToGateway-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToConfirm-id-0004_di" bpmnElement="SequenceFlow-GatewayToConfirm-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToFailed-id-0005_di" bpmnElement="SequenceFlow-GatewayToFailed-id-0005">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmToProcess-id-0006_di" bpmnElement="SequenceFlow-ConfirmToProcess-id-0006">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessToGenerate-id-0007_di" bpmnElement="SequenceFlow-ProcessToGenerate-id-0007">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateToUpdate-id-0008_di" bpmnElement="SequenceFlow-GenerateToUpdate-id-0008">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateToComplete-id-0009_di" bpmnElement="SequenceFlow-UpdateToComplete-id-0009">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1257" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

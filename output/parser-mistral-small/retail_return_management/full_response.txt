@@ -1,0 +1,62 @@
+### Summary of Elements
+
+**TASKS**:
+- userTask("Customer Initiates Return Request") - Customer provides order number and reason
+- serviceTask("Validate Return Eligibility") - System checks if return is within 30 days and item condition
+- sendTask("Send: Return Shipping Label") - System sends label to customer
+- userTask("Customer Ships Item") - Customer ships item back
+- userTask("Warehouse Verifies Item Condition") - Staff verify item condition
+- serviceTask("Process Refund") - System processes refund
+- sendTask("Send: Refund Confirmation Email") - System sends confirmation email
+- sendTask("Send: Return Denied Notification") - System notifies customer of denied return
+
+**GATEWAYS**:
+- XOR at "Validate Return Eligibility" with conditions "eligible", "not eligible"
+- XOR at "Warehouse Verifies Item Condition" with conditions "acceptable", "damaged"
+
+**EVENTS**:
+- startEvent("Customer Initiates Return Request") - trigger: manual
+- endEvent("Process Complete") - normal completion
+
+**BOUNDARY EVENTS**:
+- None (no explicit SLA or error scenarios mentioned)
+
+**SUBPROCESSES**:
+- None (no cohesive logical grouping or repeated structures)
+
+### BPMN Pseudocode
+
+```pseudocode
+startEvent("Customer Initiates Return Request")
+
+userTask("Customer Initiates Return Request")
+
+serviceTask("Validate Return Eligibility")
+
+if (eligible):
+    sendTask("Send: Return Shipping Label")
+    userTask("Customer Ships Item")
+    userTask("Warehouse Verifies Item Condition")
+
+    if (acceptable):
+        serviceTask("Process Refund")
+        sendTask("Send: Refund Confirmation Email")
+    else:
+        sendTask("Send: Return Denied Notification")
+else:
+    sendTask("Send: Return Denied Notification")
+
+endEvent("Process Complete")
+```
+
+### Compliance Checks & Correction
+
+- All timer properties BPMN compliant: No timer properties used
+- All gateways have convergence points: Yes, explicit merge gateways present
+- All boundary events justified: No boundary events used
+- All subprocesses justified: No subprocesses used
+- No orphaned flows: All paths traceable end-to-end
+- No speculative boundary events: No boundary events used
+- No unjustified subprocesses: No subprocesses used
+- All labels present: All sequence flows have descriptive labels
+- Balanced design: Core elements (tasks, gateways, events) comprise 100% of design

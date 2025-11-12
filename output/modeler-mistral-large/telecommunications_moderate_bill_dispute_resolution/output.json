@@ -1,0 +1,240 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "DisputeResolutionProcess-Definitions",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler",
+    "exporterVersion": "1.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "DisputeResolutionProcess",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-DisputeInitiated-id-0001",
+            "name": "Dispute Initiated"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-SubmitDisputeTicket-id-0001",
+            "name": "Submit Dispute Ticket"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ReviewAccountHistory-id-0001",
+            "name": "Review Account History"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-VerifyUsageRecords-id-0002",
+            "name": "Verify Usage Records"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-CheckServiceLogs-id-0003",
+            "name": "Check Service Logs"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-AgentDecision-id-0001",
+            "name": "Agent Decision",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-IssueCredit-id-0004",
+            "name": "Issue Credit"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-CreditNotification-id-0001",
+            "name": "Send: Credit Notification"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ExplainBillingLogic-id-0001",
+            "name": "Explain Billing Logic"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-CustomerResponse-id-0002",
+            "name": "Customer Response",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-EscalateToBillingSpecialist-id-0001",
+            "name": "Escalate to Billing Specialist"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-DeepInvestigation-id-0001",
+            "name": "Deep Investigation"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-SpecialistDecision-id-0003",
+            "name": "Specialist Decision",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-GoodwillOffer-id-0001",
+            "name": "Send: Goodwill Offer"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-CaseClosed-id-0001",
+            "name": "Case Closed"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToSubmitTicket-id-0001",
+            "sourceRef": "StartEvent-DisputeInitiated-id-0001",
+            "targetRef": "UserTask-SubmitDisputeTicket-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SubmitToReviewHistory-id-0002",
+            "sourceRef": "UserTask-SubmitDisputeTicket-id-0001",
+            "targetRef": "ServiceTask-ReviewAccountHistory-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReviewToVerifyUsage-id-0003",
+            "sourceRef": "ServiceTask-ReviewAccountHistory-id-0001",
+            "targetRef": "ServiceTask-VerifyUsageRecords-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-VerifyToCheckLogs-id-0004",
+            "sourceRef": "ServiceTask-VerifyUsageRecords-id-0002",
+            "targetRef": "ServiceTask-CheckServiceLogs-id-0003"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CheckToAgentDecision-id-0005",
+            "sourceRef": "ServiceTask-CheckServiceLogs-id-0003",
+            "targetRef": "ExclusiveGateway-AgentDecision-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AgentConfirmsError-id-0006",
+            "name": "agent_confirms_error",
+            "sourceRef": "ExclusiveGateway-AgentDecision-id-0001",
+            "targetRef": "ServiceTask-IssueCredit-id-0004",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-IssueToCreditNotification-id-0007",
+            "sourceRef": "ServiceTask-IssueCredit-id-0004",
+            "targetRef": "SendTask-CreditNotification-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CreditNotificationToClose-id-0008",
+            "sourceRef": "SendTask-CreditNotification-id-0001",
+            "targetRef": "EndEvent-CaseClosed-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AgentNoError-id-0009",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-AgentDecision-id-0001",
+            "targetRef": "UserTask-ExplainBillingLogic-id-0001",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ExplainToCustomerResponse-id-0010",
+            "sourceRef": "UserTask-ExplainBillingLogic-id-0001",
+            "targetRef": "ExclusiveGateway-CustomerResponse-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CustomerAccepts-id-0011",
+            "name": "customer_accepts_explanation",
+            "sourceRef": "ExclusiveGateway-CustomerResponse-id-0002",
+            "targetRef": "EndEvent-CaseClosed-id-0001",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CustomerDisputes-id-0012",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-CustomerResponse-id-0002",
+            "targetRef": "UserTask-EscalateToBillingSpecialist-id-0001",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-EscalateToDeepInvestigation-id-0013",
+            "sourceRef": "UserTask-EscalateToBillingSpecialist-id-0001",
+            "targetRef": "ServiceTask-DeepInvestigation-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DeepInvestigationToSpecialistDecision-id-0014",
+            "sourceRef": "ServiceTask-DeepInvestigation-id-0001",
+            "targetRef": "ExclusiveGateway-SpecialistDecision-id-0003"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SpecialistConfirmsError-id-0015",
+            "name": "specialist_confirms_error",
+            "sourceRef": "ExclusiveGateway-SpecialistDecision-id-0003",
+            "targetRef": "ServiceTask-IssueCredit-id-0004",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SpecialistNoError-id-0016",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-SpecialistDecision-id-0003",
+            "targetRef": "SendTask-GoodwillOffer-id-0001",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GoodwillToClose-id-0017",
+            "sourceRef": "SendTask-GoodwillOffer-id-0001",
+            "targetRef": "EndEvent-CaseClosed-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-IssueCreditFromSpecialistToNotification-id-0018",
+            "sourceRef": "ServiceTask-IssueCredit-id-0004",
+            "targetRef": "SendTask-CreditNotification-id-0001"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-large-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11774,
+        "total_tokens": 14015,
+        "completion_tokens": 2241
+      },
+      "model_name": "mistral-large-latest",
+      "model": "mistral-large-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11774,
+      "output_tokens": 2241,
+      "total_tokens": 14015
+    },
+    "id": "lc_run--f75aebb4-45d9-47e3-8da3-fdf96d97223a-0"
+  },
+  "status": "success"
+}

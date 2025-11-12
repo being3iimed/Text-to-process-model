@@ -1,0 +1,442 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "empty-definitions",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "bpmn-js (https://demo.bpmn.io)",
+    "exporterVersion": "18.0.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "WeddingProcess-id-0001",
+        "name": "Wedding Process",
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-WeddingPlanningBegins-id-0001",
+            "name": "Wedding Planning Begins"
+          },
+          {
+            "$type": "bpmn:SubProcess",
+            "id": "SubProcess-WeddingPlanning-id-0001",
+            "name": "Wedding Planning",
+            "flowElements": [
+              {
+                "$type": "bpmn:StartEvent",
+                "id": "StartEvent-PlanningStart-id-0001",
+                "name": "Planning Start"
+              },
+              {
+                "$type": "bpmn:UserTask",
+                "id": "UserTask-SelectHotel-id-0001",
+                "name": "Select Hotel"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-EnterContract-id-0002",
+                "name": "Enter Contract"
+              },
+              {
+                "$type": "bpmn:UserTask",
+                "id": "UserTask-ConfirmDetailsWithCoordinator-id-0003",
+                "name": "Confirm Details with Coordinator"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-CreateMasterTimeline-id-0004",
+                "name": "Create Master Timeline"
+              },
+              {
+                "$type": "bpmn:UserTask",
+                "id": "UserTask-ConfirmFinalDetails-id-0005",
+                "name": "Confirm Final Details"
+              },
+              {
+                "$type": "bpmn:BoundaryEvent",
+                "id": "BoundaryEvent-Timer2WeeksPreEvent-ConfirmFinalDetails-id-0001",
+                "name": "2 Weeks Pre-Event Timeout",
+                "attachedToRef": "UserTask-ConfirmFinalDetails-id-0005",
+                "cancelActivity": true,
+                "eventDefinitions": [
+                  {
+                    "$type": "bpmn:TimerEventDefinition",
+                    "timeDuration": "P14D"
+                  }
+                ]
+              },
+              {
+                "$type": "bpmn:EndEvent",
+                "id": "EndEvent-PlanningComplete-id-0006",
+                "name": "Planning Complete"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-StartToSelectHotel-id-0001",
+                "sourceRef": "StartEvent-PlanningStart-id-0001",
+                "targetRef": "UserTask-SelectHotel-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SelectHotelToEnterContract-id-0002",
+                "sourceRef": "UserTask-SelectHotel-id-0001",
+                "targetRef": "ServiceTask-EnterContract-id-0002"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-EnterContractToConfirmDetails-id-0003",
+                "sourceRef": "ServiceTask-EnterContract-id-0002",
+                "targetRef": "UserTask-ConfirmDetailsWithCoordinator-id-0003"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ConfirmDetailsToCreateTimeline-id-0004",
+                "sourceRef": "UserTask-ConfirmDetailsWithCoordinator-id-0003",
+                "targetRef": "ServiceTask-CreateMasterTimeline-id-0004"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-CreateTimelineToConfirmFinalDetails-id-0005",
+                "sourceRef": "ServiceTask-CreateMasterTimeline-id-0004",
+                "targetRef": "UserTask-ConfirmFinalDetails-id-0005"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ConfirmFinalDetailsToPlanningComplete-id-0006",
+                "sourceRef": "UserTask-ConfirmFinalDetails-id-0005",
+                "targetRef": "EndEvent-PlanningComplete-id-0006"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-BoundaryToSendReminder-id-0007",
+                "sourceRef": "BoundaryEvent-Timer2WeeksPreEvent-ConfirmFinalDetails-id-0001",
+                "targetRef": "SendTask-SendReminderToConfirmDetails-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SendReminderToConfirmFinalDetails-id-0008",
+                "sourceRef": "SendTask-SendReminderToConfirmDetails-id-0001",
+                "targetRef": "UserTask-ConfirmFinalDetails-id-0005"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:ParallelGateway",
+            "id": "ParallelGateway-Split-id-0001",
+            "name": "Parallel Execution",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-FinalizeSeatingChart-id-0001",
+            "name": "Finalize Seating Chart"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-PrepareNamePlacards-id-0002",
+            "name": "Prepare Name Placards"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-PrepareKitchenTimeline-id-0003",
+            "name": "Prepare Kitchen Timeline"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-CalculateAlcoholQuantities-id-0004",
+            "name": "Calculate Alcohol Quantities"
+          },
+          {
+            "$type": "bpmn:ParallelGateway",
+            "id": "ParallelGateway-Join-id-0001",
+            "name": "Parallel Join",
+            "gatewayDirection": "Converging"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-MorningSetup-id-0006",
+            "name": "Morning Setup"
+          },
+          {
+            "$type": "bpmn:ParallelGateway",
+            "id": "ParallelGateway-Split-id-0002",
+            "name": "Parallel Execution",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-GuestCheckIn-id-0005",
+            "name": "Guest Check-In"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-CeremonyBegins-id-0006",
+            "name": "Ceremony Begins"
+          },
+          {
+            "$type": "bpmn:ParallelGateway",
+            "id": "ParallelGateway-Join-id-0002",
+            "name": "Parallel Join",
+            "gatewayDirection": "Converging"
+          },
+          {
+            "$type": "bpmn:SubProcess",
+            "id": "SubProcess-ReceptionManagement-id-0001",
+            "name": "Reception Management",
+            "flowElements": [
+              {
+                "$type": "bpmn:StartEvent",
+                "id": "StartEvent-ReceptionStart-id-0001",
+                "name": "Reception Start"
+              },
+              {
+                "$type": "bpmn:ParallelGateway",
+                "id": "ParallelGateway-Split-id-0003",
+                "name": "Parallel Execution",
+                "gatewayDirection": "Diverging"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-CateringService-id-0001",
+                "name": "Catering Service"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-BarService-id-0002",
+                "name": "Bar Service"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-Dancing-id-0003",
+                "name": "Dancing"
+              },
+              {
+                "$type": "bpmn:ParallelGateway",
+                "id": "ParallelGateway-Join-id-0003",
+                "name": "Parallel Join",
+                "gatewayDirection": "Converging"
+              },
+              {
+                "$type": "bpmn:EndEvent",
+                "id": "EndEvent-ReceptionComplete-id-0004",
+                "name": "Reception Complete"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-StartToSplit-id-0001",
+                "sourceRef": "StartEvent-ReceptionStart-id-0001",
+                "targetRef": "ParallelGateway-Split-id-0003"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SplitToCateringService-id-0002",
+                "sourceRef": "ParallelGateway-Split-id-0003",
+                "targetRef": "ServiceTask-CateringService-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SplitToBarService-id-0003",
+                "sourceRef": "ParallelGateway-Split-id-0003",
+                "targetRef": "ServiceTask-BarService-id-0002"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SplitToDancing-id-0004",
+                "sourceRef": "ParallelGateway-Split-id-0003",
+                "targetRef": "ServiceTask-Dancing-id-0003"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-CateringServiceToJoin-id-0005",
+                "sourceRef": "ServiceTask-CateringService-id-0001",
+                "targetRef": "ParallelGateway-Join-id-0003"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-BarServiceToJoin-id-0006",
+                "sourceRef": "ServiceTask-BarService-id-0002",
+                "targetRef": "ParallelGateway-Join-id-0003"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-DancingToJoin-id-0007",
+                "sourceRef": "ServiceTask-Dancing-id-0003",
+                "targetRef": "ParallelGateway-Join-id-0003"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-JoinToReceptionComplete-id-0008",
+                "sourceRef": "ParallelGateway-Join-id-0003",
+                "targetRef": "EndEvent-ReceptionComplete-id-0004"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ImmediateCleanup-id-0007",
+            "name": "Immediate Cleanup"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-GuestCheckout-id-0008",
+            "name": "Guest Checkout"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ReconcileFinalBilling-id-0009",
+            "name": "Reconcile Final Billing"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-WeddingComplete-id-0002",
+            "name": "Wedding Complete"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-WeddingPlanningToParallelSplit-id-0001",
+            "sourceRef": "SubProcess-WeddingPlanning-id-0001",
+            "targetRef": "ParallelGateway-Split-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ParallelSplitToFinalizeSeatingChart-id-0002",
+            "sourceRef": "ParallelGateway-Split-id-0001",
+            "targetRef": "ServiceTask-FinalizeSeatingChart-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ParallelSplitToPrepareNamePlacards-id-0003",
+            "sourceRef": "ParallelGateway-Split-id-0001",
+            "targetRef": "UserTask-PrepareNamePlacards-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ParallelSplitToPrepareKitchenTimeline-id-0004",
+            "sourceRef": "ParallelGateway-Split-id-0001",
+            "targetRef": "ServiceTask-PrepareKitchenTimeline-id-0003"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ParallelSplitToCalculateAlcoholQuantities-id-0005",
+            "sourceRef": "ParallelGateway-Split-id-0001",
+            "targetRef": "ServiceTask-CalculateAlcoholQuantities-id-0004"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-FinalizeSeatingChartToParallelJoin-id-0006",
+            "sourceRef": "ServiceTask-FinalizeSeatingChart-id-0001",
+            "targetRef": "ParallelGateway-Join-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-PrepareNamePlacardsToParallelJoin-id-0007",
+            "sourceRef": "UserTask-PrepareNamePlacards-id-0002",
+            "targetRef": "ParallelGateway-Join-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-PrepareKitchenTimelineToParallelJoin-id-0008",
+            "sourceRef": "ServiceTask-PrepareKitchenTimeline-id-0003",
+            "targetRef": "ParallelGateway-Join-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CalculateAlcoholQuantitiesToParallelJoin-id-0009",
+            "sourceRef": "ServiceTask-CalculateAlcoholQuantities-id-0004",
+            "targetRef": "ParallelGateway-Join-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ParallelJoinToMorningSetup-id-0010",
+            "sourceRef": "ParallelGateway-Join-id-0001",
+            "targetRef": "UserTask-MorningSetup-id-0006"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-MorningSetupToParallelSplit-id-0011",
+            "sourceRef": "UserTask-MorningSetup-id-0006",
+            "targetRef": "ParallelGateway-Split-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ParallelSplitToGuestCheckIn-id-0012",
+            "sourceRef": "ParallelGateway-Split-id-0002",
+            "targetRef": "ServiceTask-GuestCheckIn-id-0005"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ParallelSplitToCeremonyBegins-id-0013",
+            "sourceRef": "ParallelGateway-Split-id-0002",
+            "targetRef": "ServiceTask-CeremonyBegins-id-0006"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GuestCheckInToParallelJoin-id-0014",
+            "sourceRef": "ServiceTask-GuestCheckIn-id-0005",
+            "targetRef": "ParallelGateway-Join-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CeremonyBeginsToParallelJoin-id-0015",
+            "sourceRef": "ServiceTask-CeremonyBegins-id-0006",
+            "targetRef": "ParallelGateway-Join-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ParallelJoinToReceptionManagement-id-0016",
+            "sourceRef": "ParallelGateway-Join-id-0002",
+            "targetRef": "SubProcess-ReceptionManagement-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReceptionManagementToImmediateCleanup-id-0017",
+            "sourceRef": "SubProcess-ReceptionManagement-id-0001",
+            "targetRef": "ServiceTask-ImmediateCleanup-id-0007"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ImmediateCleanupToGuestCheckout-id-0018",
+            "sourceRef": "ServiceTask-ImmediateCleanup-id-0007",
+            "targetRef": "UserTask-GuestCheckout-id-0008"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GuestCheckoutToReconcileFinalBilling-id-0019",
+            "sourceRef": "UserTask-GuestCheckout-id-0008",
+            "targetRef": "ServiceTask-ReconcileFinalBilling-id-0009"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReconcileFinalBillingToWeddingComplete-id-0020",
+            "sourceRef": "ServiceTask-ReconcileFinalBilling-id-0009",
+            "targetRef": "EndEvent-WeddingComplete-id-0002"
+          }
+        ],
+        "isExecutable": true
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-small-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11627,
+        "total_tokens": 16020,
+        "completion_tokens": 4393
+      },
+      "model_name": "mistral-small-latest",
+      "model": "mistral-small-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11627,
+      "output_tokens": 4393,
+      "total_tokens": 16020
+    },
+    "id": "lc_run--47bac81c-47e8-4582-ba04-a9fcd6007036-0"
+  },
+  "status": "success"
+}

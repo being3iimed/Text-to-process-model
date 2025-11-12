@@ -1,0 +1,488 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "BulkOrderProcess-Definitions-id-0001",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler",
+    "exporterVersion": "1.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "BulkOrderProcess-id-0001",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-BulkOrderSubmission-id-0001",
+            "name": "Bulk Order Submission"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-SubmitBulkOrder-id-0001",
+            "name": "Submit Bulk Order"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-CheckInventoryAvailability-id-0001",
+            "name": "Check Inventory Availability"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-InventoryCheck-id-0001",
+            "name": "Inventory Availability?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:SubProcess",
+            "id": "SubProcess-OrderFulfillment-id-0001",
+            "name": "Order Fulfillment",
+            "flowElements": [
+              {
+                "$type": "bpmn:StartEvent",
+                "id": "StartEvent-FulfillmentStart-id-0001",
+                "name": "Fulfillment Start"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-ReserveOrder-id-0001",
+                "name": "Reserve Order"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-ScheduleImmediatePacking-id-0001",
+                "name": "Schedule Immediate Packing"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-ShipCompleteOrder-id-0001",
+                "name": "Ship Complete Order"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-UpdateInventory-id-0001",
+                "name": "Update Inventory"
+              },
+              {
+                "$type": "bpmn:EndEvent",
+                "id": "EndEvent-FulfillmentComplete-id-0001",
+                "name": "Fulfillment Complete"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-FulfillmentStartToReserve-id-0001",
+                "sourceRef": "StartEvent-FulfillmentStart-id-0001",
+                "targetRef": "ServiceTask-ReserveOrder-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ReserveToPacking-id-0002",
+                "sourceRef": "ServiceTask-ReserveOrder-id-0001",
+                "targetRef": "ServiceTask-ScheduleImmediatePacking-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-PackingToShipComplete-id-0003",
+                "sourceRef": "ServiceTask-ScheduleImmediatePacking-id-0001",
+                "targetRef": "ServiceTask-ShipCompleteOrder-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ShipCompleteToUpdate-id-0004",
+                "sourceRef": "ServiceTask-ShipCompleteOrder-id-0001",
+                "targetRef": "ServiceTask-UpdateInventory-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-UpdateToFulfillmentComplete-id-0005",
+                "sourceRef": "ServiceTask-UpdateInventory-id-0001",
+                "targetRef": "EndEvent-FulfillmentComplete-id-0001"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-StockShortageNotification-id-0001",
+            "name": "Send: stock shortage notification"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-SelectFulfillmentOption-id-0001",
+            "name": "Select Fulfillment Option"
+          },
+          {
+            "$type": "bpmn:BoundaryEvent",
+            "id": "BoundaryEvent-Timer24Hour-SelectFulfillmentOption-id-0001",
+            "name": "24 Hour Timeout",
+            "attachedToRef": "UserTask-SelectFulfillmentOption-id-0001",
+            "cancelActivity": true,
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:TimerEventDefinition",
+                "timeDuration": "PT24H"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-EscalationToDirector-id-0001",
+            "name": "Send: escalation to director"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-FulfillmentOption-id-0001",
+            "name": "Fulfillment Option?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-SplitOrder-id-0001",
+            "name": "Split Order"
+          },
+          {
+            "$type": "bpmn:SubProcess",
+            "id": "SubProcess-PartialFulfillment-id-0001",
+            "name": "Partial Fulfillment",
+            "flowElements": [
+              {
+                "$type": "bpmn:StartEvent",
+                "id": "StartEvent-PartialFulfillmentStart-id-0001",
+                "name": "Partial Fulfillment Start"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-ReserveOrderPartial-id-0001",
+                "name": "Reserve Order"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-ScheduleImmediatePackingPartial-id-0001",
+                "name": "Schedule Immediate Packing"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-ShipAvailableItems-id-0001",
+                "name": "Ship Available Items"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-UpdateInventoryPartial-id-0001",
+                "name": "Update Inventory"
+              },
+              {
+                "$type": "bpmn:EndEvent",
+                "id": "EndEvent-PartialFulfillmentComplete-id-0001",
+                "name": "Partial Fulfillment Complete"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-PartialStartToReserve-id-0001",
+                "sourceRef": "StartEvent-PartialFulfillmentStart-id-0001",
+                "targetRef": "ServiceTask-ReserveOrderPartial-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ReserveToPackingPartial-id-0002",
+                "sourceRef": "ServiceTask-ReserveOrderPartial-id-0001",
+                "targetRef": "ServiceTask-ScheduleImmediatePackingPartial-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-PackingToShipPartial-id-0003",
+                "sourceRef": "ServiceTask-ScheduleImmediatePackingPartial-id-0001",
+                "targetRef": "ServiceTask-ShipAvailableItems-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ShipPartialToUpdate-id-0004",
+                "sourceRef": "ServiceTask-ShipAvailableItems-id-0001",
+                "targetRef": "ServiceTask-UpdateInventoryPartial-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-UpdateToPartialComplete-id-0005",
+                "sourceRef": "ServiceTask-UpdateInventoryPartial-id-0001",
+                "targetRef": "EndEvent-PartialFulfillmentComplete-id-0001"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-CreateBackorder-id-0001",
+            "name": "Create Backorder"
+          },
+          {
+            "$type": "bpmn:ReceiveTask",
+            "id": "ReceiveTask-StockArrivalNotification-id-0001",
+            "name": "Receive: stock arrival notification"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ShipRemainingItems-id-0001",
+            "name": "Ship Remaining Items"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-UpdateInventoryRemaining-id-0001",
+            "name": "Update Inventory"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-HoldOrderPending-id-0001",
+            "name": "Hold Order Pending"
+          },
+          {
+            "$type": "bpmn:SubProcess",
+            "id": "SubProcess-DelayedFulfillment-id-0001",
+            "name": "Delayed Fulfillment",
+            "flowElements": [
+              {
+                "$type": "bpmn:StartEvent",
+                "id": "StartEvent-DelayedFulfillmentStart-id-0001",
+                "name": "Delayed Fulfillment Start"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-ReserveOrderDelayed-id-0001",
+                "name": "Reserve Order"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-ScheduleImmediatePackingDelayed-id-0001",
+                "name": "Schedule Immediate Packing"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-ShipCompleteOrderDelayed-id-0001",
+                "name": "Ship Complete Order"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-UpdateInventoryDelayed-id-0001",
+                "name": "Update Inventory"
+              },
+              {
+                "$type": "bpmn:EndEvent",
+                "id": "EndEvent-DelayedFulfillmentComplete-id-0001",
+                "name": "Delayed Fulfillment Complete"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-DelayedStartToReserve-id-0001",
+                "sourceRef": "StartEvent-DelayedFulfillmentStart-id-0001",
+                "targetRef": "ServiceTask-ReserveOrderDelayed-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ReserveToPackingDelayed-id-0002",
+                "sourceRef": "ServiceTask-ReserveOrderDelayed-id-0001",
+                "targetRef": "ServiceTask-ScheduleImmediatePackingDelayed-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-PackingToShipDelayed-id-0003",
+                "sourceRef": "ServiceTask-ScheduleImmediatePackingDelayed-id-0001",
+                "targetRef": "ServiceTask-ShipCompleteOrderDelayed-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ShipDelayedToUpdate-id-0004",
+                "sourceRef": "ServiceTask-ShipCompleteOrderDelayed-id-0001",
+                "targetRef": "ServiceTask-UpdateInventoryDelayed-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-UpdateToDelayedComplete-id-0005",
+                "sourceRef": "ServiceTask-UpdateInventoryDelayed-id-0001",
+                "targetRef": "EndEvent-DelayedFulfillmentComplete-id-0001"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-OrderFulfilled-id-0001",
+            "name": "Order Fulfilled"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-OrderCancelled-id-0001",
+            "name": "Order Cancelled"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-StockArrival-id-0001",
+            "name": "Stock Arrival?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToSubmitOrder-id-0001",
+            "sourceRef": "StartEvent-BulkOrderSubmission-id-0001",
+            "targetRef": "UserTask-SubmitBulkOrder-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SubmitToCheckInventory-id-0002",
+            "sourceRef": "UserTask-SubmitBulkOrder-id-0001",
+            "targetRef": "ServiceTask-CheckInventoryAvailability-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CheckToInventoryGateway-id-0003",
+            "sourceRef": "ServiceTask-CheckInventoryAvailability-id-0001",
+            "targetRef": "ExclusiveGateway-InventoryCheck-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AllAvailableToFulfillment-id-0004",
+            "name": "all_products_available",
+            "sourceRef": "ExclusiveGateway-InventoryCheck-id-0001",
+            "targetRef": "SubProcess-OrderFulfillment-id-0001",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-FulfillmentToOrderFulfilled-id-0005",
+            "sourceRef": "SubProcess-OrderFulfillment-id-0001",
+            "targetRef": "EndEvent-OrderFulfilled-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ShortageToNotification-id-0006",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-InventoryCheck-id-0001",
+            "targetRef": "SendTask-StockShortageNotification-id-0001",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-NotificationToSelectOption-id-0007",
+            "sourceRef": "SendTask-StockShortageNotification-id-0001",
+            "targetRef": "UserTask-SelectFulfillmentOption-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SelectOptionToFulfillmentGateway-id-0008",
+            "sourceRef": "UserTask-SelectFulfillmentOption-id-0001",
+            "targetRef": "ExclusiveGateway-FulfillmentOption-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-BoundaryToEscalation-id-0009",
+            "sourceRef": "BoundaryEvent-Timer24Hour-SelectFulfillmentOption-id-0001",
+            "targetRef": "SendTask-EscalationToDirector-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-EscalationToEnd-id-0010",
+            "sourceRef": "SendTask-EscalationToDirector-id-0001",
+            "targetRef": "EndEvent-OrderCancelled-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-PartialToSplitOrder-id-0011",
+            "name": "manager_chooses_partial",
+            "sourceRef": "ExclusiveGateway-FulfillmentOption-id-0001",
+            "targetRef": "ServiceTask-SplitOrder-id-0001",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SplitToPartialFulfillment-id-0012",
+            "sourceRef": "ServiceTask-SplitOrder-id-0001",
+            "targetRef": "SubProcess-PartialFulfillment-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-PartialFulfillmentToBackorder-id-0013",
+            "sourceRef": "SubProcess-PartialFulfillment-id-0001",
+            "targetRef": "ServiceTask-CreateBackorder-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-BackorderToStockArrival-id-0014",
+            "sourceRef": "ServiceTask-CreateBackorder-id-0001",
+            "targetRef": "ReceiveTask-StockArrivalNotification-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StockArrivalToStockGateway-id-0015",
+            "sourceRef": "ReceiveTask-StockArrivalNotification-id-0001",
+            "targetRef": "ExclusiveGateway-StockArrival-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StockGatewayToShipRemaining-id-0016",
+            "name": "partial_shipped",
+            "sourceRef": "ExclusiveGateway-StockArrival-id-0001",
+            "targetRef": "ServiceTask-ShipRemainingItems-id-0001",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ShipRemainingToUpdate-id-0017",
+            "sourceRef": "ServiceTask-ShipRemainingItems-id-0001",
+            "targetRef": "ServiceTask-UpdateInventoryRemaining-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-UpdateRemainingToFulfilled-id-0018",
+            "sourceRef": "ServiceTask-UpdateInventoryRemaining-id-0001",
+            "targetRef": "EndEvent-OrderFulfilled-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StockGatewayToHoldOrder-id-0019",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-FulfillmentOption-id-0001",
+            "targetRef": "ServiceTask-HoldOrderPending-id-0001",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-HoldOrderToStockArrival-id-0020",
+            "sourceRef": "ServiceTask-HoldOrderPending-id-0001",
+            "targetRef": "ReceiveTask-StockArrivalNotification-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StockGatewayToDelayedFulfillment-id-0021",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-StockArrival-id-0001",
+            "targetRef": "SubProcess-DelayedFulfillment-id-0001",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DelayedFulfillmentToFulfilled-id-0022",
+            "sourceRef": "SubProcess-DelayedFulfillment-id-0001",
+            "targetRef": "EndEvent-OrderFulfilled-id-0001"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-medium-2508",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 12706,
+        "total_tokens": 17675,
+        "completion_tokens": 4969
+      },
+      "model_name": "mistral-medium-2508",
+      "model": "mistral-medium-2508",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 12706,
+      "output_tokens": 4969,
+      "total_tokens": 17675
+    },
+    "id": "lc_run--53c5abcc-3ba9-4f4f-a957-e804dba64068-0"
+  },
+  "status": "success"
+}

@@ -1,0 +1,299 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "MaterialProcurementDefinitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "MaterialProcurementProcess",
+      "name": "Material Procurement and Receipt",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-MaterialProcurementProcess-id-0001",
+          "name": "Material Procurement Process"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-Generate3MonthMaterialForecast-id-0001",
+          "name": "Generate 3-Month Material Forecast"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CreatePurchaseOrders-id-0002",
+          "name": "Create Purchase Orders"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendPOToSupplier-id-0001",
+          "name": "Send: PO to Supplier"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-ReceiveSupplierConfirmation-id-0001",
+          "name": "Receive: Supplier Confirmation"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-LogShipmentDetails-id-0001",
+          "name": "Log Shipment Details"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-WarehouseVerificationSplit-id-0001",
+          "name": "Warehouse Verification",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-WarehouseVerifyQuantity-id-0001",
+          "name": "Warehouse: Verify Quantity"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-WarehouseVerifyQuality-id-0002",
+          "name": "Warehouse: Verify Quality"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-WarehouseVerifyCondition-id-0003",
+          "name": "Warehouse: Verify Condition"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-WarehouseVerificationJoin-id-0002",
+          "name": "Verification Complete",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-VerificationDecision-id-0001",
+          "name": "Verification Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-LogRejectionReason-id-0001",
+          "name": "Log Rejection Reason"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendRejectionNoticeToSupplier-id-0002",
+          "name": "Send: Rejection Notice to Supplier"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-MaterialsRejected-id-0001",
+          "name": "Materials Rejected"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-UpdateInventory-id-0001",
+          "name": "Update Inventory"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-RouteToProduction-id-0002",
+          "name": "Route to Production"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-MaterialsInProduction-id-0002",
+          "name": "Materials in Production"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToGenerateForecast-id-0001",
+          "sourceRef": "StartEvent-MaterialProcurementProcess-id-0001",
+          "targetRef": "ServiceTask-Generate3MonthMaterialForecast-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GenerateForecastToCreatePO-id-0002",
+          "sourceRef": "ServiceTask-Generate3MonthMaterialForecast-id-0001",
+          "targetRef": "ServiceTask-CreatePurchaseOrders-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CreatePOToSendPO-id-0003",
+          "sourceRef": "ServiceTask-CreatePurchaseOrders-id-0002",
+          "targetRef": "SendTask-SendPOToSupplier-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendPOToReceiveConfirmation-id-0004",
+          "sourceRef": "SendTask-SendPOToSupplier-id-0001",
+          "targetRef": "ReceiveTask-ReceiveSupplierConfirmation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReceiveConfirmationToLogShipment-id-0005",
+          "sourceRef": "ReceiveTask-ReceiveSupplierConfirmation-id-0001",
+          "targetRef": "ServiceTask-LogShipmentDetails-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LogShipmentToWarehouseSplit-id-0006",
+          "sourceRef": "ServiceTask-LogShipmentDetails-id-0001",
+          "targetRef": "ParallelGateway-WarehouseVerificationSplit-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToVerifyQuantity-id-0007",
+          "sourceRef": "ParallelGateway-WarehouseVerificationSplit-id-0001",
+          "targetRef": "UserTask-WarehouseVerifyQuantity-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToVerifyQuality-id-0008",
+          "sourceRef": "ParallelGateway-WarehouseVerificationSplit-id-0001",
+          "targetRef": "UserTask-WarehouseVerifyQuality-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToVerifyCondition-id-0009",
+          "sourceRef": "ParallelGateway-WarehouseVerificationSplit-id-0001",
+          "targetRef": "UserTask-WarehouseVerifyCondition-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-VerifyQuantityToJoin-id-0010",
+          "sourceRef": "UserTask-WarehouseVerifyQuantity-id-0001",
+          "targetRef": "ParallelGateway-WarehouseVerificationJoin-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-VerifyQualityToJoin-id-0011",
+          "sourceRef": "UserTask-WarehouseVerifyQuality-id-0002",
+          "targetRef": "ParallelGateway-WarehouseVerificationJoin-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-VerifyConditionToJoin-id-0012",
+          "sourceRef": "UserTask-WarehouseVerifyCondition-id-0003",
+          "targetRef": "ParallelGateway-WarehouseVerificationJoin-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinToVerificationDecision-id-0013",
+          "sourceRef": "ParallelGateway-WarehouseVerificationJoin-id-0002",
+          "targetRef": "ExclusiveGateway-VerificationDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-VerificationDecisionToLogRejection-id-0014",
+          "sourceRef": "ExclusiveGateway-VerificationDecision-id-0001",
+          "targetRef": "ServiceTask-LogRejectionReason-id-0001",
+          "name": "quantity_mismatch OR quality_failure OR damage_detected"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LogRejectionToSendRejection-id-0015",
+          "sourceRef": "ServiceTask-LogRejectionReason-id-0001",
+          "targetRef": "SendTask-SendRejectionNoticeToSupplier-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendRejectionToEndRejected-id-0016",
+          "sourceRef": "SendTask-SendRejectionNoticeToSupplier-id-0002",
+          "targetRef": "EndEvent-MaterialsRejected-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-VerificationDecisionToUpdateInventory-id-0017",
+          "sourceRef": "ExclusiveGateway-VerificationDecision-id-0001",
+          "targetRef": "ServiceTask-UpdateInventory-id-0001",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-UpdateInventoryToRouteToProduction-id-0018",
+          "sourceRef": "ServiceTask-UpdateInventory-id-0001",
+          "targetRef": "ServiceTask-RouteToProduction-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RouteToProductionToEndInProduction-id-0019",
+          "sourceRef": "ServiceTask-RouteToProduction-id-0002",
+          "targetRef": "EndEvent-MaterialsInProduction-id-0002"
+        }
+      ]
+    },
+    {
+      "$type": "bpmn:Process",
+      "id": "InvoiceProcessingProcess",
+      "name": "Invoice Processing",
+      "isExecutable": false,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-InvoiceReceived-id-0001",
+          "name": "Invoice Received"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-MatchInvoiceToPOReceipt-id-0001",
+          "name": "Match Invoice to PO/Receipt"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ThreeWayMatch-id-0001",
+          "name": "Three-Way Match?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-InvoiceApproved-id-0001",
+          "name": "Invoice Approved"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-FinanceInvestigateMismatch-id-0001",
+          "name": "Finance: Investigate Mismatch"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-InvoiceUnderInvestigation-id-0002",
+          "name": "Invoice Under Investigation"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InvoiceReceivedToMatch-id-0001",
+          "sourceRef": "StartEvent-InvoiceReceived-id-0001",
+          "targetRef": "ServiceTask-MatchInvoiceToPOReceipt-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MatchToThreeWayMatch-id-0002",
+          "sourceRef": "ServiceTask-MatchInvoiceToPOReceipt-id-0001",
+          "targetRef": "ExclusiveGateway-ThreeWayMatch-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ThreeWayMatchToInvoiceApproved-id-0003",
+          "sourceRef": "ExclusiveGateway-ThreeWayMatch-id-0001",
+          "targetRef": "EndEvent-InvoiceApproved-id-0001",
+          "name": "three_way_match == true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ThreeWayMatchToInvestigateMismatch-id-0004",
+          "sourceRef": "ExclusiveGateway-ThreeWayMatch-id-0001",
+          "targetRef": "UserTask-FinanceInvestigateMismatch-id-0001",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InvestigateMismatchToUnderInvestigation-id-0005",
+          "sourceRef": "UserTask-FinanceInvestigateMismatch-id-0001",
+          "targetRef": "EndEvent-InvoiceUnderInvestigation-id-0002"
+        }
+      ]
+    }
+  ]
+}

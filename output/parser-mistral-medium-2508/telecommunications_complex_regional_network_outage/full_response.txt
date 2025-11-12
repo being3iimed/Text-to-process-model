@@ -1,0 +1,202 @@
+```
+<summary_of_elements>
+
+## Summary of Elements
+
+### TASKS:
+- **serviceTask("Analyze Affected Towers")** - Automated analysis of which specific towers are experiencing packet loss
+- **serviceTask("Analyze Impacted Services")** - Automated analysis of which services (voice, 4G LTE) are impacted
+- **serviceTask("Analyze Customer Impact")** - Automated analysis of how many customers are impacted
+- **serviceTask("Switch Traffic to Adjacent Towers")** - Automated traffic rerouting
+- **sendTask("Send: Incident Alert to Engineers")** - Automated notification to on-call engineers
+- **sendTask("Send: Incident Alert to NOC Team")** - Automated notification to NOC team
+- **serviceTask("Dispatch Field Engineers")** - Automated dispatch of field engineers
+- **serviceTask("Analyze Root Cause from Logs")** - Automated log analysis for root cause (hardware/software/capacity)
+- **serviceTask("Retrieve Spare Parts from Inventory")** - Automated inventory retrieval (if hardware failure)
+- **serviceTask("Prioritize Traffic to Critical Services")** - Automated traffic prioritization (if capacity overload)
+- **userTask("Field Team Connects Diagnostic Equipment")** - Manual field team action
+- **userTask("Field Team Confirms Hypothesis")** - Manual validation of system's root cause analysis
+- **userTask("Field Team Performs Fix")** - Manual fix (replace hardware, rollback software, activate backup)
+- **serviceTask("Reroute Traffic During Maintenance")** - Automated traffic rerouting during maintenance
+- **sendTask("Send: Maintenance Notification to Customers")** - Automated customer notification
+- **serviceTask("Validate Network Metrics")** - Automated validation of network metrics post-fix
+- **serviceTask("Escalate for Further Investigation")** - Automated escalation if issue persists
+- **serviceTask("Log Incident Summary")** - Automated incident logging for post-mortem
+
+### GATEWAYS:
+- **XOR** at root cause analysis (hardware failure, software issue, capacity overload)
+- **XOR** at fix validation (resolved, not resolved)
+
+### EVENTS:
+- **startEvent("High Packet Loss Detected")** - Trigger: automated detection of 5%+ packet loss
+- **endEvent("Incident Resolved")** - Normal completion
+- **endEvent("Incident Escalated")** - Escalation path
+
+### BOUNDARY EVENTS:
+- **None** (No explicit SLA requirements or error scenarios mentioned)
+
+### SUBPROCESSES:
+- **None** (No cohesive logical grouping requiring abstraction)
+
+---
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+```pseudocode
+startEvent("High Packet Loss Detected")
+
+// Automated Analysis Phase
+serviceTask("Analyze Affected Towers")
+serviceTask("Analyze Impacted Services")
+serviceTask("Analyze Customer Impact")
+
+// Automated Mitigation Phase
+serviceTask("Switch Traffic to Adjacent Towers")
+sendTask("Send: Incident Alert to Engineers")
+sendTask("Send: Incident Alert to NOC Team")
+serviceTask("Dispatch Field Engineers")
+
+// Root Cause Analysis Phase
+serviceTask("Analyze Root Cause from Logs")
+
+if (root_cause == "hardware_failure"):
+    serviceTask("Retrieve Spare Parts from Inventory")
+else if (root_cause == "capacity_overload"):
+    serviceTask("Prioritize Traffic to Critical Services")
+END_IF
+
+// Field Team Intervention Phase
+userTask("Field Team Connects Diagnostic Equipment")
+userTask("Field Team Confirms Hypothesis")
+userTask("Field Team Performs Fix")
+
+// Maintenance Phase
+serviceTask("Reroute Traffic During Maintenance")
+sendTask("Send: Maintenance Notification to Customers")
+
+// Validation Phase
+serviceTask("Validate Network Metrics")
+
+if (metrics_normal):
+    serviceTask("Log Incident Summary")
+    endEvent("Incident Resolved")
+else:
+    serviceTask("Escalate for Further Investigation")
+    endEvent("Incident Escalated")
+END_IF
+```
+
+---
+</bpmn_pseudocode>
+
+<compliance_validation>
+
+## Compliance Validation
+
+### **Timer Events**:
+✅ **N/A** (No timer events used)
+
+### **Gateway Convergence**:
+✅ **Validated**:
+- XOR at root cause analysis converges to field team intervention
+- XOR at fix validation converges to end events
+
+### **Sequence Flow Labels**:
+✅ **Validated**:
+- All conditional flows have descriptive labels (`root_cause == "hardware_failure"`, `metrics_normal`)
+- No empty string labels
+
+### **Boundary Events**:
+✅ **Validated**:
+- No speculative boundary events added
+- No SLAs or error scenarios explicitly mentioned
+
+### **Subprocesses**:
+✅ **Validated**:
+- No subprocesses needed (all tasks are linear/sequential with clear purpose)
+- Passes Three-Question Necessity Test (no abstraction required)
+
+### **Flow Paths**:
+✅ **Validated**:
+- All paths traceable from start to end
+- No orphaned flows
+- No unreachable tasks
+
+---
+</compliance_validation>
+
+<critical_success_criteria_verification>
+
+## Critical Success Criteria Verification
+
+| **Criteria**                          | **Status** | **Notes**                                                                 |
+|---------------------------------------|------------|---------------------------------------------------------------------------|
+| No invalid BPMN properties           | ✅ PASS    | No timer events or invalid constructs used                              |
+| No unreachable elements               | ✅ PASS    | All elements are reachable in all paths                                 |
+| No missing convergence points         | ✅ PASS    | All gateways have explicit merge points                                 |
+| No orphaned flows                     | ✅ PASS    | All paths terminate at end events                                       |
+| No speculative boundary events         | ✅ PASS    | No boundary events added without explicit requirements                 |
+| No unjustified subprocesses            | ✅ PASS    | No subprocesses created; linear flow is clear and simple                 |
+| All labels present                    | ✅ PASS    | All conditional flows have descriptive labels                           |
+| Balanced design (core elements 85%+)  | ✅ PASS    | 100% core elements (tasks, gateways, events); no over-engineering       |
+
+---
+</critical_success_criteria_verification>
+
+<assumptions>
+
+## Assumptions
+1. **No explicit SLAs**: No timer boundary events added (e.g., for field team response time) as none were mentioned.
+2. **No error handling**: No error boundary events added (e.g., for failed fix attempts) as none were specified.
+3. **Linear field team workflow**: Assumed field team actions are sequential (connect equipment → confirm hypothesis → perform fix).
+4. **Automated customer notifications**: Assumed system sends maintenance notifications automatically during rerouting.
+5. **Binary fix validation**: Assumed network metrics are either "normal" or "not normal" (no partial resolution states).
+
+---
+</assumptions>
+
+<recommendations>
+
+## Recommendations for Future Refinement
+1. **Add SLAs**:
+   - If field team response time is critical (e.g., "must arrive within 4 hours"), add:
+     ```pseudocode
+     userTask("Field Team Performs Fix"):
+         timerBoundary("PT4H"):
+             sendTask("Send: Escalation to Senior Engineer")
+     ```
+2. **Add Error Handling**:
+   - If fix attempts can fail (e.g., spare parts unavailable), add:
+     ```pseudocode
+     serviceTask("Retrieve Spare Parts from Inventory"):
+         errorBoundary():
+             userTask("Manual Parts Requisition")
+     ```
+3. **Customer Communication Subprocess**:
+   - If customer notifications are complex (e.g., multi-channel, templates), abstract into:
+     ```pseudocode
+     subProcess("Notify Affected Customers"):
+         startEvent("Notification Start")
+         sendTask("Send: SMS Alert")
+         sendTask("Send: Email Alert")
+         sendTask("Send: Push Notification")
+         endEvent("Notification Complete")
+     endSubProcess
+     ```
+4. **Post-Mortem Subprocess**:
+   - If incident logging involves multiple steps (e.g., root cause analysis, corrective actions, preventative measures), abstract into:
+     ```pseudocode
+     subProcess("Log Incident for Post-Mortem"):
+         startEvent("Logging Start")
+         serviceTask("Record Root Cause")
+         serviceTask("Record Actions Taken")
+         serviceTask("Record Customer Impact")
+         serviceTask("Generate Prevention Recommendations")
+         endEvent("Logging Complete")
+     endSubProcess
+     ```
+
+---
+</recommendations>
+```

@@ -1,0 +1,338 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "GraduationProcessDefinitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "GraduationProcess",
+      "isExecutable": false,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-GraduationCheckRequested-id-0001",
+          "name": "Graduation Check Requested"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-ValidateAcademicRequirements-id-0001",
+          "name": "Validate Academic Requirements",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-ValidationStart-id-0001",
+              "name": "Validation Start"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-AuditDegreeRequirements-id-0001",
+              "name": "Audit Degree Requirements"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-Split-id-0001",
+              "name": "Parallel Validation",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-VerifyMajorCourseCompletion-id-0002",
+              "name": "Verify Major Course Completion"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-VerifyGeneralEducationCompletion-id-0003",
+              "name": "Verify General Education Completion"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-CheckCreditTotal-id-0004",
+              "name": "Check Credit Total (120 minimum)"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-CheckGPA-id-0005",
+              "name": "Check GPA (2.0 cumulative, major-specific minimum)"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-Join-id-0002",
+              "name": "Validation Complete",
+              "gatewayDirection": "Converging"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-AllRequirementsMet-id-0001",
+              "name": "All Requirements Met?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-ValidationPassed-id-0001",
+              "name": "Validation Passed"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-GenerateDeficiencyReport-id-0006",
+              "name": "Generate Deficiency Report"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-ValidationFailed-id-0002",
+              "name": "Validation Failed"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StartToAudit-id-0001",
+              "sourceRef": "StartEvent-ValidationStart-id-0001",
+              "targetRef": "ServiceTask-AuditDegreeRequirements-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-AuditToSplit-id-0002",
+              "sourceRef": "ServiceTask-AuditDegreeRequirements-id-0001",
+              "targetRef": "ParallelGateway-Split-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToMajor-id-0003",
+              "sourceRef": "ParallelGateway-Split-id-0001",
+              "targetRef": "ServiceTask-VerifyMajorCourseCompletion-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToGE-id-0004",
+              "sourceRef": "ParallelGateway-Split-id-0001",
+              "targetRef": "ServiceTask-VerifyGeneralEducationCompletion-id-0003"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToCredit-id-0005",
+              "sourceRef": "ParallelGateway-Split-id-0001",
+              "targetRef": "ServiceTask-CheckCreditTotal-id-0004"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToGPA-id-0006",
+              "sourceRef": "ParallelGateway-Split-id-0001",
+              "targetRef": "ServiceTask-CheckGPA-id-0005"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MajorToJoin-id-0007",
+              "sourceRef": "ServiceTask-VerifyMajorCourseCompletion-id-0002",
+              "targetRef": "ParallelGateway-Join-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GEToJoin-id-0008",
+              "sourceRef": "ServiceTask-VerifyGeneralEducationCompletion-id-0003",
+              "targetRef": "ParallelGateway-Join-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CreditToJoin-id-0009",
+              "sourceRef": "ServiceTask-CheckCreditTotal-id-0004",
+              "targetRef": "ParallelGateway-Join-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GPAToJoin-id-0010",
+              "sourceRef": "ServiceTask-CheckGPA-id-0005",
+              "targetRef": "ParallelGateway-Join-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-JoinToXOR-id-0011",
+              "sourceRef": "ParallelGateway-Join-id-0002",
+              "targetRef": "ExclusiveGateway-AllRequirementsMet-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-XORToPassed-id-0012",
+              "name": "all_requirements_met == true",
+              "sourceRef": "ExclusiveGateway-AllRequirementsMet-id-0001",
+              "targetRef": "EndEvent-ValidationPassed-id-0001",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-XORToFailed-id-0013",
+              "name": "all_requirements_met == false",
+              "sourceRef": "ExclusiveGateway-AllRequirementsMet-id-0001",
+              "targetRef": "ServiceTask-GenerateDeficiencyReport-id-0006",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReportToFailedEnd-id-0014",
+              "sourceRef": "ServiceTask-GenerateDeficiencyReport-id-0006",
+              "targetRef": "EndEvent-ValidationFailed-id-0002"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ValidationPassed-id-0002",
+          "name": "Validation Passed?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ApproveGraduation-id-0007",
+          "name": "Approve Graduation"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-GraduationPrepSplit-id-0003",
+          "name": "Graduation Preparation",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-PrepareDiploma-id-0008",
+          "name": "Prepare Diploma"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-PlaceCapAndGownOrder-id-0009",
+          "name": "Place Cap-and-Gown Order"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-AssignGraduationCeremonySlot-id-0010",
+          "name": "Assign Graduation Ceremony Slot"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-GraduationPrepJoin-id-0004",
+          "name": "Preparation Complete",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-VerifyCeremonyAttendance-id-0011",
+          "name": "Verify Ceremony Attendance"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ConferDegree-id-0012",
+          "name": "Confer Degree"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-IssueTranscript-id-0013",
+          "name": "Issue Transcript"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-GraduationApproved-id-0003",
+          "name": "Graduation Approved"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-DeficienciesIdentified-id-0004",
+          "name": "Deficiencies Identified"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToSubProcess-id-0015",
+          "sourceRef": "StartEvent-GraduationCheckRequested-id-0001",
+          "targetRef": "SubProcess-ValidateAcademicRequirements-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SubProcessToXOR-id-0016",
+          "sourceRef": "SubProcess-ValidateAcademicRequirements-id-0001",
+          "targetRef": "ExclusiveGateway-ValidationPassed-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-XORToApprove-id-0017",
+          "name": "validation_passed == true",
+          "sourceRef": "ExclusiveGateway-ValidationPassed-id-0002",
+          "targetRef": "ServiceTask-ApproveGraduation-id-0007",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-XORToDeficiencies-id-0018",
+          "name": "validation_passed == false",
+          "sourceRef": "ExclusiveGateway-ValidationPassed-id-0002",
+          "targetRef": "EndEvent-DeficienciesIdentified-id-0004",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ApproveToSplit-id-0019",
+          "sourceRef": "ServiceTask-ApproveGraduation-id-0007",
+          "targetRef": "ParallelGateway-GraduationPrepSplit-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToDiploma-id-0020",
+          "sourceRef": "ParallelGateway-GraduationPrepSplit-id-0003",
+          "targetRef": "ServiceTask-PrepareDiploma-id-0008"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToCapGown-id-0021",
+          "sourceRef": "ParallelGateway-GraduationPrepSplit-id-0003",
+          "targetRef": "ServiceTask-PlaceCapAndGownOrder-id-0009"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToCeremonySlot-id-0022",
+          "sourceRef": "ParallelGateway-GraduationPrepSplit-id-0003",
+          "targetRef": "ServiceTask-AssignGraduationCeremonySlot-id-0010"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DiplomaToJoin-id-0023",
+          "sourceRef": "ServiceTask-PrepareDiploma-id-0008",
+          "targetRef": "ParallelGateway-GraduationPrepJoin-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CapGownToJoin-id-0024",
+          "sourceRef": "ServiceTask-PlaceCapAndGownOrder-id-0009",
+          "targetRef": "ParallelGateway-GraduationPrepJoin-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CeremonySlotToJoin-id-0025",
+          "sourceRef": "ServiceTask-AssignGraduationCeremonySlot-id-0010",
+          "targetRef": "ParallelGateway-GraduationPrepJoin-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinToAttendance-id-0026",
+          "sourceRef": "ParallelGateway-GraduationPrepJoin-id-0004",
+          "targetRef": "UserTask-VerifyCeremonyAttendance-id-0011"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AttendanceToConfer-id-0027",
+          "sourceRef": "UserTask-VerifyCeremonyAttendance-id-0011",
+          "targetRef": "ServiceTask-ConferDegree-id-0012"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConferToTranscript-id-0028",
+          "sourceRef": "ServiceTask-ConferDegree-id-0012",
+          "targetRef": "ServiceTask-IssueTranscript-id-0013"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TranscriptToEnd-id-0029",
+          "sourceRef": "ServiceTask-IssueTranscript-id-0013",
+          "targetRef": "EndEvent-GraduationApproved-id-0003"
+        }
+      ]
+    }
+  ]
+}
+```

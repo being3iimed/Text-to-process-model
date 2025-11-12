@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions-PrescriptionProcess-id-0001" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process-PrescriptionProcess-id-0001" name="Prescription Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-PrescriptionProcess-id-0001" name="Prescription Process">
+      <bpmn:outgoing>SequenceFlow-StartToSendPrescription-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-SendPrescriptionToPharmacy-id-0001" name="Send prescription to pharmacy">
+      <bpmn:incoming>SequenceFlow-StartToSendPrescription-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendToReceive-id-0002</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceivePrescription-id-0002" name="Receive: prescription">
+      <bpmn:incoming>SequenceFlow-SendToReceive-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveToCheckEligibility-id-0003</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:userTask id="UserTask-CheckInsuranceEligibility-id-0003" name="Check insurance eligibility">
+      <bpmn:incoming>SequenceFlow-ReceiveToCheckEligibility-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckToGateway-id-0004</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-PriorAuthorizationRequired-id-0001" name="Prior authorization required?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CheckToGateway-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToContactInsurance-id-0005</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToFillPrescription-id-0006</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-ContactInsuranceCompany-id-0004" name="Contact insurance company">
+      <bpmn:incoming>SequenceFlow-GatewayToContactInsurance-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ContactToInsuranceResponse-id-0007</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-InsuranceResponse-id-0002" name="Insurance response" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ContactToInsuranceResponse-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InsuranceResponseToFillPrescription-id-0008</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-InsuranceResponseToDenialNotification-id-0009</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-FillPrescription-id-0005" name="Fill prescription">
+      <bpmn:incoming>SequenceFlow-GatewayToFillPrescription-id-0006</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-InsuranceResponseToFillPrescription-id-0008</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ProcessAppealToFillPrescription-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FillToNotification-id-0010</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendNotificationToPatient-id-0006" name="Send: notification to patient">
+      <bpmn:incoming>SequenceFlow-FillToNotification-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotificationToSignReceipt-id-0011</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-SignReceipt-id-0007" name="Sign receipt">
+      <bpmn:incoming>SequenceFlow-NotificationToSignReceipt-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SignToComplete-id-0012</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0001" name="Process Complete">
+      <bpmn:incoming>SequenceFlow-SignToComplete-id-0012</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="SendTask-SendDenialNotification-id-0008" name="Send: denial notification">
+      <bpmn:incoming>SequenceFlow-InsuranceResponseToDenialNotification-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DenialNotificationToGateway-id-0013</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:inclusiveGateway id="InclusiveGateway-ProcessDenial-id-0001" name="Process denial">
+      <bpmn:incoming>SequenceFlow-DenialNotificationToGateway-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToProcessAppeal-id-0014</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToPrescribeAlternative-id-0016</bpmn:outgoing>
+    </bpmn:inclusiveGateway>
+    <bpmn:userTask id="UserTask-ProcessAppeal-id-0009" name="Process appeal">
+      <bpmn:incoming>SequenceFlow-GatewayToProcessAppeal-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProcessAppealToFillPrescription-id-0015</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-PrescribeAlternative-id-0010" name="Prescribe alternative">
+      <bpmn:incoming>SequenceFlow-GatewayToPrescribeAlternative-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PrescribeAlternativeToDenialProcessed-id-0017</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-DenialProcessed-id-0002" name="Denial Processed">
+      <bpmn:incoming>SequenceFlow-PrescribeAlternativeToDenialProcessed-id-0017</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:parallelGateway id="ParallelGateway-Join-id-0001" name="Join" gatewayDirection="Converging" />
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSendPrescription-id-0001" sourceRef="StartEvent-PrescriptionProcess-id-0001" targetRef="ServiceTask-SendPrescriptionToPharmacy-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendToReceive-id-0002" sourceRef="ServiceTask-SendPrescriptionToPharmacy-id-0001" targetRef="ReceiveTask-ReceivePrescription-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveToCheckEligibility-id-0003" sourceRef="ReceiveTask-ReceivePrescription-id-0002" targetRef="UserTask-CheckInsuranceEligibility-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckToGateway-id-0004" sourceRef="UserTask-CheckInsuranceEligibility-id-0003" targetRef="ExclusiveGateway-PriorAuthorizationRequired-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToContactInsurance-id-0005" name="prior_authorization_required" sourceRef="ExclusiveGateway-PriorAuthorizationRequired-id-0001" targetRef="UserTask-ContactInsuranceCompany-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToFillPrescription-id-0006" sourceRef="ExclusiveGateway-PriorAuthorizationRequired-id-0001" targetRef="ServiceTask-FillPrescription-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-ContactToInsuranceResponse-id-0007" sourceRef="UserTask-ContactInsuranceCompany-id-0004" targetRef="ExclusiveGateway-InsuranceResponse-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-InsuranceResponseToFillPrescription-id-0008" name="insurance_approved" sourceRef="ExclusiveGateway-InsuranceResponse-id-0002" targetRef="ServiceTask-FillPrescription-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-InsuranceResponseToDenialNotification-id-0009" sourceRef="ExclusiveGateway-InsuranceResponse-id-0002" targetRef="SendTask-SendDenialNotification-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-FillToNotification-id-0010" sourceRef="ServiceTask-FillPrescription-id-0005" targetRef="SendTask-SendNotificationToPatient-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotificationToSignReceipt-id-0011" sourceRef="SendTask-SendNotificationToPatient-id-0006" targetRef="UserTask-SignReceipt-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-SignToComplete-id-0012" sourceRef="UserTask-SignReceipt-id-0007" targetRef="EndEvent-ProcessComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DenialNotificationToGateway-id-0013" sourceRef="SendTask-SendDenialNotification-id-0008" targetRef="InclusiveGateway-ProcessDenial-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToProcessAppeal-id-0014" name="Process appeal" sourceRef="InclusiveGateway-ProcessDenial-id-0001" targetRef="UserTask-ProcessAppeal-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProcessAppealToFillPrescription-id-0015" sourceRef="UserTask-ProcessAppeal-id-0009" targetRef="ServiceTask-FillPrescription-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToPrescribeAlternative-id-0016" name="Prescribe alternative" sourceRef="InclusiveGateway-ProcessDenial-id-0001" targetRef="UserTask-PrescribeAlternative-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrescribeAlternativeToDenialProcessed-id-0017" sourceRef="UserTask-PrescribeAlternative-id-0010" targetRef="EndEvent-DenialProcessed-id-0002" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process-PrescriptionProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process-PrescriptionProcess-id-0001" bpmnElement="Process-PrescriptionProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-PrescriptionProcess-id-0001_di" bpmnElement="StartEvent-PrescriptionProcess-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SendPrescriptionToPharmacy-id-0001_di" bpmnElement="ServiceTask-SendPrescriptionToPharmacy-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceivePrescription-id-0002_di" bpmnElement="ReceiveTask-ReceivePrescription-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CheckInsuranceEligibility-id-0003_di" bpmnElement="UserTask-CheckInsuranceEligibility-id-0003">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PriorAuthorizationRequired-id-0001_di" bpmnElement="ExclusiveGateway-PriorAuthorizationRequired-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ContactInsuranceCompany-id-0004_di" bpmnElement="UserTask-ContactInsuranceCompany-id-0004">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-InsuranceResponse-id-0002_di" bpmnElement="ExclusiveGateway-InsuranceResponse-id-0002" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-FillPrescription-id-0005_di" bpmnElement="ServiceTask-FillPrescription-id-0005">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendNotificationToPatient-id-0006_di" bpmnElement="SendTask-SendNotificationToPatient-id-0006">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SignReceipt-id-0007_di" bpmnElement="UserTask-SignReceipt-id-0007">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0001_di" bpmnElement="EndEvent-ProcessComplete-id-0001">
+        <dc:Bounds x="1557" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0001_di" bpmnElement="ParallelGateway-Join-id-0001">
+        <dc:Bounds x="50" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendDenialNotification-id-0008_di" bpmnElement="SendTask-SendDenialNotification-id-0008">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="InclusiveGateway-ProcessDenial-id-0001_di" bpmnElement="InclusiveGateway-ProcessDenial-id-0001">
+        <dc:Bounds x="1700" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ProcessAppeal-id-0009_di" bpmnElement="UserTask-ProcessAppeal-id-0009">
+        <dc:Bounds x="1825" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PrescribeAlternative-id-0010_di" bpmnElement="UserTask-PrescribeAlternative-id-0010">
+        <dc:Bounds x="1825" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-DenialProcessed-id-0002_di" bpmnElement="EndEvent-DenialProcessed-id-0002">
+        <dc:Bounds x="2007" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSendPrescription-id-0001_di" bpmnElement="SequenceFlow-StartToSendPrescription-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToReceive-id-0002_di" bpmnElement="SequenceFlow-SendToReceive-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToCheckEligibility-id-0003_di" bpmnElement="SequenceFlow-ReceiveToCheckEligibility-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckToGateway-id-0004_di" bpmnElement="SequenceFlow-CheckToGateway-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToContactInsurance-id-0005_di" bpmnElement="SequenceFlow-GatewayToContactInsurance-id-0005">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToFillPrescription-id-0006_di" bpmnElement="SequenceFlow-GatewayToFillPrescription-id-0006">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="140" />
+        <di:waypoint x="1125" y="140" />
+        <di:waypoint x="1125" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ContactToInsuranceResponse-id-0007_di" bpmnElement="SequenceFlow-ContactToInsuranceResponse-id-0007">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InsuranceResponseToFillPrescription-id-0008_di" bpmnElement="SequenceFlow-InsuranceResponseToFillPrescription-id-0008">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InsuranceResponseToDenialNotification-id-0009_di" bpmnElement="SequenceFlow-InsuranceResponseToDenialNotification-id-0009">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FillToNotification-id-0010_di" bpmnElement="SequenceFlow-FillToNotification-id-0010">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotificationToSignReceipt-id-0011_di" bpmnElement="SequenceFlow-NotificationToSignReceipt-id-0011">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SignToComplete-id-0012_di" bpmnElement="SequenceFlow-SignToComplete-id-0012">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1557" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DenialNotificationToGateway-id-0013_di" bpmnElement="SequenceFlow-DenialNotificationToGateway-id-0013">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1700" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToProcessAppeal-id-0014_di" bpmnElement="SequenceFlow-GatewayToProcessAppeal-id-0014">
+        <di:waypoint x="1750" y="210" />
+        <di:waypoint x="1825" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToPrescribeAlternative-id-0016_di" bpmnElement="SequenceFlow-GatewayToPrescribeAlternative-id-0016">
+        <di:waypoint x="1725" y="235" />
+        <di:waypoint x="1725" y="350" />
+        <di:waypoint x="1825" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessAppealToFillPrescription-id-0015_di" bpmnElement="SequenceFlow-ProcessAppealToFillPrescription-id-0015">
+        <di:waypoint x="1875" y="250" />
+        <di:waypoint x="1875" y="280" />
+        <di:waypoint x="1125" y="280" />
+        <di:waypoint x="1125" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrescribeAlternativeToDenialProcessed-id-0017_di" bpmnElement="SequenceFlow-PrescribeAlternativeToDenialProcessed-id-0017">
+        <di:waypoint x="1925" y="350" />
+        <di:waypoint x="2007" y="350" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

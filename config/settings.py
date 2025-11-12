@@ -9,7 +9,7 @@ load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env")
 
 # API Configuration
 MISTRAL_API_KEY = os.environ.get("MISTRAL_API_KEY")
-MISTRAL_MODEL = "codestral-latest"
+MISTRAL_MODEL = "magistral-medium-latest"
 MISTRAL_TEMPERATURE = 0.2
 MISTRAL_MAX_RETRIES = 3
 

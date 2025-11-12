@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="return-process-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="ReturnProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ReturnProcessInitiated-id-0001" name="Return Process Initiated">
+      <bpmn:outgoing>SequenceFlow-StartToInitiate-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-InitiateReturnRequest-id-0001" name="Customer submits order number and reason">
+      <bpmn:incoming>SequenceFlow-StartToInitiate-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InitiateToValidate-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ValidateReturnEligibility-id-0001" name="System checks 30-day window and item condition">
+      <bpmn:incoming>SequenceFlow-InitiateToValidate-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidateToEligibilityGateway-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-EligibilityCheck-id-0001" name="Eligibility Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ValidateToEligibilityGateway-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EligibleToSendLabel-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-IneligibleToDenied-id-0005</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-ReturnShippingLabel-id-0001" name="System generates and emails return label">
+      <bpmn:incoming>SequenceFlow-EligibleToSendLabel-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendLabelToShip-id-0006</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-ShipItemBack-id-0001" name="Customer ships item using provided label">
+      <bpmn:incoming>SequenceFlow-SendLabelToShip-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ShipToVerify-id-0007</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-VerifyItemCondition-id-0001" name="Warehouse staff inspects returned item">
+      <bpmn:incoming>SequenceFlow-ShipToVerify-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VerifyToConditionGateway-id-0008</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ConditionCheck-id-0001" name="Condition Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-VerifyToConditionGateway-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AcceptableToProcessRefund-id-0009</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-DamagedToDenied-id-0010</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-ProcessRefund-id-0001" name="System issues refund to original payment method">
+      <bpmn:incoming>SequenceFlow-AcceptableToProcessRefund-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProcessRefundToConfirmation-id-0011</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-RefundConfirmationEmail-id-0001" name="System sends confirmation to customer">
+      <bpmn:incoming>SequenceFlow-ProcessRefundToConfirmation-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmationToComplete-id-0012</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ReturnProcessComplete-id-0001" name="Return Process Complete">
+      <bpmn:incoming>SequenceFlow-ConfirmationToComplete-id-0012</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="SendTask-ReturnDenialNotification-id-0001" name="System notifies customer of damaged item">
+      <bpmn:incoming>SequenceFlow-DamagedToDenied-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DenialToDeniedEnd-id-0013</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ReturnDenied-id-0001" name="Return Denied">
+      <bpmn:incoming>SequenceFlow-DenialToDeniedEnd-id-0013</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-ReturnDeniedIneligible-id-0002" name="Ineligible return request terminated">
+      <bpmn:incoming>SequenceFlow-IneligibleToDenied-id-0005</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToInitiate-id-0001" sourceRef="StartEvent-ReturnProcessInitiated-id-0001" targetRef="UserTask-InitiateReturnRequest-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InitiateToValidate-id-0002" sourceRef="UserTask-InitiateReturnRequest-id-0001" targetRef="ServiceTask-ValidateReturnEligibility-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidateToEligibilityGateway-id-0003" sourceRef="ServiceTask-ValidateReturnEligibility-id-0001" targetRef="ExclusiveGateway-EligibilityCheck-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EligibleToSendLabel-id-0004" name="eligible == true" sourceRef="ExclusiveGateway-EligibilityCheck-id-0001" targetRef="SendTask-ReturnShippingLabel-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-IneligibleToDenied-id-0005" sourceRef="ExclusiveGateway-EligibilityCheck-id-0001" targetRef="EndEvent-ReturnDeniedIneligible-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendLabelToShip-id-0006" sourceRef="SendTask-ReturnShippingLabel-id-0001" targetRef="UserTask-ShipItemBack-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ShipToVerify-id-0007" sourceRef="UserTask-ShipItemBack-id-0001" targetRef="UserTask-VerifyItemCondition-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerifyToConditionGateway-id-0008" sourceRef="UserTask-VerifyItemCondition-id-0001" targetRef="ExclusiveGateway-ConditionCheck-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AcceptableToProcessRefund-id-0009" name="condition == acceptable" sourceRef="ExclusiveGateway-ConditionCheck-id-0001" targetRef="ServiceTask-ProcessRefund-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DamagedToDenied-id-0010" sourceRef="ExclusiveGateway-ConditionCheck-id-0001" targetRef="SendTask-ReturnDenialNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProcessRefundToConfirmation-id-0011" sourceRef="ServiceTask-ProcessRefund-id-0001" targetRef="SendTask-RefundConfirmationEmail-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmationToComplete-id-0012" sourceRef="SendTask-RefundConfirmationEmail-id-0001" targetRef="EndEvent-ReturnProcessComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DenialToDeniedEnd-id-0013" sourceRef="SendTask-ReturnDenialNotification-id-0001" targetRef="EndEvent-ReturnDenied-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ReturnProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_ReturnProcess-id-0001" bpmnElement="ReturnProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ReturnProcessInitiated-id-0001_di" bpmnElement="StartEvent-ReturnProcessInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-InitiateReturnRequest-id-0001_di" bpmnElement="UserTask-InitiateReturnRequest-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ValidateReturnEligibility-id-0001_di" bpmnElement="ServiceTask-ValidateReturnEligibility-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-EligibilityCheck-id-0001_di" bpmnElement="ExclusiveGateway-EligibilityCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ReturnShippingLabel-id-0001_di" bpmnElement="SendTask-ReturnShippingLabel-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ShipItemBack-id-0001_di" bpmnElement="UserTask-ShipItemBack-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-VerifyItemCondition-id-0001_di" bpmnElement="UserTask-VerifyItemCondition-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ConditionCheck-id-0001_di" bpmnElement="ExclusiveGateway-ConditionCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessRefund-id-0001_di" bpmnElement="ServiceTask-ProcessRefund-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RefundConfirmationEmail-id-0001_di" bpmnElement="SendTask-RefundConfirmationEmail-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ReturnProcessComplete-id-0001_di" bpmnElement="EndEvent-ReturnProcessComplete-id-0001">
+        <dc:Bounds x="1557" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ReturnDeniedIneligible-id-0002_di" bpmnElement="EndEvent-ReturnDeniedIneligible-id-0002">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ReturnDenialNotification-id-0001_di" bpmnElement="SendTask-ReturnDenialNotification-id-0001">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ReturnDenied-id-0001_di" bpmnElement="EndEvent-ReturnDenied-id-0001">
+        <dc:Bounds x="1407" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToInitiate-id-0001_di" bpmnElement="SequenceFlow-StartToInitiate-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InitiateToValidate-id-0002_di" bpmnElement="SequenceFlow-InitiateToValidate-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidateToEligibilityGateway-id-0003_di" bpmnElement="SequenceFlow-ValidateToEligibilityGateway-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EligibleToSendLabel-id-0004_di" bpmnElement="SequenceFlow-EligibleToSendLabel-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IneligibleToDenied-id-0005_di" bpmnElement="SequenceFlow-IneligibleToDenied-id-0005">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendLabelToShip-id-0006_di" bpmnElement="SequenceFlow-SendLabelToShip-id-0006">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ShipToVerify-id-0007_di" bpmnElement="SequenceFlow-ShipToVerify-id-0007">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyToConditionGateway-id-0008_di" bpmnElement="SequenceFlow-VerifyToConditionGateway-id-0008">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AcceptableToProcessRefund-id-0009_di" bpmnElement="SequenceFlow-AcceptableToProcessRefund-id-0009">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DamagedToDenied-id-0010_di" bpmnElement="SequenceFlow-DamagedToDenied-id-0010">
+        <di:waypoint x="1125" y="95" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessRefundToConfirmation-id-0011_di" bpmnElement="SequenceFlow-ProcessRefundToConfirmation-id-0011">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmationToComplete-id-0012_di" bpmnElement="SequenceFlow-ConfirmationToComplete-id-0012">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1557" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DenialToDeniedEnd-id-0013_di" bpmnElement="SequenceFlow-DenialToDeniedEnd-id-0013">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1407" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

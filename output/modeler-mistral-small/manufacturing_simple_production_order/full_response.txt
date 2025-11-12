@@ -1,0 +1,155 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "Definitions-WorkOrderProcess-id-0001",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process-WorkOrderProcess-id-0001",
+      "name": "Work Order Process",
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-WorkOrderCreated-id-0001",
+          "name": "Work Order Created"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ProductionManagerCreatesWorkOrder-id-0001",
+          "name": "Production Manager Creates Work Order"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-PullBillOfMaterials-id-0001",
+          "name": "Pull Bill of Materials"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ReserveRawMaterials-id-0001",
+          "name": "Reserve Raw Materials"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ScheduleProductionLine-id-0001",
+          "name": "Schedule Production Line"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ManufactureComponents-id-0001",
+          "name": "Manufacture Components"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-PerformQualityCheck-id-0001",
+          "name": "Perform Quality Check"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-QualityCheckResult-id-0001",
+          "name": "Quality Check Result",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-MoveToFinishedGoods-id-0001",
+          "name": "Move to Finished Goods"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProductionComplete-id-0001",
+          "name": "Production Complete"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ScrapDefectiveProduct-id-0001",
+          "name": "Scrap Defective Product"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-LogWaste-id-0001",
+          "name": "Log Waste"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToCreateWorkOrder-id-0001",
+          "sourceRef": "StartEvent-WorkOrderCreated-id-0001",
+          "targetRef": "UserTask-ProductionManagerCreatesWorkOrder-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CreateToPullBOM-id-0001",
+          "sourceRef": "UserTask-ProductionManagerCreatesWorkOrder-id-0001",
+          "targetRef": "ServiceTask-PullBillOfMaterials-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PullToReserve-id-0001",
+          "sourceRef": "ServiceTask-PullBillOfMaterials-id-0001",
+          "targetRef": "ServiceTask-ReserveRawMaterials-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReserveToSchedule-id-0001",
+          "sourceRef": "ServiceTask-ReserveRawMaterials-id-0001",
+          "targetRef": "ServiceTask-ScheduleProductionLine-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ScheduleToManufacture-id-0001",
+          "sourceRef": "ServiceTask-ScheduleProductionLine-id-0001",
+          "targetRef": "ServiceTask-ManufactureComponents-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ManufactureToQualityCheck-id-0001",
+          "sourceRef": "ServiceTask-ManufactureComponents-id-0001",
+          "targetRef": "UserTask-PerformQualityCheck-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-QualityCheckToGateway-id-0001",
+          "sourceRef": "UserTask-PerformQualityCheck-id-0001",
+          "targetRef": "ExclusiveGateway-QualityCheckResult-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToMoveToFinishedGoods-id-0001",
+          "sourceRef": "ExclusiveGateway-QualityCheckResult-id-0001",
+          "targetRef": "ServiceTask-MoveToFinishedGoods-id-0001",
+          "name": "quality_check_passed",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MoveToFinishedGoodsToEnd-id-0001",
+          "sourceRef": "ServiceTask-MoveToFinishedGoods-id-0001",
+          "targetRef": "EndEvent-ProductionComplete-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToScrap-id-0001",
+          "sourceRef": "ExclusiveGateway-QualityCheckResult-id-0001",
+          "targetRef": "ServiceTask-ScrapDefectiveProduct-id-0001",
+          "name": "quality_check_failed",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ScrapToLogWaste-id-0001",
+          "sourceRef": "ServiceTask-ScrapDefectiveProduct-id-0001",
+          "targetRef": "ServiceTask-LogWaste-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LogWasteToEnd-id-0001",
+          "sourceRef": "ServiceTask-LogWaste-id-0001",
+          "targetRef": "EndEvent-ProductionComplete-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

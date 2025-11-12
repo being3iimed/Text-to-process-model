@@ -1,0 +1,191 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "checkout-process-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "bpmn-js (https://demo.bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "CheckoutProcess-id-0001",
+      "isExecutable": false,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-CheckoutProcessInitiated-id-0001",
+          "name": "Checkout Process Initiated",
+          "outgoing": [
+            "SequenceFlow-StartToAddItems-id-0001"
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-AddItemsToCart-id-0001",
+          "name": "Add Items to Cart",
+          "incoming": [
+            "SequenceFlow-StartToAddItems-id-0001"
+          ],
+          "outgoing": [
+            "SequenceFlow-AddItemsToProceed-id-0002"
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ProceedToCheckout-id-0002",
+          "name": "Proceed to Checkout",
+          "incoming": [
+            "SequenceFlow-AddItemsToProceed-id-0002"
+          ],
+          "outgoing": [
+            "SequenceFlow-ProceedToValidate-id-0003"
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ValidateInventory-id-0001",
+          "name": "Validate Inventory",
+          "incoming": [
+            "SequenceFlow-ProceedToValidate-id-0003"
+          ],
+          "outgoing": [
+            "SequenceFlow-ValidateToProcess-id-0004"
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProcessPayment-id-0001",
+          "name": "Process Payment",
+          "incoming": [
+            "SequenceFlow-ValidateToProcess-id-0004"
+          ],
+          "outgoing": [
+            "SequenceFlow-ProcessToGateway-id-0005"
+          ]
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-PaymentStatus-id-0001",
+          "name": "Payment Status?",
+          "gatewayDirection": "Diverging",
+          "incoming": [
+            "SequenceFlow-ProcessToGateway-id-0005"
+          ],
+          "outgoing": [
+            "SequenceFlow-GatewayToSuccess-id-0006",
+            "SequenceFlow-GatewayToFailure-id-0007"
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-OrderConfirmation-id-0001",
+          "name": "Send: order confirmation",
+          "incoming": [
+            "SequenceFlow-GatewayToSuccess-id-0006"
+          ],
+          "outgoing": [
+            "SequenceFlow-ConfirmationToEndSuccess-id-0008"
+          ]
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-OrderCompleted-id-0001",
+          "name": "Order Completed",
+          "incoming": [
+            "SequenceFlow-ConfirmationToEndSuccess-id-0008"
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-PaymentFailureNotice-id-0001",
+          "name": "Send: payment failure notice",
+          "incoming": [
+            "SequenceFlow-GatewayToFailure-id-0007"
+          ],
+          "outgoing": [
+            "SequenceFlow-FailureToEndAbandoned-id-0009"
+          ]
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-CheckoutAbandoned-id-0002",
+          "name": "Checkout Abandoned",
+          "incoming": [
+            "SequenceFlow-FailureToEndAbandoned-id-0009"
+          ]
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToAddItems-id-0001",
+          "sourceRef": "StartEvent-CheckoutProcessInitiated-id-0001",
+          "targetRef": "UserTask-AddItemsToCart-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AddItemsToProceed-id-0002",
+          "sourceRef": "UserTask-AddItemsToCart-id-0001",
+          "targetRef": "UserTask-ProceedToCheckout-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProceedToValidate-id-0003",
+          "sourceRef": "UserTask-ProceedToCheckout-id-0002",
+          "targetRef": "ServiceTask-ValidateInventory-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ValidateToProcess-id-0004",
+          "sourceRef": "ServiceTask-ValidateInventory-id-0001",
+          "targetRef": "ServiceTask-ProcessPayment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProcessToGateway-id-0005",
+          "sourceRef": "ServiceTask-ProcessPayment-id-0001",
+          "targetRef": "ExclusiveGateway-PaymentStatus-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToSuccess-id-0006",
+          "name": "payment_successful",
+          "sourceRef": "ExclusiveGateway-PaymentStatus-id-0001",
+          "targetRef": "SendTask-OrderConfirmation-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToFailure-id-0007",
+          "sourceRef": "ExclusiveGateway-PaymentStatus-id-0001",
+          "targetRef": "SendTask-PaymentFailureNotice-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmationToEndSuccess-id-0008",
+          "sourceRef": "SendTask-OrderConfirmation-id-0001",
+          "targetRef": "EndEvent-OrderCompleted-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FailureToEndAbandoned-id-0009",
+          "sourceRef": "SendTask-PaymentFailureNotice-id-0001",
+          "targetRef": "EndEvent-CheckoutAbandoned-id-0002"
+        }
+      ]
+    }
+  ],
+  "diagrams": [
+    {
+      "$type": "bpmndi:BPMNDiagram",
+      "id": "BPMNDiagram-CheckoutProcess-id-0001",
+      "name": "Checkout Process Diagram",
+      "documentation": "E-commerce checkout process with payment success/failure paths",
+      "plane": {
+        "$type": "bpmndi:BPMNPlane",
+        "id": "BPMNPlane-CheckoutProcess-id-0001",
+        "bpmnElement": "CheckoutProcess-id-0001"
+      }
+    }
+  ]
+}
+```

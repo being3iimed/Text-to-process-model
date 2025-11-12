@@ -1,0 +1,318 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "PaymentReconciliationProcess",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler",
+    "exporterVersion": "1.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "PaymentReconciliationProcess-id-0001",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-DailyPaymentProcessing-id-0001",
+            "name": "Daily Payment Processing",
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:TimerEventDefinition",
+                "timeCycle": "RRULE:FREQ=DAILY;BYHOUR=9;BYMINUTE=0"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-FetchDailyExchangeRates-id-0001",
+            "name": "Fetch Daily Exchange Rates"
+          },
+          {
+            "$type": "bpmn:BoundaryEvent",
+            "id": "BoundaryEvent-Timer1Hour-FetchRates-id-0001",
+            "name": "1 Hour Timeout",
+            "attachedToRef": "ServiceTask-FetchDailyExchangeRates-id-0001",
+            "cancelActivity": true,
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:TimerEventDefinition",
+                "timeDuration": "PT1H"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-AlertITTeam-id-0001",
+            "name": "Send: Alert to IT Team"
+          },
+          {
+            "$type": "bpmn:BoundaryEvent",
+            "id": "BoundaryEvent-APIError-FetchRates-id-0002",
+            "name": "API Call Failed",
+            "attachedToRef": "ServiceTask-FetchDailyExchangeRates-id-0001",
+            "cancelActivity": true,
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:ErrorEventDefinition",
+                "errorRef": "API_CONNECTION_ERROR"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ManualRateEntry-id-0001",
+            "name": "Manual Rate Entry"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ConvertPaymentToUSD-id-0001",
+            "name": "Convert Payment to Base Currency (USD)"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-MatchPaymentToInvoice-id-0001",
+            "name": "Match Payment to Invoice"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-PaymentMatch-id-0001",
+            "name": "Payment Match Result?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-RecordPaymentComplete-id-0001",
+            "name": "Record Payment as Complete"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-MarkInvoicePartiallyPaid-id-0001",
+            "name": "Mark Invoice as Partially Paid"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-RecordOverpaymentCredit-id-0001",
+            "name": "Record Overpayment as Credit"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ResearchUnmatchedPayment-id-0001",
+            "name": "Research Unmatched Payment"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-ReconciliationResult-id-0001",
+            "name": "Reconciliation Complete?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-NotifyAccountingManager-id-0001",
+            "name": "Send: Notification to Accounting Manager"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-UpdateARAging-id-0001",
+            "name": "Update Accounts Receivable Aging"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-FollowUpOverdueInvoices-id-0001",
+            "name": "Send: Follow-Up for Overdue Invoices"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ProcessingComplete-id-0001",
+            "name": "Processing Complete"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-MergeReconciliation-id-0001",
+            "name": "Merge Reconciliation Paths",
+            "gatewayDirection": "Converging"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-MergePaymentMatch-id-0001",
+            "name": "Merge Payment Match Paths",
+            "gatewayDirection": "Converging"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToFetchRates-id-0001",
+            "sourceRef": "StartEvent-DailyPaymentProcessing-id-0001",
+            "targetRef": "ServiceTask-FetchDailyExchangeRates-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-FetchRatesToConvert-id-0002",
+            "sourceRef": "ServiceTask-FetchDailyExchangeRates-id-0001",
+            "targetRef": "ServiceTask-ConvertPaymentToUSD-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-TimerBoundaryToAlert-id-0003",
+            "sourceRef": "BoundaryEvent-Timer1Hour-FetchRates-id-0001",
+            "targetRef": "SendTask-AlertITTeam-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AlertToEnd-id-0004",
+            "sourceRef": "SendTask-AlertITTeam-id-0001",
+            "targetRef": "EndEvent-ProcessingComplete-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-APIErrorToManualEntry-id-0005",
+            "sourceRef": "BoundaryEvent-APIError-FetchRates-id-0002",
+            "targetRef": "UserTask-ManualRateEntry-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ManualEntryToConvert-id-0006",
+            "sourceRef": "UserTask-ManualRateEntry-id-0001",
+            "targetRef": "ServiceTask-ConvertPaymentToUSD-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ConvertToMatch-id-0007",
+            "sourceRef": "ServiceTask-ConvertPaymentToUSD-id-0001",
+            "targetRef": "ServiceTask-MatchPaymentToInvoice-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-MatchToPaymentMatchGateway-id-0008",
+            "sourceRef": "ServiceTask-MatchPaymentToInvoice-id-0001",
+            "targetRef": "ExclusiveGateway-PaymentMatch-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-PaymentMatchToExactMatch-id-0009",
+            "sourceRef": "ExclusiveGateway-PaymentMatch-id-0001",
+            "targetRef": "ServiceTask-RecordPaymentComplete-id-0001",
+            "name": "payment_matches_invoice_exactly",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-PaymentMatchToPartial-id-0010",
+            "sourceRef": "ExclusiveGateway-PaymentMatch-id-0001",
+            "targetRef": "ServiceTask-MarkInvoicePartiallyPaid-id-0001",
+            "name": "payment_less_than_invoice",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-PaymentMatchToOverpayment-id-0011",
+            "sourceRef": "ExclusiveGateway-PaymentMatch-id-0001",
+            "targetRef": "ServiceTask-RecordOverpaymentCredit-id-0001",
+            "name": "payment_more_than_invoice",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-PaymentMatchToResearch-id-0012",
+            "sourceRef": "ExclusiveGateway-PaymentMatch-id-0001",
+            "targetRef": "UserTask-ResearchUnmatchedPayment-id-0001",
+            "name": "",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ExactMatchToMerge-id-0013",
+            "sourceRef": "ServiceTask-RecordPaymentComplete-id-0001",
+            "targetRef": "ExclusiveGateway-MergePaymentMatch-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-PartialToMerge-id-0014",
+            "sourceRef": "ServiceTask-MarkInvoicePartiallyPaid-id-0001",
+            "targetRef": "ExclusiveGateway-MergePaymentMatch-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-OverpaymentToMerge-id-0015",
+            "sourceRef": "ServiceTask-RecordOverpaymentCredit-id-0001",
+            "targetRef": "ExclusiveGateway-MergePaymentMatch-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ResearchToReconciliationGateway-id-0016",
+            "sourceRef": "UserTask-ResearchUnmatchedPayment-id-0001",
+            "targetRef": "ExclusiveGateway-ReconciliationResult-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReconciliationCompleteToMerge-id-0017",
+            "sourceRef": "ExclusiveGateway-ReconciliationResult-id-0001",
+            "targetRef": "ExclusiveGateway-MergeReconciliation-id-0001",
+            "name": "reconciliation_complete",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReconciliationUnresolvedToNotify-id-0018",
+            "sourceRef": "ExclusiveGateway-ReconciliationResult-id-0001",
+            "targetRef": "SendTask-NotifyAccountingManager-id-0001",
+            "name": "",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-NotifyToMergeReconciliation-id-0019",
+            "sourceRef": "SendTask-NotifyAccountingManager-id-0001",
+            "targetRef": "ExclusiveGateway-MergeReconciliation-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-MergeReconciliationToUpdateAR-id-0020",
+            "sourceRef": "ExclusiveGateway-MergeReconciliation-id-0001",
+            "targetRef": "ServiceTask-UpdateARAging-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-MergePaymentMatchToUpdateAR-id-0021",
+            "sourceRef": "ExclusiveGateway-MergePaymentMatch-id-0001",
+            "targetRef": "ServiceTask-UpdateARAging-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-UpdateARToFollowUp-id-0022",
+            "sourceRef": "ServiceTask-UpdateARAging-id-0001",
+            "targetRef": "SendTask-FollowUpOverdueInvoices-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-FollowUpToEnd-id-0023",
+            "sourceRef": "SendTask-FollowUpOverdueInvoices-id-0001",
+            "targetRef": "EndEvent-ProcessingComplete-id-0001"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-large-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 12925,
+        "total_tokens": 16044,
+        "completion_tokens": 3119
+      },
+      "model_name": "mistral-large-latest",
+      "model": "mistral-large-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 12925,
+      "output_tokens": 3119,
+      "total_tokens": 16044
+    },
+    "id": "lc_run--d7e7e2e8-052c-4bfa-8337-3df981274925-0"
+  },
+  "status": "success"
+}

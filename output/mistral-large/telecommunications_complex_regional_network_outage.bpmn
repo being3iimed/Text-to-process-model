@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_PacketLossIncidentResponse" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="Process_PacketLossIncidentResponse-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-HighPacketLossDetected-id-0001" name="High Packet Loss Detected (5%+)">
+      <bpmn:outgoing>SequenceFlow-StartToAnalyzeTowers-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-AnalyzeAffectedTowers-id-0001" name="Analyze Affected Towers">
+      <bpmn:incoming>SequenceFlow-StartToAnalyzeTowers-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AnalyzeTowersToServices-id-0002</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-AnalyzeImpactedServices-id-0002" name="Analyze Impacted Services">
+      <bpmn:incoming>SequenceFlow-AnalyzeTowersToServices-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AnalyzeServicesToCustomers-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-AnalyzeCustomerImpact-id-0003" name="Analyze Customer Impact">
+      <bpmn:incoming>SequenceFlow-AnalyzeServicesToCustomers-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AnalyzeCustomersToSwitchTraffic-id-0004</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-SwitchTrafficToAdjacentTowers-id-0004" name="Switch Traffic to Adjacent Towers">
+      <bpmn:incoming>SequenceFlow-AnalyzeCustomersToSwitchTraffic-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SwitchTrafficToAlert-id-0005</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendIncidentAlertToEngineers-id-0001" name="Send: Incident Alert to Engineers">
+      <bpmn:incoming>SequenceFlow-SwitchTrafficToAlert-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AlertToDispatch-id-0006</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="SendTask-SendDispatchNotificationToFieldTeam-id-0002" name="Send: Dispatch Notification to Field Team">
+      <bpmn:incoming>SequenceFlow-AlertToDispatch-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DispatchToRootCause-id-0007</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-AnalyzeRootCauseFromLogs-id-0005" name="Analyze Root Cause from Logs">
+      <bpmn:incoming>SequenceFlow-DispatchToRootCause-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RootCauseToGateway-id-0008</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-RootCauseAnalysis-id-0001" name="Root Cause Analysis" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-RootCauseToGateway-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToHardware-id-0009</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToSoftware-id-0010</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToCapacity-id-0011</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-RetrieveSparePartsFromInventory-id-0006" name="Retrieve Spare Parts from Inventory">
+      <bpmn:incoming>SequenceFlow-GatewayToHardware-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-HardwareToSubprocess-id-0012</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-PrioritizeTrafficToCriticalServices-id-0007" name="Prioritize Traffic to Critical Services">
+      <bpmn:incoming>SequenceFlow-GatewayToCapacity-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CapacityToSubprocess-id-0013</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:subProcess id="SubProcess-FieldRepairExecution-id-0001" name="Field Repair Execution">
+      <bpmn:incoming>SequenceFlow-GatewayToSoftware-id-0010</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-HardwareToSubprocess-id-0012</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-CapacityToSubprocess-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SubprocessToReroute-id-0014</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-FieldRepairInitiated-id-0001" name="Field Repair Initiated">
+        <bpmn:outgoing>SequenceFlow-SubProcessStartToConnect-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-FieldTeamConnectsDiagnosticEquipment-id-0001" name="Field Team Connects Diagnostic Equipment">
+        <bpmn:incoming>SequenceFlow-SubProcessStartToConnect-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ConnectToConfirm-id-0002</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-FieldTeamConfirmsRootCause-id-0002" name="Field Team Confirms Root Cause">
+        <bpmn:incoming>SequenceFlow-ConnectToConfirm-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ConfirmToFix-id-0003</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-FieldTeamPerformsFix-id-0003" name="Field Team Performs Fix">
+        <bpmn:incoming>SequenceFlow-ConfirmToFix-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-FixToEnd-id-0005</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-Timer4Hour-FieldTeamPerformsFix-id-0001" name="4 Hour Timeout" attachedToRef="UserTask-FieldTeamPerformsFix-id-0003">
+        <bpmn:outgoing>SequenceFlow-BoundaryToEscalation-id-0004</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="BoundaryEvent-Timer4Hour-FieldTeamPerformsFix-id-0001_EventDef">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT4H</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:boundaryEvent>
+      <bpmn:sendTask id="SendTask-SendSLABreachEscalation-id-0001" name="Send: SLA Breach Escalation">
+        <bpmn:incoming>SequenceFlow-BoundaryToEscalation-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-EscalationToEnd-id-0006</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:endEvent id="EndEvent-FieldRepairComplete-id-0001" name="Field Repair Complete">
+        <bpmn:incoming>SequenceFlow-FixToEnd-id-0005</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-EscalationToEnd-id-0006</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-SubProcessStartToConnect-id-0001" sourceRef="StartEvent-FieldRepairInitiated-id-0001" targetRef="UserTask-FieldTeamConnectsDiagnosticEquipment-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ConnectToConfirm-id-0002" sourceRef="UserTask-FieldTeamConnectsDiagnosticEquipment-id-0001" targetRef="UserTask-FieldTeamConfirmsRootCause-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-ConfirmToFix-id-0003" sourceRef="UserTask-FieldTeamConfirmsRootCause-id-0002" targetRef="UserTask-FieldTeamPerformsFix-id-0003" />
+      <bpmn:sequenceFlow id="SequenceFlow-BoundaryToEscalation-id-0004" sourceRef="BoundaryEvent-Timer4Hour-FieldTeamPerformsFix-id-0001" targetRef="SendTask-SendSLABreachEscalation-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-FixToEnd-id-0005" sourceRef="UserTask-FieldTeamPerformsFix-id-0003" targetRef="EndEvent-FieldRepairComplete-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-EscalationToEnd-id-0006" sourceRef="SendTask-SendSLABreachEscalation-id-0001" targetRef="EndEvent-FieldRepairComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ValidationCheck-id-0001" name="Validation Check" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ValidationToGateway-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToResolved-id-0018</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToEscalation-id-0019</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-RerouteTrafficDuringMaintenance-id-0008" name="Reroute Traffic During Maintenance">
+      <bpmn:incoming>SequenceFlow-SubprocessToReroute-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RerouteToCustomerNotification-id-0015</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendCustomerNotification-id-0003" name="Send: Customer Notification">
+      <bpmn:incoming>SequenceFlow-RerouteToCustomerNotification-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CustomerNotificationToValidation-id-0016</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-ValidateNetworkMetrics-id-0009" name="Validate Network Metrics">
+      <bpmn:incoming>SequenceFlow-CustomerNotificationToValidation-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidationToGateway-id-0017</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendEscalationNotification-id-0004" name="Send: Escalation Notification">
+      <bpmn:incoming>SequenceFlow-GatewayToEscalation-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EscalationToEnd-id-0021</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-LogIncidentSummary-id-0010" name="Log Incident Summary">
+      <bpmn:incoming>SequenceFlow-GatewayToResolved-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogToEnd-id-0020</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-LogToPostMortem-id-0022</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-IncidentResolved-id-0001" name="Incident Resolved">
+      <bpmn:incoming>SequenceFlow-LogToEnd-id-0020</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-EscalationRequired-id-0002" name="Escalation Required">
+      <bpmn:incoming>SequenceFlow-EscalationToEnd-id-0021</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-PostMortemDocumentationComplete-id-0003" name="Post-Mortem Documentation Complete">
+      <bpmn:incoming>SequenceFlow-LogToPostMortem-id-0022</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToAnalyzeTowers-id-0001" sourceRef="StartEvent-HighPacketLossDetected-id-0001" targetRef="ServiceTask-AnalyzeAffectedTowers-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AnalyzeTowersToServices-id-0002" sourceRef="ServiceTask-AnalyzeAffectedTowers-id-0001" targetRef="ServiceTask-AnalyzeImpactedServices-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-AnalyzeServicesToCustomers-id-0003" sourceRef="ServiceTask-AnalyzeImpactedServices-id-0002" targetRef="ServiceTask-AnalyzeCustomerImpact-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-AnalyzeCustomersToSwitchTraffic-id-0004" sourceRef="ServiceTask-AnalyzeCustomerImpact-id-0003" targetRef="ServiceTask-SwitchTrafficToAdjacentTowers-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-SwitchTrafficToAlert-id-0005" sourceRef="ServiceTask-SwitchTrafficToAdjacentTowers-id-0004" targetRef="SendTask-SendIncidentAlertToEngineers-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AlertToDispatch-id-0006" sourceRef="SendTask-SendIncidentAlertToEngineers-id-0001" targetRef="SendTask-SendDispatchNotificationToFieldTeam-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-DispatchToRootCause-id-0007" sourceRef="SendTask-SendDispatchNotificationToFieldTeam-id-0002" targetRef="ServiceTask-AnalyzeRootCauseFromLogs-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-RootCauseToGateway-id-0008" sourceRef="ServiceTask-AnalyzeRootCauseFromLogs-id-0005" targetRef="ExclusiveGateway-RootCauseAnalysis-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToHardware-id-0009" name="root_cause == &#39;hardware_failure&#39;" sourceRef="ExclusiveGateway-RootCauseAnalysis-id-0001" targetRef="ServiceTask-RetrieveSparePartsFromInventory-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToSoftware-id-0010" name="root_cause == &#39;software_issue&#39;" sourceRef="ExclusiveGateway-RootCauseAnalysis-id-0001" targetRef="SubProcess-FieldRepairExecution-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToCapacity-id-0011" name="root_cause == &#39;capacity_overload&#39;" sourceRef="ExclusiveGateway-RootCauseAnalysis-id-0001" targetRef="ServiceTask-PrioritizeTrafficToCriticalServices-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-HardwareToSubprocess-id-0012" sourceRef="ServiceTask-RetrieveSparePartsFromInventory-id-0006" targetRef="SubProcess-FieldRepairExecution-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CapacityToSubprocess-id-0013" sourceRef="ServiceTask-PrioritizeTrafficToCriticalServices-id-0007" targetRef="SubProcess-FieldRepairExecution-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubprocessToReroute-id-0014" sourceRef="SubProcess-FieldRepairExecution-id-0001" targetRef="ServiceTask-RerouteTrafficDuringMaintenance-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-RerouteToCustomerNotification-id-0015" sourceRef="ServiceTask-RerouteTrafficDuringMaintenance-id-0008" targetRef="SendTask-SendCustomerNotification-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-CustomerNotificationToValidation-id-0016" sourceRef="SendTask-SendCustomerNotification-id-0003" targetRef="ServiceTask-ValidateNetworkMetrics-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidationToGateway-id-0017" sourceRef="ServiceTask-ValidateNetworkMetrics-id-0009" targetRef="ExclusiveGateway-ValidationCheck-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToResolved-id-0018" name="metrics_normal" sourceRef="ExclusiveGateway-ValidationCheck-id-0001" targetRef="ServiceTask-LogIncidentSummary-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToEscalation-id-0019" sourceRef="ExclusiveGateway-ValidationCheck-id-0001" targetRef="SendTask-SendEscalationNotification-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogToEnd-id-0020" sourceRef="ServiceTask-LogIncidentSummary-id-0010" targetRef="EndEvent-IncidentResolved-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EscalationToEnd-id-0021" sourceRef="SendTask-SendEscalationNotification-id-0004" targetRef="EndEvent-EscalationRequired-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogToPostMortem-id-0022" sourceRef="ServiceTask-LogIncidentSummary-id-0010" targetRef="EndEvent-PostMortemDocumentationComplete-id-0003" />
+  </bpmn:process>
+</bpmn:definitions>

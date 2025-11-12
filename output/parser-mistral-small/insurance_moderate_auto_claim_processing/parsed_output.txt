@@ -1,0 +1,114 @@
+### SUMMARY OF ELEMENTS
+--------------------------------------------------------------------------------
+startEvent("Claim Submitted")
+
+userTask("Collect Claim Details"):
+    timerBoundary("4 hours"):
+        sendTask("Send: Escalation to Supervisor")
+
+userTask("Request Documentation")
+
+serviceTask("Validate Coverage"):
+    errorBoundary():
+        userTask("Manual Policy Review")
+
+if (coverage_valid):
+    serviceTask("Forward Claim to Appraiser")
+
+    subProcess("Appraisal Process"):
+        startEvent("Appraisal Start")
+
+        userTask("Inspect Vehicle")
+        serviceTask("Estimate Repair Costs")
+
+        endEvent("Appraisal Complete")
+    endSubProcess
+
+    userTask("Review Appraisal")
+
+    if (repair_cost <= policy_limit):
+        sendTask("Send: Approval Notification")
+        userTask("Select Repair Shop")
+        sendTask("Send: Repair Authorization")
+
+        subProcess("Repair Process"):
+            startEvent("Repair Start")
+
+            userTask("Complete Repairs")
+            sendTask("Send: Invoice")
+
+            serviceTask("Verify Invoice")
+
+            if (invoice matches estimate):
+                sendTask("Send: Payment")
+            else:
+                userTask("Review Invoice Discrepancy")
+
+            endEvent("Repair Complete")
+        endSubProcess
+
+        sendTask("Send: Repair Completion Notification")
+    else:
+        sendTask("Send: Exceeds Limit Notification")
+else:
+    sendTask("Send: Coverage Denial Notification")
+
+endEvent("Claim Processed")
+
+### BPMN PSEUDOCODE
+--------------------------------------------------------------------------------
+startEvent("Claim Submitted")
+
+userTask("Collect Claim Details"):
+    timerBoundary("4 hours"):
+        sendTask("Send: Escalation to Supervisor")
+
+userTask("Request Documentation")
+
+serviceTask("Validate Coverage"):
+    errorBoundary():
+        userTask("Manual Policy Review")
+
+if (coverage_valid):
+    serviceTask("Forward Claim to Appraiser")
+
+    subProcess("Appraisal Process"):
+        startEvent("Appraisal Start")
+
+        userTask("Inspect Vehicle")
+        serviceTask("Estimate Repair Costs")
+
+        endEvent("Appraisal Complete")
+    endSubProcess
+
+    userTask("Review Appraisal")
+
+    if (repair_cost <= policy_limit):
+        sendTask("Send: Approval Notification")
+        userTask("Select Repair Shop")
+        sendTask("Send: Repair Authorization")
+
+        subProcess("Repair Process"):
+            startEvent("Repair Start")
+
+            userTask("Complete Repairs")
+            sendTask("Send: Invoice")
+
+            serviceTask("Verify Invoice")
+
+            if (invoice matches estimate):
+                sendTask("Send: Payment")
+            else:
+                userTask("Review Invoice Discrepancy")
+
+            endEvent("Repair Complete")
+        endSubProcess
+
+        sendTask("Send: Repair Completion Notification")
+    else:
+        sendTask("Send: Exceeds Limit Notification")
+else:
+    sendTask("Send: Coverage Denial Notification")
+
+endEvent("Claim Processed")
+

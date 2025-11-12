@@ -1,0 +1,110 @@
+```
+<summary_of_elements>
+
+TASKS:
+- userTask("Create Work Order") - Human judgment required to initiate production
+- serviceTask("Pull Bill of Materials") - Automated system retrieves BOM
+- serviceTask("Reserve Raw Materials") - Automated inventory reservation
+- serviceTask("Schedule Production Line") - Automated scheduling
+- serviceTask("Manufacture Components") - Automated production process
+- userTask("Perform Quality Check") - Human inspection required
+- serviceTask("Move to Finished Goods") - Automated inventory transfer
+- serviceTask("Scrap Defective Product") - Automated waste handling
+- serviceTask("Log Waste") - Automated system logging
+
+GATEWAYS:
+- XOR after quality check with conditions:
+  - "quality_check == passed"
+  - "quality_check == failed" (default)
+
+EVENTS:
+- startEvent("Production Process Initiated") - Manual trigger
+- endEvent("Production Complete - Passed")
+- endEvent("Production Complete - Failed")
+
+BOUNDARY EVENTS:
+- None (no explicit SLA requirements or expected error scenarios mentioned)
+
+SUBPROCESSES:
+- None (all tasks are linear with single decision point; no cohesive grouping needed)
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+```
+startEvent("Production Process Initiated")
+
+// Initial Setup Phase
+userTask("Create Work Order")
+serviceTask("Pull Bill of Materials")
+serviceTask("Reserve Raw Materials")
+serviceTask("Schedule Production Line")
+
+// Production Phase
+serviceTask("Manufacture Components")
+
+// Quality Control Phase
+userTask("Perform Quality Check")
+
+// Decision Gateway
+if (quality_check == "passed"):
+    serviceTask("Move to Finished Goods")
+    endEvent("Production Complete - Passed")
+else:  // quality_check == "failed"
+    serviceTask("Scrap Defective Product")
+    serviceTask("Log Waste")
+    endEvent("Production Complete - Failed")
+```
+
+</bpmn_pseudocode>
+
+<compliance_verification>
+
+1. **TIMER EVENTS**: ✅
+   - No timer events used (none mentioned in requirements)
+   - No invalid properties present
+
+2. **GATEWAYS**: ✅
+   - Single XOR gateway after quality check
+   - Conditions are mutually exclusive and exhaustive
+   - Explicit convergence not needed (direct end events)
+
+3. **SEQUENCE FLOWS**: ✅
+   - All conditional flows have descriptive labels
+   - Default flow properly marked ("failed" case)
+   - No empty string labels
+
+4. **BOUNDARY EVENTS**: ✅
+   - No boundary events added (none justified per requirements)
+   - No speculative error handling
+
+5. **SUBPROCESSES**: ✅
+   - No subprocesses created (linear flow with single decision)
+   - All tasks are logically sequential
+
+6. **FLOW PATHS**: ✅
+   - All paths traceable from start to end
+   - No orphaned flows
+   - Two clear end states (pass/fail)
+
+7. **LABELING**: ✅
+   - All tasks have clear, specific names
+   - All events properly labeled
+   - Gateway conditions explicit
+
+8. **BALANCE**: ✅
+   - 100% core BPMN elements (tasks/gateways/events)
+   - No over-engineering
+   - Clean, readable flow
+
+</compliance_verification>
+
+<assumptions>
+1. Quality check is a manual inspection (userTask)
+2. No explicit timing requirements for any tasks
+3. No expected system failures or SLAs mentioned
+4. "Scrap and log" are automated system actions
+5. Single decision point (pass/fail) with no intermediate states
+</assumptions>
+```

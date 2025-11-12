@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="LoanApplicationProcess-Definitions-id-0001" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="LoanApplicationProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-LoanApplicationSubmitted-id-0001" name="Loan Application Submitted">
+      <bpmn:outgoing>SequenceFlow-StartToInitialValidation-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-PerformInitialValidation-id-0001" name="Perform Initial Validation">
+      <bpmn:incoming>SequenceFlow-StartToInitialValidation-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InitialValidationToGateway-id-0002</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-InitialValidation-id-0001" name="Initial Validation Result?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-InitialValidationToGateway-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidationPassedToReview-id-0003</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ValidationFailedToNotice-id-0004</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-ValidationFailureNotice-id-0001" name="Send: validation failure notice">
+      <bpmn:incoming>SequenceFlow-ValidationFailedToNotice-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FailureNoticeToRejected-id-0005</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ApplicationRejected-id-0001" name="Application Rejected">
+      <bpmn:incoming>SequenceFlow-FailureNoticeToRejected-id-0005</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="UserTask-LoanOfficerReview-id-0001" name="Loan Officer Review">
+      <bpmn:incoming>SequenceFlow-ValidationPassedToReview-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToDocumentsGateway-id-0006</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-DocumentsRequired-id-0001" name="Documents Required?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewToDocumentsGateway-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DocumentsRequiredToRequest-id-0007</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-NoDocumentsToAssessment-id-0008</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-RequestAdditionalDocuments-id-0001" name="Send: request for additional documents">
+      <bpmn:incoming>SequenceFlow-DocumentsRequiredToRequest-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RequestToReceiveDocuments-id-0009</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-AdditionalDocuments-id-0001" name="Receive: additional documents">
+      <bpmn:incoming>SequenceFlow-RequestToReceiveDocuments-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveDocumentsToAssessment-id-0010</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:serviceTask id="ServiceTask-RunRiskAssessment-id-0001" name="Run Risk Assessment">
+      <bpmn:incoming>SequenceFlow-NoDocumentsToAssessment-id-0008</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ReceiveDocumentsToAssessment-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AssessmentToRiskGateway-id-0011</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-RiskAssessment-id-0001" name="Risk Assessment Result?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-AssessmentToRiskGateway-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RiskApprovedToTerms-id-0012</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-RiskRejectedToNotice-id-0013</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-LoanTermsForAcceptance-id-0001" name="Send: loan terms for acceptance">
+      <bpmn:incoming>SequenceFlow-RiskApprovedToTerms-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TermsToCustomerAcceptance-id-0014</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-CustomerAcceptance-id-0001" name="Receive: customer acceptance">
+      <bpmn:incoming>SequenceFlow-TermsToCustomerAcceptance-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CustomerAcceptanceToDecision-id-0015</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-CustomerDecision-id-0001" name="Customer Decision?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CustomerAcceptanceToDecision-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CustomerAcceptedToFund-id-0016</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-CustomerDeclinedToEnd-id-0017</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-FundAndDisburseLoan-id-0001" name="Fund and Disburse Loan">
+      <bpmn:incoming>SequenceFlow-CustomerAcceptedToFund-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FundToFundedEnd-id-0018</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-LoanFunded-id-0001" name="Loan Funded">
+      <bpmn:incoming>SequenceFlow-FundToFundedEnd-id-0018</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="SendTask-RejectionNotice-id-0001" name="Send: rejection notice with reason">
+      <bpmn:incoming>SequenceFlow-RiskRejectedToNotice-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RejectionNoticeToRejectedEnd-id-0019</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ApplicationRejectedAfterReview-id-0001" name="Application Rejected After Review">
+      <bpmn:incoming>SequenceFlow-RejectionNoticeToRejectedEnd-id-0019</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-LoanDeclinedByCustomer-id-0001" name="Loan Declined by Customer">
+      <bpmn:incoming>SequenceFlow-CustomerDeclinedToEnd-id-0017</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToInitialValidation-id-0001" sourceRef="StartEvent-LoanApplicationSubmitted-id-0001" targetRef="ServiceTask-PerformInitialValidation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InitialValidationToGateway-id-0002" sourceRef="ServiceTask-PerformInitialValidation-id-0001" targetRef="ExclusiveGateway-InitialValidation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidationPassedToReview-id-0003" name="validation_passed" sourceRef="ExclusiveGateway-InitialValidation-id-0001" targetRef="UserTask-LoanOfficerReview-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidationFailedToNotice-id-0004" sourceRef="ExclusiveGateway-InitialValidation-id-0001" targetRef="SendTask-ValidationFailureNotice-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FailureNoticeToRejected-id-0005" sourceRef="SendTask-ValidationFailureNotice-id-0001" targetRef="EndEvent-ApplicationRejected-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToDocumentsGateway-id-0006" sourceRef="UserTask-LoanOfficerReview-id-0001" targetRef="ExclusiveGateway-DocumentsRequired-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DocumentsRequiredToRequest-id-0007" name="documents_required" sourceRef="ExclusiveGateway-DocumentsRequired-id-0001" targetRef="SendTask-RequestAdditionalDocuments-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NoDocumentsToAssessment-id-0008" sourceRef="ExclusiveGateway-DocumentsRequired-id-0001" targetRef="ServiceTask-RunRiskAssessment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RequestToReceiveDocuments-id-0009" sourceRef="SendTask-RequestAdditionalDocuments-id-0001" targetRef="ReceiveTask-AdditionalDocuments-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveDocumentsToAssessment-id-0010" sourceRef="ReceiveTask-AdditionalDocuments-id-0001" targetRef="ServiceTask-RunRiskAssessment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AssessmentToRiskGateway-id-0011" sourceRef="ServiceTask-RunRiskAssessment-id-0001" targetRef="ExclusiveGateway-RiskAssessment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RiskApprovedToTerms-id-0012" name="risk_approved" sourceRef="ExclusiveGateway-RiskAssessment-id-0001" targetRef="SendTask-LoanTermsForAcceptance-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RiskRejectedToNotice-id-0013" sourceRef="ExclusiveGateway-RiskAssessment-id-0001" targetRef="SendTask-RejectionNotice-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TermsToCustomerAcceptance-id-0014" sourceRef="SendTask-LoanTermsForAcceptance-id-0001" targetRef="ReceiveTask-CustomerAcceptance-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CustomerAcceptanceToDecision-id-0015" sourceRef="ReceiveTask-CustomerAcceptance-id-0001" targetRef="ExclusiveGateway-CustomerDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CustomerAcceptedToFund-id-0016" name="customer_accepted" sourceRef="ExclusiveGateway-CustomerDecision-id-0001" targetRef="ServiceTask-FundAndDisburseLoan-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CustomerDeclinedToEnd-id-0017" sourceRef="ExclusiveGateway-CustomerDecision-id-0001" targetRef="EndEvent-LoanDeclinedByCustomer-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FundToFundedEnd-id-0018" sourceRef="ServiceTask-FundAndDisburseLoan-id-0001" targetRef="EndEvent-LoanFunded-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RejectionNoticeToRejectedEnd-id-0019" sourceRef="SendTask-RejectionNotice-id-0001" targetRef="EndEvent-ApplicationRejectedAfterReview-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_LoanApplicationProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_LoanApplicationProcess-id-0001" bpmnElement="LoanApplicationProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-LoanApplicationSubmitted-id-0001_di" bpmnElement="StartEvent-LoanApplicationSubmitted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PerformInitialValidation-id-0001_di" bpmnElement="ServiceTask-PerformInitialValidation-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-InitialValidation-id-0001_di" bpmnElement="ExclusiveGateway-InitialValidation-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-LoanOfficerReview-id-0001_di" bpmnElement="UserTask-LoanOfficerReview-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-DocumentsRequired-id-0001_di" bpmnElement="ExclusiveGateway-DocumentsRequired-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RequestAdditionalDocuments-id-0001_di" bpmnElement="SendTask-RequestAdditionalDocuments-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-AdditionalDocuments-id-0001_di" bpmnElement="ReceiveTask-AdditionalDocuments-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RunRiskAssessment-id-0001_di" bpmnElement="ServiceTask-RunRiskAssessment-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RiskAssessment-id-0001_di" bpmnElement="ExclusiveGateway-RiskAssessment-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-LoanTermsForAcceptance-id-0001_di" bpmnElement="SendTask-LoanTermsForAcceptance-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-CustomerAcceptance-id-0001_di" bpmnElement="ReceiveTask-CustomerAcceptance-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CustomerDecision-id-0001_di" bpmnElement="ExclusiveGateway-CustomerDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1700" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-FundAndDisburseLoan-id-0001_di" bpmnElement="ServiceTask-FundAndDisburseLoan-id-0001">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-LoanFunded-id-0001_di" bpmnElement="EndEvent-LoanFunded-id-0001">
+        <dc:Bounds x="2007" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ValidationFailureNotice-id-0001_di" bpmnElement="SendTask-ValidationFailureNotice-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ApplicationRejected-id-0001_di" bpmnElement="EndEvent-ApplicationRejected-id-0001">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RejectionNotice-id-0001_di" bpmnElement="SendTask-RejectionNotice-id-0001">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ApplicationRejectedAfterReview-id-0001_di" bpmnElement="EndEvent-ApplicationRejectedAfterReview-id-0001">
+        <dc:Bounds x="1707" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-LoanDeclinedByCustomer-id-0001_di" bpmnElement="EndEvent-LoanDeclinedByCustomer-id-0001">
+        <dc:Bounds x="2157" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToInitialValidation-id-0001_di" bpmnElement="SequenceFlow-StartToInitialValidation-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InitialValidationToGateway-id-0002_di" bpmnElement="SequenceFlow-InitialValidationToGateway-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidationPassedToReview-id-0003_di" bpmnElement="SequenceFlow-ValidationPassedToReview-id-0003">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidationFailedToNotice-id-0004_di" bpmnElement="SequenceFlow-ValidationFailedToNotice-id-0004">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToDocumentsGateway-id-0006_di" bpmnElement="SequenceFlow-ReviewToDocumentsGateway-id-0006">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DocumentsRequiredToRequest-id-0007_di" bpmnElement="SequenceFlow-DocumentsRequiredToRequest-id-0007">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NoDocumentsToAssessment-id-0008_di" bpmnElement="SequenceFlow-NoDocumentsToAssessment-id-0008">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="140" />
+        <di:waypoint x="1125" y="140" />
+        <di:waypoint x="1125" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RequestToReceiveDocuments-id-0009_di" bpmnElement="SequenceFlow-RequestToReceiveDocuments-id-0009">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveDocumentsToAssessment-id-0010_di" bpmnElement="SequenceFlow-ReceiveDocumentsToAssessment-id-0010">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AssessmentToRiskGateway-id-0011_di" bpmnElement="SequenceFlow-AssessmentToRiskGateway-id-0011">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RiskApprovedToTerms-id-0012_di" bpmnElement="SequenceFlow-RiskApprovedToTerms-id-0012">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RiskRejectedToNotice-id-0013_di" bpmnElement="SequenceFlow-RiskRejectedToNotice-id-0013">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TermsToCustomerAcceptance-id-0014_di" bpmnElement="SequenceFlow-TermsToCustomerAcceptance-id-0014">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CustomerAcceptanceToDecision-id-0015_di" bpmnElement="SequenceFlow-CustomerAcceptanceToDecision-id-0015">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1700" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CustomerAcceptedToFund-id-0016_di" bpmnElement="SequenceFlow-CustomerAcceptedToFund-id-0016">
+        <di:waypoint x="1750" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CustomerDeclinedToEnd-id-0017_di" bpmnElement="SequenceFlow-CustomerDeclinedToEnd-id-0017">
+        <di:waypoint x="1750" y="70" />
+        <di:waypoint x="1800" y="70" />
+        <di:waypoint x="1800" y="140" />
+        <di:waypoint x="2100" y="140" />
+        <di:waypoint x="2100" y="210" />
+        <di:waypoint x="2157" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FundToFundedEnd-id-0018_di" bpmnElement="SequenceFlow-FundToFundedEnd-id-0018">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="2007" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FailureNoticeToRejected-id-0005_di" bpmnElement="SequenceFlow-FailureNoticeToRejected-id-0005">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RejectionNoticeToRejectedEnd-id-0019_di" bpmnElement="SequenceFlow-RejectionNoticeToRejectedEnd-id-0019">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1707" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

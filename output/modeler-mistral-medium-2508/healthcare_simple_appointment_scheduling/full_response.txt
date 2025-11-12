@@ -1,0 +1,180 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "appointment-booking-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "AppointmentBookingProcess",
+      "isExecutable": false,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-AppointmentRequestReceived-id-0001",
+          "name": "Appointment Request Received",
+          "outgoing": ["SequenceFlow-StartToCheckSlots-id-0001"]
+        },
+
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CheckAvailableTimeSlots-id-0001",
+          "name": "Check Available Time Slots",
+          "incoming": ["SequenceFlow-StartToCheckSlots-id-0001"],
+          "outgoing": ["SequenceFlow-CheckSlotsToGateway-id-0002"]
+        },
+
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-SlotsAvailable-id-0001",
+          "name": "Slots Available?",
+          "gatewayDirection": "Diverging",
+          "incoming": ["SequenceFlow-CheckSlotsToGateway-id-0002"],
+          "outgoing": [
+            "SequenceFlow-GatewayToBook-id-0003",
+            "SequenceFlow-GatewayToWaitlist-id-0004"
+          ]
+        },
+
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-BookAppointment-id-0002",
+          "name": "Book Appointment",
+          "incoming": ["SequenceFlow-GatewayToBook-id-0003"],
+          "outgoing": ["SequenceFlow-BookToConfirm-id-0005"]
+        },
+
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendConfirmation-id-0001",
+          "name": "Send: appointment confirmation",
+          "incoming": ["SequenceFlow-BookToConfirm-id-0005"],
+          "outgoing": ["SequenceFlow-ConfirmToEnd1-id-0006"]
+        },
+
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-AppointmentProcessComplete-id-0001",
+          "name": "Appointment Process Complete",
+          "incoming": ["SequenceFlow-ConfirmToEnd1-id-0006"]
+        },
+
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-PlacePatientOnWaitlist-id-0001",
+          "name": "Place Patient on Waitlist",
+          "incoming": ["SequenceFlow-GatewayToWaitlist-id-0004"],
+          "outgoing": ["SequenceFlow-WaitlistToReceive-id-0007"]
+        },
+
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-ReceiveCancellation-id-0001",
+          "name": "Receive: cancellation notification",
+          "incoming": ["SequenceFlow-WaitlistToReceive-id-0007"],
+          "outgoing": ["SequenceFlow-ReceiveToCall-id-0008"]
+        },
+
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CallWaitlistPatient-id-0001",
+          "name": "Call Waitlist Patient",
+          "incoming": ["SequenceFlow-ReceiveToCall-id-0008"],
+          "outgoing": ["SequenceFlow-CallToOffer-id-0009"]
+        },
+
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-OfferAppointmentSlot-id-0001",
+          "name": "Offer Appointment Slot",
+          "incoming": ["SequenceFlow-CallToOffer-id-0009"],
+          "outgoing": ["SequenceFlow-OfferToEnd2-id-0010"]
+        },
+
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-WaitlistProcessComplete-id-0002",
+          "name": "Waitlist Process Complete",
+          "incoming": ["SequenceFlow-OfferToEnd2-id-0010"]
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToCheckSlots-id-0001",
+          "sourceRef": "StartEvent-AppointmentRequestReceived-id-0001",
+          "targetRef": "UserTask-CheckAvailableTimeSlots-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CheckSlotsToGateway-id-0002",
+          "sourceRef": "UserTask-CheckAvailableTimeSlots-id-0001",
+          "targetRef": "ExclusiveGateway-SlotsAvailable-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToBook-id-0003",
+          "name": "slots_available",
+          "sourceRef": "ExclusiveGateway-SlotsAvailable-id-0001",
+          "targetRef": "UserTask-BookAppointment-id-0002",
+          "isDefault": false
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToWaitlist-id-0004",
+          "name": "no_slots_available",
+          "sourceRef": "ExclusiveGateway-SlotsAvailable-id-0001",
+          "targetRef": "UserTask-PlacePatientOnWaitlist-id-0001",
+          "isDefault": true
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BookToConfirm-id-0005",
+          "sourceRef": "UserTask-BookAppointment-id-0002",
+          "targetRef": "SendTask-SendConfirmation-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmToEnd1-id-0006",
+          "sourceRef": "SendTask-SendConfirmation-id-0001",
+          "targetRef": "EndEvent-AppointmentProcessComplete-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-WaitlistToReceive-id-0007",
+          "sourceRef": "UserTask-PlacePatientOnWaitlist-id-0001",
+          "targetRef": "ReceiveTask-ReceiveCancellation-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReceiveToCall-id-0008",
+          "sourceRef": "ReceiveTask-ReceiveCancellation-id-0001",
+          "targetRef": "UserTask-CallWaitlistPatient-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CallToOffer-id-0009",
+          "sourceRef": "UserTask-CallWaitlistPatient-id-0001",
+          "targetRef": "UserTask-OfferAppointmentSlot-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OfferToEnd2-id-0010",
+          "sourceRef": "UserTask-OfferAppointmentSlot-id-0001",
+          "targetRef": "EndEvent-WaitlistProcessComplete-id-0002"
+        }
+      ]
+    }
+  ]
+}
+```

@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="PaymentReconciliationProcess" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="PaymentReconciliationProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-DailyPaymentProcessing-id-0001" name="Daily Payment Processing">
+      <bpmn:outgoing>SequenceFlow-StartToFetchRates-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-FetchDailyExchangeRates-id-0001" name="Fetch Daily Exchange Rates">
+      <bpmn:incoming>SequenceFlow-StartToFetchRates-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FetchRatesToConvert-id-0002</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer1Hour-FetchRates-id-0001" name="1 Hour Timeout" attachedToRef="ServiceTask-FetchDailyExchangeRates-id-0001">
+      <bpmn:outgoing>SequenceFlow-TimerBoundaryToAlert-id-0003</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer1Hour-FetchRates-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-AlertITTeam-id-0001" name="Send: Alert to IT Team">
+      <bpmn:incoming>SequenceFlow-TimerBoundaryToAlert-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AlertToEnd-id-0004</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-APIError-FetchRates-id-0002" name="API Call Failed" attachedToRef="ServiceTask-FetchDailyExchangeRates-id-0001">
+      <bpmn:outgoing>SequenceFlow-APIErrorToManualEntry-id-0005</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="BoundaryEvent-APIError-FetchRates-id-0002_EventDef" errorRef="API_CONNECTION_ERROR" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="UserTask-ManualRateEntry-id-0001" name="Manual Rate Entry">
+      <bpmn:incoming>SequenceFlow-APIErrorToManualEntry-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ManualEntryToConvert-id-0006</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ConvertPaymentToUSD-id-0001" name="Convert Payment to Base Currency (USD)">
+      <bpmn:incoming>SequenceFlow-FetchRatesToConvert-id-0002</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ManualEntryToConvert-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConvertToMatch-id-0007</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-MatchPaymentToInvoice-id-0001" name="Match Payment to Invoice">
+      <bpmn:incoming>SequenceFlow-ConvertToMatch-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MatchToPaymentMatchGateway-id-0008</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-PaymentMatch-id-0001" name="Payment Match Result?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-MatchToPaymentMatchGateway-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PaymentMatchToExactMatch-id-0009</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-PaymentMatchToPartial-id-0010</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-PaymentMatchToOverpayment-id-0011</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-PaymentMatchToResearch-id-0012</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-RecordPaymentComplete-id-0001" name="Record Payment as Complete">
+      <bpmn:incoming>SequenceFlow-PaymentMatchToExactMatch-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ExactMatchToMerge-id-0013</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-MarkInvoicePartiallyPaid-id-0001" name="Mark Invoice as Partially Paid">
+      <bpmn:incoming>SequenceFlow-PaymentMatchToPartial-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PartialToMerge-id-0014</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-RecordOverpaymentCredit-id-0001" name="Record Overpayment as Credit">
+      <bpmn:incoming>SequenceFlow-PaymentMatchToOverpayment-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OverpaymentToMerge-id-0015</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-ResearchUnmatchedPayment-id-0001" name="Research Unmatched Payment">
+      <bpmn:incoming>SequenceFlow-PaymentMatchToResearch-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ResearchToReconciliationGateway-id-0016</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ReconciliationResult-id-0001" name="Reconciliation Complete?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ResearchToReconciliationGateway-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReconciliationCompleteToMerge-id-0017</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ReconciliationUnresolvedToNotify-id-0018</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-NotifyAccountingManager-id-0001" name="Send: Notification to Accounting Manager">
+      <bpmn:incoming>SequenceFlow-ReconciliationUnresolvedToNotify-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotifyToMergeReconciliation-id-0019</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-UpdateARAging-id-0001" name="Update Accounts Receivable Aging">
+      <bpmn:incoming>SequenceFlow-MergeReconciliationToUpdateAR-id-0020</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-MergePaymentMatchToUpdateAR-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateARToFollowUp-id-0022</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-FollowUpOverdueInvoices-id-0001" name="Send: Follow-Up for Overdue Invoices">
+      <bpmn:incoming>SequenceFlow-UpdateARToFollowUp-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FollowUpToEnd-id-0023</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ProcessingComplete-id-0001" name="Processing Complete">
+      <bpmn:incoming>SequenceFlow-AlertToEnd-id-0004</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-FollowUpToEnd-id-0023</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-MergeReconciliation-id-0001" name="Merge Reconciliation Paths" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-ReconciliationCompleteToMerge-id-0017</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-NotifyToMergeReconciliation-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MergeReconciliationToUpdateAR-id-0020</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-MergePaymentMatch-id-0001" name="Merge Payment Match Paths" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-ExactMatchToMerge-id-0013</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-PartialToMerge-id-0014</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-OverpaymentToMerge-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MergePaymentMatchToUpdateAR-id-0021</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToFetchRates-id-0001" sourceRef="StartEvent-DailyPaymentProcessing-id-0001" targetRef="ServiceTask-FetchDailyExchangeRates-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FetchRatesToConvert-id-0002" sourceRef="ServiceTask-FetchDailyExchangeRates-id-0001" targetRef="ServiceTask-ConvertPaymentToUSD-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TimerBoundaryToAlert-id-0003" sourceRef="BoundaryEvent-Timer1Hour-FetchRates-id-0001" targetRef="SendTask-AlertITTeam-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AlertToEnd-id-0004" sourceRef="SendTask-AlertITTeam-id-0001" targetRef="EndEvent-ProcessingComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-APIErrorToManualEntry-id-0005" sourceRef="BoundaryEvent-APIError-FetchRates-id-0002" targetRef="UserTask-ManualRateEntry-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ManualEntryToConvert-id-0006" sourceRef="UserTask-ManualRateEntry-id-0001" targetRef="ServiceTask-ConvertPaymentToUSD-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConvertToMatch-id-0007" sourceRef="ServiceTask-ConvertPaymentToUSD-id-0001" targetRef="ServiceTask-MatchPaymentToInvoice-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MatchToPaymentMatchGateway-id-0008" sourceRef="ServiceTask-MatchPaymentToInvoice-id-0001" targetRef="ExclusiveGateway-PaymentMatch-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PaymentMatchToExactMatch-id-0009" name="payment_matches_invoice_exactly" sourceRef="ExclusiveGateway-PaymentMatch-id-0001" targetRef="ServiceTask-RecordPaymentComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PaymentMatchToPartial-id-0010" name="payment_less_than_invoice" sourceRef="ExclusiveGateway-PaymentMatch-id-0001" targetRef="ServiceTask-MarkInvoicePartiallyPaid-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PaymentMatchToOverpayment-id-0011" name="payment_more_than_invoice" sourceRef="ExclusiveGateway-PaymentMatch-id-0001" targetRef="ServiceTask-RecordOverpaymentCredit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PaymentMatchToResearch-id-0012" sourceRef="ExclusiveGateway-PaymentMatch-id-0001" targetRef="UserTask-ResearchUnmatchedPayment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ExactMatchToMerge-id-0013" sourceRef="ServiceTask-RecordPaymentComplete-id-0001" targetRef="ExclusiveGateway-MergePaymentMatch-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PartialToMerge-id-0014" sourceRef="ServiceTask-MarkInvoicePartiallyPaid-id-0001" targetRef="ExclusiveGateway-MergePaymentMatch-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-OverpaymentToMerge-id-0015" sourceRef="ServiceTask-RecordOverpaymentCredit-id-0001" targetRef="ExclusiveGateway-MergePaymentMatch-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ResearchToReconciliationGateway-id-0016" sourceRef="UserTask-ResearchUnmatchedPayment-id-0001" targetRef="ExclusiveGateway-ReconciliationResult-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReconciliationCompleteToMerge-id-0017" name="reconciliation_complete" sourceRef="ExclusiveGateway-ReconciliationResult-id-0001" targetRef="ExclusiveGateway-MergeReconciliation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReconciliationUnresolvedToNotify-id-0018" sourceRef="ExclusiveGateway-ReconciliationResult-id-0001" targetRef="SendTask-NotifyAccountingManager-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotifyToMergeReconciliation-id-0019" sourceRef="SendTask-NotifyAccountingManager-id-0001" targetRef="ExclusiveGateway-MergeReconciliation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MergeReconciliationToUpdateAR-id-0020" sourceRef="ExclusiveGateway-MergeReconciliation-id-0001" targetRef="ServiceTask-UpdateARAging-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MergePaymentMatchToUpdateAR-id-0021" sourceRef="ExclusiveGateway-MergePaymentMatch-id-0001" targetRef="ServiceTask-UpdateARAging-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateARToFollowUp-id-0022" sourceRef="ServiceTask-UpdateARAging-id-0001" targetRef="SendTask-FollowUpOverdueInvoices-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FollowUpToEnd-id-0023" sourceRef="SendTask-FollowUpOverdueInvoices-id-0001" targetRef="EndEvent-ProcessingComplete-id-0001" />
+  </bpmn:process>
+  <bpmn:error id="API_CONNECTION_ERROR" name="API_CONNECTION_ERROR" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_PaymentReconciliationProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_PaymentReconciliationProcess-id-0001" bpmnElement="PaymentReconciliationProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-DailyPaymentProcessing-id-0001_di" bpmnElement="StartEvent-DailyPaymentProcessing-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-FetchDailyExchangeRates-id-0001_di" bpmnElement="ServiceTask-FetchDailyExchangeRates-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer1Hour-FetchRates-id-0001_di" bpmnElement="BoundaryEvent-Timer1Hour-FetchRates-id-0001">
+        <dc:Bounds x="190.33333333333334" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-APIError-FetchRates-id-0002_di" bpmnElement="BoundaryEvent-APIError-FetchRates-id-0002">
+        <dc:Bounds x="223.66666666666669" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ConvertPaymentToUSD-id-0001_di" bpmnElement="ServiceTask-ConvertPaymentToUSD-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MatchPaymentToInvoice-id-0001_di" bpmnElement="ServiceTask-MatchPaymentToInvoice-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PaymentMatch-id-0001_di" bpmnElement="ExclusiveGateway-PaymentMatch-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RecordPaymentComplete-id-0001_di" bpmnElement="ServiceTask-RecordPaymentComplete-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-MergePaymentMatch-id-0001_di" bpmnElement="ExclusiveGateway-MergePaymentMatch-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateARAging-id-0001_di" bpmnElement="ServiceTask-UpdateARAging-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-FollowUpOverdueInvoices-id-0001_di" bpmnElement="SendTask-FollowUpOverdueInvoices-id-0001">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessingComplete-id-0001_di" bpmnElement="EndEvent-ProcessingComplete-id-0001">
+        <dc:Bounds x="1857" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ManualRateEntry-id-0001_di" bpmnElement="UserTask-ManualRateEntry-id-0001">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MarkInvoicePartiallyPaid-id-0001_di" bpmnElement="ServiceTask-MarkInvoicePartiallyPaid-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-AlertITTeam-id-0001_di" bpmnElement="SendTask-AlertITTeam-id-0001">
+        <dc:Bounds x="325" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RecordOverpaymentCredit-id-0001_di" bpmnElement="ServiceTask-RecordOverpaymentCredit-id-0001">
+        <dc:Bounds x="925" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ResearchUnmatchedPayment-id-0001_di" bpmnElement="UserTask-ResearchUnmatchedPayment-id-0001">
+        <dc:Bounds x="925" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ReconciliationResult-id-0001_di" bpmnElement="ExclusiveGateway-ReconciliationResult-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="465" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-MergeReconciliation-id-0001_di" bpmnElement="ExclusiveGateway-MergeReconciliation-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1400" y="465" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-NotifyAccountingManager-id-0001_di" bpmnElement="SendTask-NotifyAccountingManager-id-0001">
+        <dc:Bounds x="1225" y="590" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToFetchRates-id-0001_di" bpmnElement="SequenceFlow-StartToFetchRates-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FetchRatesToConvert-id-0002_di" bpmnElement="SequenceFlow-FetchRatesToConvert-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TimerBoundaryToAlert-id-0003_di" bpmnElement="SequenceFlow-TimerBoundaryToAlert-id-0003">
+        <di:waypoint x="208.33333333333334" y="128" />
+        <di:waypoint x="208.33333333333334" y="350" />
+        <di:waypoint x="325" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-APIErrorToManualEntry-id-0005_di" bpmnElement="SequenceFlow-APIErrorToManualEntry-id-0005">
+        <di:waypoint x="241.66666666666669" y="128" />
+        <di:waypoint x="241.66666666666669" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConvertToMatch-id-0007_di" bpmnElement="SequenceFlow-ConvertToMatch-id-0007">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MatchToPaymentMatchGateway-id-0008_di" bpmnElement="SequenceFlow-MatchToPaymentMatchGateway-id-0008">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentMatchToExactMatch-id-0009_di" bpmnElement="SequenceFlow-PaymentMatchToExactMatch-id-0009">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentMatchToPartial-id-0010_di" bpmnElement="SequenceFlow-PaymentMatchToPartial-id-0010">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentMatchToOverpayment-id-0011_di" bpmnElement="SequenceFlow-PaymentMatchToOverpayment-id-0011">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="350" />
+        <di:waypoint x="925" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentMatchToResearch-id-0012_di" bpmnElement="SequenceFlow-PaymentMatchToResearch-id-0012">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="490" />
+        <di:waypoint x="925" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExactMatchToMerge-id-0013_di" bpmnElement="SequenceFlow-ExactMatchToMerge-id-0013">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MergePaymentMatchToUpdateAR-id-0021_di" bpmnElement="SequenceFlow-MergePaymentMatchToUpdateAR-id-0021">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateARToFollowUp-id-0022_di" bpmnElement="SequenceFlow-UpdateARToFollowUp-id-0022">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FollowUpToEnd-id-0023_di" bpmnElement="SequenceFlow-FollowUpToEnd-id-0023">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1857" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ManualEntryToConvert-id-0006_di" bpmnElement="SequenceFlow-ManualEntryToConvert-id-0006">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PartialToMerge-id-0014_di" bpmnElement="SequenceFlow-PartialToMerge-id-0014">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlertToEnd-id-0004_di" bpmnElement="SequenceFlow-AlertToEnd-id-0004">
+        <di:waypoint x="425" y="350" />
+        <di:waypoint x="450" y="350" />
+        <di:waypoint x="450" y="140" />
+        <di:waypoint x="1800" y="140" />
+        <di:waypoint x="1800" y="70" />
+        <di:waypoint x="1857" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OverpaymentToMerge-id-0015_di" bpmnElement="SequenceFlow-OverpaymentToMerge-id-0015">
+        <di:waypoint x="1025" y="350" />
+        <di:waypoint x="1125" y="350" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ResearchToReconciliationGateway-id-0016_di" bpmnElement="SequenceFlow-ResearchToReconciliationGateway-id-0016">
+        <di:waypoint x="1025" y="490" />
+        <di:waypoint x="1100" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReconciliationCompleteToMerge-id-0017_di" bpmnElement="SequenceFlow-ReconciliationCompleteToMerge-id-0017">
+        <di:waypoint x="1150" y="490" />
+        <di:waypoint x="1400" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReconciliationUnresolvedToNotify-id-0018_di" bpmnElement="SequenceFlow-ReconciliationUnresolvedToNotify-id-0018">
+        <di:waypoint x="1125" y="515" />
+        <di:waypoint x="1125" y="630" />
+        <di:waypoint x="1225" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MergeReconciliationToUpdateAR-id-0020_di" bpmnElement="SequenceFlow-MergeReconciliationToUpdateAR-id-0020">
+        <di:waypoint x="1450" y="490" />
+        <di:waypoint x="1575" y="490" />
+        <di:waypoint x="1575" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotifyToMergeReconciliation-id-0019_di" bpmnElement="SequenceFlow-NotifyToMergeReconciliation-id-0019">
+        <di:waypoint x="1325" y="630" />
+        <di:waypoint x="1425" y="630" />
+        <di:waypoint x="1425" y="515" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

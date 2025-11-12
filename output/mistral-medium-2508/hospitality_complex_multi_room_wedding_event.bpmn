@@ -1,0 +1,1001 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="WeddingEventProcess-Definitions-id-0001" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="2.0">
+  <bpmn:process id="WeddingEventProcess-id-0001" name="Wedding Event Coordination Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-WeddingContractSigned-id-0001" name="Wedding Contract Signed">
+      <bpmn:outgoing>SequenceFlow-ContractToSign-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-SignContract-id-0001" name="Sign Contract">
+      <bpmn:incoming>SequenceFlow-ContractToSign-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SignToCeremonyTime-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ConfirmCeremonyTime-id-0002" name="Confirm Ceremony Time">
+      <bpmn:incoming>SequenceFlow-SignToCeremonyTime-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CeremonyTimeToPlanningSplit-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-InitialPlanningSplit-id-0001" name="Initial Planning Parallel Split" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CeremonyTimeToPlanningSplit-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PlanningSplitToGuestCount-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-PlanningSplitToGuestRooms-id-0005</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-PlanningSplitToMenuItems-id-0006</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-FinalizeGuestCount-id-0003" name="Finalize Guest Count">
+      <bpmn:incoming>SequenceFlow-PlanningSplitToGuestCount-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GuestCountToPlanningJoin-id-0015</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-AssignGuestRooms-id-0004" name="Assign Guest Rooms">
+      <bpmn:incoming>SequenceFlow-PlanningSplitToGuestRooms-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GuestRoomsToPlanningJoin-id-0016</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-SelectMenuItems-id-0005" name="Select Menu Items">
+      <bpmn:incoming>SequenceFlow-PlanningSplitToMenuItems-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MenuItemsToDietary-id-0007</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-DietaryRestrictions-id-0001" name="Dietary Restrictions?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-MenuItemsToDietary-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DietaryToSpecify-id-0008</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-DietaryToNoRestrictions-id-0009</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-SpecifyDietaryRestrictions-id-0006" name="Specify Dietary Restrictions">
+      <bpmn:incoming>SequenceFlow-DietaryToSpecify-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SpecifyToDietaryMerge-id-0010</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-NoRestrictionsNote-id-0001" name="Note: no restrictions">
+      <bpmn:incoming>SequenceFlow-DietaryToNoRestrictions-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NoRestrictionsToDietaryMerge-id-0011</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-DietaryMerge-id-0001" name="Dietary Restrictions Merge" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-SpecifyToDietaryMerge-id-0010</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-NoRestrictionsToDietaryMerge-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DietaryMergeToBeverage-id-0012</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-ChooseBeverageSelections-id-0007" name="Choose Beverage Selections">
+      <bpmn:incoming>SequenceFlow-DietaryMergeToBeverage-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BeverageToMusic-id-0013</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ArrangeMusicDJ-id-0008" name="Arrange Music/DJ">
+      <bpmn:incoming>SequenceFlow-BeverageToMusic-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MusicToPlanningJoin-id-0014</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-InitialPlanningJoin-id-0002" name="Initial Planning Parallel Join" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-MusicToPlanningJoin-id-0014</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-GuestCountToPlanningJoin-id-0015</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-GuestRoomsToPlanningJoin-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PlanningJoinToThreeMonths-id-0017</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:startEvent id="StartEvent-ThreeMonthsBefore-id-0002" name="3 Months Before Event">
+      <bpmn:incoming>SequenceFlow-PlanningJoinToThreeMonths-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ThreeMonthsToTimeline-id-0018</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-CreateMasterTimeline-id-0009" name="Coordinator Creates Master Timeline">
+      <bpmn:incoming>SequenceFlow-ThreeMonthsToTimeline-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TimelineToDistribute-id-0019</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-DistributeTimeline-id-0002" name="Distribute to Departments">
+      <bpmn:incoming>SequenceFlow-TimelineToDistribute-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DistributeToTwoWeeks-id-0020</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:startEvent id="StartEvent-TwoWeeksBefore-id-0003" name="2 Weeks Before Event">
+      <bpmn:incoming>SequenceFlow-DistributeToTwoWeeks-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TwoWeeksToHeadcount-id-0021</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-FinalHeadcountConfirmation-id-0010" name="Final Headcount Confirmation">
+      <bpmn:incoming>SequenceFlow-TwoWeeksToHeadcount-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-HeadcountToRoomBlock-id-0022</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-HeadcountToBoundary-id-0055</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-HeadcountTimeout-id-0001" name="4 Hour SLA Exceeded" attachedToRef="UserTask-FinalHeadcountConfirmation-id-0010">
+      <bpmn:incoming>SequenceFlow-HeadcountToBoundary-id-0055</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BoundaryToLateFee-id-0056</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-HeadcountTimeout-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT4H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-LateFeeNotification-id-0001" name="Send: late fee notification">
+      <bpmn:incoming>SequenceFlow-BoundaryToLateFee-id-0056</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LateFeeToRoomBlock-id-0057</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-RoomBlockFinalization-id-0011" name="Room Block Finalization">
+      <bpmn:incoming>SequenceFlow-HeadcountToRoomBlock-id-0022</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-LateFeeToRoomBlock-id-0057</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RoomBlockToDietaryList-id-0023</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-DietaryRestrictionsListFinalized-id-0012" name="Dietary Restrictions List Finalized">
+      <bpmn:incoming>SequenceFlow-RoomBlockToDietaryList-id-0023</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DietaryListToAVReserve-id-0024</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ReserveAVEquipment-id-0003" name="Reserve AV Equipment">
+      <bpmn:incoming>SequenceFlow-DietaryListToAVReserve-id-0024</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AVReserveToOneWeek-id-0025</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:startEvent id="StartEvent-OneWeekBefore-id-0004" name="1 Week Before Event">
+      <bpmn:incoming>SequenceFlow-AVReserveToOneWeek-id-0025</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OneWeekToWalkthrough-id-0026</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-FacilityWalkthrough-id-0013" name="Facility Walkthrough">
+      <bpmn:incoming>SequenceFlow-OneWeekToWalkthrough-id-0026</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-WalkthroughToSeating-id-0027</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-WalkthroughToBoundary-id-0058</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-WalkthroughTimeout-id-0002" name="24 Hour SLA Exceeded" attachedToRef="UserTask-FacilityWalkthrough-id-0013">
+      <bpmn:incoming>SequenceFlow-WalkthroughToBoundary-id-0058</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-WalkthroughBoundaryToAlert-id-0059</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-WalkthroughTimeout-id-0002_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P1D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-WalkthroughOverdueAlert-id-0002" name="Send: walkthrough overdue alert">
+      <bpmn:incoming>SequenceFlow-WalkthroughBoundaryToAlert-id-0059</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AlertToSeating-id-0060</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-FinalizeSeatingChart-id-0014" name="Finalize Seating Chart">
+      <bpmn:incoming>SequenceFlow-WalkthroughToSeating-id-0027</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-AlertToSeating-id-0060</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SeatingToNamePlacards-id-0028</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-PrepareNamePlacards-id-0004" name="Prepare Name Placards">
+      <bpmn:incoming>SequenceFlow-SeatingToNamePlacards-id-0028</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NamePlacardsToAlcoholCalc-id-0029</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:scriptTask id="ScriptTask-CalculateAlcoholQuantities-id-0001" name="Computation: calculate alcohol quantities by guest count">
+      <bpmn:incoming>SequenceFlow-NamePlacardsToAlcoholCalc-id-0029</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AlcoholCalcToDayOf-id-0030</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:startEvent id="StartEvent-DayOfEvent-id-0005" name="Day of Event - 8:00 AM">
+      <bpmn:incoming>SequenceFlow-AlcoholCalcToDayOf-id-0030</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DayOfToMorningSetup-id-0031</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-MorningSetup-id-0005" name="Morning Setup">
+      <bpmn:incoming>SequenceFlow-DayOfToMorningSetup-id-0031</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MorningSetupToSplit-id-0032</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-MorningSetupSplit-id-0003" name="Morning Setup Parallel Split" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-MorningSetupToSplit-id-0032</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToCeremonyRoom-id-0033</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToReceptionTables-id-0034</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-ArrangeCeremonyRoom-id-0006" name="Arrange Ceremony Room">
+      <bpmn:incoming>SequenceFlow-SplitToCeremonyRoom-id-0033</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CeremonyRoomToJoin-id-0035</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ArrangeReceptionTables-id-0007" name="Arrange Reception Tables">
+      <bpmn:incoming>SequenceFlow-SplitToReceptionTables-id-0034</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceptionTablesToJoin-id-0036</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-MorningSetupJoin-id-0004" name="Morning Setup Parallel Join" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-CeremonyRoomToJoin-id-0035</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ReceptionTablesToJoin-id-0036</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToAVTest-id-0037</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-AVEquipmentTest-id-0008" name="AV Equipment Test">
+      <bpmn:incoming>SequenceFlow-JoinToAVTest-id-0037</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AVTestToCeremonyBuffer-id-0038</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-CeremonyBuffer-id-0001" name="Ceremony Buffer">
+      <bpmn:incoming>SequenceFlow-AVTestToCeremonyBuffer-id-0038</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CeremonyBufferToCheckin-id-0039</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:userTask id="UserTask-GuestCheckinProcessing-id-0015" name="Guest Check-in Processing">
+      <bpmn:incoming>SequenceFlow-CeremonyBufferToCheckin-id-0039</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckinToCeremony-id-0040</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ConductCeremony-id-0016" name="Conduct Ceremony">
+      <bpmn:incoming>SequenceFlow-CheckinToCeremony-id-0040</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CeremonyToCatering-id-0041</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-CeremonyToWeddingComplete-id-0068</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="SubProcess-CateringPreparation-id-0001" name="Catering Preparation">
+      <bpmn:incoming>SequenceFlow-CeremonyToCatering-id-0041</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CateringToBar-id-0042</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-KitchenPrepBegins-id-0006" name="Kitchen Prep Begins">
+        <bpmn:outgoing>SequenceFlow-KitchenPrepToSchedule-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-FinalizeCookingSchedule-id-0009" name="Finalize Cooking Schedule">
+        <bpmn:incoming>SequenceFlow-KitchenPrepToSchedule-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ScheduleToColdPrep-id-0002</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-PrepColdItems-id-0010" name="Prep Cold Items">
+        <bpmn:incoming>SequenceFlow-ScheduleToColdPrep-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ColdPrepToPlating-id-0003</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-CoordinatePlating-id-0011" name="Coordinate Plating">
+        <bpmn:incoming>SequenceFlow-ColdPrepToPlating-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PlatingToBuffet-id-0004</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-SetUpBuffetStations-id-0012" name="Set Up Buffet Stations">
+        <bpmn:incoming>SequenceFlow-PlatingToBuffet-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-BuffetToExecute-id-0005</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-ExecuteServiceTimeline-id-0013" name="Execute Service Timeline">
+        <bpmn:incoming>SequenceFlow-BuffetToExecute-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ExecuteToComplete-id-0006</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-CateringServiceComplete-id-0002" name="Catering Service Complete">
+        <bpmn:incoming>SequenceFlow-ExecuteToComplete-id-0006</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-KitchenPrepToSchedule-id-0001" sourceRef="StartEvent-KitchenPrepBegins-id-0006" targetRef="ServiceTask-FinalizeCookingSchedule-id-0009" />
+      <bpmn:sequenceFlow id="SequenceFlow-ScheduleToColdPrep-id-0002" sourceRef="ServiceTask-FinalizeCookingSchedule-id-0009" targetRef="ServiceTask-PrepColdItems-id-0010" />
+      <bpmn:sequenceFlow id="SequenceFlow-ColdPrepToPlating-id-0003" sourceRef="ServiceTask-PrepColdItems-id-0010" targetRef="ServiceTask-CoordinatePlating-id-0011" />
+      <bpmn:sequenceFlow id="SequenceFlow-PlatingToBuffet-id-0004" sourceRef="ServiceTask-CoordinatePlating-id-0011" targetRef="ServiceTask-SetUpBuffetStations-id-0012" />
+      <bpmn:sequenceFlow id="SequenceFlow-BuffetToExecute-id-0005" sourceRef="ServiceTask-SetUpBuffetStations-id-0012" targetRef="ServiceTask-ExecuteServiceTimeline-id-0013" />
+      <bpmn:sequenceFlow id="SequenceFlow-ExecuteToComplete-id-0006" sourceRef="ServiceTask-ExecuteServiceTimeline-id-0013" targetRef="EndEvent-CateringServiceComplete-id-0002" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-BarServiceOperation-id-0002" name="Bar Service Operation">
+      <bpmn:incoming>SequenceFlow-CateringToBar-id-0042</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BarToDancing-id-0043</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-BarSetupBegins-id-0007" name="Bar Setup Begins">
+        <bpmn:outgoing>SequenceFlow-BarSetupToInventory-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-InventoryVerification-id-0014" name="Inventory Verification">
+        <bpmn:incoming>SequenceFlow-BarSetupToInventory-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-InventoryToBriefing-id-0002</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-StaffBriefing-id-0015" name="Staff Briefing">
+        <bpmn:incoming>SequenceFlow-InventoryToBriefing-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-BriefingToOpen-id-0003</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-OpenBarService-id-0016" name="Open Bar Service">
+        <bpmn:incoming>SequenceFlow-BriefingToOpen-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-OpenToMonitor-id-0004</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-MonitorConsumption-id-0017" name="Monitor Consumption">
+        <bpmn:incoming>SequenceFlow-OpenToMonitor-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-MonitorToClose-id-0005</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-CloseBarService-id-0018" name="Close Bar Service">
+        <bpmn:incoming>SequenceFlow-MonitorToClose-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CloseToComplete-id-0006</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-BarServiceComplete-id-0003" name="Bar Service Complete">
+        <bpmn:incoming>SequenceFlow-CloseToComplete-id-0006</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-BarSetupToInventory-id-0001" sourceRef="StartEvent-BarSetupBegins-id-0007" targetRef="ServiceTask-InventoryVerification-id-0014" />
+      <bpmn:sequenceFlow id="SequenceFlow-InventoryToBriefing-id-0002" sourceRef="ServiceTask-InventoryVerification-id-0014" targetRef="ServiceTask-StaffBriefing-id-0015" />
+      <bpmn:sequenceFlow id="SequenceFlow-BriefingToOpen-id-0003" sourceRef="ServiceTask-StaffBriefing-id-0015" targetRef="ServiceTask-OpenBarService-id-0016" />
+      <bpmn:sequenceFlow id="SequenceFlow-OpenToMonitor-id-0004" sourceRef="ServiceTask-OpenBarService-id-0016" targetRef="ServiceTask-MonitorConsumption-id-0017" />
+      <bpmn:sequenceFlow id="SequenceFlow-MonitorToClose-id-0005" sourceRef="ServiceTask-MonitorConsumption-id-0017" targetRef="ServiceTask-CloseBarService-id-0018" />
+      <bpmn:sequenceFlow id="SequenceFlow-CloseToComplete-id-0006" sourceRef="ServiceTask-CloseBarService-id-0018" targetRef="EndEvent-BarServiceComplete-id-0003" />
+    </bpmn:subProcess>
+    <bpmn:serviceTask id="ServiceTask-DancingEntertainment-id-0019" name="Dancing/Entertainment">
+      <bpmn:incoming>SequenceFlow-BarToDancing-id-0043</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DancingToCleanupBuffer-id-0044</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-CleanupBuffer-id-0002" name="Cleanup Buffer">
+      <bpmn:incoming>SequenceFlow-DancingToCleanupBuffer-id-0044</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CleanupBufferToCleanup-id-0045</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="ServiceTask-PostEventCleanup-id-0020" name="Post-Event Cleanup">
+      <bpmn:incoming>SequenceFlow-CleanupBufferToCleanup-id-0045</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CleanupToSplit-id-0046</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-CleanupSplit-id-0005" name="Cleanup Parallel Split" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CleanupToSplit-id-0046</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CleanupSplitToRemove-id-0047</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-CleanupSplitToReset-id-0048</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-RemoveFurniture-id-0021" name="Remove Furniture">
+      <bpmn:incoming>SequenceFlow-CleanupSplitToRemove-id-0047</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RemoveToJoin-id-0049</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ResetFacility-id-0022" name="Reset Facility">
+      <bpmn:incoming>SequenceFlow-CleanupSplitToReset-id-0048</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ResetToJoin-id-0050</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-CleanupJoin-id-0006" name="Cleanup Parallel Join" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-RemoveToJoin-id-0049</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ResetToJoin-id-0050</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CleanupJoinToCheckout-id-0051</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-GuestCheckoutWithLuggage-id-0017" name="Guest Checkout with Luggage Storage">
+      <bpmn:incoming>SequenceFlow-CleanupJoinToCheckout-id-0051</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckoutToCompareCharges-id-0052</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:scriptTask id="ScriptTask-CompareCharges-id-0002" name="Computation: compare actual vs estimated charges">
+      <bpmn:incoming>SequenceFlow-CheckoutToCompareCharges-id-0052</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CompareToGenerateBill-id-0053</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:serviceTask id="ServiceTask-GenerateFinalBill-id-0023" name="Generate Final Bill">
+      <bpmn:incoming>SequenceFlow-CompareToGenerateBill-id-0053</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GenerateBillToBillingComplete-id-0054</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-FinalBillingReconciled-id-0004" name="Final Billing Reconciled">
+      <bpmn:incoming>SequenceFlow-GenerateBillToBillingComplete-id-0054</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:startEvent id="StartEvent-GuestRoomProcess-id-0008" name="Guest Room Process Start">
+      <bpmn:outgoing>SequenceFlow-GuestRoomProcessStartToReceive-id-0061</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:receiveTask id="ReceiveTask-GuestRoomRequests-id-0001" name="Receive: guest room requests">
+      <bpmn:incoming>SequenceFlow-GuestRoomProcessStartToReceive-id-0061</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveToBoundary-id-0062</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ReceiveToRoomUpgrades-id-0064</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-RoomRequestTimeout-id-0003" name="24 Hour SLA Exceeded" attachedToRef="ReceiveTask-GuestRoomRequests-id-0001">
+      <bpmn:incoming>SequenceFlow-ReceiveToBoundary-id-0062</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BoundaryToConfirmation-id-0063</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-RoomRequestTimeout-id-0003_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P1D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-RoomAssignmentConfirmation-id-0003" name="Send: room assignment confirmation">
+      <bpmn:incoming>SequenceFlow-BoundaryToConfirmation-id-0063</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmationToComplete-id-0067</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-ProcessRoomUpgrades-id-0024" name="Process Room Upgrades">
+      <bpmn:incoming>SequenceFlow-ReceiveToRoomUpgrades-id-0064</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RoomUpgradesToSpecialRequests-id-0065</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-HandleSpecialRequests-id-0018" name="Handle Special Requests">
+      <bpmn:incoming>SequenceFlow-RoomUpgradesToSpecialRequests-id-0065</bpmn:incoming>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-GuestRoomProcessComplete-id-0005" name="Guest Room Process Complete">
+      <bpmn:incoming>SequenceFlow-ConfirmationToComplete-id-0067</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-WeddingEventCompleted-id-0001" name="Wedding Event Completed">
+      <bpmn:incoming>SequenceFlow-CeremonyToWeddingComplete-id-0068</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-ContractToSign-id-0001" sourceRef="StartEvent-WeddingContractSigned-id-0001" targetRef="UserTask-SignContract-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SignToCeremonyTime-id-0002" sourceRef="UserTask-SignContract-id-0001" targetRef="UserTask-ConfirmCeremonyTime-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-CeremonyTimeToPlanningSplit-id-0003" sourceRef="UserTask-ConfirmCeremonyTime-id-0002" targetRef="ParallelGateway-InitialPlanningSplit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PlanningSplitToGuestCount-id-0004" sourceRef="ParallelGateway-InitialPlanningSplit-id-0001" targetRef="UserTask-FinalizeGuestCount-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-PlanningSplitToGuestRooms-id-0005" sourceRef="ParallelGateway-InitialPlanningSplit-id-0001" targetRef="UserTask-AssignGuestRooms-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-PlanningSplitToMenuItems-id-0006" sourceRef="ParallelGateway-InitialPlanningSplit-id-0001" targetRef="UserTask-SelectMenuItems-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-MenuItemsToDietary-id-0007" sourceRef="UserTask-SelectMenuItems-id-0005" targetRef="ExclusiveGateway-DietaryRestrictions-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DietaryToSpecify-id-0008" name="has_dietary_restrictions" sourceRef="ExclusiveGateway-DietaryRestrictions-id-0001" targetRef="UserTask-SpecifyDietaryRestrictions-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-DietaryToNoRestrictions-id-0009" sourceRef="ExclusiveGateway-DietaryRestrictions-id-0001" targetRef="ServiceTask-NoRestrictionsNote-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SpecifyToDietaryMerge-id-0010" sourceRef="UserTask-SpecifyDietaryRestrictions-id-0006" targetRef="ParallelGateway-DietaryMerge-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NoRestrictionsToDietaryMerge-id-0011" sourceRef="ServiceTask-NoRestrictionsNote-id-0001" targetRef="ParallelGateway-DietaryMerge-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DietaryMergeToBeverage-id-0012" sourceRef="ParallelGateway-DietaryMerge-id-0001" targetRef="UserTask-ChooseBeverageSelections-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-BeverageToMusic-id-0013" sourceRef="UserTask-ChooseBeverageSelections-id-0007" targetRef="UserTask-ArrangeMusicDJ-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-MusicToPlanningJoin-id-0014" sourceRef="UserTask-ArrangeMusicDJ-id-0008" targetRef="ParallelGateway-InitialPlanningJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-GuestCountToPlanningJoin-id-0015" sourceRef="UserTask-FinalizeGuestCount-id-0003" targetRef="ParallelGateway-InitialPlanningJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-GuestRoomsToPlanningJoin-id-0016" sourceRef="UserTask-AssignGuestRooms-id-0004" targetRef="ParallelGateway-InitialPlanningJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-PlanningJoinToThreeMonths-id-0017" sourceRef="ParallelGateway-InitialPlanningJoin-id-0002" targetRef="StartEvent-ThreeMonthsBefore-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ThreeMonthsToTimeline-id-0018" sourceRef="StartEvent-ThreeMonthsBefore-id-0002" targetRef="UserTask-CreateMasterTimeline-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-TimelineToDistribute-id-0019" sourceRef="UserTask-CreateMasterTimeline-id-0009" targetRef="ServiceTask-DistributeTimeline-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-DistributeToTwoWeeks-id-0020" sourceRef="ServiceTask-DistributeTimeline-id-0002" targetRef="StartEvent-TwoWeeksBefore-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-TwoWeeksToHeadcount-id-0021" sourceRef="StartEvent-TwoWeeksBefore-id-0003" targetRef="UserTask-FinalHeadcountConfirmation-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-HeadcountToRoomBlock-id-0022" sourceRef="UserTask-FinalHeadcountConfirmation-id-0010" targetRef="UserTask-RoomBlockFinalization-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-RoomBlockToDietaryList-id-0023" sourceRef="UserTask-RoomBlockFinalization-id-0011" targetRef="UserTask-DietaryRestrictionsListFinalized-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-DietaryListToAVReserve-id-0024" sourceRef="UserTask-DietaryRestrictionsListFinalized-id-0012" targetRef="ServiceTask-ReserveAVEquipment-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-AVReserveToOneWeek-id-0025" sourceRef="ServiceTask-ReserveAVEquipment-id-0003" targetRef="StartEvent-OneWeekBefore-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-OneWeekToWalkthrough-id-0026" sourceRef="StartEvent-OneWeekBefore-id-0004" targetRef="UserTask-FacilityWalkthrough-id-0013" />
+    <bpmn:sequenceFlow id="SequenceFlow-WalkthroughToSeating-id-0027" sourceRef="UserTask-FacilityWalkthrough-id-0013" targetRef="UserTask-FinalizeSeatingChart-id-0014" />
+    <bpmn:sequenceFlow id="SequenceFlow-SeatingToNamePlacards-id-0028" sourceRef="UserTask-FinalizeSeatingChart-id-0014" targetRef="ServiceTask-PrepareNamePlacards-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-NamePlacardsToAlcoholCalc-id-0029" sourceRef="ServiceTask-PrepareNamePlacards-id-0004" targetRef="ScriptTask-CalculateAlcoholQuantities-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AlcoholCalcToDayOf-id-0030" sourceRef="ScriptTask-CalculateAlcoholQuantities-id-0001" targetRef="StartEvent-DayOfEvent-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-DayOfToMorningSetup-id-0031" sourceRef="StartEvent-DayOfEvent-id-0005" targetRef="ServiceTask-MorningSetup-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-MorningSetupToSplit-id-0032" sourceRef="ServiceTask-MorningSetup-id-0005" targetRef="ParallelGateway-MorningSetupSplit-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToCeremonyRoom-id-0033" sourceRef="ParallelGateway-MorningSetupSplit-id-0003" targetRef="ServiceTask-ArrangeCeremonyRoom-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToReceptionTables-id-0034" sourceRef="ParallelGateway-MorningSetupSplit-id-0003" targetRef="ServiceTask-ArrangeReceptionTables-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-CeremonyRoomToJoin-id-0035" sourceRef="ServiceTask-ArrangeCeremonyRoom-id-0006" targetRef="ParallelGateway-MorningSetupJoin-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceptionTablesToJoin-id-0036" sourceRef="ServiceTask-ArrangeReceptionTables-id-0007" targetRef="ParallelGateway-MorningSetupJoin-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToAVTest-id-0037" sourceRef="ParallelGateway-MorningSetupJoin-id-0004" targetRef="ServiceTask-AVEquipmentTest-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-AVTestToCeremonyBuffer-id-0038" sourceRef="ServiceTask-AVEquipmentTest-id-0008" targetRef="IntermediateCatchEvent-CeremonyBuffer-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CeremonyBufferToCheckin-id-0039" sourceRef="IntermediateCatchEvent-CeremonyBuffer-id-0001" targetRef="UserTask-GuestCheckinProcessing-id-0015" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckinToCeremony-id-0040" sourceRef="UserTask-GuestCheckinProcessing-id-0015" targetRef="UserTask-ConductCeremony-id-0016" />
+    <bpmn:sequenceFlow id="SequenceFlow-CeremonyToCatering-id-0041" sourceRef="UserTask-ConductCeremony-id-0016" targetRef="SubProcess-CateringPreparation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CateringToBar-id-0042" sourceRef="SubProcess-CateringPreparation-id-0001" targetRef="SubProcess-BarServiceOperation-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-BarToDancing-id-0043" sourceRef="SubProcess-BarServiceOperation-id-0002" targetRef="ServiceTask-DancingEntertainment-id-0019" />
+    <bpmn:sequenceFlow id="SequenceFlow-DancingToCleanupBuffer-id-0044" sourceRef="ServiceTask-DancingEntertainment-id-0019" targetRef="IntermediateCatchEvent-CleanupBuffer-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-CleanupBufferToCleanup-id-0045" sourceRef="IntermediateCatchEvent-CleanupBuffer-id-0002" targetRef="ServiceTask-PostEventCleanup-id-0020" />
+    <bpmn:sequenceFlow id="SequenceFlow-CleanupToSplit-id-0046" sourceRef="ServiceTask-PostEventCleanup-id-0020" targetRef="ParallelGateway-CleanupSplit-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-CleanupSplitToRemove-id-0047" sourceRef="ParallelGateway-CleanupSplit-id-0005" targetRef="ServiceTask-RemoveFurniture-id-0021" />
+    <bpmn:sequenceFlow id="SequenceFlow-CleanupSplitToReset-id-0048" sourceRef="ParallelGateway-CleanupSplit-id-0005" targetRef="ServiceTask-ResetFacility-id-0022" />
+    <bpmn:sequenceFlow id="SequenceFlow-RemoveToJoin-id-0049" sourceRef="ServiceTask-RemoveFurniture-id-0021" targetRef="ParallelGateway-CleanupJoin-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-ResetToJoin-id-0050" sourceRef="ServiceTask-ResetFacility-id-0022" targetRef="ParallelGateway-CleanupJoin-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-CleanupJoinToCheckout-id-0051" sourceRef="ParallelGateway-CleanupJoin-id-0006" targetRef="UserTask-GuestCheckoutWithLuggage-id-0017" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckoutToCompareCharges-id-0052" sourceRef="UserTask-GuestCheckoutWithLuggage-id-0017" targetRef="ScriptTask-CompareCharges-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-CompareToGenerateBill-id-0053" sourceRef="ScriptTask-CompareCharges-id-0002" targetRef="ServiceTask-GenerateFinalBill-id-0023" />
+    <bpmn:sequenceFlow id="SequenceFlow-GenerateBillToBillingComplete-id-0054" sourceRef="ServiceTask-GenerateFinalBill-id-0023" targetRef="EndEvent-FinalBillingReconciled-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-HeadcountToBoundary-id-0055" sourceRef="UserTask-FinalHeadcountConfirmation-id-0010" targetRef="BoundaryEvent-HeadcountTimeout-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToLateFee-id-0056" sourceRef="BoundaryEvent-HeadcountTimeout-id-0001" targetRef="SendTask-LateFeeNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-LateFeeToRoomBlock-id-0057" sourceRef="SendTask-LateFeeNotification-id-0001" targetRef="UserTask-RoomBlockFinalization-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-WalkthroughToBoundary-id-0058" sourceRef="UserTask-FacilityWalkthrough-id-0013" targetRef="BoundaryEvent-WalkthroughTimeout-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-WalkthroughBoundaryToAlert-id-0059" sourceRef="BoundaryEvent-WalkthroughTimeout-id-0002" targetRef="SendTask-WalkthroughOverdueAlert-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-AlertToSeating-id-0060" sourceRef="SendTask-WalkthroughOverdueAlert-id-0002" targetRef="UserTask-FinalizeSeatingChart-id-0014" />
+    <bpmn:sequenceFlow id="SequenceFlow-GuestRoomProcessStartToReceive-id-0061" sourceRef="StartEvent-GuestRoomProcess-id-0008" targetRef="ReceiveTask-GuestRoomRequests-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveToBoundary-id-0062" sourceRef="ReceiveTask-GuestRoomRequests-id-0001" targetRef="BoundaryEvent-RoomRequestTimeout-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToConfirmation-id-0063" sourceRef="BoundaryEvent-RoomRequestTimeout-id-0003" targetRef="SendTask-RoomAssignmentConfirmation-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveToRoomUpgrades-id-0064" sourceRef="ReceiveTask-GuestRoomRequests-id-0001" targetRef="ServiceTask-ProcessRoomUpgrades-id-0024" />
+    <bpmn:sequenceFlow id="SequenceFlow-RoomUpgradesToSpecialRequests-id-0065" sourceRef="ServiceTask-ProcessRoomUpgrades-id-0024" targetRef="UserTask-HandleSpecialRequests-id-0018" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmationToComplete-id-0067" sourceRef="SendTask-RoomAssignmentConfirmation-id-0003" targetRef="EndEvent-GuestRoomProcessComplete-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-CeremonyToWeddingComplete-id-0068" sourceRef="UserTask-ConductCeremony-id-0016" targetRef="EndEvent-WeddingEventCompleted-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_WeddingEventProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_WeddingEventProcess-id-0001" bpmnElement="WeddingEventProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-WeddingContractSigned-id-0001_di" bpmnElement="StartEvent-WeddingContractSigned-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SignContract-id-0001_di" bpmnElement="UserTask-SignContract-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConfirmCeremonyTime-id-0002_di" bpmnElement="UserTask-ConfirmCeremonyTime-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-InitialPlanningSplit-id-0001_di" bpmnElement="ParallelGateway-InitialPlanningSplit-id-0001">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-FinalizeGuestCount-id-0003_di" bpmnElement="UserTask-FinalizeGuestCount-id-0003">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-InitialPlanningJoin-id-0002_di" bpmnElement="ParallelGateway-InitialPlanningJoin-id-0002">
+        <dc:Bounds x="1550" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent-ThreeMonthsBefore-id-0002_di" bpmnElement="StartEvent-ThreeMonthsBefore-id-0002">
+        <dc:Bounds x="1707" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CreateMasterTimeline-id-0009_di" bpmnElement="UserTask-CreateMasterTimeline-id-0009">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DistributeTimeline-id-0002_di" bpmnElement="ServiceTask-DistributeTimeline-id-0002">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent-TwoWeeksBefore-id-0003_di" bpmnElement="StartEvent-TwoWeeksBefore-id-0003">
+        <dc:Bounds x="2157" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-FinalHeadcountConfirmation-id-0010_di" bpmnElement="UserTask-FinalHeadcountConfirmation-id-0010">
+        <dc:Bounds x="2275" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-HeadcountTimeout-id-0001_di" bpmnElement="BoundaryEvent-HeadcountTimeout-id-0001">
+        <dc:Bounds x="2307" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-HeadcountTimeout-id-0001_di" bpmnElement="BoundaryEvent-HeadcountTimeout-id-0001">
+        <dc:Bounds x="2457" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-RoomBlockFinalization-id-0011_di" bpmnElement="UserTask-RoomBlockFinalization-id-0011">
+        <dc:Bounds x="2575" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-DietaryRestrictionsListFinalized-id-0012_di" bpmnElement="UserTask-DietaryRestrictionsListFinalized-id-0012">
+        <dc:Bounds x="2725" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ReserveAVEquipment-id-0003_di" bpmnElement="ServiceTask-ReserveAVEquipment-id-0003">
+        <dc:Bounds x="2875" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent-OneWeekBefore-id-0004_di" bpmnElement="StartEvent-OneWeekBefore-id-0004">
+        <dc:Bounds x="3057" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-FacilityWalkthrough-id-0013_di" bpmnElement="UserTask-FacilityWalkthrough-id-0013">
+        <dc:Bounds x="3175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-WalkthroughTimeout-id-0002_di" bpmnElement="BoundaryEvent-WalkthroughTimeout-id-0002">
+        <dc:Bounds x="3207" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-WalkthroughTimeout-id-0002_di" bpmnElement="BoundaryEvent-WalkthroughTimeout-id-0002">
+        <dc:Bounds x="3357" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-FinalizeSeatingChart-id-0014_di" bpmnElement="UserTask-FinalizeSeatingChart-id-0014">
+        <dc:Bounds x="3475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareNamePlacards-id-0004_di" bpmnElement="ServiceTask-PrepareNamePlacards-id-0004">
+        <dc:Bounds x="3625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-CalculateAlcoholQuantities-id-0001_di" bpmnElement="ScriptTask-CalculateAlcoholQuantities-id-0001">
+        <dc:Bounds x="3775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent-DayOfEvent-id-0005_di" bpmnElement="StartEvent-DayOfEvent-id-0005">
+        <dc:Bounds x="3957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MorningSetup-id-0005_di" bpmnElement="ServiceTask-MorningSetup-id-0005">
+        <dc:Bounds x="4075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-MorningSetupSplit-id-0003_di" bpmnElement="ParallelGateway-MorningSetupSplit-id-0003">
+        <dc:Bounds x="4250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ArrangeCeremonyRoom-id-0006_di" bpmnElement="ServiceTask-ArrangeCeremonyRoom-id-0006">
+        <dc:Bounds x="4375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-MorningSetupJoin-id-0004_di" bpmnElement="ParallelGateway-MorningSetupJoin-id-0004">
+        <dc:Bounds x="4550" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AVEquipmentTest-id-0008_di" bpmnElement="ServiceTask-AVEquipmentTest-id-0008">
+        <dc:Bounds x="4675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-CeremonyBuffer-id-0001_di" bpmnElement="IntermediateCatchEvent-CeremonyBuffer-id-0001">
+        <dc:Bounds x="4857" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-GuestCheckinProcessing-id-0015_di" bpmnElement="UserTask-GuestCheckinProcessing-id-0015">
+        <dc:Bounds x="4975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConductCeremony-id-0016_di" bpmnElement="UserTask-ConductCeremony-id-0016">
+        <dc:Bounds x="5125" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-CateringPreparation-id-0001_di" bpmnElement="SubProcess-CateringPreparation-id-0001">
+        <dc:Bounds x="5275" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-BarServiceOperation-id-0002_di" bpmnElement="SubProcess-BarServiceOperation-id-0002">
+        <dc:Bounds x="5425" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DancingEntertainment-id-0019_di" bpmnElement="ServiceTask-DancingEntertainment-id-0019">
+        <dc:Bounds x="5575" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-CleanupBuffer-id-0002_di" bpmnElement="IntermediateCatchEvent-CleanupBuffer-id-0002">
+        <dc:Bounds x="5757" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PostEventCleanup-id-0020_di" bpmnElement="ServiceTask-PostEventCleanup-id-0020">
+        <dc:Bounds x="5875" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-CleanupSplit-id-0005_di" bpmnElement="ParallelGateway-CleanupSplit-id-0005">
+        <dc:Bounds x="6050" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RemoveFurniture-id-0021_di" bpmnElement="ServiceTask-RemoveFurniture-id-0021">
+        <dc:Bounds x="6175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-CleanupJoin-id-0006_di" bpmnElement="ParallelGateway-CleanupJoin-id-0006">
+        <dc:Bounds x="6350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-GuestCheckoutWithLuggage-id-0017_di" bpmnElement="UserTask-GuestCheckoutWithLuggage-id-0017">
+        <dc:Bounds x="6475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-CompareCharges-id-0002_di" bpmnElement="ScriptTask-CompareCharges-id-0002">
+        <dc:Bounds x="6625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateFinalBill-id-0023_di" bpmnElement="ServiceTask-GenerateFinalBill-id-0023">
+        <dc:Bounds x="6775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-FinalBillingReconciled-id-0004_di" bpmnElement="EndEvent-FinalBillingReconciled-id-0004">
+        <dc:Bounds x="6957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent-GuestRoomProcess-id-0008_di" bpmnElement="StartEvent-GuestRoomProcess-id-0008">
+        <dc:Bounds x="57" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-GuestRoomRequests-id-0001_di" bpmnElement="ReceiveTask-GuestRoomRequests-id-0001">
+        <dc:Bounds x="175" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-RoomRequestTimeout-id-0003_di" bpmnElement="BoundaryEvent-RoomRequestTimeout-id-0003">
+        <dc:Bounds x="207" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-RoomRequestTimeout-id-0003_di" bpmnElement="BoundaryEvent-RoomRequestTimeout-id-0003">
+        <dc:Bounds x="357" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AssignGuestRooms-id-0004_di" bpmnElement="UserTask-AssignGuestRooms-id-0004">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-LateFeeNotification-id-0001_di" bpmnElement="SendTask-LateFeeNotification-id-0001">
+        <dc:Bounds x="2425" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-WalkthroughOverdueAlert-id-0002_di" bpmnElement="SendTask-WalkthroughOverdueAlert-id-0002">
+        <dc:Bounds x="3325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ArrangeReceptionTables-id-0007_di" bpmnElement="ServiceTask-ArrangeReceptionTables-id-0007">
+        <dc:Bounds x="4375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-WeddingEventCompleted-id-0001_di" bpmnElement="EndEvent-WeddingEventCompleted-id-0001">
+        <dc:Bounds x="5307" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ResetFacility-id-0022_di" bpmnElement="ServiceTask-ResetFacility-id-0022">
+        <dc:Bounds x="6175" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RoomAssignmentConfirmation-id-0003_di" bpmnElement="SendTask-RoomAssignmentConfirmation-id-0003">
+        <dc:Bounds x="325" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-GuestRoomProcessComplete-id-0005_di" bpmnElement="EndEvent-GuestRoomProcessComplete-id-0005">
+        <dc:Bounds x="507" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectMenuItems-id-0005_di" bpmnElement="UserTask-SelectMenuItems-id-0005">
+        <dc:Bounds x="625" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-DietaryRestrictions-id-0001_di" bpmnElement="ExclusiveGateway-DietaryRestrictions-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="325" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SpecifyDietaryRestrictions-id-0006_di" bpmnElement="UserTask-SpecifyDietaryRestrictions-id-0006">
+        <dc:Bounds x="925" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-DietaryMerge-id-0001_di" bpmnElement="ParallelGateway-DietaryMerge-id-0001">
+        <dc:Bounds x="1100" y="325" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ChooseBeverageSelections-id-0007_di" bpmnElement="UserTask-ChooseBeverageSelections-id-0007">
+        <dc:Bounds x="1225" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ArrangeMusicDJ-id-0008_di" bpmnElement="UserTask-ArrangeMusicDJ-id-0008">
+        <dc:Bounds x="1375" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessRoomUpgrades-id-0024_di" bpmnElement="ServiceTask-ProcessRoomUpgrades-id-0024">
+        <dc:Bounds x="325" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-HandleSpecialRequests-id-0018_di" bpmnElement="UserTask-HandleSpecialRequests-id-0018">
+        <dc:Bounds x="475" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-NoRestrictionsNote-id-0001_di" bpmnElement="ServiceTask-NoRestrictionsNote-id-0001">
+        <dc:Bounds x="925" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-ContractToSign-id-0001_di" bpmnElement="SequenceFlow-ContractToSign-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SignToCeremonyTime-id-0002_di" bpmnElement="SequenceFlow-SignToCeremonyTime-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CeremonyTimeToPlanningSplit-id-0003_di" bpmnElement="SequenceFlow-CeremonyTimeToPlanningSplit-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PlanningSplitToGuestCount-id-0004_di" bpmnElement="SequenceFlow-PlanningSplitToGuestCount-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PlanningSplitToGuestRooms-id-0005_di" bpmnElement="SequenceFlow-PlanningSplitToGuestRooms-id-0005">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PlanningSplitToMenuItems-id-0006_di" bpmnElement="SequenceFlow-PlanningSplitToMenuItems-id-0006">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="600" y="70" />
+        <di:waypoint x="600" y="280" />
+        <di:waypoint x="600" y="280" />
+        <di:waypoint x="600" y="350" />
+        <di:waypoint x="625" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GuestCountToPlanningJoin-id-0015_di" bpmnElement="SequenceFlow-GuestCountToPlanningJoin-id-0015">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="1550" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PlanningJoinToThreeMonths-id-0017_di" bpmnElement="SequenceFlow-PlanningJoinToThreeMonths-id-0017">
+        <di:waypoint x="1600" y="70" />
+        <di:waypoint x="1707" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ThreeMonthsToTimeline-id-0018_di" bpmnElement="SequenceFlow-ThreeMonthsToTimeline-id-0018">
+        <di:waypoint x="1743" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TimelineToDistribute-id-0019_di" bpmnElement="SequenceFlow-TimelineToDistribute-id-0019">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DistributeToTwoWeeks-id-0020_di" bpmnElement="SequenceFlow-DistributeToTwoWeeks-id-0020">
+        <di:waypoint x="2075" y="70" />
+        <di:waypoint x="2157" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TwoWeeksToHeadcount-id-0021_di" bpmnElement="SequenceFlow-TwoWeeksToHeadcount-id-0021">
+        <di:waypoint x="2193" y="70" />
+        <di:waypoint x="2275" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HeadcountToRoomBlock-id-0022_di" bpmnElement="SequenceFlow-HeadcountToRoomBlock-id-0022">
+        <di:waypoint x="2325" y="110" />
+        <di:waypoint x="2325" y="140" />
+        <di:waypoint x="2625" y="140" />
+        <di:waypoint x="2625" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HeadcountToBoundary-id-0055_di" bpmnElement="SequenceFlow-HeadcountToBoundary-id-0055">
+        <di:waypoint x="2375" y="70" />
+        <di:waypoint x="2457" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToLateFee-id-0056_di" bpmnElement="SequenceFlow-BoundaryToLateFee-id-0056">
+        <di:waypoint x="2475" y="88" />
+        <di:waypoint x="2475" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToLateFee-id-0056_di" bpmnElement="SequenceFlow-BoundaryToLateFee-id-0056">
+        <di:waypoint x="2475" y="88" />
+        <di:waypoint x="2475" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RoomBlockToDietaryList-id-0023_di" bpmnElement="SequenceFlow-RoomBlockToDietaryList-id-0023">
+        <di:waypoint x="2675" y="70" />
+        <di:waypoint x="2725" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DietaryListToAVReserve-id-0024_di" bpmnElement="SequenceFlow-DietaryListToAVReserve-id-0024">
+        <di:waypoint x="2825" y="70" />
+        <di:waypoint x="2875" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AVReserveToOneWeek-id-0025_di" bpmnElement="SequenceFlow-AVReserveToOneWeek-id-0025">
+        <di:waypoint x="2975" y="70" />
+        <di:waypoint x="3057" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OneWeekToWalkthrough-id-0026_di" bpmnElement="SequenceFlow-OneWeekToWalkthrough-id-0026">
+        <di:waypoint x="3093" y="70" />
+        <di:waypoint x="3175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WalkthroughToSeating-id-0027_di" bpmnElement="SequenceFlow-WalkthroughToSeating-id-0027">
+        <di:waypoint x="3225" y="110" />
+        <di:waypoint x="3225" y="140" />
+        <di:waypoint x="3525" y="140" />
+        <di:waypoint x="3525" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WalkthroughToBoundary-id-0058_di" bpmnElement="SequenceFlow-WalkthroughToBoundary-id-0058">
+        <di:waypoint x="3275" y="70" />
+        <di:waypoint x="3357" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WalkthroughBoundaryToAlert-id-0059_di" bpmnElement="SequenceFlow-WalkthroughBoundaryToAlert-id-0059">
+        <di:waypoint x="3375" y="88" />
+        <di:waypoint x="3375" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WalkthroughBoundaryToAlert-id-0059_di" bpmnElement="SequenceFlow-WalkthroughBoundaryToAlert-id-0059">
+        <di:waypoint x="3375" y="88" />
+        <di:waypoint x="3375" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SeatingToNamePlacards-id-0028_di" bpmnElement="SequenceFlow-SeatingToNamePlacards-id-0028">
+        <di:waypoint x="3575" y="70" />
+        <di:waypoint x="3625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NamePlacardsToAlcoholCalc-id-0029_di" bpmnElement="SequenceFlow-NamePlacardsToAlcoholCalc-id-0029">
+        <di:waypoint x="3725" y="70" />
+        <di:waypoint x="3775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlcoholCalcToDayOf-id-0030_di" bpmnElement="SequenceFlow-AlcoholCalcToDayOf-id-0030">
+        <di:waypoint x="3875" y="70" />
+        <di:waypoint x="3957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DayOfToMorningSetup-id-0031_di" bpmnElement="SequenceFlow-DayOfToMorningSetup-id-0031">
+        <di:waypoint x="3993" y="70" />
+        <di:waypoint x="4075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MorningSetupToSplit-id-0032_di" bpmnElement="SequenceFlow-MorningSetupToSplit-id-0032">
+        <di:waypoint x="4175" y="70" />
+        <di:waypoint x="4250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToCeremonyRoom-id-0033_di" bpmnElement="SequenceFlow-SplitToCeremonyRoom-id-0033">
+        <di:waypoint x="4300" y="70" />
+        <di:waypoint x="4375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToReceptionTables-id-0034_di" bpmnElement="SequenceFlow-SplitToReceptionTables-id-0034">
+        <di:waypoint x="4275" y="95" />
+        <di:waypoint x="4275" y="210" />
+        <di:waypoint x="4375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CeremonyRoomToJoin-id-0035_di" bpmnElement="SequenceFlow-CeremonyRoomToJoin-id-0035">
+        <di:waypoint x="4475" y="70" />
+        <di:waypoint x="4550" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToAVTest-id-0037_di" bpmnElement="SequenceFlow-JoinToAVTest-id-0037">
+        <di:waypoint x="4600" y="70" />
+        <di:waypoint x="4675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AVTestToCeremonyBuffer-id-0038_di" bpmnElement="SequenceFlow-AVTestToCeremonyBuffer-id-0038">
+        <di:waypoint x="4775" y="70" />
+        <di:waypoint x="4857" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CeremonyBufferToCheckin-id-0039_di" bpmnElement="SequenceFlow-CeremonyBufferToCheckin-id-0039">
+        <di:waypoint x="4893" y="70" />
+        <di:waypoint x="4975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckinToCeremony-id-0040_di" bpmnElement="SequenceFlow-CheckinToCeremony-id-0040">
+        <di:waypoint x="5075" y="70" />
+        <di:waypoint x="5125" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CeremonyToCatering-id-0041_di" bpmnElement="SequenceFlow-CeremonyToCatering-id-0041">
+        <di:waypoint x="5225" y="70" />
+        <di:waypoint x="5275" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CeremonyToWeddingComplete-id-0068_di" bpmnElement="SequenceFlow-CeremonyToWeddingComplete-id-0068">
+        <di:waypoint x="5175" y="110" />
+        <di:waypoint x="5175" y="210" />
+        <di:waypoint x="5307" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CateringToBar-id-0042_di" bpmnElement="SequenceFlow-CateringToBar-id-0042">
+        <di:waypoint x="5375" y="70" />
+        <di:waypoint x="5425" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BarToDancing-id-0043_di" bpmnElement="SequenceFlow-BarToDancing-id-0043">
+        <di:waypoint x="5525" y="70" />
+        <di:waypoint x="5575" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DancingToCleanupBuffer-id-0044_di" bpmnElement="SequenceFlow-DancingToCleanupBuffer-id-0044">
+        <di:waypoint x="5675" y="70" />
+        <di:waypoint x="5757" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CleanupBufferToCleanup-id-0045_di" bpmnElement="SequenceFlow-CleanupBufferToCleanup-id-0045">
+        <di:waypoint x="5793" y="70" />
+        <di:waypoint x="5875" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CleanupToSplit-id-0046_di" bpmnElement="SequenceFlow-CleanupToSplit-id-0046">
+        <di:waypoint x="5975" y="70" />
+        <di:waypoint x="6050" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CleanupSplitToRemove-id-0047_di" bpmnElement="SequenceFlow-CleanupSplitToRemove-id-0047">
+        <di:waypoint x="6100" y="70" />
+        <di:waypoint x="6175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CleanupSplitToReset-id-0048_di" bpmnElement="SequenceFlow-CleanupSplitToReset-id-0048">
+        <di:waypoint x="6075" y="95" />
+        <di:waypoint x="6075" y="210" />
+        <di:waypoint x="6175" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RemoveToJoin-id-0049_di" bpmnElement="SequenceFlow-RemoveToJoin-id-0049">
+        <di:waypoint x="6275" y="70" />
+        <di:waypoint x="6350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CleanupJoinToCheckout-id-0051_di" bpmnElement="SequenceFlow-CleanupJoinToCheckout-id-0051">
+        <di:waypoint x="6400" y="70" />
+        <di:waypoint x="6475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckoutToCompareCharges-id-0052_di" bpmnElement="SequenceFlow-CheckoutToCompareCharges-id-0052">
+        <di:waypoint x="6575" y="70" />
+        <di:waypoint x="6625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompareToGenerateBill-id-0053_di" bpmnElement="SequenceFlow-CompareToGenerateBill-id-0053">
+        <di:waypoint x="6725" y="70" />
+        <di:waypoint x="6775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateBillToBillingComplete-id-0054_di" bpmnElement="SequenceFlow-GenerateBillToBillingComplete-id-0054">
+        <di:waypoint x="6875" y="70" />
+        <di:waypoint x="6957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GuestRoomProcessStartToReceive-id-0061_di" bpmnElement="SequenceFlow-GuestRoomProcessStartToReceive-id-0061">
+        <di:waypoint x="93" y="210" />
+        <di:waypoint x="175" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToBoundary-id-0062_di" bpmnElement="SequenceFlow-ReceiveToBoundary-id-0062">
+        <di:waypoint x="275" y="210" />
+        <di:waypoint x="357" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToRoomUpgrades-id-0064_di" bpmnElement="SequenceFlow-ReceiveToRoomUpgrades-id-0064">
+        <di:waypoint x="225" y="250" />
+        <di:waypoint x="225" y="490" />
+        <di:waypoint x="325" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToConfirmation-id-0063_di" bpmnElement="SequenceFlow-BoundaryToConfirmation-id-0063">
+        <di:waypoint x="375" y="228" />
+        <di:waypoint x="375" y="310" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToConfirmation-id-0063_di" bpmnElement="SequenceFlow-BoundaryToConfirmation-id-0063">
+        <di:waypoint x="375" y="228" />
+        <di:waypoint x="375" y="310" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GuestRoomsToPlanningJoin-id-0016_di" bpmnElement="SequenceFlow-GuestRoomsToPlanningJoin-id-0016">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="1575" y="210" />
+        <di:waypoint x="1575" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LateFeeToRoomBlock-id-0057_di" bpmnElement="SequenceFlow-LateFeeToRoomBlock-id-0057">
+        <di:waypoint x="2525" y="210" />
+        <di:waypoint x="2625" y="210" />
+        <di:waypoint x="2625" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlertToSeating-id-0060_di" bpmnElement="SequenceFlow-AlertToSeating-id-0060">
+        <di:waypoint x="3425" y="210" />
+        <di:waypoint x="3525" y="210" />
+        <di:waypoint x="3525" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceptionTablesToJoin-id-0036_di" bpmnElement="SequenceFlow-ReceptionTablesToJoin-id-0036">
+        <di:waypoint x="4475" y="210" />
+        <di:waypoint x="4575" y="210" />
+        <di:waypoint x="4575" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ResetToJoin-id-0050_di" bpmnElement="SequenceFlow-ResetToJoin-id-0050">
+        <di:waypoint x="6275" y="210" />
+        <di:waypoint x="6375" y="210" />
+        <di:waypoint x="6375" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmationToComplete-id-0067_di" bpmnElement="SequenceFlow-ConfirmationToComplete-id-0067">
+        <di:waypoint x="425" y="350" />
+        <di:waypoint x="507" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MenuItemsToDietary-id-0007_di" bpmnElement="SequenceFlow-MenuItemsToDietary-id-0007">
+        <di:waypoint x="725" y="350" />
+        <di:waypoint x="800" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DietaryToSpecify-id-0008_di" bpmnElement="SequenceFlow-DietaryToSpecify-id-0008">
+        <di:waypoint x="850" y="350" />
+        <di:waypoint x="925" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DietaryToNoRestrictions-id-0009_di" bpmnElement="SequenceFlow-DietaryToNoRestrictions-id-0009">
+        <di:waypoint x="825" y="375" />
+        <di:waypoint x="825" y="490" />
+        <di:waypoint x="925" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SpecifyToDietaryMerge-id-0010_di" bpmnElement="SequenceFlow-SpecifyToDietaryMerge-id-0010">
+        <di:waypoint x="1025" y="350" />
+        <di:waypoint x="1100" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DietaryMergeToBeverage-id-0012_di" bpmnElement="SequenceFlow-DietaryMergeToBeverage-id-0012">
+        <di:waypoint x="1150" y="350" />
+        <di:waypoint x="1225" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BeverageToMusic-id-0013_di" bpmnElement="SequenceFlow-BeverageToMusic-id-0013">
+        <di:waypoint x="1325" y="350" />
+        <di:waypoint x="1375" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MusicToPlanningJoin-id-0014_di" bpmnElement="SequenceFlow-MusicToPlanningJoin-id-0014">
+        <di:waypoint x="1475" y="350" />
+        <di:waypoint x="1575" y="350" />
+        <di:waypoint x="1575" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RoomUpgradesToSpecialRequests-id-0065_di" bpmnElement="SequenceFlow-RoomUpgradesToSpecialRequests-id-0065">
+        <di:waypoint x="425" y="490" />
+        <di:waypoint x="475" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NoRestrictionsToDietaryMerge-id-0011_di" bpmnElement="SequenceFlow-NoRestrictionsToDietaryMerge-id-0011">
+        <di:waypoint x="1025" y="490" />
+        <di:waypoint x="1125" y="490" />
+        <di:waypoint x="1125" y="375" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-BarServiceOperation-id-0002">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-BarServiceOperation-id-0002" bpmnElement="SubProcess-BarServiceOperation-id-0002">
+      <bpmndi:BPMNShape id="StartEvent-BarSetupBegins-id-0007_di" bpmnElement="StartEvent-BarSetupBegins-id-0007">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-InventoryVerification-id-0014_di" bpmnElement="ServiceTask-InventoryVerification-id-0014">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-StaffBriefing-id-0015_di" bpmnElement="ServiceTask-StaffBriefing-id-0015">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-OpenBarService-id-0016_di" bpmnElement="ServiceTask-OpenBarService-id-0016">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MonitorConsumption-id-0017_di" bpmnElement="ServiceTask-MonitorConsumption-id-0017">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CloseBarService-id-0018_di" bpmnElement="ServiceTask-CloseBarService-id-0018">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-BarServiceComplete-id-0003_di" bpmnElement="EndEvent-BarServiceComplete-id-0003">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-BarSetupToInventory-id-0001_di" bpmnElement="SequenceFlow-BarSetupToInventory-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InventoryToBriefing-id-0002_di" bpmnElement="SequenceFlow-InventoryToBriefing-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BriefingToOpen-id-0003_di" bpmnElement="SequenceFlow-BriefingToOpen-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OpenToMonitor-id-0004_di" bpmnElement="SequenceFlow-OpenToMonitor-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MonitorToClose-id-0005_di" bpmnElement="SequenceFlow-MonitorToClose-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CloseToComplete-id-0006_di" bpmnElement="SequenceFlow-CloseToComplete-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-CateringPreparation-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-CateringPreparation-id-0001" bpmnElement="SubProcess-CateringPreparation-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-KitchenPrepBegins-id-0006_di" bpmnElement="StartEvent-KitchenPrepBegins-id-0006">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-FinalizeCookingSchedule-id-0009_di" bpmnElement="ServiceTask-FinalizeCookingSchedule-id-0009">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepColdItems-id-0010_di" bpmnElement="ServiceTask-PrepColdItems-id-0010">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CoordinatePlating-id-0011_di" bpmnElement="ServiceTask-CoordinatePlating-id-0011">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SetUpBuffetStations-id-0012_di" bpmnElement="ServiceTask-SetUpBuffetStations-id-0012">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ExecuteServiceTimeline-id-0013_di" bpmnElement="ServiceTask-ExecuteServiceTimeline-id-0013">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CateringServiceComplete-id-0002_di" bpmnElement="EndEvent-CateringServiceComplete-id-0002">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-KitchenPrepToSchedule-id-0001_di" bpmnElement="SequenceFlow-KitchenPrepToSchedule-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ScheduleToColdPrep-id-0002_di" bpmnElement="SequenceFlow-ScheduleToColdPrep-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ColdPrepToPlating-id-0003_di" bpmnElement="SequenceFlow-ColdPrepToPlating-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PlatingToBuffet-id-0004_di" bpmnElement="SequenceFlow-PlatingToBuffet-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BuffetToExecute-id-0005_di" bpmnElement="SequenceFlow-BuffetToExecute-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExecuteToComplete-id-0006_di" bpmnElement="SequenceFlow-ExecuteToComplete-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

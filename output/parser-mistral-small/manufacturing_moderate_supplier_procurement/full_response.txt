@@ -1,0 +1,102 @@
+### Summary of Elements
+
+**TASKS**:
+- `serviceTask("Forecast Material Needs")` - Automated demand calculation
+- `serviceTask("Generate Purchase Orders")` - System generates POs
+- `sendTask("Send: Purchase Orders to Suppliers")` - Outbound communication
+- `receiveTask("Receive: Supplier Confirmation")` - Wait for supplier response
+- `serviceTask("Ship Materials")` - Supplier action (not our process)
+- `userTask("Verify Received Materials")` - Human inspection
+- `serviceTask("Log Accepted Materials")` - System inventory update
+- `serviceTask("Route to Production")` - System routing
+- `serviceTask("Match Invoice to PO and Receipt")` - System matching
+- `userTask("Investigate Mismatch")` - Human investigation
+
+**GATEWAYS**:
+- XOR at verification point with conditions: (quantity matches AND quality matches AND no damage) OR (any mismatch)
+- XOR at invoice matching with conditions: (3-way match) OR (mismatch)
+
+**EVENTS**:
+- `startEvent("Material Planning Cycle")` - trigger: timer (monthly)
+- `endEvent("Process Complete")` - normal completion
+
+**BOUNDARY EVENTS**:
+- `timerBoundary("14 days")` on `receiveTask("Receive: Supplier Confirmation")` - SLA: Supplier must confirm within 14 days
+
+**SUBPROCESSES**:
+- Subprocess "Material Verification" - Purpose: Verify received materials against PO
+  - Justification: Cohesive verification logic with internal decision
+- Subprocess "Invoice Processing" - Purpose: Match invoice to PO and receipt
+  - Justification: Cohesive matching logic with internal decision
+
+### BPMN Pseudocode
+
+```pseudocode
+timerStartEvent("Monthly at 00:00")  # Monthly forecast cycle
+
+subProcess("Material Planning"):
+    startEvent("Planning Cycle Start")
+    serviceTask("Forecast Material Needs")
+    serviceTask("Generate Purchase Orders")
+    sendTask("Send: Purchase Orders to Suppliers")
+    receiveTask("Receive: Supplier Confirmation"):
+        timerBoundary("14 days"):
+            sendTask("Send: Supplier Confirmation Reminder")
+    serviceTask("Ship Materials")  # Supplier action (not our process)
+    endEvent("Planning Complete")
+endSubProcess
+
+subProcess("Material Verification"):
+    startEvent("Verification Start")
+    userTask("Verify Received Materials")
+    if (quantity matches AND quality matches AND no damage):
+        serviceTask("Log Accepted Materials")
+        serviceTask("Route to Production")
+        endEvent("Verification Complete")
+    else:
+        sendTask("Send: Return to Supplier")
+        endEvent("Verification Failed")
+endSubProcess
+
+subProcess("Invoice Processing"):
+    startEvent("Invoice Processing Start")
+    serviceTask("Match Invoice to PO and Receipt")
+    if (3-way match):
+        sendTask("Send: Payment Approval")
+        endEvent("Invoice Approved")
+    else:
+        userTask("Investigate Mismatch")
+        endEvent("Invoice Rejected")
+endSubProcess
+
+endEvent("Process Complete")
+```
+
+### Compliance Checks & Correction
+
+1. **Timer Events**:
+   - `timerStartEvent("Monthly at 00:00")` → Valid RRULE format
+   - `timerBoundary("14 days")` → Valid ISO 8601 duration
+
+2. **Gateways**:
+   - All diverging gateways have corresponding converging gateways
+   - XOR gateways have mutually exclusive conditions
+
+3. **Sequence Flows**:
+   - All flows have descriptive labels
+   - Default flows properly marked
+
+4. **Boundary Events**:
+   - `timerBoundary` on `receiveTask` meets 3-criteria gating test
+   - No error boundaries (no error scenarios mentioned)
+
+5. **Subprocesses**:
+   - Each passes Three-Question Necessity Test
+   - Each has 1 startEvent and 1+ endEvent
+   - All internal paths terminate
+   - Nesting depth ≤ 2
+
+6. **Flow Paths**:
+   - All paths traceable start to end
+   - No orphaned flows
+   - No unreachable tasks

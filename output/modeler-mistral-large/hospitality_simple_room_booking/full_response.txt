@@ -1,0 +1,158 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "BookingProcess-Definitions-id-0001",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "BookingProcess-id-0001",
+      "isExecutable": false,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-GuestInitiatesSearch-id-0001",
+          "name": "Guest Initiates Search"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-SearchInventory-id-0001",
+          "name": "Search Inventory for Dates and Room Type"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CalculatePricing-id-0002",
+          "name": "Calculate Dynamic Pricing"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-DisplayRooms-id-0003",
+          "name": "Display Available Rooms and Pricing"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-GuestSelectsRoom-id-0001",
+          "name": "Guest Selects Room"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProcessPayment-id-0004",
+          "name": "Process Payment"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-SplitPostBooking-id-0001",
+          "name": "Parallel Post-Booking Actions",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-ConfirmationEmail-id-0001",
+          "name": "Send: Booking Confirmation Email"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-LinkLoyalty-id-0005",
+          "name": "Link Booking to Loyalty Account"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-UpdateHousekeeping-id-0006",
+          "name": "Update Housekeeping Schedule"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-JoinPostBooking-id-0002",
+          "name": "Synchronize Post-Booking Actions",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-BookingComplete-id-0001",
+          "name": "Booking Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToSearch-id-0001",
+          "sourceRef": "StartEvent-GuestInitiatesSearch-id-0001",
+          "targetRef": "ServiceTask-SearchInventory-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SearchToCalculate-id-0002",
+          "sourceRef": "ServiceTask-SearchInventory-id-0001",
+          "targetRef": "ServiceTask-CalculatePricing-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CalculateToDisplay-id-0003",
+          "sourceRef": "ServiceTask-CalculatePricing-id-0002",
+          "targetRef": "ServiceTask-DisplayRooms-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DisplayToSelect-id-0004",
+          "sourceRef": "ServiceTask-DisplayRooms-id-0003",
+          "targetRef": "UserTask-GuestSelectsRoom-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SelectToPayment-id-0005",
+          "sourceRef": "UserTask-GuestSelectsRoom-id-0001",
+          "targetRef": "ServiceTask-ProcessPayment-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PaymentToSplit-id-0006",
+          "sourceRef": "ServiceTask-ProcessPayment-id-0004",
+          "targetRef": "ParallelGateway-SplitPostBooking-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToEmail-id-0007",
+          "sourceRef": "ParallelGateway-SplitPostBooking-id-0001",
+          "targetRef": "SendTask-ConfirmationEmail-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToLoyalty-id-0008",
+          "sourceRef": "ParallelGateway-SplitPostBooking-id-0001",
+          "targetRef": "ServiceTask-LinkLoyalty-id-0005"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToHousekeeping-id-0009",
+          "sourceRef": "ParallelGateway-SplitPostBooking-id-0001",
+          "targetRef": "ServiceTask-UpdateHousekeeping-id-0006"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-EmailToJoin-id-0010",
+          "sourceRef": "SendTask-ConfirmationEmail-id-0001",
+          "targetRef": "ParallelGateway-JoinPostBooking-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LoyaltyToJoin-id-0011",
+          "sourceRef": "ServiceTask-LinkLoyalty-id-0005",
+          "targetRef": "ParallelGateway-JoinPostBooking-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HousekeepingToJoin-id-0012",
+          "sourceRef": "ServiceTask-UpdateHousekeeping-id-0006",
+          "targetRef": "ParallelGateway-JoinPostBooking-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinToEnd-id-0013",
+          "sourceRef": "ParallelGateway-JoinPostBooking-id-0002",
+          "targetRef": "EndEvent-BookingComplete-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

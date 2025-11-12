@@ -1,0 +1,192 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "return-process-definitions",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler",
+    "exporterVersion": "1.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "ReturnProcess",
+        "name": "Customer Return Process",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-ReturnProcessInitiated-id-0001",
+            "name": "Return Process Initiated"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-CustomerInitiatesReturn-id-0001",
+            "name": "Customer Initiates Return"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ValidateReturnEligibility-id-0001",
+            "name": "Validate Return Eligibility"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-ReturnEligibility-id-0001",
+            "name": "Return Eligible?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-SendReturnShippingLabel-id-0001",
+            "name": "Send: return shipping label"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-CustomerShipsItem-id-0001",
+            "name": "Customer Ships Item"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-WarehouseStaffVerifiesCondition-id-0001",
+            "name": "Warehouse Staff Verifies Condition"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-ItemCondition-id-0001",
+            "name": "Item Condition Acceptable?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ProcessRefund-id-0001",
+            "name": "Process Refund"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-SendRefundConfirmationEmail-id-0001",
+            "name": "Send: refund confirmation email"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ReturnProcessComplete-id-0001",
+            "name": "Return Process Complete"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-SendReturnDenialNotification-id-0001",
+            "name": "Send: return denial notification"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ReturnDenied-id-0002",
+            "name": "Return Denied"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToCustomerInitiates-id-0001",
+            "sourceRef": "StartEvent-ReturnProcessInitiated-id-0001",
+            "targetRef": "UserTask-CustomerInitiatesReturn-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CustomerInitiatesToValidate-id-0002",
+            "sourceRef": "UserTask-CustomerInitiatesReturn-id-0001",
+            "targetRef": "ServiceTask-ValidateReturnEligibility-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ValidateToEligibilityGateway-id-0003",
+            "sourceRef": "ServiceTask-ValidateReturnEligibility-id-0001",
+            "targetRef": "ExclusiveGateway-ReturnEligibility-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-EligibleToSendLabel-id-0004",
+            "name": "return_eligible",
+            "sourceRef": "ExclusiveGateway-ReturnEligibility-id-0001",
+            "targetRef": "SendTask-SendReturnShippingLabel-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-IneligibleToDenial-id-0005",
+            "name": "!return_eligible",
+            "sourceRef": "ExclusiveGateway-ReturnEligibility-id-0001",
+            "targetRef": "SendTask-SendReturnDenialNotification-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SendLabelToCustomerShips-id-0006",
+            "sourceRef": "SendTask-SendReturnShippingLabel-id-0001",
+            "targetRef": "UserTask-CustomerShipsItem-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CustomerShipsToVerify-id-0007",
+            "sourceRef": "UserTask-CustomerShipsItem-id-0001",
+            "targetRef": "UserTask-WarehouseStaffVerifiesCondition-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-VerifyToConditionGateway-id-0008",
+            "sourceRef": "UserTask-WarehouseStaffVerifiesCondition-id-0001",
+            "targetRef": "ExclusiveGateway-ItemCondition-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AcceptableToProcessRefund-id-0009",
+            "name": "item_condition_acceptable",
+            "sourceRef": "ExclusiveGateway-ItemCondition-id-0001",
+            "targetRef": "ServiceTask-ProcessRefund-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DamagedToDenial-id-0010",
+            "name": "!item_condition_acceptable",
+            "sourceRef": "ExclusiveGateway-ItemCondition-id-0001",
+            "targetRef": "SendTask-SendReturnDenialNotification-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ProcessRefundToConfirmation-id-0011",
+            "sourceRef": "ServiceTask-ProcessRefund-id-0001",
+            "targetRef": "SendTask-SendRefundConfirmationEmail-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ConfirmationToComplete-id-0012",
+            "sourceRef": "SendTask-SendRefundConfirmationEmail-id-0001",
+            "targetRef": "EndEvent-ReturnProcessComplete-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DenialToDeniedEnd-id-0013",
+            "sourceRef": "SendTask-SendReturnDenialNotification-id-0001",
+            "targetRef": "EndEvent-ReturnDenied-id-0002"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-medium-2508",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11433,
+        "total_tokens": 13214,
+        "completion_tokens": 1781
+      },
+      "model_name": "mistral-medium-2508",
+      "model": "mistral-medium-2508",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11433,
+      "output_tokens": 1781,
+      "total_tokens": 13214
+    },
+    "id": "lc_run--6f09d37a-8b33-4b85-953d-8bf2cb6a4cb2-0"
+  },
+  "status": "success"
+}

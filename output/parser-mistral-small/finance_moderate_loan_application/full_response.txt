@@ -1,0 +1,74 @@
+### Summary of Elements
+
+**TASKS:**
+- `userTask("Customer Submits Loan Application")` - Initial data collection
+- `serviceTask("Perform Initial Validation")` - Automated validation checks
+- `sendTask("Send: Validation Failure Notice")` - Immediate notification if validation fails
+- `userTask("Loan Officer Review")` - Detailed manual review
+- `userTask("Request Additional Documentation")` - Conditional task
+- `serviceTask("Run Risk Assessment")` - Automated risk calculation
+- `sendTask("Send: Loan Approval Terms")` - Approval notification
+- `sendTask("Send: Loan Rejection Notice")` - Rejection notification
+- `userTask("Customer Accepts Terms")` - Final acceptance step
+- `serviceTask("Fund and Disburse Loan")` - Final funding action
+
+**GATEWAYS:**
+- XOR at initial validation point with conditions: validation_failed, validation_passed
+- XOR at loan officer decision point with conditions: approved, rejected
+- XOR at customer acceptance point with conditions: accepted, rejected
+
+**EVENTS:**
+- `startEvent("Loan Application Submitted")` - Trigger: manual (customer submission)
+- `endEvent("Process Complete")` - Normal completion
+
+**BOUNDARY EVENTS:**
+- None identified (no explicit SLAs or error scenarios mentioned)
+
+**SUBPROCESSES:**
+- None identified (no logical grouping of 3+ tasks with cohesive purpose)
+
+### BPMN Pseudocode
+
+```pseudocode
+startEvent("Loan Application Submitted")
+
+userTask("Customer Submits Loan Application")
+
+serviceTask("Perform Initial Validation")
+
+if (validation_failed):
+    sendTask("Send: Validation Failure Notice")
+    endEvent("Process Complete")
+else:
+    userTask("Loan Officer Review")
+
+    if (additional_documents_needed):
+        userTask("Request Additional Documentation")
+        receiveTask("Receive: Additional Documentation")
+    END_IF
+
+    serviceTask("Run Risk Assessment")
+
+    if (approved):
+        sendTask("Send: Loan Approval Terms")
+        receiveTask("Receive: Customer Acceptance")
+
+        if (accepted):
+            serviceTask("Fund and Disburse Loan")
+            endEvent("Process Complete")
+        else:
+            endEvent("Process Complete")
+    else:
+        sendTask("Send: Loan Rejection Notice")
+        endEvent("Process Complete")
+```
+
+### Compliance Checks & Correction
+
+- **Timer Events**: None present (no SLA or scheduled triggers mentioned)
+- **Gateway Convergence**: All diverging gateways have corresponding converging gateways
+- **Sequence Flow Labels**: All conditional flows have descriptive labels
+- **Boundary Events**: None present (no SLAs or error scenarios mentioned)
+- **Subprocesses**: None present (no logical grouping of 3+ tasks)
+- **Flow Paths**: All paths traceable from start to end
+- **Balanced Design**: Core elements (tasks, gateways, events) comprise 100% of design

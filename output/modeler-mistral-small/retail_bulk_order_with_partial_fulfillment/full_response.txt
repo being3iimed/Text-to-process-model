@@ -1,0 +1,253 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "Definitions-BulkOrderProcessing-id-0001",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process-BulkOrderProcessing-id-0001",
+      "name": "Bulk Order Processing",
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-BulkOrderSubmitted-id-0001",
+          "name": "Bulk Order Submitted"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CheckInventoryAvailability-id-0001",
+          "name": "Check Inventory Availability"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-InventoryCheck-id-0001",
+          "name": "Inventory Check",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ReserveAvailableInventory-id-0001",
+          "name": "Reserve Available Inventory"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-SchedulePacking-id-0001",
+          "name": "Schedule Packing"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-OrderFulfilled-id-0001",
+          "name": "Order Fulfilled"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-ShortageNotification-id-0001",
+          "name": "Send: Shortage Notification"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ManagerDecidesOnPartialShipment-id-0001",
+          "name": "Manager Decides on Partial Shipment"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-Timer24Hour-ManagerDecidesOnPartialShipment-id-0001",
+          "name": "24 Hour Timeout",
+          "attachedToRef": "UserTask-ManagerDecidesOnPartialShipment-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT24H"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ManagerDecision-id-0001",
+          "name": "Manager Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-SplitOrderIntoShipments-id-0001",
+          "name": "Split Order into Shipments"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ShipAvailableItems-id-0001",
+          "name": "Ship Available Items"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-HoldOrderInPendingStatus-id-0001",
+          "name": "Hold Order in Pending Status"
+        },
+        {
+          "$type": "bpmn:IntermediateCatchEvent",
+          "id": "IntermediateCatchEvent-Timer24Hour-id-0001",
+          "name": "24 Hour Wait",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT24H"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ShipBackorderedItems-id-0001",
+          "name": "Ship Backordered Items"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ShipCompleteOrder-id-0001",
+          "name": "Ship Complete Order"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-FullShortageNotification-id-0001",
+          "name": "Send: Full Shortage Notification"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CancelOrder-id-0001",
+          "name": "Cancel Order"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-OrderProcessed-id-0001",
+          "name": "Order Processed"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToCheckInventory-id-0001",
+          "sourceRef": "StartEvent-BulkOrderSubmitted-id-0001",
+          "targetRef": "ServiceTask-CheckInventoryAvailability-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CheckInventoryToGateway-id-0001",
+          "sourceRef": "ServiceTask-CheckInventoryAvailability-id-0001",
+          "targetRef": "ExclusiveGateway-InventoryCheck-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToReserveInventory-id-0001",
+          "name": "all_products_available",
+          "sourceRef": "ExclusiveGateway-InventoryCheck-id-0001",
+          "targetRef": "ServiceTask-ReserveAvailableInventory-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReserveToSchedulePacking-id-0001",
+          "sourceRef": "ServiceTask-ReserveAvailableInventory-id-0001",
+          "targetRef": "ServiceTask-SchedulePacking-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SchedulePackingToEnd-id-0001",
+          "sourceRef": "ServiceTask-SchedulePacking-id-0001",
+          "targetRef": "EndEvent-OrderFulfilled-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToShortageNotification-id-0002",
+          "name": "partial_products_available",
+          "sourceRef": "ExclusiveGateway-InventoryCheck-id-0001",
+          "targetRef": "SendTask-ShortageNotification-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ShortageNotificationToManagerDecision-id-0001",
+          "sourceRef": "SendTask-ShortageNotification-id-0001",
+          "targetRef": "UserTask-ManagerDecidesOnPartialShipment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ManagerDecisionToGateway-id-0001",
+          "sourceRef": "UserTask-ManagerDecidesOnPartialShipment-id-0001",
+          "targetRef": "ExclusiveGateway-ManagerDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToSplitOrder-id-0001",
+          "name": "partial_shipment_chosen",
+          "sourceRef": "ExclusiveGateway-ManagerDecision-id-0001",
+          "targetRef": "ServiceTask-SplitOrderIntoShipments-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitOrderToShipAvailable-id-0001",
+          "sourceRef": "ServiceTask-SplitOrderIntoShipments-id-0001",
+          "targetRef": "ServiceTask-ShipAvailableItems-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ShipAvailableToHoldOrder-id-0001",
+          "sourceRef": "ServiceTask-ShipAvailableItems-id-0001",
+          "targetRef": "ServiceTask-HoldOrderInPendingStatus-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HoldOrderToTimer-id-0001",
+          "sourceRef": "ServiceTask-HoldOrderInPendingStatus-id-0001",
+          "targetRef": "IntermediateCatchEvent-Timer24Hour-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TimerToShipBackordered-id-0001",
+          "sourceRef": "IntermediateCatchEvent-Timer24Hour-id-0001",
+          "targetRef": "ServiceTask-ShipBackorderedItems-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ShipBackorderedToEnd-id-0001",
+          "sourceRef": "ServiceTask-ShipBackorderedItems-id-0001",
+          "targetRef": "EndEvent-OrderFulfilled-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToHoldOrder-id-0002",
+          "name": "",
+          "sourceRef": "ExclusiveGateway-ManagerDecision-id-0001",
+          "targetRef": "ServiceTask-HoldOrderInPendingStatus-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToFullShortageNotification-id-0001",
+          "name": "",
+          "sourceRef": "ExclusiveGateway-InventoryCheck-id-0001",
+          "targetRef": "SendTask-FullShortageNotification-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FullShortageNotificationToHoldOrder-id-0001",
+          "sourceRef": "SendTask-FullShortageNotification-id-0001",
+          "targetRef": "ServiceTask-HoldOrderInPendingStatus-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryToSendReminder-id-0001",
+          "sourceRef": "BoundaryEvent-Timer24Hour-ManagerDecidesOnPartialShipment-id-0001",
+          "targetRef": "SendTask-SendReminderToManager-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendReminderToManagerDecision-id-0001",
+          "sourceRef": "SendTask-SendReminderToManager-id-0001",
+          "targetRef": "UserTask-ManagerDecidesOnPartialShipment-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

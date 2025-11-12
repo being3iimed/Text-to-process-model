@@ -1,0 +1,186 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "empty-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "bpmn-js (https://demo.bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "PaymentProcessing-Process-id-0001",
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-DailyPaymentsReceived-id-0001",
+          "name": "Daily Payments Received",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeCycle": "RRULE:FREQ=DAILY;BYHOUR=9"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ConvertCurrency-id-0001",
+          "name": "Convert currency to base currency"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-MatchPayment-id-0002",
+          "name": "Match payment to outstanding invoice"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-PaymentMatch-id-0001",
+          "name": "Payment Match",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-RecordComplete-id-0003",
+          "name": "Record payment as complete"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-MarkPartiallyPaid-id-0004",
+          "name": "Mark invoice as partially paid"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-RecordOverpayment-id-0005",
+          "name": "Record overpayment as credit"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-HoldUnmatched-id-0006",
+          "name": "Hold payment as unmatched"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-NotifyAccounting-id-0001",
+          "name": "Send: notification to accounting team"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ResearchPayment-id-0001",
+          "name": "Accounting team researches payment"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-UpdateAgingReport-id-0007",
+          "name": "Update accounts receivable aging report"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-TriggerFollowUp-id-0008",
+          "name": "Trigger automatic follow-up for overdue invoices"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProcessComplete-id-0001",
+          "name": "Process Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToConvertCurrency-id-0001",
+          "sourceRef": "StartEvent-DailyPaymentsReceived-id-0001",
+          "targetRef": "ServiceTask-ConvertCurrency-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConvertToMatchPayment-id-0002",
+          "sourceRef": "ServiceTask-ConvertCurrency-id-0001",
+          "targetRef": "ServiceTask-MatchPayment-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MatchToGateway-id-0003",
+          "sourceRef": "ServiceTask-MatchPayment-id-0002",
+          "targetRef": "ExclusiveGateway-PaymentMatch-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToRecordComplete-id-0004",
+          "sourceRef": "ExclusiveGateway-PaymentMatch-id-0001",
+          "targetRef": "ServiceTask-RecordComplete-id-0003",
+          "name": "payment matches invoice amount exactly",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToMarkPartiallyPaid-id-0005",
+          "sourceRef": "ExclusiveGateway-PaymentMatch-id-0001",
+          "targetRef": "ServiceTask-MarkPartiallyPaid-id-0004",
+          "name": "payment is less than invoice amount",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToRecordOverpayment-id-0006",
+          "sourceRef": "ExclusiveGateway-PaymentMatch-id-0001",
+          "targetRef": "ServiceTask-RecordOverpayment-id-0005",
+          "name": "payment is more than invoice amount",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToHoldUnmatched-id-0007",
+          "sourceRef": "ExclusiveGateway-PaymentMatch-id-0001",
+          "targetRef": "ServiceTask-HoldUnmatched-id-0006",
+          "name": "payment doesn't match any invoice",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RecordCompleteToUpdateAging-id-0008",
+          "sourceRef": "ServiceTask-RecordComplete-id-0003",
+          "targetRef": "ServiceTask-UpdateAgingReport-id-0007"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MarkPartiallyPaidToUpdateAging-id-0009",
+          "sourceRef": "ServiceTask-MarkPartiallyPaid-id-0004",
+          "targetRef": "ServiceTask-UpdateAgingReport-id-0007"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RecordOverpaymentToUpdateAging-id-0010",
+          "sourceRef": "ServiceTask-RecordOverpayment-id-0005",
+          "targetRef": "ServiceTask-UpdateAgingReport-id-0007"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HoldUnmatchedToNotifyAccounting-id-0011",
+          "sourceRef": "ServiceTask-HoldUnmatched-id-0006",
+          "targetRef": "SendTask-NotifyAccounting-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NotifyToResearchPayment-id-0012",
+          "sourceRef": "SendTask-NotifyAccounting-id-0001",
+          "targetRef": "UserTask-ResearchPayment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ResearchPaymentToUpdateAging-id-0013",
+          "sourceRef": "UserTask-ResearchPayment-id-0001",
+          "targetRef": "ServiceTask-UpdateAgingReport-id-0007"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-UpdateAgingToTriggerFollowUp-id-0014",
+          "sourceRef": "ServiceTask-UpdateAgingReport-id-0007",
+          "targetRef": "ServiceTask-TriggerFollowUp-id-0008"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TriggerFollowUpToEnd-id-0015",
+          "sourceRef": "ServiceTask-TriggerFollowUp-id-0008",
+          "targetRef": "EndEvent-ProcessComplete-id-0001"
+        }
+      ],
+      "isExecutable": true
+    }
+  ]
+}

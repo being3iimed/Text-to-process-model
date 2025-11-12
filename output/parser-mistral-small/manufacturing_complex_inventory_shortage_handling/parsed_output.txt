@@ -1,0 +1,92 @@
+### SUMMARY OF ELEMENTS
+--------------------------------------------------------------------------------
+startEvent("Inventory Check Triggered")
+
+serviceTask("Check Inventory for Component X")
+
+if (inventory_sufficient):
+    endEvent("Production Proceeds")
+else:
+    serviceTask("Check Next Supplier Delivery")
+
+    if (delivery_within_24_hours):
+        intermediateEvent(timerBoundary("24 hours"))
+        endEvent("Production Resumes")
+    else:
+        serviceTask("Check for Alternative Components")
+
+        if (alternative_available):
+            sendTask("Send: Notify Production to Use Alternative")
+            endEvent("Production Resumes")
+        else:
+            subProcess("Expedite Handling"):
+                startEvent("Expedite Start")
+                serviceTask("Request Supplier Expedite")
+                    errorBoundary():
+                        subProcess("Backup Supplier Process"):
+                            startEvent("Backup Supplier Start")
+                            userTask("Procurement Manager Finds Backup Supplier")
+                            serviceTask("Create Purchase Order")
+                                errorBoundary():
+                                    userTask("Procurement Manager Finds Alternative Backup Supplier")
+                            sendTask("Send: Confirm Backup Supplier Delivery")
+                            endEvent("Backup Supplier Process Complete")
+                        endSubProcess
+                sendTask("Send: Notify Production of Expedite")
+                if (expedite_successful):
+                    endEvent("Expedite Complete")
+                else:
+                    endEvent("Proceed to Backup Supplier")
+            endSubProcess
+
+            sendTask("Send: Notify Dependent Production Lines of Potential Delay")
+            serviceTask("Log Cost Variance")
+            serviceTask("Update Supplier Metrics")
+            endEvent("Production Resumes")
+
+### BPMN PSEUDOCODE
+--------------------------------------------------------------------------------
+startEvent("Inventory Check Triggered")
+
+serviceTask("Check Inventory for Component X")
+
+if (inventory_sufficient):
+    endEvent("Production Proceeds")
+else:
+    serviceTask("Check Next Supplier Delivery")
+
+    if (delivery_within_24_hours):
+        intermediateEvent(timerBoundary("24 hours"))
+        endEvent("Production Resumes")
+    else:
+        serviceTask("Check for Alternative Components")
+
+        if (alternative_available):
+            sendTask("Send: Notify Production to Use Alternative")
+            endEvent("Production Resumes")
+        else:
+            subProcess("Expedite Handling"):
+                startEvent("Expedite Start")
+                serviceTask("Request Supplier Expedite")
+                    errorBoundary():
+                        subProcess("Backup Supplier Process"):
+                            startEvent("Backup Supplier Start")
+                            userTask("Procurement Manager Finds Backup Supplier")
+                            serviceTask("Create Purchase Order")
+                                errorBoundary():
+                                    userTask("Procurement Manager Finds Alternative Backup Supplier")
+                            sendTask("Send: Confirm Backup Supplier Delivery")
+                            endEvent("Backup Supplier Process Complete")
+                        endSubProcess
+                sendTask("Send: Notify Production of Expedite")
+                if (expedite_successful):
+                    endEvent("Expedite Complete")
+                else:
+                    endEvent("Proceed to Backup Supplier")
+            endSubProcess
+
+            sendTask("Send: Notify Dependent Production Lines of Potential Delay")
+            serviceTask("Log Cost Variance")
+            serviceTask("Update Supplier Metrics")
+            endEvent("Production Resumes")
+

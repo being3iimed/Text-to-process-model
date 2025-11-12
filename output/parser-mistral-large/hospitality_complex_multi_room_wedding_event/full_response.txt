@@ -1,0 +1,235 @@
+```
+<summary_of_elements>
+
+### TASKS:
+- **userTask("Sign Wedding Contract")** - Couple and hotel formalize agreement covering all services
+- **userTask("Confirm Ceremony Time")** - Couple provides exact ceremony start time
+- **userTask("Confirm Guest Count")** - Couple provides final headcount (affects catering/room block)
+- **userTask("Assign Guest Rooms")** - Couple provides rooming list with guest names
+- **userTask("Select Menu Items")** - Couple chooses catering options from hotel offerings
+- **userTask("Specify Dietary Restrictions")** - Couple provides allergen/preference list
+- **userTask("Select Beverage Package")** - Couple chooses bar service level (open/cash/limited)
+- **userTask("Confirm Music/DJ Arrangement")** - Couple finalizes entertainment logistics
+- **userTask("Approve Master Timeline")** - Couple reviews coordinator's consolidated schedule
+- **userTask("Final Headcount Confirmation")** - Couple locks in number for final billing (2 weeks out)
+- **userTask("Final Room Block Confirmation")** - Couple confirms no further room changes
+- **userTask("Finalize Seating Chart")** - Couple provides table assignments (1 week out)
+- **userTask("Facility Walkthrough")** - Couple/coordinator verify physical setup plan
+- **serviceTask("Create Master Timeline")** - Coordinator synthesizes all details into operational plan
+- **serviceTask("Reserve AV Equipment")** - Tech team books microphones, speakers, projectors
+- **serviceTask("Prepare Name Placards")** - Print shop produces table assignments
+- **serviceTask("Generate Kitchen Prep Timeline")** - Chef creates cooking/service schedule
+- **serviceTask("Calculate Alcohol Quantities")** - Bar manager determines inventory needs
+- **serviceTask("Arrange Ceremony Room")** - Staff sets up chairs, aisle, altar (day-of)
+- **serviceTask("Arrange Reception Tables")** - Staff sets up linens, centerpieces, place settings
+- **serviceTask("Test AV Equipment")** - Tech team verifies all systems operational
+- **serviceTask("Coordinate Guest Check-In")** - Front desk manages room assignments/key distribution
+- **serviceTask("Begin Catering Service")** - Kitchen executes meal service per timeline
+- **serviceTask("Open Bar Service")** - Bar staff begins beverage service
+- **serviceTask("Begin Cleanup")** - Staff resets ceremony/reception spaces post-event
+- **serviceTask("Generate Final Bill")** - Accounting reconciles actuals vs. contract estimates
+- **sendTask("Send: Contract for Signature")** - Hotel provides agreement to couple
+- **sendTask("Send: Timeline Draft")** - Coordinator shares schedule for approval
+- **sendTask("Send: Final Invoice")** - Accounting provides reconciled charges
+
+### GATEWAYS:
+- **XOR after "Confirm Guest Count"** (branches: ≤100 guests, >100 guests → affects room block)
+- **XOR after "Select Beverage Package"** (branches: open bar, cash bar, limited bar)
+- **AND for Parallel Pre-Event Tasks** (2 weeks out: headcount + rooms + dietary + AV)
+- **AND for Parallel Final Prep** (1 week out: walkthrough + seating + kitchen + bar)
+
+### EVENTS:
+- **startEvent("Wedding Contract Initiated")** - Trigger: couple inquiry → manual
+- **timerStartEvent("14 Days Before Event")** - Trigger: final confirmations due (RRULE: `FREQ=ONCE;BYDAY=-14`)
+- **timerStartEvent("7 Days Before Event")** - Trigger: final prep tasks (RRULE: `FREQ=ONCE;BYDAY=-7`)
+- **timerStartEvent("Day of Event - 08:00")** - Trigger: setup begins (RRULE: `FREQ=DAILY;BYHOUR=8;BYMINUTE=0;COUNT=1`)
+- **timerStartEvent("Day of Event - 15:00")** - Trigger: ceremony start (RRULE: `FREQ=DAILY;BYHOUR=15;BYMINUTE=0;COUNT=1`)
+- **intermediateEvent(timerBoundary("PT2H"))** - Ceremony-to-reception transition buffer
+- **endEvent("Wedding Event Complete")** - All services concluded
+
+### BOUNDARY EVENTS:
+- **timerBoundary("P3D") on "Final Headcount Confirmation"** - SLA: must confirm 3 days before event or incur penalties
+- **timerBoundary("P1D") on "Finalize Seating Chart"** - SLA: must finalize 24h before walkthrough
+
+### SUBPROCESSES:
+1. **"Guest Room Management"**
+   - **Purpose**: Handle all room block coordination from assignment to checkout
+   - **Justification**: Cohesive 5-task workflow (assign → confirm → check-in → luggage → checkout) with clear data dependencies
+   - **Tasks**:
+     - `userTask("Assign Guest Rooms")`
+     - `userTask("Final Room Block Confirmation")`
+     - `serviceTask("Coordinate Guest Check-In")`
+     - `serviceTask("Provide Luggage Storage")` (post-event)
+     - `serviceTask("Process Guest Checkout")`
+
+2. **"Catering Execution"**
+   - **Purpose**: End-to-end food service from planning to cleanup
+   - **Justification**: Complex 6-task workflow with kitchen/bar/service handoffs and dietary safety
+   - **Tasks**:
+     - `userTask("Select Menu Items")`
+     - `userTask("Specify Dietary Restrictions")`
+     - `serviceTask("Generate Kitchen Prep Timeline")`
+     - `serviceTask("Begin Catering Service")`
+     - `serviceTask("Open Bar Service")`
+     - `serviceTask("Begin Cleanup")` (food service areas)
+
+---
+</summary_of_elements>
+
+<bpmn_pseudocode>
+```
+startEvent("Wedding Contract Initiated")
+
+// Contract Phase
+sendTask("Send: Contract for Signature")
+userTask("Sign Wedding Contract")
+serviceTask("Enter Contract Details into System")
+
+// Planning Phase (3 Months)
+userTask("Confirm Ceremony Time")
+userTask("Confirm Guest Count")
+if (guest_count > 100):
+    userTask("Adjust Room Block for Overflow")  // XOR branch
+else:
+    // Default room block
+userTask("Assign Guest Rooms")
+userTask("Select Menu Items")
+userTask("Specify Dietary Restrictions")
+userTask("Select Beverage Package")
+if (beverage_package == "open_bar"):
+    serviceTask("Flag Unlimited Alcohol Authorization")  // XOR branch
+else if (beverage_package == "cash_bar"):
+    serviceTask("Prepare POS for Cash Transactions")
+else:
+    serviceTask("Set Limited Bar Inventory Controls")
+
+userTask("Confirm Music/DJ Arrangement")
+serviceTask("Create Master Timeline")
+sendTask("Send: Timeline Draft")
+userTask("Approve Master Timeline")
+
+// Final Confirmations (14 Days Out)
+timerStartEvent("14 Days Before Event"):
+    AND:
+        userTask("Final Headcount Confirmation"):
+            timerBoundary("P3D"):  // SLA: 3 days before event
+                sendTask("Send: Late Confirmation Penalty Notice")
+        userTask("Final Room Block Confirmation")
+        userTask("Finalize Dietary Restrictions List")
+        serviceTask("Reserve AV Equipment")
+    END_AND
+
+// Final Prep (7 Days Out)
+timerStartEvent("7 Days Before Event"):
+    AND:
+        userTask("Facility Walkthrough")
+        userTask("Finalize Seating Chart"):
+            timerBoundary("P1D"):  // SLA: 24h before walkthrough
+                sendTask("Send: Seating Chart Overdue Alert")
+        serviceTask("Prepare Name Placards")
+        serviceTask("Generate Kitchen Prep Timeline")
+        serviceTask("Calculate Alcohol Quantities")
+    END_AND
+
+// Day-of Event Execution
+timerStartEvent("Day of Event - 08:00"):
+    AND:
+        serviceTask("Arrange Ceremony Room")
+        serviceTask("Arrange Reception Tables")
+        serviceTask("Test AV Equipment")
+    END_AND
+
+    intermediateEvent(timerBoundary("PT2H"))  // Buffer between setup and ceremony
+
+    timerStartEvent("Day of Event - 15:00"):  // Ceremony start
+        serviceTask("Coordinate Guest Check-In")
+        // Ceremony occurs (no task - external to hotel workflow)
+        subProcess("Catering Execution"):
+            startEvent("Catering Service Begins")
+            serviceTask("Begin Catering Service")
+            serviceTask("Open Bar Service")
+            // Parallel service operations
+            AND:
+                // Food service
+                serviceTask("Execute Kitchen Timeline")
+                // Beverage service
+                serviceTask("Monitor Bar Inventory")
+            END_AND
+            intermediateEvent(timerBoundary("PT6H"))  // Reception duration
+            serviceTask("Begin Cleanup")
+            endEvent("Catering Service Complete")
+        endSubProcess
+
+        subProcess("Guest Room Management"):
+            startEvent("Room Block Activated")
+            serviceTask("Coordinate Guest Check-In")
+            // Parallel operations
+            AND:
+                serviceTask("Provide Luggage Storage")  // For early arrivals
+                userTask("Handle Room Change Requests")  // Front desk
+            END_AND
+            timerStartEvent("Next Morning - 11:00"):  // Checkout time
+                serviceTask("Process Guest Checkout")
+            endEvent("All Guests Departed")
+        endSubProcess
+
+// Post-Event
+serviceTask("Generate Final Bill")
+sendTask("Send: Final Invoice")
+endEvent("Wedding Event Complete")
+```
+</bpmn_pseudocode>
+
+<compliance_validation>
+
+### TIMER EVENTS:
+✅ All properties valid:
+- `timerStartEvent("14 Days Before Event")` → RRULE: `FREQ=ONCE;BYDAY=-14`
+- `timerStartEvent("7 Days Before Event")` → RRULE: `FREQ=ONCE;BYDAY=-7`
+- `timerStartEvent("Day of Event - 08:00")` → RRULE: `FREQ=DAILY;BYHOUR=8;BYMINUTE=0;COUNT=1`
+- Boundary timers use ISO 8601 duration (`P3D`, `P1D`)
+
+### GATEWAYS:
+✅ All converged:
+- XOR after guest count → implicit converge before room assignments
+- XOR after beverage package → implicit converge before timeline creation
+- AND blocks (14d/7d/day-of) all have matching `END_AND`
+
+### SEQUENCE FLOWS:
+✅ All labeled:
+- Conditional flows: `guest_count > 100`, `beverage_package == "open_bar"`
+- Default flows marked (e.g., else branch for room block)
+
+### BOUNDARY EVENTS:
+✅ Justified:
+1. **Headcount Confirmation**:
+   - SLA: Contract specifies 3-day penalty window
+   - Handler: Single `sendTask` (penalty notice)
+2. **Seating Chart**:
+   - SLA: Walkthrough requires finalized chart 24h prior
+   - Handler: Single `sendTask` (overdue alert)
+
+### SUBPROCESSES:
+✅ Pass necessity test:
+1. **Guest Room Management**:
+   - Purpose: "End-to-end room block coordination"
+   - Justification: 5 cohesive tasks with shared guest data; reusable for other events
+2. **Catering Execution**:
+   - Purpose: "Safe, timed food/beverage service"
+   - Justification: 6 interdependent tasks with handoffs; isolates complexity
+
+### FLOW PATHS:
+✅ All traceable:
+- Contract → Planning → 14d Prep → 7d Prep → Day-of → Post-Event
+- No orphaned tasks (e.g., cleanup tied to catering subprocess end)
+- All timer triggers resolve to single end event
+
+---
+</compliance_validation>
+
+<critical_assumptions>
+1. **Penalty Timing**: Assumed 3-day SLA for headcount based on standard hotel contracts (clarify if different).
+2. **Reception Duration**: Assumed 6-hour reception (18:00–00:00) for cleanup timing.
+3. **Room Block Adjustments**: Only >100 guests triggers overflow handling (confirm threshold).
+4. **Bar Service**: Assumed "open_bar"/"cash_bar"/"limited_bar" are only options (validate).
+</critical_assumptions>

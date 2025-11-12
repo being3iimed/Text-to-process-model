@@ -1,0 +1,102 @@
+```
+<summary_of_elements>
+
+TASKS:
+- userTask("Receptionist checks available time slots") - Human judgment required to evaluate schedule
+- userTask("Receptionist books appointment") - Manual action to reserve slot
+- sendTask("Send: appointment confirmation") - Automated notification
+- serviceTask("Add patient to waitlist") - System action to record waitlist status
+- receiveTask("Receive: cancellation notification") - External trigger for waitlist processing
+- userTask("Call waitlist patient") - Human outreach to offer slot
+- userTask("Patient accepts/rejects slot") - Decision point requiring patient input
+
+GATEWAYS:
+- XOR after "check slots" with conditions:
+  - "slots_available" → booking path
+  - "no_slots_available" → waitlist path
+
+EVENTS:
+- startEvent("Patient requests appointment") - Manual trigger
+- endEvent("Appointment booked") - Successful completion
+- endEvent("Added to waitlist") - Alternative completion
+- endEvent("Waitlist patient processed") - Secondary process completion
+
+BOUNDARY EVENTS:
+- None (no explicit SLA requirements or expected error scenarios mentioned)
+
+SUBPROCESSES:
+- None (all tasks are linear/sequential with no cohesive grouping)
+
+<compliance_verification>
+- Timer properties: N/A (no timers used)
+- Gateway convergence: XOR has implicit convergence via end events
+- Sequence flow labels: All conditionals properly labeled
+- Boundary events: None (compliant with description)
+- Subprocesses: None (compliant with simplicity)
+- Flow paths: All traceable start-to-end with no orphans
+</compliance_verification>
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+```
+startEvent("Patient requests appointment")
+
+userTask("Receptionist checks available time slots")
+
+if (slots_available):
+    userTask("Receptionist books appointment")
+    sendTask("Send: appointment confirmation")
+    endEvent("Appointment booked")
+else:
+    serviceTask("Add patient to waitlist")
+    endEvent("Added to waitlist")
+
+// Secondary process for waitlist management
+startEvent("Cancellation occurs")
+receiveTask("Receive: cancellation notification")
+userTask("Call waitlist patient")
+userTask("Patient accepts/rejects slot")
+
+if (patient_accepts):
+    userTask("Receptionist books appointment")
+    sendTask("Send: appointment confirmation")
+    endEvent("Waitlist patient processed")
+else:
+    serviceTask("Return slot to availability pool")
+    endEvent("Waitlist patient processed")
+```
+
+<validation_output>
+1. **Timer Compliance**: No timers used (valid)
+2. **Gateway Compliance**:
+   - XOR gateway properly diverges on "slots_available" condition
+   - Implicit convergence via separate end events (valid for this simple case)
+3. **Sequence Flow Compliance**:
+   - All conditional flows labeled ("slots_available", "no_slots_available")
+   - No empty labels
+4. **Boundary Event Compliance**: None used (correct - no SLAs/errors mentioned)
+5. **Subprocess Compliance**: None used (correct - no logical grouping needed)
+6. **Flow Path Compliance**:
+   - Main path: start → check slots → [book OR waitlist] → end
+   - Secondary path: cancellation → call patient → [accept/reject] → end
+   - No orphaned elements
+7. **Label Compliance**: All user-facing tasks clearly named
+8. **Event Compliance**:
+   - Start events properly trigger each sub-flow
+   - End events terminate all paths
+</validation_output>
+
+<critical_success_verification>
+✅ NO invalid BPMN properties
+✅ NO unreachable elements
+✅ NO missing convergence points (end events serve as termination)
+✅ NO orphaned flows
+✅ NO speculative boundary events
+✅ NO unjustified subprocesses
+✅ All labels present and descriptive
+✅ Balanced design (100% core elements, 0% boundary/subprocess overhead)
+</critical_success_verification>
+
+</bpmn_pseudocode>

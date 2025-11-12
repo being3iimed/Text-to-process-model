@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="BookingProcess-Definitions-id-0001" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0.0">
+  <bpmn:process id="BookingProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-GuestInitiatesSearch-id-0001" name="Guest Initiates Search">
+      <bpmn:outgoing>SequenceFlow-StartToSearch-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-SearchInventory-id-0001" name="Search Inventory for Dates and Room Type">
+      <bpmn:incoming>SequenceFlow-StartToSearch-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SearchToCalculate-id-0002</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-CalculatePricing-id-0002" name="Calculate Dynamic Pricing">
+      <bpmn:incoming>SequenceFlow-SearchToCalculate-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CalculateToDisplay-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-DisplayRooms-id-0003" name="Display Available Rooms and Pricing">
+      <bpmn:incoming>SequenceFlow-CalculateToDisplay-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DisplayToSelect-id-0004</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-GuestSelectsRoom-id-0001" name="Guest Selects Room">
+      <bpmn:incoming>SequenceFlow-DisplayToSelect-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectToPayment-id-0005</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ProcessPayment-id-0004" name="Process Payment">
+      <bpmn:incoming>SequenceFlow-SelectToPayment-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PaymentToSplit-id-0006</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-SplitPostBooking-id-0001" name="Parallel Post-Booking Actions" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-PaymentToSplit-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToEmail-id-0007</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToLoyalty-id-0008</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToHousekeeping-id-0009</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sendTask id="SendTask-ConfirmationEmail-id-0001" name="Send: Booking Confirmation Email">
+      <bpmn:incoming>SequenceFlow-SplitToEmail-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EmailToJoin-id-0010</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-LinkLoyalty-id-0005" name="Link Booking to Loyalty Account">
+      <bpmn:incoming>SequenceFlow-SplitToLoyalty-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LoyaltyToJoin-id-0011</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-UpdateHousekeeping-id-0006" name="Update Housekeeping Schedule">
+      <bpmn:incoming>SequenceFlow-SplitToHousekeeping-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-HousekeepingToJoin-id-0012</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-JoinPostBooking-id-0002" name="Synchronize Post-Booking Actions" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-EmailToJoin-id-0010</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-LoyaltyToJoin-id-0011</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-HousekeepingToJoin-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToEnd-id-0013</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:endEvent id="EndEvent-BookingComplete-id-0001" name="Booking Complete">
+      <bpmn:incoming>SequenceFlow-JoinToEnd-id-0013</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSearch-id-0001" sourceRef="StartEvent-GuestInitiatesSearch-id-0001" targetRef="ServiceTask-SearchInventory-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SearchToCalculate-id-0002" sourceRef="ServiceTask-SearchInventory-id-0001" targetRef="ServiceTask-CalculatePricing-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-CalculateToDisplay-id-0003" sourceRef="ServiceTask-CalculatePricing-id-0002" targetRef="ServiceTask-DisplayRooms-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-DisplayToSelect-id-0004" sourceRef="ServiceTask-DisplayRooms-id-0003" targetRef="UserTask-GuestSelectsRoom-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectToPayment-id-0005" sourceRef="UserTask-GuestSelectsRoom-id-0001" targetRef="ServiceTask-ProcessPayment-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-PaymentToSplit-id-0006" sourceRef="ServiceTask-ProcessPayment-id-0004" targetRef="ParallelGateway-SplitPostBooking-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToEmail-id-0007" sourceRef="ParallelGateway-SplitPostBooking-id-0001" targetRef="SendTask-ConfirmationEmail-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToLoyalty-id-0008" sourceRef="ParallelGateway-SplitPostBooking-id-0001" targetRef="ServiceTask-LinkLoyalty-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToHousekeeping-id-0009" sourceRef="ParallelGateway-SplitPostBooking-id-0001" targetRef="ServiceTask-UpdateHousekeeping-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-EmailToJoin-id-0010" sourceRef="SendTask-ConfirmationEmail-id-0001" targetRef="ParallelGateway-JoinPostBooking-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-LoyaltyToJoin-id-0011" sourceRef="ServiceTask-LinkLoyalty-id-0005" targetRef="ParallelGateway-JoinPostBooking-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-HousekeepingToJoin-id-0012" sourceRef="ServiceTask-UpdateHousekeeping-id-0006" targetRef="ParallelGateway-JoinPostBooking-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToEnd-id-0013" sourceRef="ParallelGateway-JoinPostBooking-id-0002" targetRef="EndEvent-BookingComplete-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_BookingProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_BookingProcess-id-0001" bpmnElement="BookingProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-GuestInitiatesSearch-id-0001_di" bpmnElement="StartEvent-GuestInitiatesSearch-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SearchInventory-id-0001_di" bpmnElement="ServiceTask-SearchInventory-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CalculatePricing-id-0002_di" bpmnElement="ServiceTask-CalculatePricing-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DisplayRooms-id-0003_di" bpmnElement="ServiceTask-DisplayRooms-id-0003">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-GuestSelectsRoom-id-0001_di" bpmnElement="UserTask-GuestSelectsRoom-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessPayment-id-0004_di" bpmnElement="ServiceTask-ProcessPayment-id-0004">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-SplitPostBooking-id-0001_di" bpmnElement="ParallelGateway-SplitPostBooking-id-0001">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ConfirmationEmail-id-0001_di" bpmnElement="SendTask-ConfirmationEmail-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-JoinPostBooking-id-0002_di" bpmnElement="ParallelGateway-JoinPostBooking-id-0002">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-BookingComplete-id-0001_di" bpmnElement="EndEvent-BookingComplete-id-0001">
+        <dc:Bounds x="1407" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LinkLoyalty-id-0005_di" bpmnElement="ServiceTask-LinkLoyalty-id-0005">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateHousekeeping-id-0006_di" bpmnElement="ServiceTask-UpdateHousekeeping-id-0006">
+        <dc:Bounds x="1075" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSearch-id-0001_di" bpmnElement="SequenceFlow-StartToSearch-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SearchToCalculate-id-0002_di" bpmnElement="SequenceFlow-SearchToCalculate-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculateToDisplay-id-0003_di" bpmnElement="SequenceFlow-CalculateToDisplay-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DisplayToSelect-id-0004_di" bpmnElement="SequenceFlow-DisplayToSelect-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectToPayment-id-0005_di" bpmnElement="SequenceFlow-SelectToPayment-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentToSplit-id-0006_di" bpmnElement="SequenceFlow-PaymentToSplit-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToEmail-id-0007_di" bpmnElement="SequenceFlow-SplitToEmail-id-0007">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToLoyalty-id-0008_di" bpmnElement="SequenceFlow-SplitToLoyalty-id-0008">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToHousekeeping-id-0009_di" bpmnElement="SequenceFlow-SplitToHousekeeping-id-0009">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="350" />
+        <di:waypoint x="1075" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EmailToJoin-id-0010_di" bpmnElement="SequenceFlow-EmailToJoin-id-0010">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToEnd-id-0013_di" bpmnElement="SequenceFlow-JoinToEnd-id-0013">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1407" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LoyaltyToJoin-id-0011_di" bpmnElement="SequenceFlow-LoyaltyToJoin-id-0011">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1275" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HousekeepingToJoin-id-0012_di" bpmnElement="SequenceFlow-HousekeepingToJoin-id-0012">
+        <di:waypoint x="1175" y="350" />
+        <di:waypoint x="1275" y="350" />
+        <di:waypoint x="1275" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

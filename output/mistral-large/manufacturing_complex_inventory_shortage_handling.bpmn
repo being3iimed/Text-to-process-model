@@ -1,0 +1,570 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_ComponentShortageProcess" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process_ComponentShortageResolution" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ShortageDetected-id-0001" name="Component X Shortage Detected">
+      <bpmn:outgoing>SequenceFlow-StartToQueryDelivery-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-QueryDeliverySchedule-id-0001" name="Query Supplier Delivery Schedule">
+      <bpmn:incoming>SequenceFlow-StartToQueryDelivery-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-QueryToETAGateway-id-0002</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-DeliveryETA-id-0001" name="Next Delivery ETA ≤ 24h?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-QueryToETAGateway-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ETAGatewayToLogMinor-id-0003</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ETAGatewayToQueryAlternatives-id-0006</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-LogMinorDelay-id-0002" name="Log: Minor Production Delay">
+      <bpmn:incoming>SequenceFlow-ETAGatewayToLogMinor-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogMinorToAdjust-id-0004</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-AdjustSchedule-id-0003" name="Adjust Production Schedule">
+      <bpmn:incoming>SequenceFlow-LogMinorToAdjust-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AdjustToEndOriginal-id-0005</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-ResumedOriginal-id-0001" name="Production Resumes with Original Components">
+      <bpmn:incoming>SequenceFlow-AdjustToEndOriginal-id-0005</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-QueryAlternatives-id-0004" name="Query Alternative Components Database">
+      <bpmn:incoming>SequenceFlow-ETAGatewayToQueryAlternatives-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-QueryAlternativesToGateway-id-0007</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-AlternativeAvailable-id-0002" name="Alternative Component Available?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-QueryAlternativesToGateway-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AlternativeGatewayToUseAlternative-id-0008</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-AlternativeGatewayToExpedite-id-0012</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-UseAlternative-id-0001" name="Send: Use Alternative Component to Production">
+      <bpmn:incoming>SequenceFlow-AlternativeGatewayToUseAlternative-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UseAlternativeToLog-id-0009</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-LogAlternativeUsed-id-0005" name="Log: Alternative Component Used">
+      <bpmn:incoming>SequenceFlow-UseAlternativeToLog-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogToAdjustParameters-id-0010</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-AdjustParameters-id-0006" name="Adjust Production Parameters if Needed">
+      <bpmn:incoming>SequenceFlow-LogToAdjustParameters-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AdjustParametersToEndAlternative-id-0011</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-ResumedAlternative-id-0002" name="Production Resumes with Alternative">
+      <bpmn:incoming>SequenceFlow-AdjustParametersToEndAlternative-id-0011</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:subProcess id="SubProcess-ExpediteShipment-id-0001" name="Expedite Shipment">
+      <bpmn:incoming>SequenceFlow-AlternativeGatewayToExpedite-id-0012</bpmn:incoming>
+      <bpmn:startEvent id="StartEvent-ExpediteInitiated-id-0001" name="Expedite Request Initiated">
+        <bpmn:outgoing>SequenceFlow-ExpediteStartToApproval-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-ManagerApproval-id-0001" name="Production Manager Approves Expedite Premium Cost">
+        <bpmn:incoming>SequenceFlow-ExpediteStartToApproval-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ApprovalToRequest-id-0002</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:serviceTask id="ServiceTask-SendExpediteRequest-id-0001" name="Send Expedite Request to Supplier">
+        <bpmn:incoming>SequenceFlow-ApprovalToRequest-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RequestToGateway-id-0003</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-SupplierAgrees-id-0001" name="Supplier Agrees to Expedite?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-RequestToGateway-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GatewayToConfirmation-id-0004</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToRejected-id-0007</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:sendTask id="SendTask-ConfirmToProduction-id-0001" name="Send: Confirmation to Production Line">
+        <bpmn:incoming>SequenceFlow-GatewayToConfirmation-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ConfirmationToDelay-id-0005</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:sendTask id="SendTask-DelayNotice-id-0002" name="Send: Delay Notice to Dependent Lines">
+        <bpmn:incoming>SequenceFlow-ConfirmationToDelay-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-DelayToExpediteConfirmed-id-0006</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:endEvent id="EndEvent-ExpediteConfirmed-id-0001" name="Expedite Confirmed">
+        <bpmn:incoming>SequenceFlow-DelayToExpediteConfirmed-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ExpediteConfirmedToUpdateETA-id-0013</bpmn:outgoing>
+      </bpmn:endEvent>
+      <bpmn:endEvent id="EndEvent-ExpediteRejected-id-0002" name="Expedite Rejected">
+        <bpmn:incoming>SequenceFlow-GatewayToRejected-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ExpediteRejectedToBackup-id-0016</bpmn:outgoing>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-ExpediteStartToApproval-id-0001" sourceRef="StartEvent-ExpediteInitiated-id-0001" targetRef="UserTask-ManagerApproval-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ApprovalToRequest-id-0002" sourceRef="UserTask-ManagerApproval-id-0001" targetRef="ServiceTask-SendExpediteRequest-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RequestToGateway-id-0003" sourceRef="ServiceTask-SendExpediteRequest-id-0001" targetRef="ExclusiveGateway-SupplierAgrees-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToConfirmation-id-0004" name="Supplier Agrees" sourceRef="ExclusiveGateway-SupplierAgrees-id-0001" targetRef="SendTask-ConfirmToProduction-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ConfirmationToDelay-id-0005" sourceRef="SendTask-ConfirmToProduction-id-0001" targetRef="SendTask-DelayNotice-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-DelayToExpediteConfirmed-id-0006" sourceRef="SendTask-DelayNotice-id-0002" targetRef="EndEvent-ExpediteConfirmed-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToRejected-id-0007" name="Supplier Rejects" sourceRef="ExclusiveGateway-SupplierAgrees-id-0001" targetRef="EndEvent-ExpediteRejected-id-0002" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-BackupSupplier-id-0002" name="Procure Backup Supplier">
+      <bpmn:incoming>SequenceFlow-ExpediteRejectedToBackup-id-0016</bpmn:incoming>
+      <bpmn:startEvent id="StartEvent-EscalationInitiated-id-0001" name="Escalation to Procurement">
+        <bpmn:outgoing>SequenceFlow-EscalationToSelect-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-SelectBackupSupplier-id-0001" name="Procurement Manager Selects Backup Supplier">
+        <bpmn:incoming>SequenceFlow-EscalationToSelect-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SelectToVerify-id-0002</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:serviceTask id="ServiceTask-VerifyBackupStock-id-0001" name="Verify Backup Supplier Stock">
+        <bpmn:incoming>SequenceFlow-SelectToVerify-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-VerifyToNegotiate-id-0003</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-NegotiateDelivery-id-0002" name="Negotiate Same-Day Delivery">
+        <bpmn:incoming>SequenceFlow-VerifyToNegotiate-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-NegotiateToGateway-id-0004</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-BackupConfirmed-id-0001" name="Backup Supplier Confirmed?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-NegotiateToGateway-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GatewayToCreatePO-id-0005</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToNoBackup-id-0008</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-CreatePO-id-0003" name="Create Purchase Order for Backup Supplier">
+        <bpmn:incoming>SequenceFlow-GatewayToCreatePO-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CreatePOToLog-id-0006</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-LogCostVariance-id-0004" name="Log: Backup Supplier Cost Variance">
+        <bpmn:incoming>SequenceFlow-CreatePOToLog-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-LogToBackupSecured-id-0007</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-BackupSecured-id-0001" name="Backup Supplier Secured">
+        <bpmn:incoming>SequenceFlow-LogToBackupSecured-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-BackupSecuredToUpdateSchedule-id-0017</bpmn:outgoing>
+      </bpmn:endEvent>
+      <bpmn:endEvent id="EndEvent-NoBackup-id-0002" name="No Backup Available">
+        <bpmn:incoming>SequenceFlow-GatewayToNoBackup-id-0008</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-NoBackupToManualResolution-id-0020</bpmn:outgoing>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-EscalationToSelect-id-0001" sourceRef="StartEvent-EscalationInitiated-id-0001" targetRef="UserTask-SelectBackupSupplier-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SelectToVerify-id-0002" sourceRef="UserTask-SelectBackupSupplier-id-0001" targetRef="ServiceTask-VerifyBackupStock-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-VerifyToNegotiate-id-0003" sourceRef="ServiceTask-VerifyBackupStock-id-0001" targetRef="ServiceTask-NegotiateDelivery-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-NegotiateToGateway-id-0004" sourceRef="ServiceTask-NegotiateDelivery-id-0002" targetRef="ExclusiveGateway-BackupConfirmed-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToCreatePO-id-0005" name="Backup Confirmed" sourceRef="ExclusiveGateway-BackupConfirmed-id-0001" targetRef="ServiceTask-CreatePO-id-0003" />
+      <bpmn:sequenceFlow id="SequenceFlow-CreatePOToLog-id-0006" sourceRef="ServiceTask-CreatePO-id-0003" targetRef="ServiceTask-LogCostVariance-id-0004" />
+      <bpmn:sequenceFlow id="SequenceFlow-LogToBackupSecured-id-0007" sourceRef="ServiceTask-LogCostVariance-id-0004" targetRef="EndEvent-BackupSecured-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToNoBackup-id-0008" name="No Backup Available" sourceRef="ExclusiveGateway-BackupConfirmed-id-0001" targetRef="EndEvent-NoBackup-id-0002" />
+    </bpmn:subProcess>
+    <bpmn:serviceTask id="ServiceTask-UpdateETA-id-0007" name="Update Delivery ETA">
+      <bpmn:incoming>SequenceFlow-ExpediteConfirmedToUpdateETA-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateETAToLogExpedite-id-0014</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-LogExpediteCost-id-0008" name="Log: Expedite Cost Variance">
+      <bpmn:incoming>SequenceFlow-UpdateETAToLogExpedite-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogExpediteToEndExpedited-id-0015</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-ResumedExpedited-id-0003" name="Production Resumes with Expedited Components">
+      <bpmn:incoming>SequenceFlow-LogExpediteToEndExpedited-id-0015</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-UpdateSchedule-id-0009" name="Update Production Schedule">
+      <bpmn:incoming>SequenceFlow-BackupSecuredToUpdateSchedule-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateScheduleToUpdateMetrics-id-0018</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-UpdateMetrics-id-0010" name="Update Supplier Performance Metrics">
+      <bpmn:incoming>SequenceFlow-UpdateScheduleToUpdateMetrics-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateMetricsToEndBackup-id-0019</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-ResumedBackup-id-0004" name="Production Resumes with Backup Components">
+      <bpmn:incoming>SequenceFlow-UpdateMetricsToEndBackup-id-0019</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="UserTask-ManualResolution-id-0001" name="Manual Resolution Required">
+      <bpmn:incoming>SequenceFlow-NoBackupToManualResolution-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ManualResolutionToTerminated-id-0021</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-Terminated-id-0005" name="Process Terminated: No Resolution">
+      <bpmn:incoming>SequenceFlow-ManualResolutionToTerminated-id-0021</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToQueryDelivery-id-0001" sourceRef="StartEvent-ShortageDetected-id-0001" targetRef="ServiceTask-QueryDeliverySchedule-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-QueryToETAGateway-id-0002" sourceRef="ServiceTask-QueryDeliverySchedule-id-0001" targetRef="ExclusiveGateway-DeliveryETA-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ETAGatewayToLogMinor-id-0003" name="ETA ≤ 24h" sourceRef="ExclusiveGateway-DeliveryETA-id-0001" targetRef="ServiceTask-LogMinorDelay-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogMinorToAdjust-id-0004" sourceRef="ServiceTask-LogMinorDelay-id-0002" targetRef="ServiceTask-AdjustSchedule-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-AdjustToEndOriginal-id-0005" sourceRef="ServiceTask-AdjustSchedule-id-0003" targetRef="EndEvent-ResumedOriginal-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ETAGatewayToQueryAlternatives-id-0006" name="ETA &#62; 24h" sourceRef="ExclusiveGateway-DeliveryETA-id-0001" targetRef="ServiceTask-QueryAlternatives-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-QueryAlternativesToGateway-id-0007" sourceRef="ServiceTask-QueryAlternatives-id-0004" targetRef="ExclusiveGateway-AlternativeAvailable-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-AlternativeGatewayToUseAlternative-id-0008" name="Alternative Available" sourceRef="ExclusiveGateway-AlternativeAvailable-id-0002" targetRef="SendTask-UseAlternative-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UseAlternativeToLog-id-0009" sourceRef="SendTask-UseAlternative-id-0001" targetRef="ServiceTask-LogAlternativeUsed-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogToAdjustParameters-id-0010" sourceRef="ServiceTask-LogAlternativeUsed-id-0005" targetRef="ServiceTask-AdjustParameters-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-AdjustParametersToEndAlternative-id-0011" sourceRef="ServiceTask-AdjustParameters-id-0006" targetRef="EndEvent-ResumedAlternative-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-AlternativeGatewayToExpedite-id-0012" name="No Alternative Available" sourceRef="ExclusiveGateway-AlternativeAvailable-id-0002" targetRef="SubProcess-ExpediteShipment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ExpediteConfirmedToUpdateETA-id-0013" sourceRef="EndEvent-ExpediteConfirmed-id-0001" targetRef="ServiceTask-UpdateETA-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateETAToLogExpedite-id-0014" sourceRef="ServiceTask-UpdateETA-id-0007" targetRef="ServiceTask-LogExpediteCost-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogExpediteToEndExpedited-id-0015" sourceRef="ServiceTask-LogExpediteCost-id-0008" targetRef="EndEvent-ResumedExpedited-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-ExpediteRejectedToBackup-id-0016" sourceRef="EndEvent-ExpediteRejected-id-0002" targetRef="SubProcess-BackupSupplier-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-BackupSecuredToUpdateSchedule-id-0017" sourceRef="EndEvent-BackupSecured-id-0001" targetRef="ServiceTask-UpdateSchedule-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateScheduleToUpdateMetrics-id-0018" sourceRef="ServiceTask-UpdateSchedule-id-0009" targetRef="ServiceTask-UpdateMetrics-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateMetricsToEndBackup-id-0019" sourceRef="ServiceTask-UpdateMetrics-id-0010" targetRef="EndEvent-ResumedBackup-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-NoBackupToManualResolution-id-0020" sourceRef="EndEvent-NoBackup-id-0002" targetRef="UserTask-ManualResolution-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ManualResolutionToTerminated-id-0021" sourceRef="UserTask-ManualResolution-id-0001" targetRef="EndEvent-Terminated-id-0005" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process_ComponentShortageResolution">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process_ComponentShortageResolution" bpmnElement="Process_ComponentShortageResolution">
+      <bpmndi:BPMNShape id="StartEvent-ShortageDetected-id-0001_di" bpmnElement="StartEvent-ShortageDetected-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-QueryDeliverySchedule-id-0001_di" bpmnElement="ServiceTask-QueryDeliverySchedule-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-DeliveryETA-id-0001_di" bpmnElement="ExclusiveGateway-DeliveryETA-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogMinorDelay-id-0002_di" bpmnElement="ServiceTask-LogMinorDelay-id-0002">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AdjustSchedule-id-0003_di" bpmnElement="ServiceTask-AdjustSchedule-id-0003">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ResumedOriginal-id-0001_di" bpmnElement="EndEvent-ResumedOriginal-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-QueryAlternatives-id-0004_di" bpmnElement="ServiceTask-QueryAlternatives-id-0004">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-AlternativeAvailable-id-0002_di" bpmnElement="ExclusiveGateway-AlternativeAvailable-id-0002" isMarkerVisible="true">
+        <dc:Bounds x="650" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-UseAlternative-id-0001_di" bpmnElement="SendTask-UseAlternative-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogAlternativeUsed-id-0005_di" bpmnElement="ServiceTask-LogAlternativeUsed-id-0005">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AdjustParameters-id-0006_di" bpmnElement="ServiceTask-AdjustParameters-id-0006">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ResumedAlternative-id-0002_di" bpmnElement="EndEvent-ResumedAlternative-id-0002">
+        <dc:Bounds x="1257" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-ExpediteShipment-id-0001_di" bpmnElement="SubProcess-ExpediteShipment-id-0001">
+        <dc:Bounds x="775" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-BackupSupplier-id-0002_di" bpmnElement="SubProcess-BackupSupplier-id-0002">
+        <dc:Bounds x="25" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToQueryDelivery-id-0001_di" bpmnElement="SequenceFlow-StartToQueryDelivery-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-QueryToETAGateway-id-0002_di" bpmnElement="SequenceFlow-QueryToETAGateway-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ETAGatewayToLogMinor-id-0003_di" bpmnElement="SequenceFlow-ETAGatewayToLogMinor-id-0003">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ETAGatewayToQueryAlternatives-id-0006_di" bpmnElement="SequenceFlow-ETAGatewayToQueryAlternatives-id-0006">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogMinorToAdjust-id-0004_di" bpmnElement="SequenceFlow-LogMinorToAdjust-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AdjustToEndOriginal-id-0005_di" bpmnElement="SequenceFlow-AdjustToEndOriginal-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-QueryAlternativesToGateway-id-0007_di" bpmnElement="SequenceFlow-QueryAlternativesToGateway-id-0007">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="650" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlternativeGatewayToUseAlternative-id-0008_di" bpmnElement="SequenceFlow-AlternativeGatewayToUseAlternative-id-0008">
+        <di:waypoint x="700" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlternativeGatewayToExpedite-id-0012_di" bpmnElement="SequenceFlow-AlternativeGatewayToExpedite-id-0012">
+        <di:waypoint x="675" y="235" />
+        <di:waypoint x="675" y="350" />
+        <di:waypoint x="775" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UseAlternativeToLog-id-0009_di" bpmnElement="SequenceFlow-UseAlternativeToLog-id-0009">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogToAdjustParameters-id-0010_di" bpmnElement="SequenceFlow-LogToAdjustParameters-id-0010">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AdjustParametersToEndAlternative-id-0011_di" bpmnElement="SequenceFlow-AdjustParametersToEndAlternative-id-0011">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1257" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-BackupSupplier-id-0002">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-BackupSupplier-id-0002" bpmnElement="SubProcess-BackupSupplier-id-0002">
+      <bpmndi:BPMNShape id="StartEvent-EscalationInitiated-id-0001_di" bpmnElement="StartEvent-EscalationInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectBackupSupplier-id-0001_di" bpmnElement="UserTask-SelectBackupSupplier-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-VerifyBackupStock-id-0001_di" bpmnElement="ServiceTask-VerifyBackupStock-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-NegotiateDelivery-id-0002_di" bpmnElement="ServiceTask-NegotiateDelivery-id-0002">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-BackupConfirmed-id-0001_di" bpmnElement="ExclusiveGateway-BackupConfirmed-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CreatePO-id-0003_di" bpmnElement="ServiceTask-CreatePO-id-0003">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogCostVariance-id-0004_di" bpmnElement="ServiceTask-LogCostVariance-id-0004">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-BackupSecured-id-0001_di" bpmnElement="EndEvent-BackupSecured-id-0001">
+        <dc:Bounds x="1107" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateSchedule-id-0009_di" bpmnElement="ServiceTask-UpdateSchedule-id-0009">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateMetrics-id-0010_di" bpmnElement="ServiceTask-UpdateMetrics-id-0010">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ResumedBackup-id-0004_di" bpmnElement="EndEvent-ResumedBackup-id-0004">
+        <dc:Bounds x="1557" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-NoBackup-id-0002_di" bpmnElement="EndEvent-NoBackup-id-0002">
+        <dc:Bounds x="807" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ManualResolution-id-0001_di" bpmnElement="UserTask-ManualResolution-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-Terminated-id-0005_di" bpmnElement="EndEvent-Terminated-id-0005">
+        <dc:Bounds x="1107" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-EscalationToSelect-id-0001_di" bpmnElement="SequenceFlow-EscalationToSelect-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectToVerify-id-0002_di" bpmnElement="SequenceFlow-SelectToVerify-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyToNegotiate-id-0003_di" bpmnElement="SequenceFlow-VerifyToNegotiate-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NegotiateToGateway-id-0004_di" bpmnElement="SequenceFlow-NegotiateToGateway-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToCreatePO-id-0005_di" bpmnElement="SequenceFlow-GatewayToCreatePO-id-0005">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToNoBackup-id-0008_di" bpmnElement="SequenceFlow-GatewayToNoBackup-id-0008">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="807" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CreatePOToLog-id-0006_di" bpmnElement="SequenceFlow-CreatePOToLog-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogToBackupSecured-id-0007_di" bpmnElement="SequenceFlow-LogToBackupSecured-id-0007">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1107" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BackupSecuredToUpdateSchedule-id-0017_di" bpmnElement="SequenceFlow-BackupSecuredToUpdateSchedule-id-0017">
+        <di:waypoint x="1143" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateScheduleToUpdateMetrics-id-0018_di" bpmnElement="SequenceFlow-UpdateScheduleToUpdateMetrics-id-0018">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateMetricsToEndBackup-id-0019_di" bpmnElement="SequenceFlow-UpdateMetricsToEndBackup-id-0019">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1557" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NoBackupToManualResolution-id-0020_di" bpmnElement="SequenceFlow-NoBackupToManualResolution-id-0020">
+        <di:waypoint x="843" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ManualResolutionToTerminated-id-0021_di" bpmnElement="SequenceFlow-ManualResolutionToTerminated-id-0021">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1107" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-ExpediteShipment-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-ExpediteShipment-id-0001" bpmnElement="SubProcess-ExpediteShipment-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ExpediteInitiated-id-0001_di" bpmnElement="StartEvent-ExpediteInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ManagerApproval-id-0001_di" bpmnElement="UserTask-ManagerApproval-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SendExpediteRequest-id-0001_di" bpmnElement="ServiceTask-SendExpediteRequest-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SupplierAgrees-id-0001_di" bpmnElement="ExclusiveGateway-SupplierAgrees-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ConfirmToProduction-id-0001_di" bpmnElement="SendTask-ConfirmToProduction-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-DelayNotice-id-0002_di" bpmnElement="SendTask-DelayNotice-id-0002">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ExpediteConfirmed-id-0001_di" bpmnElement="EndEvent-ExpediteConfirmed-id-0001">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateETA-id-0007_di" bpmnElement="ServiceTask-UpdateETA-id-0007">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogExpediteCost-id-0008_di" bpmnElement="ServiceTask-LogExpediteCost-id-0008">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ResumedExpedited-id-0003_di" bpmnElement="EndEvent-ResumedExpedited-id-0003">
+        <dc:Bounds x="1407" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ExpediteRejected-id-0002_di" bpmnElement="EndEvent-ExpediteRejected-id-0002">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-BackupSupplier-id-0002_di" bpmnElement="SubProcess-BackupSupplier-id-0002">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExpediteStartToApproval-id-0001_di" bpmnElement="SequenceFlow-ExpediteStartToApproval-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalToRequest-id-0002_di" bpmnElement="SequenceFlow-ApprovalToRequest-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RequestToGateway-id-0003_di" bpmnElement="SequenceFlow-RequestToGateway-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToConfirmation-id-0004_di" bpmnElement="SequenceFlow-GatewayToConfirmation-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToRejected-id-0007_di" bpmnElement="SequenceFlow-GatewayToRejected-id-0007">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmationToDelay-id-0005_di" bpmnElement="SequenceFlow-ConfirmationToDelay-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DelayToExpediteConfirmed-id-0006_di" bpmnElement="SequenceFlow-DelayToExpediteConfirmed-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExpediteConfirmedToUpdateETA-id-0013_di" bpmnElement="SequenceFlow-ExpediteConfirmedToUpdateETA-id-0013">
+        <di:waypoint x="993" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateETAToLogExpedite-id-0014_di" bpmnElement="SequenceFlow-UpdateETAToLogExpedite-id-0014">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogExpediteToEndExpedited-id-0015_di" bpmnElement="SequenceFlow-LogExpediteToEndExpedited-id-0015">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1407" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExpediteRejectedToBackup-id-0016_di" bpmnElement="SequenceFlow-ExpediteRejectedToBackup-id-0016">
+        <di:waypoint x="693" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-BackupSupplier-id-0002">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-BackupSupplier-id-0002" bpmnElement="SubProcess-BackupSupplier-id-0002">
+      <bpmndi:BPMNShape id="StartEvent-EscalationInitiated-id-0001_di" bpmnElement="StartEvent-EscalationInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectBackupSupplier-id-0001_di" bpmnElement="UserTask-SelectBackupSupplier-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-VerifyBackupStock-id-0001_di" bpmnElement="ServiceTask-VerifyBackupStock-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-NegotiateDelivery-id-0002_di" bpmnElement="ServiceTask-NegotiateDelivery-id-0002">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-BackupConfirmed-id-0001_di" bpmnElement="ExclusiveGateway-BackupConfirmed-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CreatePO-id-0003_di" bpmnElement="ServiceTask-CreatePO-id-0003">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogCostVariance-id-0004_di" bpmnElement="ServiceTask-LogCostVariance-id-0004">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-BackupSecured-id-0001_di" bpmnElement="EndEvent-BackupSecured-id-0001">
+        <dc:Bounds x="1107" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateSchedule-id-0009_di" bpmnElement="ServiceTask-UpdateSchedule-id-0009">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateMetrics-id-0010_di" bpmnElement="ServiceTask-UpdateMetrics-id-0010">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ResumedBackup-id-0004_di" bpmnElement="EndEvent-ResumedBackup-id-0004">
+        <dc:Bounds x="1557" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-NoBackup-id-0002_di" bpmnElement="EndEvent-NoBackup-id-0002">
+        <dc:Bounds x="807" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ManualResolution-id-0001_di" bpmnElement="UserTask-ManualResolution-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-Terminated-id-0005_di" bpmnElement="EndEvent-Terminated-id-0005">
+        <dc:Bounds x="1107" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-EscalationToSelect-id-0001_di" bpmnElement="SequenceFlow-EscalationToSelect-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectToVerify-id-0002_di" bpmnElement="SequenceFlow-SelectToVerify-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyToNegotiate-id-0003_di" bpmnElement="SequenceFlow-VerifyToNegotiate-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NegotiateToGateway-id-0004_di" bpmnElement="SequenceFlow-NegotiateToGateway-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToCreatePO-id-0005_di" bpmnElement="SequenceFlow-GatewayToCreatePO-id-0005">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToNoBackup-id-0008_di" bpmnElement="SequenceFlow-GatewayToNoBackup-id-0008">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="807" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CreatePOToLog-id-0006_di" bpmnElement="SequenceFlow-CreatePOToLog-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogToBackupSecured-id-0007_di" bpmnElement="SequenceFlow-LogToBackupSecured-id-0007">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1107" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BackupSecuredToUpdateSchedule-id-0017_di" bpmnElement="SequenceFlow-BackupSecuredToUpdateSchedule-id-0017">
+        <di:waypoint x="1143" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateScheduleToUpdateMetrics-id-0018_di" bpmnElement="SequenceFlow-UpdateScheduleToUpdateMetrics-id-0018">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateMetricsToEndBackup-id-0019_di" bpmnElement="SequenceFlow-UpdateMetricsToEndBackup-id-0019">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1557" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NoBackupToManualResolution-id-0020_di" bpmnElement="SequenceFlow-NoBackupToManualResolution-id-0020">
+        <di:waypoint x="843" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ManualResolutionToTerminated-id-0021_di" bpmnElement="SequenceFlow-ManualResolutionToTerminated-id-0021">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1107" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
