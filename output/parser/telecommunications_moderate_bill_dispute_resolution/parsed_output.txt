@@ -1,0 +1,60 @@
+### SUMMARY OF ELEMENTS
+--------------------------------------------------------------------------------
+TASKS:
+- userTask("Customer submits dispute ticket") - initial contact
+- userTask("Support agent reviews account history") - verification
+- userTask("Support agent explains billing logic") - clarification
+- serviceTask("Issue credit") - immediate resolution
+- sendTask("Notify customer of credit") - communication
+- serviceTask("Escalate case to billing specialist") - escalation
+- serviceTask("Billing specialist performs deep investigation") - detailed review
+- serviceTask("Issue retroactive credit") - retroactive resolution
+- serviceTask("Offer service credits for future bills") - goodwill gesture
+- serviceTask("Close case") - finalization
+
+GATEWAYS:
+- XOR at point after initial review with conditions:
+  - "Error confirmed" (credit issued)
+  - "Charges correct" (explanation provided)
+- XOR at point after explanation with conditions:
+  - "Customer still disputes" (escalation)
+  - "Customer accepts charges" (case closed)
+- XOR at point after specialist review with conditions:
+  - "Error confirmed" (retroactive credit)
+  - "Charges correct" (service credits offered)
+
+EVENTS:
+- startEvent("Customer contacts support") - manual trigger
+- endEvent("Case closed") - normal completion
+
+BOUNDARY EVENTS:
+- None identified (no explicit SLA or error scenarios mentioned)
+
+SUBPROCESSES:
+- None identified (no logical grouping or repeated structures)
+
+### BPMN PSEUDOCODE
+--------------------------------------------------------------------------------
+startEvent("Customer contacts support")
+userTask("Customer submits dispute ticket")
+userTask("Support agent reviews account history")
+if (error_confirmed):
+    serviceTask("Issue credit")
+    sendTask("Notify customer of credit")
+    endEvent("Case closed")
+else if (charges_correct):
+    userTask("Support agent explains billing logic")
+    if (customer_still_disputes):
+        serviceTask("Escalate case to billing specialist")
+        serviceTask("Billing specialist performs deep investigation")
+        if (error_confirmed):
+            serviceTask("Issue retroactive credit")
+            endEvent("Case closed")
+        else:
+            serviceTask("Offer service credits for future bills")
+            endEvent("Case closed")
+    else:
+        endEvent("Case closed")
+else:
+    endEvent("Case closed")
+

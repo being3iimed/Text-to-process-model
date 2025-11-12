@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Event-Setup-Process" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="Event-Setup-Process-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ProcessBegins-id-0001" name="Process Begins">
+      <bpmn:outgoing>SequenceFlow-StartToConfirmDates-id-0014</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-ConfirmDatesAndRoomAvailability-id-0002" name="Confirm Dates and Room Availability">
+      <bpmn:incoming>SequenceFlow-StartToConfirmDates-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmDatesToCalculateSetup-id-0015</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-CalculateRequiredSetup-id-0003" name="Calculate Required Setup">
+      <bpmn:incoming>SequenceFlow-ConfirmDatesToCalculateSetup-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CalculateSetupToPrepareMenu-id-0016</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-PrepareMenuOptions-id-0004" name="Prepare Menu Options">
+      <bpmn:incoming>SequenceFlow-CalculateSetupToPrepareMenu-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PrepareMenuToApproveMenu-id-0017</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ApproveMenuAndFinalHeadcount-id-0005" name="Approve Menu and Final Headcount">
+      <bpmn:incoming>SequenceFlow-PrepareMenuToApproveMenu-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ApproveMenuToPrepareFood-id-0018</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-PrepareFood-id-0006" name="Prepare Food">
+      <bpmn:incoming>SequenceFlow-ApproveMenuToPrepareFood-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PrepareFoodToParallelSplit-id-0019</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-Split-id-0007" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-PrepareFoodToParallelSplit-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToSetUpRoom-id-0020</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToTestAVEquipment-id-0021</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToDeliverFood-id-0022</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-SetUpRoom-id-0008" name="Set Up Room">
+      <bpmn:incoming>SequenceFlow-SplitToSetUpRoom-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SetUpRoomToParallelJoin-id-0023</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-TestAVEquipment-id-0009" name="Test AV Equipment">
+      <bpmn:incoming>SequenceFlow-SplitToTestAVEquipment-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TestAVEquipmentToParallelJoin-id-0024</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-DeliverFoodAndSetUpBuffetArea-id-0010" name="Deliver Food and Set Up Buffet Area">
+      <bpmn:incoming>SequenceFlow-SplitToDeliverFood-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DeliverFoodToParallelJoin-id-0025</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join-id-0011" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-SetUpRoomToParallelJoin-id-0023</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-TestAVEquipmentToParallelJoin-id-0024</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-DeliverFoodToParallelJoin-id-0025</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ParallelJoinToBreakDownSetup-id-0026</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-BreakDownSetupAndRestoreRoom-id-0012" name="Break Down Setup and Restore Room">
+      <bpmn:incoming>SequenceFlow-ParallelJoinToBreakDownSetup-id-0026</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BreakDownSetupToEnd-id-0027</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0013" name="Process Complete">
+      <bpmn:incoming>SequenceFlow-BreakDownSetupToEnd-id-0027</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToConfirmDates-id-0014" sourceRef="StartEvent-ProcessBegins-id-0001" targetRef="UserTask-ConfirmDatesAndRoomAvailability-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmDatesToCalculateSetup-id-0015" sourceRef="UserTask-ConfirmDatesAndRoomAvailability-id-0002" targetRef="ServiceTask-CalculateRequiredSetup-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-CalculateSetupToPrepareMenu-id-0016" sourceRef="ServiceTask-CalculateRequiredSetup-id-0003" targetRef="UserTask-PrepareMenuOptions-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrepareMenuToApproveMenu-id-0017" sourceRef="UserTask-PrepareMenuOptions-id-0004" targetRef="UserTask-ApproveMenuAndFinalHeadcount-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApproveMenuToPrepareFood-id-0018" sourceRef="UserTask-ApproveMenuAndFinalHeadcount-id-0005" targetRef="ServiceTask-PrepareFood-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrepareFoodToParallelSplit-id-0019" sourceRef="ServiceTask-PrepareFood-id-0006" targetRef="ParallelGateway-Split-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToSetUpRoom-id-0020" sourceRef="ParallelGateway-Split-id-0007" targetRef="ServiceTask-SetUpRoom-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToTestAVEquipment-id-0021" sourceRef="ParallelGateway-Split-id-0007" targetRef="ServiceTask-TestAVEquipment-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToDeliverFood-id-0022" sourceRef="ParallelGateway-Split-id-0007" targetRef="ServiceTask-DeliverFoodAndSetUpBuffetArea-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-SetUpRoomToParallelJoin-id-0023" sourceRef="ServiceTask-SetUpRoom-id-0008" targetRef="ParallelGateway-Join-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-TestAVEquipmentToParallelJoin-id-0024" sourceRef="ServiceTask-TestAVEquipment-id-0009" targetRef="ParallelGateway-Join-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-DeliverFoodToParallelJoin-id-0025" sourceRef="ServiceTask-DeliverFoodAndSetUpBuffetArea-id-0010" targetRef="ParallelGateway-Join-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelJoinToBreakDownSetup-id-0026" sourceRef="ParallelGateway-Join-id-0011" targetRef="ServiceTask-BreakDownSetupAndRestoreRoom-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-BreakDownSetupToEnd-id-0027" sourceRef="ServiceTask-BreakDownSetupAndRestoreRoom-id-0012" targetRef="EndEvent-ProcessComplete-id-0013" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Event-Setup-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Event-Setup-Process-id-0001" bpmnElement="Event-Setup-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ProcessBegins-id-0001_di" bpmnElement="StartEvent-ProcessBegins-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConfirmDatesAndRoomAvailability-id-0002_di" bpmnElement="UserTask-ConfirmDatesAndRoomAvailability-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CalculateRequiredSetup-id-0003_di" bpmnElement="ServiceTask-CalculateRequiredSetup-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PrepareMenuOptions-id-0004_di" bpmnElement="UserTask-PrepareMenuOptions-id-0004">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ApproveMenuAndFinalHeadcount-id-0005_di" bpmnElement="UserTask-ApproveMenuAndFinalHeadcount-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareFood-id-0006_di" bpmnElement="ServiceTask-PrepareFood-id-0006">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0007_di" bpmnElement="ParallelGateway-Split-id-0007">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SetUpRoom-id-0008_di" bpmnElement="ServiceTask-SetUpRoom-id-0008">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0011_di" bpmnElement="ParallelGateway-Join-id-0011">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-BreakDownSetupAndRestoreRoom-id-0012_di" bpmnElement="ServiceTask-BreakDownSetupAndRestoreRoom-id-0012">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0013_di" bpmnElement="EndEvent-ProcessComplete-id-0013">
+        <dc:Bounds x="1557" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-TestAVEquipment-id-0009_di" bpmnElement="ServiceTask-TestAVEquipment-id-0009">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DeliverFoodAndSetUpBuffetArea-id-0010_di" bpmnElement="ServiceTask-DeliverFoodAndSetUpBuffetArea-id-0010">
+        <dc:Bounds x="1075" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToConfirmDates-id-0014_di" bpmnElement="SequenceFlow-StartToConfirmDates-id-0014">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmDatesToCalculateSetup-id-0015_di" bpmnElement="SequenceFlow-ConfirmDatesToCalculateSetup-id-0015">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculateSetupToPrepareMenu-id-0016_di" bpmnElement="SequenceFlow-CalculateSetupToPrepareMenu-id-0016">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrepareMenuToApproveMenu-id-0017_di" bpmnElement="SequenceFlow-PrepareMenuToApproveMenu-id-0017">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApproveMenuToPrepareFood-id-0018_di" bpmnElement="SequenceFlow-ApproveMenuToPrepareFood-id-0018">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrepareFoodToParallelSplit-id-0019_di" bpmnElement="SequenceFlow-PrepareFoodToParallelSplit-id-0019">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToSetUpRoom-id-0020_di" bpmnElement="SequenceFlow-SplitToSetUpRoom-id-0020">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToTestAVEquipment-id-0021_di" bpmnElement="SequenceFlow-SplitToTestAVEquipment-id-0021">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToDeliverFood-id-0022_di" bpmnElement="SequenceFlow-SplitToDeliverFood-id-0022">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="350" />
+        <di:waypoint x="1075" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SetUpRoomToParallelJoin-id-0023_di" bpmnElement="SequenceFlow-SetUpRoomToParallelJoin-id-0023">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelJoinToBreakDownSetup-id-0026_di" bpmnElement="SequenceFlow-ParallelJoinToBreakDownSetup-id-0026">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BreakDownSetupToEnd-id-0027_di" bpmnElement="SequenceFlow-BreakDownSetupToEnd-id-0027">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1557" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TestAVEquipmentToParallelJoin-id-0024_di" bpmnElement="SequenceFlow-TestAVEquipmentToParallelJoin-id-0024">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1275" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DeliverFoodToParallelJoin-id-0025_di" bpmnElement="SequenceFlow-DeliverFoodToParallelJoin-id-0025">
+        <di:waypoint x="1175" y="350" />
+        <di:waypoint x="1275" y="350" />
+        <di:waypoint x="1275" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

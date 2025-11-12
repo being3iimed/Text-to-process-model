@@ -1,0 +1,55 @@
+### Summary of Elements
+
+```
+TASKS:
+- userTask("Doctor Prescribes Medication") - Human judgment required for prescription
+- serviceTask("Send Prescription Electronically") - Automated system action to send prescription
+- userTask("Pharmacy Technician Checks Insurance") - Human judgment required for insurance check
+- serviceTask("Contact Insurance Company") - Automated system action to contact insurance
+- userTask("Fill Prescription") - Human action to fill prescription
+- serviceTask("Notify Patient to Pick Up") - Automated system action to notify patient
+- userTask("Notify Patient and Doctor of Denial") - Human action to notify patient and doctor
+- userTask("Patient Appeals Denial") - Human action for patient to appeal denial
+- userTask("Doctor Prescribes Alternative") - Human judgment required for alternative prescription
+- userTask("Patient Picks Up Prescription") - Human action for patient to pick up prescription
+
+GATEWAYS:
+- XOR at point X with conditions "Prior Authorization Required", "Prior Authorization Not Required", default
+- XOR at point Y with conditions "Insurance Approves", "Insurance Denies", default
+
+EVENTS:
+- startEvent("Process Begins") - trigger: manual
+- endEvent("Process Complete") - normal completion
+
+BOUNDARY EVENTS:
+- None
+
+SUBPROCESSES:
+- None
+```
+
+### BPMN Pseudocode
+
+```pseudocode
+startEvent("Process Begins")
+userTask("Doctor Prescribes Medication")
+serviceTask("Send Prescription Electronically")
+userTask("Pharmacy Technician Checks Insurance")
+if (Prior Authorization Required):
+    serviceTask("Contact Insurance Company")
+    if (Insurance Approves):
+        userTask("Fill Prescription")
+        serviceTask("Notify Patient to Pick Up")
+        userTask("Patient Picks Up Prescription")
+    else:
+        userTask("Notify Patient and Doctor of Denial")
+        OR:
+            userTask("Patient Appeals Denial")
+            userTask("Doctor Prescribes Alternative")
+        END_OR
+else:
+    userTask("Fill Prescription")
+    serviceTask("Notify Patient to Pick Up")
+    userTask("Patient Picks Up Prescription")
+endEvent("Process Complete")
+```

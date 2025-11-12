@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="dispute-resolution-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="DisputeResolutionProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-CustomerContactsSupport-id-0001" name="Customer contacts support">
+      <bpmn:outgoing>SequenceFlow-StartToSubmit-id-0018</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-CustomerSubmitsDisputeTicket-id-0002" name="Customer submits dispute ticket">
+      <bpmn:incoming>SequenceFlow-StartToSubmit-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SubmitToReview-id-0019</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-SupportAgentReviewsAccountHistory-id-0003" name="Support agent reviews account history">
+      <bpmn:incoming>SequenceFlow-SubmitToReview-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToGateway-id-0020</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ReviewResult-id-0004" name="Review Result" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewToGateway-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToIssueCredit-id-0021</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToExplain-id-0022</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-IssueCredit-id-0005" name="Issue credit">
+      <bpmn:incoming>SequenceFlow-GatewayToIssueCredit-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-IssueCreditToNotify-id-0023</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-NotifyCustomerOfCredit-id-0006" name="Notify customer of credit">
+      <bpmn:incoming>SequenceFlow-IssueCreditToNotify-id-0023</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotifyToEnd-id-0024</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-CaseClosed-id-0007" name="Case closed">
+      <bpmn:incoming>SequenceFlow-NotifyToEnd-id-0024</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="UserTask-SupportAgentExplainsBillingLogic-id-0008" name="Support agent explains billing logic">
+      <bpmn:incoming>SequenceFlow-GatewayToExplain-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ExplainToGateway-id-0025</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ExplanationResult-id-0009" name="Explanation Result" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ExplainToGateway-id-0025</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToEscalate-id-0026</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToEnd-id-0027</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-EscalateCaseToBillingSpecialist-id-0010" name="Escalate case to billing specialist">
+      <bpmn:incoming>SequenceFlow-GatewayToEscalate-id-0026</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EscalateToInvestigate-id-0028</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-BillingSpecialistPerformsDeepInvestigation-id-0011" name="Billing specialist performs deep investigation">
+      <bpmn:incoming>SequenceFlow-EscalateToInvestigate-id-0028</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InvestigateToGateway-id-0029</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-SpecialistReviewResult-id-0012" name="Specialist Review Result" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-InvestigateToGateway-id-0029</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToRetroactiveCredit-id-0030</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToServiceCredits-id-0031</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-IssueRetroactiveCredit-id-0013" name="Issue retroactive credit">
+      <bpmn:incoming>SequenceFlow-GatewayToRetroactiveCredit-id-0030</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RetroactiveCreditToEnd-id-0032</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-OfferServiceCreditsForFutureBills-id-0014" name="Offer service credits for future bills">
+      <bpmn:incoming>SequenceFlow-GatewayToServiceCredits-id-0031</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ServiceCreditsToEnd-id-0033</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-CaseClosed2-id-0015" name="Case closed">
+      <bpmn:incoming>SequenceFlow-RetroactiveCreditToEnd-id-0032</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-CaseClosed3-id-0016" name="Case closed">
+      <bpmn:incoming>SequenceFlow-GatewayToEnd-id-0027</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-CaseClosed4-id-0017" name="Case closed">
+      <bpmn:incoming>SequenceFlow-ServiceCreditsToEnd-id-0033</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSubmit-id-0018" sourceRef="StartEvent-CustomerContactsSupport-id-0001" targetRef="UserTask-CustomerSubmitsDisputeTicket-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubmitToReview-id-0019" sourceRef="UserTask-CustomerSubmitsDisputeTicket-id-0002" targetRef="UserTask-SupportAgentReviewsAccountHistory-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToGateway-id-0020" sourceRef="UserTask-SupportAgentReviewsAccountHistory-id-0003" targetRef="ExclusiveGateway-ReviewResult-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToIssueCredit-id-0021" name="error_confirmed" sourceRef="ExclusiveGateway-ReviewResult-id-0004" targetRef="ServiceTask-IssueCredit-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToExplain-id-0022" name="charges_correct" sourceRef="ExclusiveGateway-ReviewResult-id-0004" targetRef="UserTask-SupportAgentExplainsBillingLogic-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-IssueCreditToNotify-id-0023" sourceRef="ServiceTask-IssueCredit-id-0005" targetRef="SendTask-NotifyCustomerOfCredit-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotifyToEnd-id-0024" sourceRef="SendTask-NotifyCustomerOfCredit-id-0006" targetRef="EndEvent-CaseClosed-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-ExplainToGateway-id-0025" sourceRef="UserTask-SupportAgentExplainsBillingLogic-id-0008" targetRef="ExclusiveGateway-ExplanationResult-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToEscalate-id-0026" name="customer_still_disputes" sourceRef="ExclusiveGateway-ExplanationResult-id-0009" targetRef="ServiceTask-EscalateCaseToBillingSpecialist-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToEnd-id-0027" name="customer_accepts_charges" sourceRef="ExclusiveGateway-ExplanationResult-id-0009" targetRef="EndEvent-CaseClosed3-id-0016" />
+    <bpmn:sequenceFlow id="SequenceFlow-EscalateToInvestigate-id-0028" sourceRef="ServiceTask-EscalateCaseToBillingSpecialist-id-0010" targetRef="ServiceTask-BillingSpecialistPerformsDeepInvestigation-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-InvestigateToGateway-id-0029" sourceRef="ServiceTask-BillingSpecialistPerformsDeepInvestigation-id-0011" targetRef="ExclusiveGateway-SpecialistReviewResult-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToRetroactiveCredit-id-0030" name="error_confirmed" sourceRef="ExclusiveGateway-SpecialistReviewResult-id-0012" targetRef="ServiceTask-IssueRetroactiveCredit-id-0013" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToServiceCredits-id-0031" name="charges_correct" sourceRef="ExclusiveGateway-SpecialistReviewResult-id-0012" targetRef="ServiceTask-OfferServiceCreditsForFutureBills-id-0014" />
+    <bpmn:sequenceFlow id="SequenceFlow-RetroactiveCreditToEnd-id-0032" sourceRef="ServiceTask-IssueRetroactiveCredit-id-0013" targetRef="EndEvent-CaseClosed2-id-0015" />
+    <bpmn:sequenceFlow id="SequenceFlow-ServiceCreditsToEnd-id-0033" sourceRef="ServiceTask-OfferServiceCreditsForFutureBills-id-0014" targetRef="EndEvent-CaseClosed4-id-0017" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_DisputeResolutionProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_DisputeResolutionProcess-id-0001" bpmnElement="DisputeResolutionProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-CustomerContactsSupport-id-0001_di" bpmnElement="StartEvent-CustomerContactsSupport-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CustomerSubmitsDisputeTicket-id-0002_di" bpmnElement="UserTask-CustomerSubmitsDisputeTicket-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SupportAgentReviewsAccountHistory-id-0003_di" bpmnElement="UserTask-SupportAgentReviewsAccountHistory-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ReviewResult-id-0004_di" bpmnElement="ExclusiveGateway-ReviewResult-id-0004" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-IssueCredit-id-0005_di" bpmnElement="ServiceTask-IssueCredit-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-NotifyCustomerOfCredit-id-0006_di" bpmnElement="SendTask-NotifyCustomerOfCredit-id-0006">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CaseClosed-id-0007_di" bpmnElement="EndEvent-CaseClosed-id-0007">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SupportAgentExplainsBillingLogic-id-0008_di" bpmnElement="UserTask-SupportAgentExplainsBillingLogic-id-0008">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ExplanationResult-id-0009_di" bpmnElement="ExclusiveGateway-ExplanationResult-id-0009" isMarkerVisible="true">
+        <dc:Bounds x="800" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-EscalateCaseToBillingSpecialist-id-0010_di" bpmnElement="ServiceTask-EscalateCaseToBillingSpecialist-id-0010">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-BillingSpecialistPerformsDeepInvestigation-id-0011_di" bpmnElement="ServiceTask-BillingSpecialistPerformsDeepInvestigation-id-0011">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SpecialistReviewResult-id-0012_di" bpmnElement="ExclusiveGateway-SpecialistReviewResult-id-0012" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-IssueRetroactiveCredit-id-0013_di" bpmnElement="ServiceTask-IssueRetroactiveCredit-id-0013">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CaseClosed2-id-0015_di" bpmnElement="EndEvent-CaseClosed2-id-0015">
+        <dc:Bounds x="1557" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CaseClosed3-id-0016_di" bpmnElement="EndEvent-CaseClosed3-id-0016">
+        <dc:Bounds x="957" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-OfferServiceCreditsForFutureBills-id-0014_di" bpmnElement="ServiceTask-OfferServiceCreditsForFutureBills-id-0014">
+        <dc:Bounds x="1375" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CaseClosed4-id-0017_di" bpmnElement="EndEvent-CaseClosed4-id-0017">
+        <dc:Bounds x="1557" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSubmit-id-0018_di" bpmnElement="SequenceFlow-StartToSubmit-id-0018">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubmitToReview-id-0019_di" bpmnElement="SequenceFlow-SubmitToReview-id-0019">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToGateway-id-0020_di" bpmnElement="SequenceFlow-ReviewToGateway-id-0020">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToIssueCredit-id-0021_di" bpmnElement="SequenceFlow-GatewayToIssueCredit-id-0021">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToExplain-id-0022_di" bpmnElement="SequenceFlow-GatewayToExplain-id-0022">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IssueCreditToNotify-id-0023_di" bpmnElement="SequenceFlow-IssueCreditToNotify-id-0023">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotifyToEnd-id-0024_di" bpmnElement="SequenceFlow-NotifyToEnd-id-0024">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExplainToGateway-id-0025_di" bpmnElement="SequenceFlow-ExplainToGateway-id-0025">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="800" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToEscalate-id-0026_di" bpmnElement="SequenceFlow-GatewayToEscalate-id-0026">
+        <di:waypoint x="850" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToEnd-id-0027_di" bpmnElement="SequenceFlow-GatewayToEnd-id-0027">
+        <di:waypoint x="825" y="235" />
+        <di:waypoint x="825" y="350" />
+        <di:waypoint x="957" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EscalateToInvestigate-id-0028_di" bpmnElement="SequenceFlow-EscalateToInvestigate-id-0028">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvestigateToGateway-id-0029_di" bpmnElement="SequenceFlow-InvestigateToGateway-id-0029">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1250" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToRetroactiveCredit-id-0030_di" bpmnElement="SequenceFlow-GatewayToRetroactiveCredit-id-0030">
+        <di:waypoint x="1300" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToServiceCredits-id-0031_di" bpmnElement="SequenceFlow-GatewayToServiceCredits-id-0031">
+        <di:waypoint x="1275" y="235" />
+        <di:waypoint x="1275" y="350" />
+        <di:waypoint x="1375" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RetroactiveCreditToEnd-id-0032_di" bpmnElement="SequenceFlow-RetroactiveCreditToEnd-id-0032">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1557" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ServiceCreditsToEnd-id-0033_di" bpmnElement="SequenceFlow-ServiceCreditsToEnd-id-0033">
+        <di:waypoint x="1475" y="350" />
+        <di:waypoint x="1557" y="350" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

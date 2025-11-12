@@ -1,0 +1,187 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "OrderProcessing-definitions",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "bpmn-js (https://demo.bpmn.io)",
+    "exporterVersion": "18.0.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "OrderProcessing-Process-id-0001",
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-ProcessBegins-id-0001",
+            "name": "Process Begins"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-CustomerAddsItemsToCart-id-0002",
+            "name": "Customer Adds Items to Cart"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-CustomerProceedsToCheckout-id-0003",
+            "name": "Customer Proceeds to Checkout"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-SystemValidatesItemsInStock-id-0004",
+            "name": "System Validates Items in Stock"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ProcessPayment-id-0005",
+            "name": "Process Payment"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-SendOrderConfirmation-id-0006",
+            "name": "Send: Order Confirmation"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-SendPaymentFailureNotification-id-0007",
+            "name": "Send: Payment Failure Notification"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-CustomerRetriesPayment-id-0008",
+            "name": "Customer Retries Payment"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-OrderComplete-id-0009",
+            "name": "Order Complete"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-OrderFailed-id-0010",
+            "name": "Order Failed"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-PaymentResult-id-0011",
+            "name": "Payment Result",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-RetryPaymentResult-id-0012",
+            "name": "Retry Payment Result",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:BoundaryEvent",
+            "id": "BoundaryEvent-Error-ProcessPayment-id-0013",
+            "name": "Payment Processing Failed",
+            "attachedToRef": "ServiceTask-ProcessPayment-id-0005",
+            "cancelActivity": true,
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:ErrorEventDefinition",
+                "errorRef": "PAYMENT_PROCESSING_ERROR"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToAddItems-id-0014",
+            "sourceRef": "StartEvent-ProcessBegins-id-0001",
+            "targetRef": "UserTask-CustomerAddsItemsToCart-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AddItemsToCheckout-id-0015",
+            "sourceRef": "UserTask-CustomerAddsItemsToCart-id-0002",
+            "targetRef": "UserTask-CustomerProceedsToCheckout-id-0003"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CheckoutToValidate-id-0016",
+            "sourceRef": "UserTask-CustomerProceedsToCheckout-id-0003",
+            "targetRef": "ServiceTask-SystemValidatesItemsInStock-id-0004"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ValidateToProcessPayment-id-0017",
+            "sourceRef": "ServiceTask-SystemValidatesItemsInStock-id-0004",
+            "targetRef": "ServiceTask-ProcessPayment-id-0005"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ProcessPaymentToGateway-id-0018",
+            "sourceRef": "ServiceTask-ProcessPayment-id-0005",
+            "targetRef": "ExclusiveGateway-PaymentResult-id-0011"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToOrderConfirmation-id-0019",
+            "name": "payment_succeeds",
+            "sourceRef": "ExclusiveGateway-PaymentResult-id-0011",
+            "targetRef": "SendTask-SendOrderConfirmation-id-0006",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToPaymentFailure-id-0020",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-PaymentResult-id-0011",
+            "targetRef": "SendTask-SendPaymentFailureNotification-id-0007",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-OrderConfirmationToComplete-id-0021",
+            "sourceRef": "SendTask-SendOrderConfirmation-id-0006",
+            "targetRef": "EndEvent-OrderComplete-id-0009"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-PaymentFailureToRetry-id-0022",
+            "sourceRef": "SendTask-SendPaymentFailureNotification-id-0007",
+            "targetRef": "UserTask-CustomerRetriesPayment-id-0008"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RetryToProcessPayment-id-0023",
+            "sourceRef": "UserTask-CustomerRetriesPayment-id-0008",
+            "targetRef": "ServiceTask-ProcessPayment-id-0005"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-BoundaryToPaymentFailure-id-0024",
+            "sourceRef": "BoundaryEvent-Error-ProcessPayment-id-0013",
+            "targetRef": "SendTask-SendPaymentFailureNotification-id-0007"
+          }
+        ],
+        "isExecutable": true
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "codestral-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11237,
+        "total_tokens": 12883,
+        "completion_tokens": 1646
+      },
+      "model_name": "codestral-latest",
+      "model": "codestral-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11237,
+      "output_tokens": 1646,
+      "total_tokens": 12883
+    },
+    "id": "lc_run--245297c9-5246-4f25-af27-c8ffc12e7c86-0"
+  },
+  "status": "success"
+}

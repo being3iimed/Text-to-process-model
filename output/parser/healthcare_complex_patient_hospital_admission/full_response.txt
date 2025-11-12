@@ -1,0 +1,91 @@
+### Summary of Elements
+
+```
+TASKS:
+- userTask("Triage nurse assesses severity") - Human judgment required
+- serviceTask("Assigns acuity level") - Automated system action
+- serviceTask("Checks bed availability") - Automated system action
+- userTask("Physician performs assessment") - Human judgment required
+- serviceTask("Orders tests") - Automated system action
+- serviceTask("Determines admission/discharge") - Automated system action
+- serviceTask("Checks available bed types") - Automated system action
+- serviceTask("Assigns appropriate bed") - Automated system action
+- serviceTask("Places patient in waiting queue") - Automated system action
+- sendTask("Notifies nursing manager") - One-way communication
+- serviceTask("Transfers patient") - Automated system action
+- serviceTask("Initiates protocols") - Automated system action
+- serviceTask("Medication reconciliation") - Automated system action
+- serviceTask("Allergy verification") - Automated system action
+- serviceTask("Reviews medications for interactions") - Automated system action
+- sendTask("Notifies prescribing physician") - One-way communication
+- userTask("Prescribing physician adjusts regimen") - Human judgment required
+- serviceTask("Tracks insurance authorization") - Automated system action
+- sendTask("Contacts patient for approval") - One-way communication
+- serviceTask("Monitors physician orders") - Automated system action
+- sendTask("Alerts physician if critical lab values detected") - One-way communication
+
+GATEWAYS:
+- XOR at point X with conditions A, B, default
+- AND at point Y with N parallel branches
+
+EVENTS:
+- startEvent("Patient arrives at emergency department") - trigger: [manual]
+- endEvent("Process Complete") - normal completion
+
+BOUNDARY EVENTS:
+- None
+
+SUBPROCESSES:
+- Subprocess "Admission Process" - Purpose: [Handles patient admission including bed assignment, protocols, and insurance authorization]
+- Justification: [Multiple related tasks with cohesive purpose]
+```
+
+### BPMN Pseudocode
+
+```pseudocode
+startEvent("Patient arrives at emergency department")
+
+userTask("Triage nurse assesses severity")
+serviceTask("Assigns acuity level")
+
+if (acuity_level == 1 OR acuity_level == 2):
+    serviceTask("Admits to monitored bed")
+else:
+    serviceTask("Waits in ED area")
+
+userTask("Physician performs assessment")
+serviceTask("Orders tests")
+
+if (test_results == "requires admission"):
+    serviceTask("Checks available bed types")
+    if (bed_available):
+        serviceTask("Assigns appropriate bed")
+        subProcess("Admission Process"):
+            startEvent("Admission Process Begins")
+            AND:
+                serviceTask("Transfers patient")
+                serviceTask("Initiates protocols")
+                serviceTask("Medication reconciliation")
+                serviceTask("Allergy verification")
+            END_AND
+            serviceTask("Reviews medications for interactions")
+            if (interaction_found):
+                sendTask("Notifies prescribing physician")
+                userTask("Prescribing physician adjusts regimen")
+            serviceTask("Tracks insurance authorization")
+            if (insurance_not_covered):
+                sendTask("Contacts patient for approval")
+            endEvent("Admission Process Complete")
+        endSubProcess
+    else:
+        serviceTask("Places patient in waiting queue")
+        sendTask("Notifies nursing manager")
+else:
+    serviceTask("Discharges patient")
+
+serviceTask("Monitors physician orders")
+if (critical_lab_values):
+    sendTask("Alerts physician if critical lab values detected")
+
+endEvent("Process Complete")
+```

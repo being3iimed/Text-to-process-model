@@ -137,6 +137,36 @@ python main.py \
 | `--verbose, -v` | Enable detailed output |
 | `--output-json` | Output results as JSON |
 
+
+## Batch processing (new)
+
+Transform **many** process descriptions in one shot.  
+Descriptions are read from `input/processes.json` (category → process → description).
+
+# all processes
+python batch_main.py
+
+# one category
+python batch_main.py --category retail
+
+# single process
+python batch_main.py --category retail --process checkout_process
+
+# extra options
+python batch_main.py --verbose --stop-on-error --no-convert   # skip BPMN XML step
+  
+```json
+// input/processes.json example
+{
+  "retail": {
+    "checkout_process": "Customer adds items to cart → proceeds to checkout → pays → receives confirmation",
+    "return_process":   "Customer requests return → agent validates → refund issued"
+  },
+  "finance": {
+    "loan_approval":    "Applicant submits form → risk score → manager approval → loan granted"
+  }
+}
+```
 ## Output Structure
 
 ```

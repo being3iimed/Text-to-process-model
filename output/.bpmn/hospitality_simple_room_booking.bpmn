@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="hotel-booking-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="HotelBookingProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ProcessBegins-id-0001" name="Process Begins">
+      <bpmn:outgoing>SequenceFlow-StartToSearch-id-0011</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-GuestSearchesAvailability-id-0002" name="Guest searches availability">
+      <bpmn:incoming>SequenceFlow-StartToSearch-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SearchToShowRooms-id-0012</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-SystemShowsRoomsAndPricing-id-0003" name="System shows available rooms and pricing">
+      <bpmn:incoming>SequenceFlow-SearchToShowRooms-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ShowRoomsToSelectRoom-id-0013</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-GuestSelectsRoom-id-0004" name="Guest selects room">
+      <bpmn:incoming>SequenceFlow-ShowRoomsToSelectRoom-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectRoomToProceedBooking-id-0014</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-GuestProceedsToBooking-id-0005" name="Guest proceeds to booking">
+      <bpmn:incoming>SequenceFlow-SelectRoomToProceedBooking-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProceedBookingToPayment-id-0015</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-PaymentCollected-id-0006" name="Payment is collected">
+      <bpmn:incoming>SequenceFlow-ProceedBookingToPayment-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PaymentToSendConfirmation-id-0016</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendBookingConfirmation-id-0007" name="Send: Booking confirmation">
+      <bpmn:incoming>SequenceFlow-PaymentToSendConfirmation-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendConfirmationToLinkBooking-id-0017</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-BookingLinkedToLoyalty-id-0008" name="Booking is linked to loyalty account">
+      <bpmn:incoming>SequenceFlow-SendConfirmationToLinkBooking-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LinkBookingToMarkRoom-id-0018</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-RoomMarkedAsReserved-id-0009" name="Room is marked as reserved on housekeeping schedule">
+      <bpmn:incoming>SequenceFlow-LinkBookingToMarkRoom-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MarkRoomToEnd-id-0019</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0010" name="Process Complete">
+      <bpmn:incoming>SequenceFlow-MarkRoomToEnd-id-0019</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSearch-id-0011" sourceRef="StartEvent-ProcessBegins-id-0001" targetRef="UserTask-GuestSearchesAvailability-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SearchToShowRooms-id-0012" sourceRef="UserTask-GuestSearchesAvailability-id-0002" targetRef="ServiceTask-SystemShowsRoomsAndPricing-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-ShowRoomsToSelectRoom-id-0013" sourceRef="ServiceTask-SystemShowsRoomsAndPricing-id-0003" targetRef="UserTask-GuestSelectsRoom-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectRoomToProceedBooking-id-0014" sourceRef="UserTask-GuestSelectsRoom-id-0004" targetRef="UserTask-GuestProceedsToBooking-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProceedBookingToPayment-id-0015" sourceRef="UserTask-GuestProceedsToBooking-id-0005" targetRef="ServiceTask-PaymentCollected-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-PaymentToSendConfirmation-id-0016" sourceRef="ServiceTask-PaymentCollected-id-0006" targetRef="SendTask-SendBookingConfirmation-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendConfirmationToLinkBooking-id-0017" sourceRef="SendTask-SendBookingConfirmation-id-0007" targetRef="ServiceTask-BookingLinkedToLoyalty-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-LinkBookingToMarkRoom-id-0018" sourceRef="ServiceTask-BookingLinkedToLoyalty-id-0008" targetRef="ServiceTask-RoomMarkedAsReserved-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-MarkRoomToEnd-id-0019" sourceRef="ServiceTask-RoomMarkedAsReserved-id-0009" targetRef="EndEvent-ProcessComplete-id-0010" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_HotelBookingProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_HotelBookingProcess-id-0001" bpmnElement="HotelBookingProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ProcessBegins-id-0001_di" bpmnElement="StartEvent-ProcessBegins-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-GuestSearchesAvailability-id-0002_di" bpmnElement="UserTask-GuestSearchesAvailability-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SystemShowsRoomsAndPricing-id-0003_di" bpmnElement="ServiceTask-SystemShowsRoomsAndPricing-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-GuestSelectsRoom-id-0004_di" bpmnElement="UserTask-GuestSelectsRoom-id-0004">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-GuestProceedsToBooking-id-0005_di" bpmnElement="UserTask-GuestProceedsToBooking-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PaymentCollected-id-0006_di" bpmnElement="ServiceTask-PaymentCollected-id-0006">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendBookingConfirmation-id-0007_di" bpmnElement="SendTask-SendBookingConfirmation-id-0007">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-BookingLinkedToLoyalty-id-0008_di" bpmnElement="ServiceTask-BookingLinkedToLoyalty-id-0008">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RoomMarkedAsReserved-id-0009_di" bpmnElement="ServiceTask-RoomMarkedAsReserved-id-0009">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0010_di" bpmnElement="EndEvent-ProcessComplete-id-0010">
+        <dc:Bounds x="1407" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSearch-id-0011_di" bpmnElement="SequenceFlow-StartToSearch-id-0011">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SearchToShowRooms-id-0012_di" bpmnElement="SequenceFlow-SearchToShowRooms-id-0012">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ShowRoomsToSelectRoom-id-0013_di" bpmnElement="SequenceFlow-ShowRoomsToSelectRoom-id-0013">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectRoomToProceedBooking-id-0014_di" bpmnElement="SequenceFlow-SelectRoomToProceedBooking-id-0014">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProceedBookingToPayment-id-0015_di" bpmnElement="SequenceFlow-ProceedBookingToPayment-id-0015">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentToSendConfirmation-id-0016_di" bpmnElement="SequenceFlow-PaymentToSendConfirmation-id-0016">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendConfirmationToLinkBooking-id-0017_di" bpmnElement="SequenceFlow-SendConfirmationToLinkBooking-id-0017">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LinkBookingToMarkRoom-id-0018_di" bpmnElement="SequenceFlow-LinkBookingToMarkRoom-id-0018">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MarkRoomToEnd-id-0019_di" bpmnElement="SequenceFlow-MarkRoomToEnd-id-0019">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1407" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

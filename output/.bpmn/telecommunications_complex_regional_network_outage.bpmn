@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="NetworkIncidentManagement" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="NetworkIncidentManagementProcess" name="Network Incident Management" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-HighPacketLossDetected-id-0001" name="High Packet Loss Detected">
+      <bpmn:outgoing>SequenceFlow-StartToDetect-id-0054</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-DetectHighPacketLoss-id-0002" name="Detect High Packet Loss">
+      <bpmn:incoming>SequenceFlow-StartToDetect-id-0054</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DetectToAnalyzeTowers-id-0055</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-AnalyzeAffectedTowers-id-0003" name="Analyze Affected Towers">
+      <bpmn:incoming>SequenceFlow-DetectToAnalyzeTowers-id-0055</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AnalyzeTowersToServices-id-0056</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-AnalyzeImpactedServices-id-0004" name="Analyze Impacted Services">
+      <bpmn:incoming>SequenceFlow-AnalyzeTowersToServices-id-0056</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AnalyzeServicesToCount-id-0057</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-CountImpactedCustomers-id-0005" name="Count Impacted Customers">
+      <bpmn:incoming>SequenceFlow-AnalyzeServicesToCount-id-0057</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CountToSwitch-id-0058</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-SwitchTrafficToAdjacentTowers-id-0006" name="Switch Traffic to Adjacent Towers">
+      <bpmn:incoming>SequenceFlow-CountToSwitch-id-0058</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SwitchToSend-id-0059</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendIncidentAlert-id-0007" name="Send Incident Alert">
+      <bpmn:incoming>SequenceFlow-SwitchToSend-id-0059</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendToDispatch-id-0060</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-DispatchFieldEngineers-id-0008" name="Dispatch Field Engineers">
+      <bpmn:incoming>SequenceFlow-SendToDispatch-id-0060</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DispatchToRootCause-id-0061</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:subProcess id="SubProcess-RootCauseAnalysis-id-0009" name="Root Cause Analysis">
+      <bpmn:incoming>SequenceFlow-DispatchToRootCause-id-0061</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RootCauseToFix-id-0062</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-RootCauseAnalysisStart-id-0010" name="Root Cause Analysis Start">
+        <bpmn:outgoing>SequenceFlow-StartToAnalyze-id-0019</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-AnalyzeRootCause-id-0011" name="Analyze Root Cause">
+        <bpmn:incoming>SequenceFlow-StartToAnalyze-id-0019</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AnalyzeToGateway-id-0020</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-Error-AnalyzeRootCause-id-0012" name="Log Analysis Failed" attachedToRef="ServiceTask-AnalyzeRootCause-id-0011">
+        <bpmn:outgoing>SequenceFlow-ErrorToManual-id-0021</bpmn:outgoing>
+        <bpmn:errorEventDefinition id="BoundaryEvent-Error-AnalyzeRootCause-id-0012_EventDef" errorRef="LOG_ANALYSIS_ERROR" />
+      </bpmn:boundaryEvent>
+      <bpmn:userTask id="UserTask-ManualLogAnalysis-id-0013" name="Manual Log Analysis">
+        <bpmn:incoming>SequenceFlow-ErrorToManual-id-0021</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ManualToGateway-id-0022</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-RootCause-id-0014" name="Root Cause Analysis" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-AnalyzeToGateway-id-0020</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ManualToGateway-id-0022</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GatewayToHardware-id-0023</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToCapacity-id-0024</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToSoftware-id-0025</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-RetrieveSpareParts-id-0015" name="Retrieve Spare Parts">
+        <bpmn:incoming>SequenceFlow-GatewayToHardware-id-0023</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-HardwareToEnd-id-0026</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-PrioritizeTraffic-id-0016" name="Prioritize Traffic">
+        <bpmn:incoming>SequenceFlow-GatewayToCapacity-id-0024</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CapacityToEnd-id-0027</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-PrepareSoftwareRollback-id-0017" name="Prepare for Software Rollback">
+        <bpmn:incoming>SequenceFlow-GatewayToSoftware-id-0025</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SoftwareToEnd-id-0028</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-RootCauseAnalysisComplete-id-0018" name="Root Cause Analysis Complete">
+        <bpmn:incoming>SequenceFlow-HardwareToEnd-id-0026</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-CapacityToEnd-id-0027</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-SoftwareToEnd-id-0028</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToAnalyze-id-0019" sourceRef="StartEvent-RootCauseAnalysisStart-id-0010" targetRef="ServiceTask-AnalyzeRootCause-id-0011" />
+      <bpmn:sequenceFlow id="SequenceFlow-AnalyzeToGateway-id-0020" sourceRef="ServiceTask-AnalyzeRootCause-id-0011" targetRef="ExclusiveGateway-RootCause-id-0014" />
+      <bpmn:sequenceFlow id="SequenceFlow-ErrorToManual-id-0021" sourceRef="BoundaryEvent-Error-AnalyzeRootCause-id-0012" targetRef="UserTask-ManualLogAnalysis-id-0013" />
+      <bpmn:sequenceFlow id="SequenceFlow-ManualToGateway-id-0022" sourceRef="UserTask-ManualLogAnalysis-id-0013" targetRef="ExclusiveGateway-RootCause-id-0014" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToHardware-id-0023" name="hardware_failure" sourceRef="ExclusiveGateway-RootCause-id-0014" targetRef="ServiceTask-RetrieveSpareParts-id-0015" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToCapacity-id-0024" name="capacity_overload" sourceRef="ExclusiveGateway-RootCause-id-0014" targetRef="ServiceTask-PrioritizeTraffic-id-0016" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToSoftware-id-0025" sourceRef="ExclusiveGateway-RootCause-id-0014" targetRef="ServiceTask-PrepareSoftwareRollback-id-0017" />
+      <bpmn:sequenceFlow id="SequenceFlow-HardwareToEnd-id-0026" sourceRef="ServiceTask-RetrieveSpareParts-id-0015" targetRef="EndEvent-RootCauseAnalysisComplete-id-0018" />
+      <bpmn:sequenceFlow id="SequenceFlow-CapacityToEnd-id-0027" sourceRef="ServiceTask-PrioritizeTraffic-id-0016" targetRef="EndEvent-RootCauseAnalysisComplete-id-0018" />
+      <bpmn:sequenceFlow id="SequenceFlow-SoftwareToEnd-id-0028" sourceRef="ServiceTask-PrepareSoftwareRollback-id-0017" targetRef="EndEvent-RootCauseAnalysisComplete-id-0018" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-FixImplementation-id-0029" name="Fix Implementation">
+      <bpmn:incoming>SequenceFlow-RootCauseToFix-id-0062</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FixToValidate-id-0063</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-FixImplementationStart-id-0030" name="Fix Implementation Start">
+        <bpmn:outgoing>SequenceFlow-StartToConnect-id-0039</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-ConnectDiagnosticEquipment-id-0031" name="Connect Diagnostic Equipment">
+        <bpmn:incoming>SequenceFlow-StartToConnect-id-0039</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ConnectToConfirm-id-0040</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-ConfirmSystemHypothesis-id-0032" name="Confirm System&#39;s Hypothesis">
+        <bpmn:incoming>SequenceFlow-ConnectToConfirm-id-0040</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ConfirmToPerform-id-0041</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-PerformFix-id-0033" name="Perform Fix">
+        <bpmn:incoming>SequenceFlow-ConfirmToPerform-id-0041</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PerformToSplit-id-0042</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:parallelGateway id="ParallelGateway-Split-id-0034" name="Parallel Execution" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-PerformToSplit-id-0042</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SplitToReroute-id-0043</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToNotify-id-0044</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:serviceTask id="ServiceTask-RerouteTrafficDuringMaintenance-id-0035" name="Reroute Traffic During Maintenance">
+        <bpmn:incoming>SequenceFlow-SplitToReroute-id-0043</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RerouteToJoin-id-0045</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-NotifyAffectedCustomers-id-0036" name="Notify Affected Customers">
+        <bpmn:incoming>SequenceFlow-SplitToNotify-id-0044</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-NotifyToJoin-id-0046</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:parallelGateway id="ParallelGateway-Join-id-0037" name="Synchronize Branches" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-RerouteToJoin-id-0045</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-NotifyToJoin-id-0046</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-JoinToEnd-id-0047</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:endEvent id="EndEvent-FixImplementationComplete-id-0038" name="Fix Implementation Complete">
+        <bpmn:incoming>SequenceFlow-JoinToEnd-id-0047</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToConnect-id-0039" sourceRef="StartEvent-FixImplementationStart-id-0030" targetRef="ServiceTask-ConnectDiagnosticEquipment-id-0031" />
+      <bpmn:sequenceFlow id="SequenceFlow-ConnectToConfirm-id-0040" sourceRef="ServiceTask-ConnectDiagnosticEquipment-id-0031" targetRef="ServiceTask-ConfirmSystemHypothesis-id-0032" />
+      <bpmn:sequenceFlow id="SequenceFlow-ConfirmToPerform-id-0041" sourceRef="ServiceTask-ConfirmSystemHypothesis-id-0032" targetRef="ServiceTask-PerformFix-id-0033" />
+      <bpmn:sequenceFlow id="SequenceFlow-PerformToSplit-id-0042" sourceRef="ServiceTask-PerformFix-id-0033" targetRef="ParallelGateway-Split-id-0034" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToReroute-id-0043" sourceRef="ParallelGateway-Split-id-0034" targetRef="ServiceTask-RerouteTrafficDuringMaintenance-id-0035" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToNotify-id-0044" sourceRef="ParallelGateway-Split-id-0034" targetRef="SendTask-NotifyAffectedCustomers-id-0036" />
+      <bpmn:sequenceFlow id="SequenceFlow-RerouteToJoin-id-0045" sourceRef="ServiceTask-RerouteTrafficDuringMaintenance-id-0035" targetRef="ParallelGateway-Join-id-0037" />
+      <bpmn:sequenceFlow id="SequenceFlow-NotifyToJoin-id-0046" sourceRef="SendTask-NotifyAffectedCustomers-id-0036" targetRef="ParallelGateway-Join-id-0037" />
+      <bpmn:sequenceFlow id="SequenceFlow-JoinToEnd-id-0047" sourceRef="ParallelGateway-Join-id-0037" targetRef="EndEvent-FixImplementationComplete-id-0038" />
+    </bpmn:subProcess>
+    <bpmn:serviceTask id="ServiceTask-ValidateNetworkMetrics-id-0048" name="Validate Network Metrics">
+      <bpmn:incoming>SequenceFlow-FixToValidate-id-0063</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidateToGateway-id-0064</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer1Hour-ValidateNetworkMetrics-id-0049" name="1 Hour Timeout" attachedToRef="ServiceTask-ValidateNetworkMetrics-id-0048">
+      <bpmn:outgoing>SequenceFlow-TimerToEscalate-id-0065</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer1Hour-ValidateNetworkMetrics-id-0049_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-MetricsNormal-id-0050" name="Metrics Normal?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ValidateToGateway-id-0064</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToLog-id-0066</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToEscalate-id-0067</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-LogIncidentSummary-id-0051" name="Log Incident Summary">
+      <bpmn:incoming>SequenceFlow-GatewayToLog-id-0066</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-EscalateToLog-id-0069</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogToEnd-id-0068</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-EscalateForFurtherInvestigation-id-0052" name="Escalate for Further Investigation">
+      <bpmn:incoming>SequenceFlow-TimerToEscalate-id-0065</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-GatewayToEscalate-id-0067</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EscalateToLog-id-0069</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-IncidentResolved-id-0053" name="Incident Resolved">
+      <bpmn:incoming>SequenceFlow-LogToEnd-id-0068</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToDetect-id-0054" sourceRef="StartEvent-HighPacketLossDetected-id-0001" targetRef="ServiceTask-DetectHighPacketLoss-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-DetectToAnalyzeTowers-id-0055" sourceRef="ServiceTask-DetectHighPacketLoss-id-0002" targetRef="ServiceTask-AnalyzeAffectedTowers-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-AnalyzeTowersToServices-id-0056" sourceRef="ServiceTask-AnalyzeAffectedTowers-id-0003" targetRef="ServiceTask-AnalyzeImpactedServices-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-AnalyzeServicesToCount-id-0057" sourceRef="ServiceTask-AnalyzeImpactedServices-id-0004" targetRef="ServiceTask-CountImpactedCustomers-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-CountToSwitch-id-0058" sourceRef="ServiceTask-CountImpactedCustomers-id-0005" targetRef="ServiceTask-SwitchTrafficToAdjacentTowers-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-SwitchToSend-id-0059" sourceRef="ServiceTask-SwitchTrafficToAdjacentTowers-id-0006" targetRef="SendTask-SendIncidentAlert-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendToDispatch-id-0060" sourceRef="SendTask-SendIncidentAlert-id-0007" targetRef="ServiceTask-DispatchFieldEngineers-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-DispatchToRootCause-id-0061" sourceRef="ServiceTask-DispatchFieldEngineers-id-0008" targetRef="SubProcess-RootCauseAnalysis-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-RootCauseToFix-id-0062" sourceRef="SubProcess-RootCauseAnalysis-id-0009" targetRef="SubProcess-FixImplementation-id-0029" />
+    <bpmn:sequenceFlow id="SequenceFlow-FixToValidate-id-0063" sourceRef="SubProcess-FixImplementation-id-0029" targetRef="ServiceTask-ValidateNetworkMetrics-id-0048" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidateToGateway-id-0064" sourceRef="ServiceTask-ValidateNetworkMetrics-id-0048" targetRef="ExclusiveGateway-MetricsNormal-id-0050" />
+    <bpmn:sequenceFlow id="SequenceFlow-TimerToEscalate-id-0065" sourceRef="BoundaryEvent-Timer1Hour-ValidateNetworkMetrics-id-0049" targetRef="ServiceTask-EscalateForFurtherInvestigation-id-0052" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToLog-id-0066" name="metrics_normal" sourceRef="ExclusiveGateway-MetricsNormal-id-0050" targetRef="ServiceTask-LogIncidentSummary-id-0051" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToEscalate-id-0067" sourceRef="ExclusiveGateway-MetricsNormal-id-0050" targetRef="ServiceTask-EscalateForFurtherInvestigation-id-0052" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogToEnd-id-0068" sourceRef="ServiceTask-LogIncidentSummary-id-0051" targetRef="EndEvent-IncidentResolved-id-0053" />
+    <bpmn:sequenceFlow id="SequenceFlow-EscalateToLog-id-0069" sourceRef="ServiceTask-EscalateForFurtherInvestigation-id-0052" targetRef="ServiceTask-LogIncidentSummary-id-0051" />
+  </bpmn:process>
+  <bpmn:error id="LOG_ANALYSIS_ERROR" name="LOG_ANALYSIS_ERROR" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_NetworkIncidentManagementProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_NetworkIncidentManagementProcess" bpmnElement="NetworkIncidentManagementProcess">
+      <bpmndi:BPMNShape id="StartEvent-HighPacketLossDetected-id-0001_di" bpmnElement="StartEvent-HighPacketLossDetected-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DetectHighPacketLoss-id-0002_di" bpmnElement="ServiceTask-DetectHighPacketLoss-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AnalyzeAffectedTowers-id-0003_di" bpmnElement="ServiceTask-AnalyzeAffectedTowers-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AnalyzeImpactedServices-id-0004_di" bpmnElement="ServiceTask-AnalyzeImpactedServices-id-0004">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CountImpactedCustomers-id-0005_di" bpmnElement="ServiceTask-CountImpactedCustomers-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SwitchTrafficToAdjacentTowers-id-0006_di" bpmnElement="ServiceTask-SwitchTrafficToAdjacentTowers-id-0006">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendIncidentAlert-id-0007_di" bpmnElement="SendTask-SendIncidentAlert-id-0007">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DispatchFieldEngineers-id-0008_di" bpmnElement="ServiceTask-DispatchFieldEngineers-id-0008">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-RootCauseAnalysis-id-0009_di" bpmnElement="SubProcess-RootCauseAnalysis-id-0009">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-FixImplementation-id-0029_di" bpmnElement="SubProcess-FixImplementation-id-0029">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ValidateNetworkMetrics-id-0048_di" bpmnElement="ServiceTask-ValidateNetworkMetrics-id-0048">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer1Hour-ValidateNetworkMetrics-id-0049_di" bpmnElement="BoundaryEvent-Timer1Hour-ValidateNetworkMetrics-id-0049">
+        <dc:Bounds x="1557" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-EscalateForFurtherInvestigation-id-0052_di" bpmnElement="ServiceTask-EscalateForFurtherInvestigation-id-0052">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogIncidentSummary-id-0051_di" bpmnElement="ServiceTask-LogIncidentSummary-id-0051">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-IncidentResolved-id-0053_di" bpmnElement="EndEvent-IncidentResolved-id-0053">
+        <dc:Bounds x="2157" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-MetricsNormal-id-0050_di" bpmnElement="ExclusiveGateway-MetricsNormal-id-0050" isMarkerVisible="true">
+        <dc:Bounds x="2300" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToDetect-id-0054_di" bpmnElement="SequenceFlow-StartToDetect-id-0054">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DetectToAnalyzeTowers-id-0055_di" bpmnElement="SequenceFlow-DetectToAnalyzeTowers-id-0055">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AnalyzeTowersToServices-id-0056_di" bpmnElement="SequenceFlow-AnalyzeTowersToServices-id-0056">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AnalyzeServicesToCount-id-0057_di" bpmnElement="SequenceFlow-AnalyzeServicesToCount-id-0057">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CountToSwitch-id-0058_di" bpmnElement="SequenceFlow-CountToSwitch-id-0058">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SwitchToSend-id-0059_di" bpmnElement="SequenceFlow-SwitchToSend-id-0059">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToDispatch-id-0060_di" bpmnElement="SequenceFlow-SendToDispatch-id-0060">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DispatchToRootCause-id-0061_di" bpmnElement="SequenceFlow-DispatchToRootCause-id-0061">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RootCauseToFix-id-0062_di" bpmnElement="SequenceFlow-RootCauseToFix-id-0062">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FixToValidate-id-0063_di" bpmnElement="SequenceFlow-FixToValidate-id-0063">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidateToGateway-id-0064_di" bpmnElement="SequenceFlow-ValidateToGateway-id-0064">
+        <di:waypoint x="1575" y="110" />
+        <di:waypoint x="1575" y="140" />
+        <di:waypoint x="2325" y="140" />
+        <di:waypoint x="2325" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TimerToEscalate-id-0065_di" bpmnElement="SequenceFlow-TimerToEscalate-id-0065">
+        <di:waypoint x="1575" y="128" />
+        <di:waypoint x="1575" y="140" />
+        <di:waypoint x="1650" y="140" />
+        <di:waypoint x="1650" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EscalateToLog-id-0069_di" bpmnElement="SequenceFlow-EscalateToLog-id-0069">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogToEnd-id-0068_di" bpmnElement="SequenceFlow-LogToEnd-id-0068">
+        <di:waypoint x="2075" y="70" />
+        <di:waypoint x="2157" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToLog-id-0066_di" bpmnElement="SequenceFlow-GatewayToLog-id-0066">
+        <di:waypoint x="2325" y="95" />
+        <di:waypoint x="2325" y="140" />
+        <di:waypoint x="2025" y="140" />
+        <di:waypoint x="2025" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToEscalate-id-0067_di" bpmnElement="SequenceFlow-GatewayToEscalate-id-0067">
+        <di:waypoint x="2325" y="95" />
+        <di:waypoint x="2325" y="140" />
+        <di:waypoint x="1875" y="140" />
+        <di:waypoint x="1875" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-FixImplementation-id-0029">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-FixImplementation-id-0029" bpmnElement="SubProcess-FixImplementation-id-0029">
+      <bpmndi:BPMNShape id="StartEvent-FixImplementationStart-id-0030_di" bpmnElement="StartEvent-FixImplementationStart-id-0030">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ConnectDiagnosticEquipment-id-0031_di" bpmnElement="ServiceTask-ConnectDiagnosticEquipment-id-0031">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ConfirmSystemHypothesis-id-0032_di" bpmnElement="ServiceTask-ConfirmSystemHypothesis-id-0032">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PerformFix-id-0033_di" bpmnElement="ServiceTask-PerformFix-id-0033">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0034_di" bpmnElement="ParallelGateway-Split-id-0034">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RerouteTrafficDuringMaintenance-id-0035_di" bpmnElement="ServiceTask-RerouteTrafficDuringMaintenance-id-0035">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0037_di" bpmnElement="ParallelGateway-Join-id-0037">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-FixImplementationComplete-id-0038_di" bpmnElement="EndEvent-FixImplementationComplete-id-0038">
+        <dc:Bounds x="1107" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-NotifyAffectedCustomers-id-0036_di" bpmnElement="SendTask-NotifyAffectedCustomers-id-0036">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToConnect-id-0039_di" bpmnElement="SequenceFlow-StartToConnect-id-0039">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConnectToConfirm-id-0040_di" bpmnElement="SequenceFlow-ConnectToConfirm-id-0040">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmToPerform-id-0041_di" bpmnElement="SequenceFlow-ConfirmToPerform-id-0041">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PerformToSplit-id-0042_di" bpmnElement="SequenceFlow-PerformToSplit-id-0042">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToReroute-id-0043_di" bpmnElement="SequenceFlow-SplitToReroute-id-0043">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToNotify-id-0044_di" bpmnElement="SequenceFlow-SplitToNotify-id-0044">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RerouteToJoin-id-0045_di" bpmnElement="SequenceFlow-RerouteToJoin-id-0045">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToEnd-id-0047_di" bpmnElement="SequenceFlow-JoinToEnd-id-0047">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1107" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotifyToJoin-id-0046_di" bpmnElement="SequenceFlow-NotifyToJoin-id-0046">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="975" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-RootCauseAnalysis-id-0009">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-RootCauseAnalysis-id-0009" bpmnElement="SubProcess-RootCauseAnalysis-id-0009">
+      <bpmndi:BPMNShape id="StartEvent-RootCauseAnalysisStart-id-0010_di" bpmnElement="StartEvent-RootCauseAnalysisStart-id-0010">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AnalyzeRootCause-id-0011_di" bpmnElement="ServiceTask-AnalyzeRootCause-id-0011">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Error-AnalyzeRootCause-id-0012_di" bpmnElement="BoundaryEvent-Error-AnalyzeRootCause-id-0012">
+        <dc:Bounds x="207" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RootCause-id-0014_di" bpmnElement="ExclusiveGateway-RootCause-id-0014" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RetrieveSpareParts-id-0015_di" bpmnElement="ServiceTask-RetrieveSpareParts-id-0015">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-RootCauseAnalysisComplete-id-0018_di" bpmnElement="EndEvent-RootCauseAnalysisComplete-id-0018">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ManualLogAnalysis-id-0013_di" bpmnElement="UserTask-ManualLogAnalysis-id-0013">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrioritizeTraffic-id-0016_di" bpmnElement="ServiceTask-PrioritizeTraffic-id-0016">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareSoftwareRollback-id-0017_di" bpmnElement="ServiceTask-PrepareSoftwareRollback-id-0017">
+        <dc:Bounds x="625" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToAnalyze-id-0019_di" bpmnElement="SequenceFlow-StartToAnalyze-id-0019">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AnalyzeToGateway-id-0020_di" bpmnElement="SequenceFlow-AnalyzeToGateway-id-0020">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ErrorToManual-id-0021_di" bpmnElement="SequenceFlow-ErrorToManual-id-0021">
+        <di:waypoint x="225" y="128" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToHardware-id-0023_di" bpmnElement="SequenceFlow-GatewayToHardware-id-0023">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToCapacity-id-0024_di" bpmnElement="SequenceFlow-GatewayToCapacity-id-0024">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToSoftware-id-0025_di" bpmnElement="SequenceFlow-GatewayToSoftware-id-0025">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="625" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HardwareToEnd-id-0026_di" bpmnElement="SequenceFlow-HardwareToEnd-id-0026">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ManualToGateway-id-0022_di" bpmnElement="SequenceFlow-ManualToGateway-id-0022">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CapacityToEnd-id-0027_di" bpmnElement="SequenceFlow-CapacityToEnd-id-0027">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="825" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SoftwareToEnd-id-0028_di" bpmnElement="SequenceFlow-SoftwareToEnd-id-0028">
+        <di:waypoint x="725" y="350" />
+        <di:waypoint x="825" y="350" />
+        <di:waypoint x="825" y="88" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

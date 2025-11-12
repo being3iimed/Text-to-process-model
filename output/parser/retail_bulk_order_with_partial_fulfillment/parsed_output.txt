@@ -1,0 +1,53 @@
+### SUMMARY OF ELEMENTS
+--------------------------------------------------------------------------------
+TASKS:
+- userTask("Manager Submits Bulk Order") - initial order submission
+- serviceTask("Check Inventory Availability") - verify stock levels for all products
+- userTask("Manager Reviews Shortage") - decide on partial shipment or wait
+- serviceTask("Reserve Order") - mark order as reserved
+- serviceTask("Schedule Packing") - prepare order for shipment
+- serviceTask("Split Order") - separate available and backordered items
+- serviceTask("Ship Available Items") - send immediately available items
+- serviceTask("Hold Order") - keep order pending
+- serviceTask("Ship Backorder Items") - send remaining items when stock arrives
+
+GATEWAYS:
+- XOR at point after inventory check with conditions "all products have sufficient stock" and "any product has insufficient stock"
+- XOR at point after manager review with conditions "proceed with partial shipment" and "wait for full stock"
+
+EVENTS:
+- startEvent("Process Begins") - manual trigger
+- endEvent("Order Processed") - normal completion
+- intermediateEvent - timer delay for backorder items
+
+BOUNDARY EVENTS:
+- None identified in this process
+
+SUBPROCESSES:
+- None identified in this process
+
+### BPMN PSEUDOCODE
+--------------------------------------------------------------------------------
+startEvent("Process Begins")
+userTask("Manager Submits Bulk Order")
+serviceTask("Check Inventory Availability")
+
+if (all products have sufficient stock):
+    serviceTask("Reserve Order")
+    serviceTask("Schedule Packing")
+    endEvent("Order Processed")
+else:
+    userTask("Manager Reviews Shortage")
+
+    if (proceed with partial shipment):
+        serviceTask("Split Order")
+        serviceTask("Ship Available Items")
+        intermediateEvent(timerBoundary("until backorder items arrive"))
+        serviceTask("Ship Backorder Items")
+        endEvent("Order Processed")
+    else:
+        serviceTask("Hold Order")
+        intermediateEvent(timerBoundary("until all items in stock"))
+        serviceTask("Schedule Packing")
+        endEvent("Order Processed")
+

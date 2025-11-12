@@ -1,0 +1,229 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "material-procurement-definitions",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "bpmn-js (https://demo.bpmn.io)",
+    "exporterVersion": "18.0.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "MaterialProcurementProcess-id-0001",
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-ProcessBegins-id-0001",
+            "name": "Process Begins"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ForecastMaterialNeeds-id-0002",
+            "name": "Forecast Material Needs"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-GeneratePurchaseOrders-id-0003",
+            "name": "Generate Purchase Orders"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-SendPurchaseOrders-id-0004",
+            "name": "Send: Purchase Orders to Suppliers"
+          },
+          {
+            "$type": "bpmn:ReceiveTask",
+            "id": "ReceiveTask-ReceiveSupplierConfirmation-id-0005",
+            "name": "Receive Supplier Confirmation"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-VerifyMaterialQuality-id-0006",
+            "name": "Verify Material Quality"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-QualityCheck-id-0007",
+            "name": "Quality Check",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-LogMaterialsIntoInventory-id-0008",
+            "name": "Log Materials into Inventory"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-RouteMaterialsToProduction-id-0009",
+            "name": "Route Materials to Production"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-SendRejectionNotice-id-0010",
+            "name": "Send: Rejection Notice to Supplier"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-MatchInvoiceToPOAndReceipt-id-0011",
+            "name": "Match Invoice to PO and Receipt"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-InvoiceCheck-id-0012",
+            "name": "Invoice Check",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ApproveInvoiceForPayment-id-0013",
+            "name": "Approve Invoice for Payment"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-InvestigateMismatch-id-0014",
+            "name": "Investigate Mismatch"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ProcessComplete-id-0015",
+            "name": "Process Complete"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToForecast-id-0016",
+            "sourceRef": "StartEvent-ProcessBegins-id-0001",
+            "targetRef": "ServiceTask-ForecastMaterialNeeds-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ForecastToGenerate-id-0017",
+            "sourceRef": "ServiceTask-ForecastMaterialNeeds-id-0002",
+            "targetRef": "ServiceTask-GeneratePurchaseOrders-id-0003"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GenerateToSend-id-0018",
+            "sourceRef": "ServiceTask-GeneratePurchaseOrders-id-0003",
+            "targetRef": "SendTask-SendPurchaseOrders-id-0004"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SendToReceive-id-0019",
+            "sourceRef": "SendTask-SendPurchaseOrders-id-0004",
+            "targetRef": "ReceiveTask-ReceiveSupplierConfirmation-id-0005"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReceiveToVerify-id-0020",
+            "sourceRef": "ReceiveTask-ReceiveSupplierConfirmation-id-0005",
+            "targetRef": "ServiceTask-VerifyMaterialQuality-id-0006"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-VerifyToQualityGateway-id-0021",
+            "sourceRef": "ServiceTask-VerifyMaterialQuality-id-0006",
+            "targetRef": "ExclusiveGateway-QualityCheck-id-0007"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-QualityGatewayToLog-id-0022",
+            "name": "quantity matches PO AND quality matches specifications AND no damage during shipping",
+            "sourceRef": "ExclusiveGateway-QualityCheck-id-0007",
+            "targetRef": "ServiceTask-LogMaterialsIntoInventory-id-0008",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-QualityGatewayToReject-id-0023",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-QualityCheck-id-0007",
+            "targetRef": "SendTask-SendRejectionNotice-id-0010",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-LogToRoute-id-0024",
+            "sourceRef": "ServiceTask-LogMaterialsIntoInventory-id-0008",
+            "targetRef": "ServiceTask-RouteMaterialsToProduction-id-0009"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RouteToEnd-id-0025",
+            "sourceRef": "ServiceTask-RouteMaterialsToProduction-id-0009",
+            "targetRef": "EndEvent-ProcessComplete-id-0015"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RejectToEnd-id-0026",
+            "sourceRef": "SendTask-SendRejectionNotice-id-0010",
+            "targetRef": "EndEvent-ProcessComplete-id-0015"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RouteToMatch-id-0027",
+            "sourceRef": "ServiceTask-RouteMaterialsToProduction-id-0009",
+            "targetRef": "ServiceTask-MatchInvoiceToPOAndReceipt-id-0011"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-MatchToInvoiceGateway-id-0028",
+            "sourceRef": "ServiceTask-MatchInvoiceToPOAndReceipt-id-0011",
+            "targetRef": "ExclusiveGateway-InvoiceCheck-id-0012"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-InvoiceGatewayToApprove-id-0029",
+            "name": "invoice matches PO and receipt",
+            "sourceRef": "ExclusiveGateway-InvoiceCheck-id-0012",
+            "targetRef": "ServiceTask-ApproveInvoiceForPayment-id-0013",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-InvoiceGatewayToInvestigate-id-0030",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-InvoiceCheck-id-0012",
+            "targetRef": "UserTask-InvestigateMismatch-id-0014",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ApproveToEnd-id-0031",
+            "sourceRef": "ServiceTask-ApproveInvoiceForPayment-id-0013",
+            "targetRef": "EndEvent-ProcessComplete-id-0015"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-InvestigateToEnd-id-0032",
+            "sourceRef": "UserTask-InvestigateMismatch-id-0014",
+            "targetRef": "EndEvent-ProcessComplete-id-0015"
+          }
+        ],
+        "isExecutable": true
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "codestral-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11169,
+        "total_tokens": 13322,
+        "completion_tokens": 2153
+      },
+      "model_name": "codestral-latest",
+      "model": "codestral-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11169,
+      "output_tokens": 2153,
+      "total_tokens": 13322
+    },
+    "id": "lc_run--b5b7905f-1aa4-489e-a65a-8e9557e50096-0"
+  },
+  "status": "success"
+}

@@ -1,0 +1,89 @@
+### SUMMARY OF ELEMENTS
+--------------------------------------------------------------------------------
+TASKS:
+- serviceTask("Detect High Packet Loss") - Automated monitoring
+- serviceTask("Analyze Affected Towers") - Data analysis
+- serviceTask("Analyze Impacted Services") - Data analysis
+- serviceTask("Count Impacted Customers") - Data analysis
+- serviceTask("Switch Traffic to Adjacent Towers") - Automated rerouting
+- sendTask("Send Incident Alert") - Communication to engineers
+- serviceTask("Dispatch Field Engineers") - Automated dispatch
+- serviceTask("Analyze Root Cause") - Log analysis
+- serviceTask("Retrieve Spare Parts") - Inventory management
+- serviceTask("Prioritize Traffic") - Traffic management
+- serviceTask("Connect Diagnostic Equipment") - Field work
+- serviceTask("Confirm System's Hypothesis") - Field validation
+- serviceTask("Perform Fix") - Field work
+- serviceTask("Reroute Traffic During Maintenance") - Automated rerouting
+- sendTask("Notify Affected Customers") - Communication to customers
+- serviceTask("Validate Network Metrics") - Monitoring
+- serviceTask("Escalate for Further Investigation") - Escalation
+- serviceTask("Log Incident Summary") - Documentation
+
+GATEWAYS:
+- XOR at root cause analysis with conditions: hardware failure, software issue, capacity overload
+- AND at traffic switching and notification with parallel branches
+
+EVENTS:
+- startEvent("High Packet Loss Detected") - trigger: automated monitoring
+- endEvent("Incident Resolved") - normal completion
+
+BOUNDARY EVENTS:
+- timerBoundary on "Validate Network Metrics" - SLA: 1 hour to return to normal
+- errorBoundary on "Analyze Root Cause" - Error: log analysis failure
+
+SUBPROCESSES:
+- Subprocess "Root Cause Analysis" - Purpose: Determine the root cause of the packet loss
+- Justification: Logical grouping of analysis tasks
+- Subprocess "Fix Implementation" - Purpose: Implement the fix based on the root cause
+- Justification: Logical grouping of field work tasks
+
+### BPMN PSEUDOCODE
+--------------------------------------------------------------------------------
+startEvent("High Packet Loss Detected")
+serviceTask("Detect High Packet Loss")
+serviceTask("Analyze Affected Towers")
+serviceTask("Analyze Impacted Services")
+serviceTask("Count Impacted Customers")
+serviceTask("Switch Traffic to Adjacent Towers")
+sendTask("Send Incident Alert")
+serviceTask("Dispatch Field Engineers")
+
+subProcess("Root Cause Analysis"):
+    startEvent("Root Cause Analysis Start")
+    serviceTask("Analyze Root Cause"):
+        errorBoundary():
+            userTask("Manual Log Analysis")
+    if (hardware_failure):
+        serviceTask("Retrieve Spare Parts")
+    else if (capacity_overload):
+        serviceTask("Prioritize Traffic")
+    else:
+        serviceTask("Prepare for Software Rollback")
+    endEvent("Root Cause Analysis Complete")
+endSubProcess
+
+subProcess("Fix Implementation"):
+    startEvent("Fix Implementation Start")
+    serviceTask("Connect Diagnostic Equipment")
+    serviceTask("Confirm System's Hypothesis")
+    serviceTask("Perform Fix")
+    AND:
+        serviceTask("Reroute Traffic During Maintenance")
+        sendTask("Notify Affected Customers")
+    END_AND
+    endEvent("Fix Implementation Complete")
+endSubProcess
+
+serviceTask("Validate Network Metrics"):
+    timerBoundary("1 hour"):
+        serviceTask("Escalate for Further Investigation")
+
+if (metrics_normal):
+    serviceTask("Log Incident Summary")
+    endEvent("Incident Resolved")
+else:
+    serviceTask("Escalate for Further Investigation")
+    serviceTask("Log Incident Summary")
+    endEvent("Incident Resolved")
+

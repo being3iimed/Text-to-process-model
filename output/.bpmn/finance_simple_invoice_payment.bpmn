@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="invoice-payment-process" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="InvoicePaymentProcess-id-0001" name="Invoice Payment Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-InvoiceReceived-id-0001" name="Invoice Received">
+      <bpmn:outgoing>SequenceFlow-StartToLogInvoice-id-0015</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-LogInvoice-id-0002" name="Log Invoice">
+      <bpmn:incoming>SequenceFlow-StartToLogInvoice-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogInvoiceToCalculateDueDate-id-0016</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-CalculatePaymentDueDate-id-0003" name="Calculate Payment Due Date">
+      <bpmn:incoming>SequenceFlow-LogInvoiceToCalculateDueDate-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CalculateDueDateToImmediateTimer-id-0017</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-ImmediateTimer-id-0004" name="Immediate Timer">
+      <bpmn:incoming>SequenceFlow-CalculateDueDateToImmediateTimer-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ImmediateTimerToGeneratePayment-id-0018</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="ServiceTask-GeneratePaymentRequest-id-0005" name="Generate Payment Request">
+      <bpmn:incoming>SequenceFlow-ImmediateTimerToGeneratePayment-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GeneratePaymentToBoundary-id-0019</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GeneratePaymentToFinanceApproval-id-0020</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-TimerGeneratePayment-id-0006" name="Payment Generation Timeout" attachedToRef="ServiceTask-GeneratePaymentRequest-id-0005">
+      <bpmn:incoming>SequenceFlow-GeneratePaymentToBoundary-id-0019</bpmn:incoming>
+      <bpmn:timerEventDefinition id="BoundaryEvent-TimerGeneratePayment-id-0006_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT0S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="UserTask-FinanceManagerApprovesPayment-id-0007" name="Finance Manager Approves Payment">
+      <bpmn:incoming>SequenceFlow-GeneratePaymentToFinanceApproval-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FinanceApprovalToGateway-id-0021</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-PaymentApproved-id-0008" name="Payment Approved?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-FinanceApprovalToGateway-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToProcessPayment-id-0022</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToRejectPayment-id-0028</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-ProcessPayment-id-0009" name="Process Payment">
+      <bpmn:incoming>SequenceFlow-GatewayToProcessPayment-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProcessPaymentToBoundary-id-0023</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ProcessPaymentToSendConfirmation-id-0024</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-ErrorProcessPayment-id-0010" name="Payment Processing Error" attachedToRef="ServiceTask-ProcessPayment-id-0009">
+      <bpmn:incoming>SequenceFlow-ProcessPaymentToBoundary-id-0023</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BoundaryToHandleFailure-id-0025</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="BoundaryEvent-ErrorProcessPayment-id-0010_EventDef" errorRef="PAYMENT_ERROR" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="UserTask-HandlePaymentFailure-id-0011" name="Handle Payment Failure">
+      <bpmn:incoming>SequenceFlow-BoundaryToHandleFailure-id-0025</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-HandleFailureToSendConfirmation-id-0026</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="SendTask-SendPaymentConfirmation-id-0012" name="Send Payment Confirmation">
+      <bpmn:incoming>SequenceFlow-ProcessPaymentToSendConfirmation-id-0024</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-HandleFailureToSendConfirmation-id-0026</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendConfirmationToEnd-id-0027</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-RejectPaymentRequest-id-0013" name="Reject Payment Request">
+      <bpmn:incoming>SequenceFlow-GatewayToRejectPayment-id-0028</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RejectPaymentToEnd-id-0029</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-PaymentComplete-id-0014" name="Payment Complete">
+      <bpmn:incoming>SequenceFlow-SendConfirmationToEnd-id-0027</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-RejectPaymentToEnd-id-0029</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToLogInvoice-id-0015" sourceRef="StartEvent-InvoiceReceived-id-0001" targetRef="ServiceTask-LogInvoice-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogInvoiceToCalculateDueDate-id-0016" sourceRef="ServiceTask-LogInvoice-id-0002" targetRef="ServiceTask-CalculatePaymentDueDate-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-CalculateDueDateToImmediateTimer-id-0017" sourceRef="ServiceTask-CalculatePaymentDueDate-id-0003" targetRef="IntermediateCatchEvent-ImmediateTimer-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-ImmediateTimerToGeneratePayment-id-0018" sourceRef="IntermediateCatchEvent-ImmediateTimer-id-0004" targetRef="ServiceTask-GeneratePaymentRequest-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-GeneratePaymentToBoundary-id-0019" sourceRef="ServiceTask-GeneratePaymentRequest-id-0005" targetRef="BoundaryEvent-TimerGeneratePayment-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-GeneratePaymentToFinanceApproval-id-0020" sourceRef="ServiceTask-GeneratePaymentRequest-id-0005" targetRef="UserTask-FinanceManagerApprovesPayment-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-FinanceApprovalToGateway-id-0021" sourceRef="UserTask-FinanceManagerApprovesPayment-id-0007" targetRef="ExclusiveGateway-PaymentApproved-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToProcessPayment-id-0022" name="payment_approved" sourceRef="ExclusiveGateway-PaymentApproved-id-0008" targetRef="ServiceTask-ProcessPayment-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProcessPaymentToBoundary-id-0023" sourceRef="ServiceTask-ProcessPayment-id-0009" targetRef="BoundaryEvent-ErrorProcessPayment-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProcessPaymentToSendConfirmation-id-0024" sourceRef="ServiceTask-ProcessPayment-id-0009" targetRef="SendTask-SendPaymentConfirmation-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToHandleFailure-id-0025" sourceRef="BoundaryEvent-ErrorProcessPayment-id-0010" targetRef="UserTask-HandlePaymentFailure-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-HandleFailureToSendConfirmation-id-0026" sourceRef="UserTask-HandlePaymentFailure-id-0011" targetRef="SendTask-SendPaymentConfirmation-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendConfirmationToEnd-id-0027" sourceRef="SendTask-SendPaymentConfirmation-id-0012" targetRef="EndEvent-PaymentComplete-id-0014" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToRejectPayment-id-0028" sourceRef="ExclusiveGateway-PaymentApproved-id-0008" targetRef="ServiceTask-RejectPaymentRequest-id-0013" />
+    <bpmn:sequenceFlow id="SequenceFlow-RejectPaymentToEnd-id-0029" sourceRef="ServiceTask-RejectPaymentRequest-id-0013" targetRef="EndEvent-PaymentComplete-id-0014" />
+  </bpmn:process>
+  <bpmn:error id="PAYMENT_ERROR" name="PAYMENT_ERROR" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_InvoicePaymentProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_InvoicePaymentProcess-id-0001" bpmnElement="InvoicePaymentProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-InvoiceReceived-id-0001_di" bpmnElement="StartEvent-InvoiceReceived-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogInvoice-id-0002_di" bpmnElement="ServiceTask-LogInvoice-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CalculatePaymentDueDate-id-0003_di" bpmnElement="ServiceTask-CalculatePaymentDueDate-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-ImmediateTimer-id-0004_di" bpmnElement="IntermediateCatchEvent-ImmediateTimer-id-0004">
+        <dc:Bounds x="507" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GeneratePaymentRequest-id-0005_di" bpmnElement="ServiceTask-GeneratePaymentRequest-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-TimerGeneratePayment-id-0006_di" bpmnElement="BoundaryEvent-TimerGeneratePayment-id-0006">
+        <dc:Bounds x="657" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-TimerGeneratePayment-id-0006_di" bpmnElement="BoundaryEvent-TimerGeneratePayment-id-0006">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-FinanceManagerApprovesPayment-id-0007_di" bpmnElement="UserTask-FinanceManagerApprovesPayment-id-0007">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PaymentApproved-id-0008_di" bpmnElement="ExclusiveGateway-PaymentApproved-id-0008" isMarkerVisible="true">
+        <dc:Bounds x="950" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessPayment-id-0009_di" bpmnElement="ServiceTask-ProcessPayment-id-0009">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-ErrorProcessPayment-id-0010_di" bpmnElement="BoundaryEvent-ErrorProcessPayment-id-0010">
+        <dc:Bounds x="1107" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-ErrorProcessPayment-id-0010_di" bpmnElement="BoundaryEvent-ErrorProcessPayment-id-0010">
+        <dc:Bounds x="1257" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendPaymentConfirmation-id-0012_di" bpmnElement="SendTask-SendPaymentConfirmation-id-0012">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-PaymentComplete-id-0014_di" bpmnElement="EndEvent-PaymentComplete-id-0014">
+        <dc:Bounds x="1557" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-HandlePaymentFailure-id-0011_di" bpmnElement="UserTask-HandlePaymentFailure-id-0011">
+        <dc:Bounds x="1225" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RejectPaymentRequest-id-0013_di" bpmnElement="ServiceTask-RejectPaymentRequest-id-0013">
+        <dc:Bounds x="1075" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToLogInvoice-id-0015_di" bpmnElement="SequenceFlow-StartToLogInvoice-id-0015">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogInvoiceToCalculateDueDate-id-0016_di" bpmnElement="SequenceFlow-LogInvoiceToCalculateDueDate-id-0016">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculateDueDateToImmediateTimer-id-0017_di" bpmnElement="SequenceFlow-CalculateDueDateToImmediateTimer-id-0017">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="507" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ImmediateTimerToGeneratePayment-id-0018_di" bpmnElement="SequenceFlow-ImmediateTimerToGeneratePayment-id-0018">
+        <di:waypoint x="543" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GeneratePaymentToBoundary-id-0019_di" bpmnElement="SequenceFlow-GeneratePaymentToBoundary-id-0019">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GeneratePaymentToFinanceApproval-id-0020_di" bpmnElement="SequenceFlow-GeneratePaymentToFinanceApproval-id-0020">
+        <di:waypoint x="675" y="110" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FinanceApprovalToGateway-id-0021_di" bpmnElement="SequenceFlow-FinanceApprovalToGateway-id-0021">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="950" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToProcessPayment-id-0022_di" bpmnElement="SequenceFlow-GatewayToProcessPayment-id-0022">
+        <di:waypoint x="1000" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToRejectPayment-id-0028_di" bpmnElement="SequenceFlow-GatewayToRejectPayment-id-0028">
+        <di:waypoint x="975" y="235" />
+        <di:waypoint x="975" y="490" />
+        <di:waypoint x="1075" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessPaymentToBoundary-id-0023_di" bpmnElement="SequenceFlow-ProcessPaymentToBoundary-id-0023">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1257" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessPaymentToSendConfirmation-id-0024_di" bpmnElement="SequenceFlow-ProcessPaymentToSendConfirmation-id-0024">
+        <di:waypoint x="1125" y="250" />
+        <di:waypoint x="1125" y="280" />
+        <di:waypoint x="1425" y="280" />
+        <di:waypoint x="1425" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToHandleFailure-id-0025_di" bpmnElement="SequenceFlow-BoundaryToHandleFailure-id-0025">
+        <di:waypoint x="1275" y="228" />
+        <di:waypoint x="1275" y="310" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToHandleFailure-id-0025_di" bpmnElement="SequenceFlow-BoundaryToHandleFailure-id-0025">
+        <di:waypoint x="1275" y="228" />
+        <di:waypoint x="1275" y="310" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendConfirmationToEnd-id-0027_di" bpmnElement="SequenceFlow-SendConfirmationToEnd-id-0027">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1557" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HandleFailureToSendConfirmation-id-0026_di" bpmnElement="SequenceFlow-HandleFailureToSendConfirmation-id-0026">
+        <di:waypoint x="1325" y="350" />
+        <di:waypoint x="1425" y="350" />
+        <di:waypoint x="1425" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RejectPaymentToEnd-id-0029_di" bpmnElement="SequenceFlow-RejectPaymentToEnd-id-0029">
+        <di:waypoint x="1175" y="490" />
+        <di:waypoint x="1575" y="490" />
+        <di:waypoint x="1575" y="228" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

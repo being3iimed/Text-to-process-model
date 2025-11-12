@@ -1,0 +1,503 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "emergency-department-process",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "bpmn-js (https://demo.bpmn.io)",
+    "exporterVersion": "18.0.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "EmergencyDepartmentProcess-id-0001",
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-PatientArrives-id-0001",
+            "name": "Patient arrives at emergency department"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-TriageAssessment-id-0002",
+            "name": "Triage nurse assesses severity"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-AssignAcuity-id-0003",
+            "name": "Assigns acuity level"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-AcuityLevel-id-0004",
+            "name": "Acuity Level Check",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-AdmitMonitoredBed-id-0005",
+            "name": "Admits to monitored bed"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-WaitInED-id-0006",
+            "name": "Waits in ED area"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-PhysicianAssessment-id-0007",
+            "name": "Physician performs assessment"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-OrderTests-id-0008",
+            "name": "Orders tests"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-TestResults-id-0009",
+            "name": "Test Results Check",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-CheckBedTypes-id-0010",
+            "name": "Checks available bed types"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-BedAvailability-id-0011",
+            "name": "Bed Availability Check",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-AssignBed-id-0012",
+            "name": "Assigns appropriate bed"
+          },
+          {
+            "$type": "bpmn:SubProcess",
+            "id": "SubProcess-AdmissionProcess-id-0013",
+            "name": "Admission Process",
+            "flowElements": [
+              {
+                "$type": "bpmn:StartEvent",
+                "id": "StartEvent-AdmissionProcess-id-0014",
+                "name": "Admission Process Begins"
+              },
+              {
+                "$type": "bpmn:ParallelGateway",
+                "id": "ParallelGateway-Split-id-0015",
+                "name": "Parallel Execution",
+                "gatewayDirection": "Diverging"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-TransferPatient-id-0016",
+                "name": "Transfers patient"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-InitiateProtocols-id-0017",
+                "name": "Initiates protocols"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-MedicationReconciliation-id-0018",
+                "name": "Medication reconciliation"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-AllergyVerification-id-0019",
+                "name": "Allergy verification"
+              },
+              {
+                "$type": "bpmn:ParallelGateway",
+                "id": "ParallelGateway-Join-id-0020",
+                "name": "Synchronize Branches",
+                "gatewayDirection": "Converging"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-ReviewMedications-id-0021",
+                "name": "Reviews medications for interactions"
+              },
+              {
+                "$type": "bpmn:ExclusiveGateway",
+                "id": "ExclusiveGateway-InteractionFound-id-0022",
+                "name": "Interaction Found Check",
+                "gatewayDirection": "Diverging"
+              },
+              {
+                "$type": "bpmn:SendTask",
+                "id": "SendTask-NotifyPhysician-id-0023",
+                "name": "Notifies prescribing physician"
+              },
+              {
+                "$type": "bpmn:UserTask",
+                "id": "UserTask-AdjustRegimen-id-0024",
+                "name": "Prescribing physician adjusts regimen"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-TrackInsurance-id-0025",
+                "name": "Tracks insurance authorization"
+              },
+              {
+                "$type": "bpmn:ExclusiveGateway",
+                "id": "ExclusiveGateway-InsuranceCoverage-id-0026",
+                "name": "Insurance Coverage Check",
+                "gatewayDirection": "Diverging"
+              },
+              {
+                "$type": "bpmn:SendTask",
+                "id": "SendTask-ContactPatient-id-0027",
+                "name": "Contacts patient for approval"
+              },
+              {
+                "$type": "bpmn:EndEvent",
+                "id": "EndEvent-AdmissionProcess-id-0028",
+                "name": "Admission Process Complete"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-AdmissionStartToSplit-id-0029",
+                "sourceRef": "StartEvent-AdmissionProcess-id-0014",
+                "targetRef": "ParallelGateway-Split-id-0015"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SplitToTransfer-id-0030",
+                "sourceRef": "ParallelGateway-Split-id-0015",
+                "targetRef": "ServiceTask-TransferPatient-id-0016"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SplitToProtocols-id-0031",
+                "sourceRef": "ParallelGateway-Split-id-0015",
+                "targetRef": "ServiceTask-InitiateProtocols-id-0017"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SplitToReconciliation-id-0032",
+                "sourceRef": "ParallelGateway-Split-id-0015",
+                "targetRef": "ServiceTask-MedicationReconciliation-id-0018"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SplitToAllergy-id-0033",
+                "sourceRef": "ParallelGateway-Split-id-0015",
+                "targetRef": "ServiceTask-AllergyVerification-id-0019"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-TransferToJoin-id-0034",
+                "sourceRef": "ServiceTask-TransferPatient-id-0016",
+                "targetRef": "ParallelGateway-Join-id-0020"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ProtocolsToJoin-id-0035",
+                "sourceRef": "ServiceTask-InitiateProtocols-id-0017",
+                "targetRef": "ParallelGateway-Join-id-0020"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ReconciliationToJoin-id-0036",
+                "sourceRef": "ServiceTask-MedicationReconciliation-id-0018",
+                "targetRef": "ParallelGateway-Join-id-0020"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-AllergyToJoin-id-0037",
+                "sourceRef": "ServiceTask-AllergyVerification-id-0019",
+                "targetRef": "ParallelGateway-Join-id-0020"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-JoinToReview-id-0038",
+                "sourceRef": "ParallelGateway-Join-id-0020",
+                "targetRef": "ServiceTask-ReviewMedications-id-0021"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ReviewToInteractionGateway-id-0039",
+                "sourceRef": "ServiceTask-ReviewMedications-id-0021",
+                "targetRef": "ExclusiveGateway-InteractionFound-id-0022"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-InteractionGatewayToNotify-id-0040",
+                "name": "interaction_found",
+                "sourceRef": "ExclusiveGateway-InteractionFound-id-0022",
+                "targetRef": "SendTask-NotifyPhysician-id-0023",
+                "isDefault": false
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-InteractionGatewayToTrack-id-0041",
+                "name": "",
+                "sourceRef": "ExclusiveGateway-InteractionFound-id-0022",
+                "targetRef": "ServiceTask-TrackInsurance-id-0025",
+                "isDefault": true
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-NotifyToAdjust-id-0042",
+                "sourceRef": "SendTask-NotifyPhysician-id-0023",
+                "targetRef": "UserTask-AdjustRegimen-id-0024"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-AdjustToTrack-id-0043",
+                "sourceRef": "UserTask-AdjustRegimen-id-0024",
+                "targetRef": "ServiceTask-TrackInsurance-id-0025"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-TrackToCoverageGateway-id-0044",
+                "sourceRef": "ServiceTask-TrackInsurance-id-0025",
+                "targetRef": "ExclusiveGateway-InsuranceCoverage-id-0026"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-CoverageGatewayToContact-id-0045",
+                "name": "insurance_not_covered",
+                "sourceRef": "ExclusiveGateway-InsuranceCoverage-id-0026",
+                "targetRef": "SendTask-ContactPatient-id-0027",
+                "isDefault": false
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-CoverageGatewayToEnd-id-0046",
+                "name": "",
+                "sourceRef": "ExclusiveGateway-InsuranceCoverage-id-0026",
+                "targetRef": "EndEvent-AdmissionProcess-id-0028",
+                "isDefault": true
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ContactToEnd-id-0047",
+                "sourceRef": "SendTask-ContactPatient-id-0027",
+                "targetRef": "EndEvent-AdmissionProcess-id-0028"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-PlaceInQueue-id-0048",
+            "name": "Places patient in waiting queue"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-NotifyNursingManager-id-0049",
+            "name": "Notifies nursing manager"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-DischargePatient-id-0050",
+            "name": "Discharges patient"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-MonitorOrders-id-0051",
+            "name": "Monitors physician orders"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-CriticalLabValues-id-0052",
+            "name": "Critical Lab Values Check",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-AlertPhysician-id-0053",
+            "name": "Alerts physician if critical lab values detected"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ProcessComplete-id-0054",
+            "name": "Process Complete"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToTriage-id-0055",
+            "sourceRef": "StartEvent-PatientArrives-id-0001",
+            "targetRef": "UserTask-TriageAssessment-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-TriageToAssign-id-0056",
+            "sourceRef": "UserTask-TriageAssessment-id-0002",
+            "targetRef": "ServiceTask-AssignAcuity-id-0003"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AssignToAcuityGateway-id-0057",
+            "sourceRef": "ServiceTask-AssignAcuity-id-0003",
+            "targetRef": "ExclusiveGateway-AcuityLevel-id-0004"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AcuityGatewayToAdmit-id-0058",
+            "name": "acuity_level == 1 OR acuity_level == 2",
+            "sourceRef": "ExclusiveGateway-AcuityLevel-id-0004",
+            "targetRef": "ServiceTask-AdmitMonitoredBed-id-0005",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AcuityGatewayToWait-id-0059",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-AcuityLevel-id-0004",
+            "targetRef": "ServiceTask-WaitInED-id-0006",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AdmitToPhysician-id-0060",
+            "sourceRef": "ServiceTask-AdmitMonitoredBed-id-0005",
+            "targetRef": "UserTask-PhysicianAssessment-id-0007"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-WaitToPhysician-id-0061",
+            "sourceRef": "ServiceTask-WaitInED-id-0006",
+            "targetRef": "UserTask-PhysicianAssessment-id-0007"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-PhysicianToOrderTests-id-0062",
+            "sourceRef": "UserTask-PhysicianAssessment-id-0007",
+            "targetRef": "ServiceTask-OrderTests-id-0008"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-OrderTestsToTestGateway-id-0063",
+            "sourceRef": "ServiceTask-OrderTests-id-0008",
+            "targetRef": "ExclusiveGateway-TestResults-id-0009"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-TestGatewayToCheckBeds-id-0064",
+            "name": "test_results == \"requires admission\"",
+            "sourceRef": "ExclusiveGateway-TestResults-id-0009",
+            "targetRef": "ServiceTask-CheckBedTypes-id-0010",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-TestGatewayToDischarge-id-0065",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-TestResults-id-0009",
+            "targetRef": "ServiceTask-DischargePatient-id-0050",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CheckBedsToBedGateway-id-0066",
+            "sourceRef": "ServiceTask-CheckBedTypes-id-0010",
+            "targetRef": "ExclusiveGateway-BedAvailability-id-0011"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-BedGatewayToAssignBed-id-0067",
+            "name": "bed_available",
+            "sourceRef": "ExclusiveGateway-BedAvailability-id-0011",
+            "targetRef": "ServiceTask-AssignBed-id-0012",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-BedGatewayToQueue-id-0068",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-BedAvailability-id-0011",
+            "targetRef": "ServiceTask-PlaceInQueue-id-0048",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AssignBedToAdmission-id-0069",
+            "sourceRef": "ServiceTask-AssignBed-id-0012",
+            "targetRef": "SubProcess-AdmissionProcess-id-0013"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AdmissionToMonitor-id-0070",
+            "sourceRef": "SubProcess-AdmissionProcess-id-0013",
+            "targetRef": "ServiceTask-MonitorOrders-id-0051"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-QueueToNotify-id-0071",
+            "sourceRef": "ServiceTask-PlaceInQueue-id-0048",
+            "targetRef": "SendTask-NotifyNursingManager-id-0049"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-NotifyToMonitor-id-0072",
+            "sourceRef": "SendTask-NotifyNursingManager-id-0049",
+            "targetRef": "ServiceTask-MonitorOrders-id-0051"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DischargeToMonitor-id-0073",
+            "sourceRef": "ServiceTask-DischargePatient-id-0050",
+            "targetRef": "ServiceTask-MonitorOrders-id-0051"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-MonitorToCriticalGateway-id-0074",
+            "sourceRef": "ServiceTask-MonitorOrders-id-0051",
+            "targetRef": "ExclusiveGateway-CriticalLabValues-id-0052"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CriticalGatewayToAlert-id-0075",
+            "name": "critical_lab_values",
+            "sourceRef": "ExclusiveGateway-CriticalLabValues-id-0052",
+            "targetRef": "SendTask-AlertPhysician-id-0053",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CriticalGatewayToEnd-id-0076",
+            "name": "",
+            "sourceRef": "ExclusiveGateway-CriticalLabValues-id-0052",
+            "targetRef": "EndEvent-ProcessComplete-id-0054",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AlertToEnd-id-0077",
+            "sourceRef": "SendTask-AlertPhysician-id-0053",
+            "targetRef": "EndEvent-ProcessComplete-id-0054"
+          }
+        ],
+        "isExecutable": true
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "codestral-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11494,
+        "total_tokens": 16506,
+        "completion_tokens": 5012
+      },
+      "model_name": "codestral-latest",
+      "model": "codestral-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11494,
+      "output_tokens": 5012,
+      "total_tokens": 16506
+    },
+    "id": "lc_run--592a525e-a7af-471c-8d49-7bcd97d4b584-0"
+  },
+  "status": "success"
+}

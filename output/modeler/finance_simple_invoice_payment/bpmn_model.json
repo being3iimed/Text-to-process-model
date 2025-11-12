@@ -1,0 +1,204 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "invoice-payment-process",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "bpmn-js (https://demo.bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "InvoicePaymentProcess-id-0001",
+      "name": "Invoice Payment Process",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-InvoiceReceived-id-0001",
+          "name": "Invoice Received"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-LogInvoice-id-0002",
+          "name": "Log Invoice"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CalculatePaymentDueDate-id-0003",
+          "name": "Calculate Payment Due Date"
+        },
+        {
+          "$type": "bpmn:IntermediateCatchEvent",
+          "id": "IntermediateCatchEvent-ImmediateTimer-id-0004",
+          "name": "Immediate Timer",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT0S"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GeneratePaymentRequest-id-0005",
+          "name": "Generate Payment Request"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-TimerGeneratePayment-id-0006",
+          "name": "Payment Generation Timeout",
+          "attachedToRef": "ServiceTask-GeneratePaymentRequest-id-0005",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT0S"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-FinanceManagerApprovesPayment-id-0007",
+          "name": "Finance Manager Approves Payment"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-PaymentApproved-id-0008",
+          "name": "Payment Approved?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProcessPayment-id-0009",
+          "name": "Process Payment"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-ErrorProcessPayment-id-0010",
+          "name": "Payment Processing Error",
+          "attachedToRef": "ServiceTask-ProcessPayment-id-0009",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:ErrorEventDefinition",
+              "errorRef": "PAYMENT_ERROR"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-HandlePaymentFailure-id-0011",
+          "name": "Handle Payment Failure"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendPaymentConfirmation-id-0012",
+          "name": "Send Payment Confirmation"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-RejectPaymentRequest-id-0013",
+          "name": "Reject Payment Request"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-PaymentComplete-id-0014",
+          "name": "Payment Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToLogInvoice-id-0015",
+          "sourceRef": "StartEvent-InvoiceReceived-id-0001",
+          "targetRef": "ServiceTask-LogInvoice-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LogInvoiceToCalculateDueDate-id-0016",
+          "sourceRef": "ServiceTask-LogInvoice-id-0002",
+          "targetRef": "ServiceTask-CalculatePaymentDueDate-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CalculateDueDateToImmediateTimer-id-0017",
+          "sourceRef": "ServiceTask-CalculatePaymentDueDate-id-0003",
+          "targetRef": "IntermediateCatchEvent-ImmediateTimer-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ImmediateTimerToGeneratePayment-id-0018",
+          "sourceRef": "IntermediateCatchEvent-ImmediateTimer-id-0004",
+          "targetRef": "ServiceTask-GeneratePaymentRequest-id-0005"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GeneratePaymentToBoundary-id-0019",
+          "sourceRef": "ServiceTask-GeneratePaymentRequest-id-0005",
+          "targetRef": "BoundaryEvent-TimerGeneratePayment-id-0006"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GeneratePaymentToFinanceApproval-id-0020",
+          "sourceRef": "ServiceTask-GeneratePaymentRequest-id-0005",
+          "targetRef": "UserTask-FinanceManagerApprovesPayment-id-0007"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FinanceApprovalToGateway-id-0021",
+          "sourceRef": "UserTask-FinanceManagerApprovesPayment-id-0007",
+          "targetRef": "ExclusiveGateway-PaymentApproved-id-0008"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToProcessPayment-id-0022",
+          "name": "payment_approved",
+          "sourceRef": "ExclusiveGateway-PaymentApproved-id-0008",
+          "targetRef": "ServiceTask-ProcessPayment-id-0009",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProcessPaymentToBoundary-id-0023",
+          "sourceRef": "ServiceTask-ProcessPayment-id-0009",
+          "targetRef": "BoundaryEvent-ErrorProcessPayment-id-0010"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProcessPaymentToSendConfirmation-id-0024",
+          "sourceRef": "ServiceTask-ProcessPayment-id-0009",
+          "targetRef": "SendTask-SendPaymentConfirmation-id-0012"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryToHandleFailure-id-0025",
+          "sourceRef": "BoundaryEvent-ErrorProcessPayment-id-0010",
+          "targetRef": "UserTask-HandlePaymentFailure-id-0011"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HandleFailureToSendConfirmation-id-0026",
+          "sourceRef": "UserTask-HandlePaymentFailure-id-0011",
+          "targetRef": "SendTask-SendPaymentConfirmation-id-0012"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendConfirmationToEnd-id-0027",
+          "sourceRef": "SendTask-SendPaymentConfirmation-id-0012",
+          "targetRef": "EndEvent-PaymentComplete-id-0014"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToRejectPayment-id-0028",
+          "name": "",
+          "sourceRef": "ExclusiveGateway-PaymentApproved-id-0008",
+          "targetRef": "ServiceTask-RejectPaymentRequest-id-0013",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RejectPaymentToEnd-id-0029",
+          "sourceRef": "ServiceTask-RejectPaymentRequest-id-0013",
+          "targetRef": "EndEvent-PaymentComplete-id-0014"
+        }
+      ]
+    }
+  ]
+}

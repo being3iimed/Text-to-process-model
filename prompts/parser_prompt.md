@@ -870,25 +870,7 @@ SUBPROCESSES:
 - Subprocess Z - Purpose: [single sentence]
 - Justification: [Which of 4 criteria applies?]
 ```
-
-### 2. Validation Notes
-
-```
-ASSUMPTIONS:
-- [Document all assumptions made]
-
-CLARIFICATIONS REQUESTED:
-- [If needed]
-
-COMPLIANCE CHECKS:
-- All timer properties BPMN compliant
-- All gateways have convergence points
-- All boundary events justified
-- All subprocesses justified
-- No orphaned flows
-```
-
-### 3. BPMN Pseudocode
+### 2. BPMN Pseudocode
 
 ```pseudocode
 startEvent("Process Begins")
@@ -900,6 +882,13 @@ endEvent("Process Complete")
 
 </output_format>
 
+COMPLIANCE CHECKS & CORRECTION:
+- All timer properties BPMN compliant
+- All gateways have convergence points
+- All boundary events justified
+- All subprocesses justified
+- No orphaned flows
+```
 <critical_success_criteria>
 
 ## Critical Success Criteria
@@ -920,5 +909,3 @@ endEvent("Process Complete")
 **NOW PARSE PROCESS DESCRIPTIONS WITH RIGOROUS COMPLIANCE CHECKING AND NEVER GENERATE INVALID BPMN PATTERNS**
 
 </final_instruction>
-
-</bpmn_parser>

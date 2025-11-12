@@ -1,0 +1,49 @@
+### SUMMARY OF ELEMENTS
+--------------------------------------------------------------------------------
+TASKS:
+- userTask("Student submits grade appeal form") - Student submits form within 10 days
+- userTask("Professor reviews student's work and appeal justification") - Professor evaluates evidence
+- userTask("Professor confirms grade is correct") - Professor defends original grade
+- userTask("Professor adjusts grade") - Professor finds error and corrects grade
+- userTask("Student escalates to department chair") - Student disagrees with professor's decision
+- userTask("Chair reviews appeal and professor's response") - Chair evaluates all evidence
+- userTask("Chair makes final determination") - Chair decides final grade
+- serviceTask("Registrar updates system") - System records final grade
+
+GATEWAYS:
+- XOR at point after professor's review with conditions:
+  - "Professor confirms grade is correct"
+  - "Professor adjusts grade"
+  - default (student escalates)
+
+EVENTS:
+- startEvent("Grade appeal process begins") - manual trigger
+- endEvent("Appeal process complete") - normal completion
+
+BOUNDARY EVENTS:
+- timerBoundary on "Student submits grade appeal form" - SLA: 10 days from grade posting
+
+### BPMN PSEUDOCODE
+--------------------------------------------------------------------------------
+startEvent("Grade appeal process begins")
+
+userTask("Student submits grade appeal form"):
+    timerBoundary("10 days"):
+        endEvent("Appeal period expired")
+
+userTask("Professor reviews student's work and appeal justification")
+
+if (professor_confirms_grade_correct):
+    userTask("Professor confirms grade is correct")
+    endEvent("Appeal process complete")
+else if (professor_adjusts_grade):
+    userTask("Professor adjusts grade")
+    serviceTask("Registrar updates system")
+    endEvent("Appeal process complete")
+else:
+    userTask("Student escalates to department chair")
+    userTask("Chair reviews appeal and professor's response")
+    userTask("Chair makes final determination")
+    serviceTask("Registrar updates system")
+    endEvent("Appeal process complete")
+

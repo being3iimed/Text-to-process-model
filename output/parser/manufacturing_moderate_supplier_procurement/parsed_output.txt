@@ -1,0 +1,49 @@
+### SUMMARY OF ELEMENTS
+--------------------------------------------------------------------------------
+TASKS:
+- serviceTask("Forecast Material Needs") - Automated calculation based on production schedule
+- serviceTask("Generate Purchase Orders") - System creates PO documents
+- receiveTask("Receive Supplier Confirmation") - Supplier responds with availability and delivery date
+- serviceTask("Verify Material Quality") - Warehouse staff inspects materials
+- serviceTask("Log Materials into Inventory") - System updates inventory records
+- serviceTask("Route Materials to Production") - Warehouse staff directs materials to production area
+- serviceTask("Match Invoice to PO and Receipt") - Finance team verifies invoice matches PO and receipt
+- userTask("Investigate Mismatch") - Finance team reviews discrepancy
+
+GATEWAYS:
+- XOR at point X with conditions: quantity matches PO, quality matches specifications, no damage during shipping
+- XOR at point Y with conditions: invoice matches PO and receipt, default
+
+EVENTS:
+- startEvent("Process Begins") - trigger: manual (forecasting schedule)
+- endEvent("Process Complete") - normal completion
+
+BOUNDARY EVENTS:
+- None (no explicit SLA or error scenarios mentioned)
+
+SUBPROCESSES:
+- None (no cohesive logical groupings identified)
+
+### BPMN PSEUDOCODE
+--------------------------------------------------------------------------------
+startEvent("Process Begins")
+serviceTask("Forecast Material Needs")
+serviceTask("Generate Purchase Orders")
+sendTask("Send: Purchase Orders to Suppliers")
+receiveTask("Receive Supplier Confirmation")
+serviceTask("Verify Material Quality")
+if (quantity matches PO AND quality matches specifications AND no damage during shipping):
+    serviceTask("Log Materials into Inventory")
+    serviceTask("Route Materials to Production")
+    endEvent("Process Complete")
+else:
+    sendTask("Send: Rejection Notice to Supplier")
+    endEvent("Process Complete")
+serviceTask("Match Invoice to PO and Receipt")
+if (invoice matches PO and receipt):
+    serviceTask("Approve Invoice for Payment")
+    endEvent("Process Complete")
+else:
+    userTask("Investigate Mismatch")
+    endEvent("Process Complete")
+

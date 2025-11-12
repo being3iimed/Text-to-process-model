@@ -1,0 +1,49 @@
+### SUMMARY OF ELEMENTS
+--------------------------------------------------------------------------------
+TASKS:
+- userTask("Customer Adds Items to Cart") - Manual action by customer
+- userTask("Customer Proceeds to Checkout") - Manual action by customer
+- serviceTask("System Validates Items in Stock") - Automated system check
+- serviceTask("Process Payment") - Automated payment processing
+- sendTask("Send: Order Confirmation") - One-way communication
+- sendTask("Send: Payment Failure Notification") - One-way communication
+- userTask("Customer Retries Payment") - Manual action by customer
+
+GATEWAYS:
+- XOR at payment processing with conditions: payment_succeeds, payment_fails, default
+
+EVENTS:
+- startEvent("Process Begins") - trigger: manual
+- endEvent("Order Complete") - normal completion
+- endEvent("Order Failed") - abnormal completion
+
+BOUNDARY EVENTS:
+- errorBoundary on "Process Payment" - Error: payment processing failure
+
+SUBPROCESSES:
+- None - No subprocesses justified as all tasks are simple and directly related to the main process
+
+### BPMN PSEUDOCODE
+--------------------------------------------------------------------------------
+startEvent("Process Begins")
+userTask("Customer Adds Items to Cart")
+userTask("Customer Proceeds to Checkout")
+serviceTask("System Validates Items in Stock")
+serviceTask("Process Payment"):
+    errorBoundary():
+        sendTask("Send: Payment Failure Notification")
+        userTask("Customer Retries Payment")
+        serviceTask("Process Payment")
+if (payment_succeeds):
+    sendTask("Send: Order Confirmation")
+    endEvent("Order Complete")
+else:
+    sendTask("Send: Payment Failure Notification")
+    userTask("Customer Retries Payment")
+    serviceTask("Process Payment")
+    if (payment_succeeds):
+        sendTask("Send: Order Confirmation")
+        endEvent("Order Complete")
+    else:
+        endEvent("Order Failed")
+

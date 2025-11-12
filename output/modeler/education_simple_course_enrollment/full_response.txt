@@ -1,0 +1,134 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "CourseEnrollmentProcess",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "bpmn-js (https://demo.bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "CourseEnrollmentProcess-id-0001",
+      "name": "Course Enrollment Process",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-ProcessBegins-id-0001",
+          "name": "Process Begins"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-StudentLogsIn-id-0002",
+          "name": "Student logs into university portal"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SearchCourses-id-0003",
+          "name": "Searches for courses available next semester"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CheckCourseDetails-id-0004",
+          "name": "Checks course details: time, location, professor, prerequisites, enrollment cap"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-EligibilityCheck-id-0005",
+          "name": "Eligibility Check",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ClicksEnroll-id-0006",
+          "name": "Clicks enroll"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ConfirmEnrollment-id-0007",
+          "name": "System confirms enrollment"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateSchedule-id-0008",
+          "name": "Generates course schedule"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-UpdateRoster-id-0009",
+          "name": "Updates course roster"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProcessComplete-id-0010",
+          "name": "Process Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToLogin-id-0011",
+          "sourceRef": "StartEvent-ProcessBegins-id-0001",
+          "targetRef": "UserTask-StudentLogsIn-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LoginToSearch-id-0012",
+          "sourceRef": "UserTask-StudentLogsIn-id-0002",
+          "targetRef": "UserTask-SearchCourses-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SearchToCheckDetails-id-0013",
+          "sourceRef": "UserTask-SearchCourses-id-0003",
+          "targetRef": "UserTask-CheckCourseDetails-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CheckDetailsToGateway-id-0014",
+          "sourceRef": "UserTask-CheckCourseDetails-id-0004",
+          "targetRef": "ExclusiveGateway-EligibilityCheck-id-0005"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToEnroll-id-0015",
+          "sourceRef": "ExclusiveGateway-EligibilityCheck-id-0005",
+          "targetRef": "UserTask-ClicksEnroll-id-0006",
+          "name": "prerequisites met AND seats available",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-EnrollToConfirm-id-0016",
+          "sourceRef": "UserTask-ClicksEnroll-id-0006",
+          "targetRef": "ServiceTask-ConfirmEnrollment-id-0007"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmToGenerate-id-0017",
+          "sourceRef": "ServiceTask-ConfirmEnrollment-id-0007",
+          "targetRef": "ServiceTask-GenerateSchedule-id-0008"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GenerateToUpdate-id-0018",
+          "sourceRef": "ServiceTask-GenerateSchedule-id-0008",
+          "targetRef": "ServiceTask-UpdateRoster-id-0009"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-UpdateToEnd-id-0019",
+          "sourceRef": "ServiceTask-UpdateRoster-id-0009",
+          "targetRef": "EndEvent-ProcessComplete-id-0010"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToEnd-id-0020",
+          "sourceRef": "ExclusiveGateway-EligibilityCheck-id-0005",
+          "targetRef": "EndEvent-ProcessComplete-id-0010",
+          "name": "not eligible",
+          "isDefault": true
+        }
+      ]
+    }
+  ]
+}
+```

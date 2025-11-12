@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="Process-InsuranceQuote-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ProcessBegins-id-0001" name="Process Begins">
+      <bpmn:outgoing>SequenceFlow-StartToEnterInfo-id-0013</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-EnterVehicleInformation-id-0002" name="Enter Vehicle Information">
+      <bpmn:incoming>SequenceFlow-StartToEnterInfo-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EnterInfoToQuery-id-0014</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-QueryDatabase-id-0003" name="Query Database">
+      <bpmn:incoming>SequenceFlow-EnterInfoToQuery-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-QueryToCalculate-id-0015</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-CalculatePremium-id-0004" name="Calculate Premium">
+      <bpmn:incoming>SequenceFlow-QueryToCalculate-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CalculateToDisplay-id-0016</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-DisplayQuote-id-0005" name="Display Quote">
+      <bpmn:incoming>SequenceFlow-CalculateToDisplay-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DisplayToReview-id-0017</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-ReviewQuote-id-0006" name="Review Quote">
+      <bpmn:incoming>SequenceFlow-DisplayToReview-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToGateway-id-0018</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-PurchaseDecision-id-0007" name="Purchase Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewToGateway-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToPurchase-id-0019</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToSave-id-0020</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-ProcessPayment-id-0008" name="Process Payment">
+      <bpmn:incoming>SequenceFlow-GatewayToPurchase-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PurchaseToConfirm-id-0021</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-PurchaseConfirmation-id-0009" name="Send: Purchase Confirmation">
+      <bpmn:incoming>SequenceFlow-PurchaseToConfirm-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmToEnd-id-0022</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-SaveQuote-id-0010" name="Save Quote">
+      <bpmn:incoming>SequenceFlow-GatewayToSave-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SaveToNotify-id-0023</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-QuoteSavedNotification-id-0011" name="Send: Quote Saved Notification">
+      <bpmn:incoming>SequenceFlow-SaveToNotify-id-0023</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotifyToEnd-id-0024</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0012" name="Process Complete">
+      <bpmn:incoming>SequenceFlow-ConfirmToEnd-id-0022</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-NotifyToEnd-id-0024</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToEnterInfo-id-0013" sourceRef="StartEvent-ProcessBegins-id-0001" targetRef="UserTask-EnterVehicleInformation-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-EnterInfoToQuery-id-0014" sourceRef="UserTask-EnterVehicleInformation-id-0002" targetRef="ServiceTask-QueryDatabase-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-QueryToCalculate-id-0015" sourceRef="ServiceTask-QueryDatabase-id-0003" targetRef="ServiceTask-CalculatePremium-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-CalculateToDisplay-id-0016" sourceRef="ServiceTask-CalculatePremium-id-0004" targetRef="SendTask-DisplayQuote-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-DisplayToReview-id-0017" sourceRef="SendTask-DisplayQuote-id-0005" targetRef="UserTask-ReviewQuote-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToGateway-id-0018" sourceRef="UserTask-ReviewQuote-id-0006" targetRef="ExclusiveGateway-PurchaseDecision-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToPurchase-id-0019" name="customer_purchases" sourceRef="ExclusiveGateway-PurchaseDecision-id-0007" targetRef="ServiceTask-ProcessPayment-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToSave-id-0020" sourceRef="ExclusiveGateway-PurchaseDecision-id-0007" targetRef="ServiceTask-SaveQuote-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-PurchaseToConfirm-id-0021" sourceRef="ServiceTask-ProcessPayment-id-0008" targetRef="SendTask-PurchaseConfirmation-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmToEnd-id-0022" sourceRef="SendTask-PurchaseConfirmation-id-0009" targetRef="EndEvent-ProcessComplete-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-SaveToNotify-id-0023" sourceRef="ServiceTask-SaveQuote-id-0010" targetRef="SendTask-QuoteSavedNotification-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotifyToEnd-id-0024" sourceRef="SendTask-QuoteSavedNotification-id-0011" targetRef="EndEvent-ProcessComplete-id-0012" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process-InsuranceQuote-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process-InsuranceQuote-id-0001" bpmnElement="Process-InsuranceQuote-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ProcessBegins-id-0001_di" bpmnElement="StartEvent-ProcessBegins-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterVehicleInformation-id-0002_di" bpmnElement="UserTask-EnterVehicleInformation-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-QueryDatabase-id-0003_di" bpmnElement="ServiceTask-QueryDatabase-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CalculatePremium-id-0004_di" bpmnElement="ServiceTask-CalculatePremium-id-0004">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-DisplayQuote-id-0005_di" bpmnElement="SendTask-DisplayQuote-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewQuote-id-0006_di" bpmnElement="UserTask-ReviewQuote-id-0006">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PurchaseDecision-id-0007_di" bpmnElement="ExclusiveGateway-PurchaseDecision-id-0007" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessPayment-id-0008_di" bpmnElement="ServiceTask-ProcessPayment-id-0008">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-PurchaseConfirmation-id-0009_di" bpmnElement="SendTask-PurchaseConfirmation-id-0009">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0012_di" bpmnElement="EndEvent-ProcessComplete-id-0012">
+        <dc:Bounds x="1407" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SaveQuote-id-0010_di" bpmnElement="ServiceTask-SaveQuote-id-0010">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-QuoteSavedNotification-id-0011_di" bpmnElement="SendTask-QuoteSavedNotification-id-0011">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToEnterInfo-id-0013_di" bpmnElement="SequenceFlow-StartToEnterInfo-id-0013">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EnterInfoToQuery-id-0014_di" bpmnElement="SequenceFlow-EnterInfoToQuery-id-0014">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-QueryToCalculate-id-0015_di" bpmnElement="SequenceFlow-QueryToCalculate-id-0015">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculateToDisplay-id-0016_di" bpmnElement="SequenceFlow-CalculateToDisplay-id-0016">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DisplayToReview-id-0017_di" bpmnElement="SequenceFlow-DisplayToReview-id-0017">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToGateway-id-0018_di" bpmnElement="SequenceFlow-ReviewToGateway-id-0018">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToPurchase-id-0019_di" bpmnElement="SequenceFlow-GatewayToPurchase-id-0019">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToSave-id-0020_di" bpmnElement="SequenceFlow-GatewayToSave-id-0020">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PurchaseToConfirm-id-0021_di" bpmnElement="SequenceFlow-PurchaseToConfirm-id-0021">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmToEnd-id-0022_di" bpmnElement="SequenceFlow-ConfirmToEnd-id-0022">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1407" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SaveToNotify-id-0023_di" bpmnElement="SequenceFlow-SaveToNotify-id-0023">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotifyToEnd-id-0024_di" bpmnElement="SequenceFlow-NotifyToEnd-id-0024">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1425" y="88" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

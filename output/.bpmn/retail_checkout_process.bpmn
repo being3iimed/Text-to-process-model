@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="OrderProcessing-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="OrderProcessing-Process-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ProcessBegins-id-0001" name="Process Begins">
+      <bpmn:outgoing>SequenceFlow-StartToAddItems-id-0014</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-CustomerAddsItemsToCart-id-0002" name="Customer Adds Items to Cart">
+      <bpmn:incoming>SequenceFlow-StartToAddItems-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AddItemsToCheckout-id-0015</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-CustomerProceedsToCheckout-id-0003" name="Customer Proceeds to Checkout">
+      <bpmn:incoming>SequenceFlow-AddItemsToCheckout-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckoutToValidate-id-0016</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-SystemValidatesItemsInStock-id-0004" name="System Validates Items in Stock">
+      <bpmn:incoming>SequenceFlow-CheckoutToValidate-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidateToProcessPayment-id-0017</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ProcessPayment-id-0005" name="Process Payment">
+      <bpmn:incoming>SequenceFlow-ValidateToProcessPayment-id-0017</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-RetryToProcessPayment-id-0023</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProcessPaymentToGateway-id-0018</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendOrderConfirmation-id-0006" name="Send: Order Confirmation">
+      <bpmn:incoming>SequenceFlow-GatewayToOrderConfirmation-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OrderConfirmationToComplete-id-0021</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="SendTask-SendPaymentFailureNotification-id-0007" name="Send: Payment Failure Notification">
+      <bpmn:incoming>SequenceFlow-GatewayToPaymentFailure-id-0020</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-BoundaryToPaymentFailure-id-0024</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PaymentFailureToRetry-id-0022</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-CustomerRetriesPayment-id-0008" name="Customer Retries Payment">
+      <bpmn:incoming>SequenceFlow-PaymentFailureToRetry-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RetryToProcessPayment-id-0023</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-OrderComplete-id-0009" name="Order Complete">
+      <bpmn:incoming>SequenceFlow-OrderConfirmationToComplete-id-0021</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-OrderFailed-id-0010" name="Order Failed" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway-PaymentResult-id-0011" name="Payment Result" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ProcessPaymentToGateway-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToOrderConfirmation-id-0019</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToPaymentFailure-id-0020</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-RetryPaymentResult-id-0012" name="Retry Payment Result" gatewayDirection="Diverging" />
+    <bpmn:boundaryEvent id="BoundaryEvent-Error-ProcessPayment-id-0013" name="Payment Processing Failed" attachedToRef="ServiceTask-ProcessPayment-id-0005">
+      <bpmn:outgoing>SequenceFlow-BoundaryToPaymentFailure-id-0024</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="BoundaryEvent-Error-ProcessPayment-id-0013_EventDef" errorRef="PAYMENT_PROCESSING_ERROR" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToAddItems-id-0014" sourceRef="StartEvent-ProcessBegins-id-0001" targetRef="UserTask-CustomerAddsItemsToCart-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-AddItemsToCheckout-id-0015" sourceRef="UserTask-CustomerAddsItemsToCart-id-0002" targetRef="UserTask-CustomerProceedsToCheckout-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckoutToValidate-id-0016" sourceRef="UserTask-CustomerProceedsToCheckout-id-0003" targetRef="ServiceTask-SystemValidatesItemsInStock-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidateToProcessPayment-id-0017" sourceRef="ServiceTask-SystemValidatesItemsInStock-id-0004" targetRef="ServiceTask-ProcessPayment-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProcessPaymentToGateway-id-0018" sourceRef="ServiceTask-ProcessPayment-id-0005" targetRef="ExclusiveGateway-PaymentResult-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToOrderConfirmation-id-0019" name="payment_succeeds" sourceRef="ExclusiveGateway-PaymentResult-id-0011" targetRef="SendTask-SendOrderConfirmation-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToPaymentFailure-id-0020" sourceRef="ExclusiveGateway-PaymentResult-id-0011" targetRef="SendTask-SendPaymentFailureNotification-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-OrderConfirmationToComplete-id-0021" sourceRef="SendTask-SendOrderConfirmation-id-0006" targetRef="EndEvent-OrderComplete-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-PaymentFailureToRetry-id-0022" sourceRef="SendTask-SendPaymentFailureNotification-id-0007" targetRef="UserTask-CustomerRetriesPayment-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-RetryToProcessPayment-id-0023" sourceRef="UserTask-CustomerRetriesPayment-id-0008" targetRef="ServiceTask-ProcessPayment-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToPaymentFailure-id-0024" sourceRef="BoundaryEvent-Error-ProcessPayment-id-0013" targetRef="SendTask-SendPaymentFailureNotification-id-0007" />
+  </bpmn:process>
+  <bpmn:error id="PAYMENT_PROCESSING_ERROR" name="PAYMENT_PROCESSING_ERROR" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_OrderProcessing-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_OrderProcessing-Process-id-0001" bpmnElement="OrderProcessing-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ProcessBegins-id-0001_di" bpmnElement="StartEvent-ProcessBegins-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CustomerAddsItemsToCart-id-0002_di" bpmnElement="UserTask-CustomerAddsItemsToCart-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CustomerProceedsToCheckout-id-0003_di" bpmnElement="UserTask-CustomerProceedsToCheckout-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SystemValidatesItemsInStock-id-0004_di" bpmnElement="ServiceTask-SystemValidatesItemsInStock-id-0004">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessPayment-id-0005_di" bpmnElement="ServiceTask-ProcessPayment-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Error-ProcessPayment-id-0013_di" bpmnElement="BoundaryEvent-Error-ProcessPayment-id-0013">
+        <dc:Bounds x="657" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendPaymentFailureNotification-id-0007_di" bpmnElement="SendTask-SendPaymentFailureNotification-id-0007">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CustomerRetriesPayment-id-0008_di" bpmnElement="UserTask-CustomerRetriesPayment-id-0008">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PaymentResult-id-0011_di" bpmnElement="ExclusiveGateway-PaymentResult-id-0011" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendOrderConfirmation-id-0006_di" bpmnElement="SendTask-SendOrderConfirmation-id-0006">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-OrderComplete-id-0009_di" bpmnElement="EndEvent-OrderComplete-id-0009">
+        <dc:Bounds x="1557" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-OrderFailed-id-0010_di" bpmnElement="EndEvent-OrderFailed-id-0010">
+        <dc:Bounds x="57" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RetryPaymentResult-id-0012_di" bpmnElement="ExclusiveGateway-RetryPaymentResult-id-0012" isMarkerVisible="true">
+        <dc:Bounds x="50" y="325" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToAddItems-id-0014_di" bpmnElement="SequenceFlow-StartToAddItems-id-0014">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AddItemsToCheckout-id-0015_di" bpmnElement="SequenceFlow-AddItemsToCheckout-id-0015">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckoutToValidate-id-0016_di" bpmnElement="SequenceFlow-CheckoutToValidate-id-0016">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidateToProcessPayment-id-0017_di" bpmnElement="SequenceFlow-ValidateToProcessPayment-id-0017">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessPaymentToGateway-id-0018_di" bpmnElement="SequenceFlow-ProcessPaymentToGateway-id-0018">
+        <di:waypoint x="675" y="110" />
+        <di:waypoint x="675" y="140" />
+        <di:waypoint x="1275" y="140" />
+        <di:waypoint x="1275" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToPaymentFailure-id-0024_di" bpmnElement="SequenceFlow-BoundaryToPaymentFailure-id-0024">
+        <di:waypoint x="675" y="128" />
+        <di:waypoint x="675" y="140" />
+        <di:waypoint x="750" y="140" />
+        <di:waypoint x="750" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentFailureToRetry-id-0022_di" bpmnElement="SequenceFlow-PaymentFailureToRetry-id-0022">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RetryToProcessPayment-id-0023_di" bpmnElement="SequenceFlow-RetryToProcessPayment-id-0023">
+        <di:waypoint x="1125" y="110" />
+        <di:waypoint x="1125" y="140" />
+        <di:waypoint x="675" y="140" />
+        <di:waypoint x="675" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToOrderConfirmation-id-0019_di" bpmnElement="SequenceFlow-GatewayToOrderConfirmation-id-0019">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToPaymentFailure-id-0020_di" bpmnElement="SequenceFlow-GatewayToPaymentFailure-id-0020">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="140" />
+        <di:waypoint x="975" y="140" />
+        <di:waypoint x="975" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderConfirmationToComplete-id-0021_di" bpmnElement="SequenceFlow-OrderConfirmationToComplete-id-0021">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1557" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

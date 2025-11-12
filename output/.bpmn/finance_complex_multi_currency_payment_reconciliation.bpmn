@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="PaymentProcessing-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="PaymentProcessing-Process-id-0001" name="Payment Processing" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ProcessBegins-id-0001" name="Process Begins">
+      <bpmn:outgoing>SequenceFlow-StartToReceive-id-0016</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveDailyPayments-id-0002" name="Receive: daily payments">
+      <bpmn:incoming>SequenceFlow-StartToReceive-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveToConvert-id-0017</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:serviceTask id="ServiceTask-ConvertToBaseCurrency-id-0003" name="Convert to base currency">
+      <bpmn:incoming>SequenceFlow-ReceiveToConvert-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConvertToMatch-id-0018</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-MatchToInvoices-id-0004" name="Match to outstanding invoices">
+      <bpmn:incoming>SequenceFlow-ConvertToMatch-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MatchToGateway-id-0019</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-PaymentMatch-id-0005" name="Payment Match" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-MatchToGateway-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToComplete-id-0020</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToPartial-id-0021</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToOverpayment-id-0022</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToUnmatched-id-0023</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-RecordCompletePayment-id-0006" name="Record complete payment">
+      <bpmn:incoming>SequenceFlow-GatewayToComplete-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CompleteToParallel-id-0025</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-MarkPartiallyPaid-id-0007" name="Mark invoice as partially paid">
+      <bpmn:incoming>SequenceFlow-GatewayToPartial-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PartialToParallel-id-0026</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-RecordOverpayment-id-0008" name="Record overpayment as credit">
+      <bpmn:incoming>SequenceFlow-GatewayToOverpayment-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OverpaymentToParallel-id-0027</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-HoldUnmatched-id-0009" name="Hold payment as unmatched">
+      <bpmn:incoming>SequenceFlow-GatewayToUnmatched-id-0023</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UnmatchedToInvestigate-id-0024</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-AccountingInvestigates-id-0010" name="Accounting team investigates">
+      <bpmn:incoming>SequenceFlow-UnmatchedToInvestigate-id-0024</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InvestigateToParallel-id-0028</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-Split-id-0011" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CompleteToParallel-id-0025</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-PartialToParallel-id-0026</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-OverpaymentToParallel-id-0027</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-InvestigateToParallel-id-0028</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ParallelToUpdate-id-0029</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ParallelToTrigger-id-0030</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-UpdateAgingReport-id-0012" name="Update accounts receivable aging report">
+      <bpmn:incoming>SequenceFlow-ParallelToUpdate-id-0029</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateToJoin-id-0031</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-TriggerFollowUp-id-0013" name="Trigger automatic follow-up for overdue invoices">
+      <bpmn:incoming>SequenceFlow-ParallelToTrigger-id-0030</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TriggerToJoin-id-0032</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join-id-0014" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-UpdateToJoin-id-0031</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-TriggerToJoin-id-0032</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToEnd-id-0033</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0015" name="Process Complete">
+      <bpmn:incoming>SequenceFlow-JoinToEnd-id-0033</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToReceive-id-0016" sourceRef="StartEvent-ProcessBegins-id-0001" targetRef="ReceiveTask-ReceiveDailyPayments-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveToConvert-id-0017" sourceRef="ReceiveTask-ReceiveDailyPayments-id-0002" targetRef="ServiceTask-ConvertToBaseCurrency-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConvertToMatch-id-0018" sourceRef="ServiceTask-ConvertToBaseCurrency-id-0003" targetRef="ServiceTask-MatchToInvoices-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-MatchToGateway-id-0019" sourceRef="ServiceTask-MatchToInvoices-id-0004" targetRef="ExclusiveGateway-PaymentMatch-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToComplete-id-0020" name="payment matches invoice exactly" sourceRef="ExclusiveGateway-PaymentMatch-id-0005" targetRef="ServiceTask-RecordCompletePayment-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToPartial-id-0021" name="payment less than invoice" sourceRef="ExclusiveGateway-PaymentMatch-id-0005" targetRef="ServiceTask-MarkPartiallyPaid-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToOverpayment-id-0022" name="payment more than invoice" sourceRef="ExclusiveGateway-PaymentMatch-id-0005" targetRef="ServiceTask-RecordOverpayment-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToUnmatched-id-0023" name="no matching invoice" sourceRef="ExclusiveGateway-PaymentMatch-id-0005" targetRef="ServiceTask-HoldUnmatched-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-UnmatchedToInvestigate-id-0024" sourceRef="ServiceTask-HoldUnmatched-id-0009" targetRef="UserTask-AccountingInvestigates-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-CompleteToParallel-id-0025" sourceRef="ServiceTask-RecordCompletePayment-id-0006" targetRef="ParallelGateway-Split-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-PartialToParallel-id-0026" sourceRef="ServiceTask-MarkPartiallyPaid-id-0007" targetRef="ParallelGateway-Split-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-OverpaymentToParallel-id-0027" sourceRef="ServiceTask-RecordOverpayment-id-0008" targetRef="ParallelGateway-Split-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-InvestigateToParallel-id-0028" sourceRef="UserTask-AccountingInvestigates-id-0010" targetRef="ParallelGateway-Split-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelToUpdate-id-0029" sourceRef="ParallelGateway-Split-id-0011" targetRef="ServiceTask-UpdateAgingReport-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelToTrigger-id-0030" sourceRef="ParallelGateway-Split-id-0011" targetRef="ServiceTask-TriggerFollowUp-id-0013" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateToJoin-id-0031" sourceRef="ServiceTask-UpdateAgingReport-id-0012" targetRef="ParallelGateway-Join-id-0014" />
+    <bpmn:sequenceFlow id="SequenceFlow-TriggerToJoin-id-0032" sourceRef="ServiceTask-TriggerFollowUp-id-0013" targetRef="ParallelGateway-Join-id-0014" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToEnd-id-0033" sourceRef="ParallelGateway-Join-id-0014" targetRef="EndEvent-ProcessComplete-id-0015" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_PaymentProcessing-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_PaymentProcessing-Process-id-0001" bpmnElement="PaymentProcessing-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ProcessBegins-id-0001_di" bpmnElement="StartEvent-ProcessBegins-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveDailyPayments-id-0002_di" bpmnElement="ReceiveTask-ReceiveDailyPayments-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ConvertToBaseCurrency-id-0003_di" bpmnElement="ServiceTask-ConvertToBaseCurrency-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MatchToInvoices-id-0004_di" bpmnElement="ServiceTask-MatchToInvoices-id-0004">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PaymentMatch-id-0005_di" bpmnElement="ExclusiveGateway-PaymentMatch-id-0005" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RecordCompletePayment-id-0006_di" bpmnElement="ServiceTask-RecordCompletePayment-id-0006">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0011_di" bpmnElement="ParallelGateway-Split-id-0011">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateAgingReport-id-0012_di" bpmnElement="ServiceTask-UpdateAgingReport-id-0012">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0014_di" bpmnElement="ParallelGateway-Join-id-0014">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0015_di" bpmnElement="EndEvent-ProcessComplete-id-0015">
+        <dc:Bounds x="1557" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MarkPartiallyPaid-id-0007_di" bpmnElement="ServiceTask-MarkPartiallyPaid-id-0007">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-TriggerFollowUp-id-0013_di" bpmnElement="ServiceTask-TriggerFollowUp-id-0013">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RecordOverpayment-id-0008_di" bpmnElement="ServiceTask-RecordOverpayment-id-0008">
+        <dc:Bounds x="775" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-HoldUnmatched-id-0009_di" bpmnElement="ServiceTask-HoldUnmatched-id-0009">
+        <dc:Bounds x="775" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AccountingInvestigates-id-0010_di" bpmnElement="UserTask-AccountingInvestigates-id-0010">
+        <dc:Bounds x="925" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToReceive-id-0016_di" bpmnElement="SequenceFlow-StartToReceive-id-0016">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToConvert-id-0017_di" bpmnElement="SequenceFlow-ReceiveToConvert-id-0017">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConvertToMatch-id-0018_di" bpmnElement="SequenceFlow-ConvertToMatch-id-0018">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MatchToGateway-id-0019_di" bpmnElement="SequenceFlow-MatchToGateway-id-0019">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToComplete-id-0020_di" bpmnElement="SequenceFlow-GatewayToComplete-id-0020">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToPartial-id-0021_di" bpmnElement="SequenceFlow-GatewayToPartial-id-0021">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToOverpayment-id-0022_di" bpmnElement="SequenceFlow-GatewayToOverpayment-id-0022">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="350" />
+        <di:waypoint x="775" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToUnmatched-id-0023_di" bpmnElement="SequenceFlow-GatewayToUnmatched-id-0023">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="490" />
+        <di:waypoint x="775" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompleteToParallel-id-0025_di" bpmnElement="SequenceFlow-CompleteToParallel-id-0025">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelToUpdate-id-0029_di" bpmnElement="SequenceFlow-ParallelToUpdate-id-0029">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelToTrigger-id-0030_di" bpmnElement="SequenceFlow-ParallelToTrigger-id-0030">
+        <di:waypoint x="1125" y="95" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateToJoin-id-0031_di" bpmnElement="SequenceFlow-UpdateToJoin-id-0031">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToEnd-id-0033_di" bpmnElement="SequenceFlow-JoinToEnd-id-0033">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1557" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PartialToParallel-id-0026_di" bpmnElement="SequenceFlow-PartialToParallel-id-0026">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TriggerToJoin-id-0032_di" bpmnElement="SequenceFlow-TriggerToJoin-id-0032">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1425" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OverpaymentToParallel-id-0027_di" bpmnElement="SequenceFlow-OverpaymentToParallel-id-0027">
+        <di:waypoint x="875" y="350" />
+        <di:waypoint x="1125" y="350" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UnmatchedToInvestigate-id-0024_di" bpmnElement="SequenceFlow-UnmatchedToInvestigate-id-0024">
+        <di:waypoint x="875" y="490" />
+        <di:waypoint x="925" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvestigateToParallel-id-0028_di" bpmnElement="SequenceFlow-InvestigateToParallel-id-0028">
+        <di:waypoint x="1025" y="490" />
+        <di:waypoint x="1125" y="490" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

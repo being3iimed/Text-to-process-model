@@ -1,0 +1,49 @@
+### SUMMARY OF ELEMENTS
+--------------------------------------------------------------------------------
+TASKS:
+- receiveTask("Receive: daily payments") - reason: Initial payment collection
+- serviceTask("Convert to base currency") - reason: Standardize currency for processing
+- serviceTask("Match to outstanding invoices") - reason: Reconcile payments with invoices
+- serviceTask("Record complete payment") - reason: Exact match with invoice
+- serviceTask("Mark invoice as partially paid") - reason: Payment less than invoice amount
+- serviceTask("Record overpayment as credit") - reason: Payment more than invoice amount
+- serviceTask("Hold payment as unmatched") - reason: No matching invoice found
+- userTask("Accounting team investigates") - reason: Manual reconciliation required
+- serviceTask("Update accounts receivable aging report") - reason: Track payment status
+- serviceTask("Trigger automatic follow-up for overdue invoices") - reason: Ensure timely collection
+
+GATEWAYS:
+- XOR at point X with conditions: payment matches invoice exactly, payment less than invoice, payment more than invoice, no matching invoice
+- AND at point Y with N parallel branches: Update accounts receivable aging report and Trigger automatic follow-up for overdue invoices
+
+EVENTS:
+- startEvent("Process Begins") - trigger: manual
+- endEvent("Process Complete") - normal completion
+
+BOUNDARY EVENTS:
+- None
+
+SUBPROCESSES:
+- None
+
+### BPMN PSEUDOCODE
+--------------------------------------------------------------------------------
+startEvent("Process Begins")
+receiveTask("Receive: daily payments")
+serviceTask("Convert to base currency")
+serviceTask("Match to outstanding invoices")
+if (payment matches invoice exactly):
+    serviceTask("Record complete payment")
+else if (payment less than invoice):
+    serviceTask("Mark invoice as partially paid")
+else if (payment more than invoice):
+    serviceTask("Record overpayment as credit")
+else:
+    serviceTask("Hold payment as unmatched")
+    userTask("Accounting team investigates")
+AND:
+    serviceTask("Update accounts receivable aging report")
+    serviceTask("Trigger automatic follow-up for overdue invoices")
+END_AND
+endEvent("Process Complete")
+

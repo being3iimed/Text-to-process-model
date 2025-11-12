@@ -1,0 +1,47 @@
+### SUMMARY OF ELEMENTS
+--------------------------------------------------------------------------------
+TASKS:
+- receiveTask("Receive: patient call") - initial contact
+- userTask("Check available time slots") - manual check
+- serviceTask("Book appointment") - automated booking
+- sendTask("Send: appointment confirmation") - communication
+- userTask("Place patient on waitlist") - manual action
+- userTask("Notify patient of cancellation") - manual action
+- userTask("Offer appointment to waitlisted patient") - manual action
+
+GATEWAYS:
+- XOR at point after checking slots with conditions "slots available", "slots unavailable", default
+- XOR at point after cancellation with condition "patient on waitlist", default
+
+EVENTS:
+- startEvent("Process Begins") - trigger: manual (patient call)
+- endEvent("Process Complete") - normal completion
+- messageStartEvent("Cancellation Notification") - trigger: external message
+
+BOUNDARY EVENTS:
+- None (no SLA or error scenarios mentioned)
+
+SUBPROCESSES:
+- None (no cohesive logical groupings identified)
+
+### BPMN PSEUDOCODE
+--------------------------------------------------------------------------------
+startEvent("Process Begins")
+receiveTask("Receive: patient call")
+userTask("Check available time slots")
+if (slots available):
+    serviceTask("Book appointment")
+    sendTask("Send: appointment confirmation")
+    endEvent("Process Complete")
+else:
+    userTask("Place patient on waitlist")
+    endEvent("Process Complete")
+
+messageStartEvent("Cancellation Notification")
+if (patient on waitlist):
+    userTask("Notify patient of cancellation")
+    userTask("Offer appointment to waitlisted patient")
+    endEvent("Process Complete")
+else:
+    endEvent("Process Complete")
+

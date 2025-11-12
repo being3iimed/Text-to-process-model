@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Graduation-Process-Definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="Graduation-Process-id-0001" name="Graduation Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-GraduationCheckRequested-id-0001" name="Graduation Check Requested">
+      <bpmn:outgoing>SequenceFlow-StartToSubmitRequest-id-0023</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-StudentSubmitsGraduationRequest-id-0002" name="Student submits graduation request">
+      <bpmn:incoming>SequenceFlow-StartToSubmitRequest-id-0023</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SubmitToAudit-id-0024</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-SystemAuditsDegreeRequirements-id-0003" name="System audits degree requirements">
+      <bpmn:incoming>SequenceFlow-SubmitToAudit-id-0024</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AuditToGateway-id-0025</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-RequirementsMet-id-0004" name="Requirements Met?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-AuditToGateway-id-0025</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RequirementsMetToChecks-id-0026</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-RequirementsNotMetToReport-id-0027</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-SystemChecksDisciplinaryHolds-id-0005" name="System checks disciplinary holds, library fees, and visa status">
+      <bpmn:incoming>SequenceFlow-RequirementsMetToChecks-id-0026</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ChecksToAdditionalGateway-id-0028</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-AdditionalRequirementsMet-id-0006" name="Additional Requirements Met?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ChecksToAdditionalGateway-id-0028</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AdditionalRequirementsMetToVerification-id-0029</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-AdditionalRequirementsNotMetToReport-id-0030</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-SystemVerifiesMajorCourses-id-0007" name="System verifies completion of all major courses">
+      <bpmn:incoming>SequenceFlow-AdditionalRequirementsMetToVerification-id-0029</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VerifyMajorToVerifyGeneral-id-0031</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-SystemVerifiesGeneralEducation-id-0008" name="System verifies completion of all general education requirements">
+      <bpmn:incoming>SequenceFlow-VerifyMajorToVerifyGeneral-id-0031</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VerifyGeneralToFinalGateway-id-0032</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-AllRequirementsMet-id-0009" name="All Requirements Met?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-VerifyGeneralToFinalGateway-id-0032</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AllRequirementsMetToApproval-id-0033</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-AllRequirementsNotMetToReport-id-0034</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-GraduationApproved-id-0010" name="Graduation approved">
+      <bpmn:incoming>SequenceFlow-AllRequirementsMetToApproval-id-0033</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ApprovalToDiploma-id-0035</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-DiplomaPrepared-id-0011" name="Diploma prepared">
+      <bpmn:incoming>SequenceFlow-ApprovalToDiploma-id-0035</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DiplomaToCapAndGown-id-0036</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-CapAndGownOrderPlaced-id-0012" name="Cap-and-gown order placed">
+      <bpmn:incoming>SequenceFlow-DiplomaToCapAndGown-id-0036</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CapAndGownToCeremonySlot-id-0037</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-GraduationCeremonySlotAssigned-id-0013" name="Graduation ceremony slot assigned">
+      <bpmn:incoming>SequenceFlow-CapAndGownToCeremonySlot-id-0037</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CeremonySlotToAttendCeremony-id-0038</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-StudentAttendsGraduationCeremony-id-0014" name="Student attends graduation ceremony">
+      <bpmn:incoming>SequenceFlow-CeremonySlotToAttendCeremony-id-0038</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AttendCeremonyToVerifyAttendance-id-0039</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-AttendanceVerified-id-0015" name="Attendance verified">
+      <bpmn:incoming>SequenceFlow-AttendCeremonyToVerifyAttendance-id-0039</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VerifyAttendanceToConferDegree-id-0040</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-DegreeConferred-id-0016" name="Degree conferred">
+      <bpmn:incoming>SequenceFlow-VerifyAttendanceToConferDegree-id-0040</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConferDegreeToIssueTranscript-id-0041</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-TranscriptIssued-id-0017" name="Transcript issued">
+      <bpmn:incoming>SequenceFlow-ConferDegreeToIssueTranscript-id-0041</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-IssueTranscriptToComplete-id-0042</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-GraduationComplete-id-0018" name="Graduation Complete">
+      <bpmn:incoming>SequenceFlow-IssueTranscriptToComplete-id-0042</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-GenerateDetailedReport-id-0019" name="Generate detailed report of missing requirements">
+      <bpmn:incoming>SequenceFlow-RequirementsNotMetToReport-id-0027</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-AdditionalRequirementsNotMetToReport-id-0030</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-AllRequirementsNotMetToReport-id-0034</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReportToCompleteRequirements-id-0043</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-StudentCompletesMissingRequirements-id-0020" name="Student completes missing requirements by deadline">
+      <bpmn:incoming>SequenceFlow-ReportToCompleteRequirements-id-0043</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CompleteRequirementsToReEvaluate-id-0044</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ReEvaluateGraduationRequirements-id-0021" name="Re-evaluate graduation requirements">
+      <bpmn:incoming>SequenceFlow-CompleteRequirementsToReEvaluate-id-0044</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReEvaluateToNotMet-id-0045</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-GraduationRequirementsNotMet-id-0022" name="Graduation Requirements Not Met">
+      <bpmn:incoming>SequenceFlow-ReEvaluateToNotMet-id-0045</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSubmitRequest-id-0023" sourceRef="StartEvent-GraduationCheckRequested-id-0001" targetRef="UserTask-StudentSubmitsGraduationRequest-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubmitToAudit-id-0024" sourceRef="UserTask-StudentSubmitsGraduationRequest-id-0002" targetRef="ServiceTask-SystemAuditsDegreeRequirements-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-AuditToGateway-id-0025" sourceRef="ServiceTask-SystemAuditsDegreeRequirements-id-0003" targetRef="ExclusiveGateway-RequirementsMet-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-RequirementsMetToChecks-id-0026" name="all_courses_completed AND all_credits_earned &#62;= 120 AND cumulative_GPA &#62;= 2.0 AND major_GPA &#62;= minimum_major_GPA" sourceRef="ExclusiveGateway-RequirementsMet-id-0004" targetRef="ServiceTask-SystemChecksDisciplinaryHolds-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-RequirementsNotMetToReport-id-0027" sourceRef="ExclusiveGateway-RequirementsMet-id-0004" targetRef="ServiceTask-GenerateDetailedReport-id-0019" />
+    <bpmn:sequenceFlow id="SequenceFlow-ChecksToAdditionalGateway-id-0028" sourceRef="ServiceTask-SystemChecksDisciplinaryHolds-id-0005" targetRef="ExclusiveGateway-AdditionalRequirementsMet-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-AdditionalRequirementsMetToVerification-id-0029" name="no_disciplinary_holds AND library_fees_paid AND visa_status_current" sourceRef="ExclusiveGateway-AdditionalRequirementsMet-id-0006" targetRef="ServiceTask-SystemVerifiesMajorCourses-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-AdditionalRequirementsNotMetToReport-id-0030" sourceRef="ExclusiveGateway-AdditionalRequirementsMet-id-0006" targetRef="ServiceTask-GenerateDetailedReport-id-0019" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerifyMajorToVerifyGeneral-id-0031" sourceRef="ServiceTask-SystemVerifiesMajorCourses-id-0007" targetRef="ServiceTask-SystemVerifiesGeneralEducation-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerifyGeneralToFinalGateway-id-0032" sourceRef="ServiceTask-SystemVerifiesGeneralEducation-id-0008" targetRef="ExclusiveGateway-AllRequirementsMet-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-AllRequirementsMetToApproval-id-0033" name="all_major_courses_completed AND all_general_education_requirements_completed" sourceRef="ExclusiveGateway-AllRequirementsMet-id-0009" targetRef="ServiceTask-GraduationApproved-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-AllRequirementsNotMetToReport-id-0034" sourceRef="ExclusiveGateway-AllRequirementsMet-id-0009" targetRef="ServiceTask-GenerateDetailedReport-id-0019" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApprovalToDiploma-id-0035" sourceRef="ServiceTask-GraduationApproved-id-0010" targetRef="ServiceTask-DiplomaPrepared-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-DiplomaToCapAndGown-id-0036" sourceRef="ServiceTask-DiplomaPrepared-id-0011" targetRef="ServiceTask-CapAndGownOrderPlaced-id-0012" />
+    <bpmn:sequenceFlow id="SequenceFlow-CapAndGownToCeremonySlot-id-0037" sourceRef="ServiceTask-CapAndGownOrderPlaced-id-0012" targetRef="ServiceTask-GraduationCeremonySlotAssigned-id-0013" />
+    <bpmn:sequenceFlow id="SequenceFlow-CeremonySlotToAttendCeremony-id-0038" sourceRef="ServiceTask-GraduationCeremonySlotAssigned-id-0013" targetRef="UserTask-StudentAttendsGraduationCeremony-id-0014" />
+    <bpmn:sequenceFlow id="SequenceFlow-AttendCeremonyToVerifyAttendance-id-0039" sourceRef="UserTask-StudentAttendsGraduationCeremony-id-0014" targetRef="ServiceTask-AttendanceVerified-id-0015" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerifyAttendanceToConferDegree-id-0040" sourceRef="ServiceTask-AttendanceVerified-id-0015" targetRef="ServiceTask-DegreeConferred-id-0016" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConferDegreeToIssueTranscript-id-0041" sourceRef="ServiceTask-DegreeConferred-id-0016" targetRef="ServiceTask-TranscriptIssued-id-0017" />
+    <bpmn:sequenceFlow id="SequenceFlow-IssueTranscriptToComplete-id-0042" sourceRef="ServiceTask-TranscriptIssued-id-0017" targetRef="EndEvent-GraduationComplete-id-0018" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReportToCompleteRequirements-id-0043" sourceRef="ServiceTask-GenerateDetailedReport-id-0019" targetRef="UserTask-StudentCompletesMissingRequirements-id-0020" />
+    <bpmn:sequenceFlow id="SequenceFlow-CompleteRequirementsToReEvaluate-id-0044" sourceRef="UserTask-StudentCompletesMissingRequirements-id-0020" targetRef="ServiceTask-ReEvaluateGraduationRequirements-id-0021" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReEvaluateToNotMet-id-0045" sourceRef="ServiceTask-ReEvaluateGraduationRequirements-id-0021" targetRef="EndEvent-GraduationRequirementsNotMet-id-0022" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Graduation-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Graduation-Process-id-0001" bpmnElement="Graduation-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-GraduationCheckRequested-id-0001_di" bpmnElement="StartEvent-GraduationCheckRequested-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-StudentSubmitsGraduationRequest-id-0002_di" bpmnElement="UserTask-StudentSubmitsGraduationRequest-id-0002">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SystemAuditsDegreeRequirements-id-0003_di" bpmnElement="ServiceTask-SystemAuditsDegreeRequirements-id-0003">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RequirementsMet-id-0004_di" bpmnElement="ExclusiveGateway-RequirementsMet-id-0004" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SystemChecksDisciplinaryHolds-id-0005_di" bpmnElement="ServiceTask-SystemChecksDisciplinaryHolds-id-0005">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-AdditionalRequirementsMet-id-0006_di" bpmnElement="ExclusiveGateway-AdditionalRequirementsMet-id-0006" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SystemVerifiesMajorCourses-id-0007_di" bpmnElement="ServiceTask-SystemVerifiesMajorCourses-id-0007">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SystemVerifiesGeneralEducation-id-0008_di" bpmnElement="ServiceTask-SystemVerifiesGeneralEducation-id-0008">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-AllRequirementsMet-id-0009_di" bpmnElement="ExclusiveGateway-AllRequirementsMet-id-0009" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GraduationApproved-id-0010_di" bpmnElement="ServiceTask-GraduationApproved-id-0010">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DiplomaPrepared-id-0011_di" bpmnElement="ServiceTask-DiplomaPrepared-id-0011">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CapAndGownOrderPlaced-id-0012_di" bpmnElement="ServiceTask-CapAndGownOrderPlaced-id-0012">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GraduationCeremonySlotAssigned-id-0013_di" bpmnElement="ServiceTask-GraduationCeremonySlotAssigned-id-0013">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-StudentAttendsGraduationCeremony-id-0014_di" bpmnElement="UserTask-StudentAttendsGraduationCeremony-id-0014">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AttendanceVerified-id-0015_di" bpmnElement="ServiceTask-AttendanceVerified-id-0015">
+        <dc:Bounds x="2125" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DegreeConferred-id-0016_di" bpmnElement="ServiceTask-DegreeConferred-id-0016">
+        <dc:Bounds x="2275" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-TranscriptIssued-id-0017_di" bpmnElement="ServiceTask-TranscriptIssued-id-0017">
+        <dc:Bounds x="2425" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-GraduationComplete-id-0018_di" bpmnElement="EndEvent-GraduationComplete-id-0018">
+        <dc:Bounds x="2607" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateDetailedReport-id-0019_di" bpmnElement="ServiceTask-GenerateDetailedReport-id-0019">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-StudentCompletesMissingRequirements-id-0020_di" bpmnElement="UserTask-StudentCompletesMissingRequirements-id-0020">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ReEvaluateGraduationRequirements-id-0021_di" bpmnElement="ServiceTask-ReEvaluateGraduationRequirements-id-0021">
+        <dc:Bounds x="1675" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-GraduationRequirementsNotMet-id-0022_di" bpmnElement="EndEvent-GraduationRequirementsNotMet-id-0022">
+        <dc:Bounds x="1857" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSubmitRequest-id-0023_di" bpmnElement="SequenceFlow-StartToSubmitRequest-id-0023">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubmitToAudit-id-0024_di" bpmnElement="SequenceFlow-SubmitToAudit-id-0024">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AuditToGateway-id-0025_di" bpmnElement="SequenceFlow-AuditToGateway-id-0025">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RequirementsMetToChecks-id-0026_di" bpmnElement="SequenceFlow-RequirementsMetToChecks-id-0026">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RequirementsNotMetToReport-id-0027_di" bpmnElement="SequenceFlow-RequirementsNotMetToReport-id-0027">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ChecksToAdditionalGateway-id-0028_di" bpmnElement="SequenceFlow-ChecksToAdditionalGateway-id-0028">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AdditionalRequirementsMetToVerification-id-0029_di" bpmnElement="SequenceFlow-AdditionalRequirementsMetToVerification-id-0029">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AdditionalRequirementsNotMetToReport-id-0030_di" bpmnElement="SequenceFlow-AdditionalRequirementsNotMetToReport-id-0030">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyMajorToVerifyGeneral-id-0031_di" bpmnElement="SequenceFlow-VerifyMajorToVerifyGeneral-id-0031">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyGeneralToFinalGateway-id-0032_di" bpmnElement="SequenceFlow-VerifyGeneralToFinalGateway-id-0032">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AllRequirementsMetToApproval-id-0033_di" bpmnElement="SequenceFlow-AllRequirementsMetToApproval-id-0033">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AllRequirementsNotMetToReport-id-0034_di" bpmnElement="SequenceFlow-AllRequirementsNotMetToReport-id-0034">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalToDiploma-id-0035_di" bpmnElement="SequenceFlow-ApprovalToDiploma-id-0035">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DiplomaToCapAndGown-id-0036_di" bpmnElement="SequenceFlow-DiplomaToCapAndGown-id-0036">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CapAndGownToCeremonySlot-id-0037_di" bpmnElement="SequenceFlow-CapAndGownToCeremonySlot-id-0037">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CeremonySlotToAttendCeremony-id-0038_di" bpmnElement="SequenceFlow-CeremonySlotToAttendCeremony-id-0038">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AttendCeremonyToVerifyAttendance-id-0039_di" bpmnElement="SequenceFlow-AttendCeremonyToVerifyAttendance-id-0039">
+        <di:waypoint x="2075" y="70" />
+        <di:waypoint x="2125" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyAttendanceToConferDegree-id-0040_di" bpmnElement="SequenceFlow-VerifyAttendanceToConferDegree-id-0040">
+        <di:waypoint x="2225" y="70" />
+        <di:waypoint x="2275" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConferDegreeToIssueTranscript-id-0041_di" bpmnElement="SequenceFlow-ConferDegreeToIssueTranscript-id-0041">
+        <di:waypoint x="2375" y="70" />
+        <di:waypoint x="2425" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IssueTranscriptToComplete-id-0042_di" bpmnElement="SequenceFlow-IssueTranscriptToComplete-id-0042">
+        <di:waypoint x="2525" y="70" />
+        <di:waypoint x="2607" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReportToCompleteRequirements-id-0043_di" bpmnElement="SequenceFlow-ReportToCompleteRequirements-id-0043">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompleteRequirementsToReEvaluate-id-0044_di" bpmnElement="SequenceFlow-CompleteRequirementsToReEvaluate-id-0044">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1675" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReEvaluateToNotMet-id-0045_di" bpmnElement="SequenceFlow-ReEvaluateToNotMet-id-0045">
+        <di:waypoint x="1775" y="210" />
+        <di:waypoint x="1857" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

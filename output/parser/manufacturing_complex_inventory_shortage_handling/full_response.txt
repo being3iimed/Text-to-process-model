@@ -1,0 +1,79 @@
+### Summary of Elements
+
+**TASKS:**
+- userTask("Check Supplier Delivery Schedule") - Determine when next delivery is expected
+- serviceTask("Calculate Delivery Time Difference") - Compute time until next delivery
+- userTask("Check for Alternative Component") - Verify if alternative component exists
+- userTask("Notify Production of Alternative Component") - Inform production about alternative component
+- userTask("Approve Expedite") - Production manager approves expediting shipment
+- userTask("Request Expedite from Supplier") - Request expedited shipment from supplier
+- userTask("Notify Dependent Production Lines") - Inform dependent production lines about potential delay
+- userTask("Escalate to Procurement Manager") - Escalate issue to procurement manager for backup supplier
+- userTask("Find Backup Supplier") - Procurement manager finds backup supplier
+- userTask("Confirm Backup Supplier Delivery") - Backup supplier confirms same-day delivery
+- serviceTask("Create Purchase Order") - Create purchase order for backup supplier
+- serviceTask("Receive Component from Backup Supplier") - Receive component from backup supplier
+- serviceTask("Log Cost Variance") - Log variance in cost
+- serviceTask("Update Supplier Performance Metrics") - Update supplier performance metrics
+
+**GATEWAYS:**
+- XOR at point 1 with conditions "delivery within 24 hours", "delivery more than 24 hours away", default
+- XOR at point 2 with conditions "alternative component available", "no alternative component available", default
+- XOR at point 3 with conditions "expedite approved", "expedite not approved", default
+- XOR at point 4 with conditions "expedite successful", "expedite failed", default
+
+**EVENTS:**
+- startEvent("Insufficient Stock Detected") - trigger: manual
+- endEvent("Production Line Resumes") - normal completion
+
+**BOUNDARY EVENTS:**
+- None
+
+**SUBPROCESSES:**
+- None
+
+### BPMN Pseudocode
+
+```pseudocode
+startEvent("Insufficient Stock Detected")
+serviceTask("Calculate Delivery Time Difference")
+if (delivery_time_difference <= 24 hours):
+    serviceTask("Delay Production Slightly")
+    serviceTask("Components Arrive in Time")
+    endEvent("Production Line Resumes")
+else:
+    userTask("Check for Alternative Component")
+    if (alternative_component_available):
+        userTask("Notify Production of Alternative Component")
+        serviceTask("Log Cost Variance")
+        serviceTask("Update Supplier Performance Metrics")
+        endEvent("Production Line Resumes")
+    else:
+        userTask("Approve Expedite")
+        if (expedite_approved):
+            userTask("Request Expedite from Supplier")
+            userTask("Notify Dependent Production Lines")
+            if (expedite_successful):
+                serviceTask("Components Arrive from Supplier")
+                serviceTask("Log Cost Variance")
+                serviceTask("Update Supplier Performance Metrics")
+                endEvent("Production Line Resumes")
+            else:
+                userTask("Escalate to Procurement Manager")
+                userTask("Find Backup Supplier")
+                userTask("Confirm Backup Supplier Delivery")
+                serviceTask("Create Purchase Order")
+                serviceTask("Receive Component from Backup Supplier")
+                serviceTask("Log Cost Variance")
+                serviceTask("Update Supplier Performance Metrics")
+                endEvent("Production Line Resumes")
+        else:
+            userTask("Escalate to Procurement Manager")
+            userTask("Find Backup Supplier")
+            userTask("Confirm Backup Supplier Delivery")
+            serviceTask("Create Purchase Order")
+            serviceTask("Receive Component from Backup Supplier")
+            serviceTask("Log Cost Variance")
+            serviceTask("Update Supplier Performance Metrics")
+            endEvent("Production Line Resumes")
+```

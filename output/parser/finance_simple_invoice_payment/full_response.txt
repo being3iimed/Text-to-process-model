@@ -1,0 +1,48 @@
+### Summary of Elements
+
+```
+TASKS:
+- userTask("Finance Manager Approves Payment") - Requires human approval
+- serviceTask("Log Invoice") - Automated system action
+- serviceTask("Calculate Payment Due Date") - Automated calculation
+- serviceTask("Generate Payment Request") - Automated system action
+- serviceTask("Process Payment") - Automated bank transfer
+- sendTask("Send: Payment Confirmation") - One-way communication
+
+GATEWAYS:
+- XOR at point X with condition: payment_approved
+
+EVENTS:
+- startEvent("Invoice Received") - Trigger: message (vendor invoice)
+- endEvent("Payment Complete") - Normal completion
+- timerStartEvent("Daily at 09:00") - Scheduled trigger
+
+BOUNDARY EVENTS:
+- timerBoundary on "Generate Payment Request" - SLA: Payment must be generated on due date
+- errorBoundary on "Process Payment" - Error: Bank transfer failure
+
+SUBPROCESSES:
+- Subprocess "Payment Processing" - Purpose: Handles payment generation, approval, and processing
+- Justification: Three related tasks with cohesive purpose
+```
+
+### BPMN Pseudocode
+
+```pseudocode
+startEvent("Invoice Received")
+serviceTask("Log Invoice")
+serviceTask("Calculate Payment Due Date")
+intermediateEvent(timerBoundary("PT0S"))  # Immediate timer to trigger payment generation on due date
+serviceTask("Generate Payment Request"):
+    timerBoundary("PT0S"):
+        serviceTask("Generate Payment Request")
+userTask("Finance Manager Approves Payment")
+if (payment_approved):
+    serviceTask("Process Payment"):
+        errorBoundary():
+            userTask("Handle Payment Failure")
+    sendTask("Send: Payment Confirmation")
+else:
+    serviceTask("Reject Payment Request")
+endEvent("Payment Complete")
+```
