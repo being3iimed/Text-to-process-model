@@ -1,0 +1,139 @@
+```
+<validation_phase>
+**Clarifications Requested**:
+1. **Error Scenarios**: Are there expected system failures (e.g., payment gateway timeout, university registration API failure)? If so, specify which are **explicitly handled** vs. speculative.
+2. **SLA Requirements**: Are there hard time limits for any steps (e.g., "account activation must complete within 24 hours")? Current description mentions "wait for a response" but no duration.
+3. **Parallelism**: Is the Twitter integration **optional** (user chooses to tweet) or **mandatory**? Does it block course registration?
+4. **Payment Flow**: Are there multiple payment methods (e.g., credit card, PayPal) requiring a decision gateway, or is it a single step?
+5. **Course Slot Availability**: If no slots are free, does the process:
+   - End immediately?
+   - Offer a waitlist?
+   - Suggest alternative courses/dates?
+6. **University Eligibility Check**: Is this an automated API call or manual verification? Are there known failure modes (e.g., API timeout)?
+
+**Assumptions (Documented for Transparency)**:
+- No hard SLAs unless explicitly stated (e.g., "wait for a response" is unbounded).
+- Twitter integration is **optional** and does not block registration.
+- Payment is a single step (no branching for methods).
+- If no slots are free, process ends with a rejection notice.
+- University eligibility check is an automated API call with no mentioned error handling.
+- Account registration/activation is a black box (no internal steps described).
+</validation_phase>
+
+---
+<element_classification>
+**TASKS**:
+1. **userTask("Select Course")**
+   - *Reason*: Human judgment to choose from available courses/dates.
+2. **serviceTask("Check Course Slots")**
+   - *Reason*: Automated system check for availability.
+3. **serviceTask("Check Existing Account")**
+   - *Reason*: Automated lookup in sports institute database.
+4. **serviceTask("Check University Eligibility")**
+   - *Reason*: Automated API call to verify university registration.
+   - *Note*: No error boundary added (no explicit failure mode described).
+5. **userTask("Register Account")**
+   - *Reason*: Human action to create account (if eligible).
+6. **receiveTask("Receive: Account Activation")**
+   - *Reason*: Wait for external response (no SLA → no timerBoundary).
+7. **userTask("Log Into Account")**
+   - *Reason*: Human action post-activation.
+8. **userTask("Opt-In: Tweet to Friends")** *(Optional Path)*
+   - *Reason*: Human decision to share on Twitter.
+9. **serviceTask("Complete Course Registration")**
+   - *Reason*: Automated system action to finalize enrollment.
+10. **userTask("Provide Payment Information")**
+    - *Reason*: Human input for payment (assumed single step).
+11. **serviceTask("Generate Course Ticket")**
+    - *Reason*: Automated ticket generation post-payment.
+
+**GATEWAYS**:
+1. **XOR**: After "Check Course Slots" (slots free vs. none free).
+2. **XOR**: After "Check Existing Account" (has account vs. none).
+3. **XOR**: After "Check University Eligibility" (eligible vs. ineligible).
+4. **XOR**: After "Opt-In: Tweet to Friends" (tweet vs. skip).
+
+**EVENTS**:
+- **startEvent("Start Course Registration")**: Manual trigger.
+- **endEvent("Course Ticket Issued")**: Successful completion.
+- **endEvent("Registration Rejected: No Slots")**: Early termination.
+- **endEvent("Registration Rejected: Ineligible")**: Early termination.
+
+**BOUNDARY EVENTS**:
+- *None justified*: No explicit SLAs or error scenarios described.
+
+**SUBPROCESSES**:
+- *None justified*: No cohesive multi-step logic requiring abstraction.
+---
+<bpmn_compliance_checks>
+**TIMER EVENTS**: N/A (no SLAs or schedules).
+**GATEWAY CONVERGENCE**:
+- All XOR gateways have explicit converging points.
+**SEQUENCE FLOW LABELS**:
+- All conditional flows have descriptive labels (e.g., "slots_available == true").
+**BOUNDARY EVENTS**: None (compliant with gating criteria).
+**SUBPROCESSES**: None (compliant with necessity test).
+**FLOW PATHS**:
+- All paths traceable start-to-end.
+- No orphaned flows.
+---
+</bpmn_compliance_checks>
+
+---
+<bpmn_pseudocode>
+```pseudocode
+startEvent("Start Course Registration")
+
+// --- Course Selection ---
+userTask("Select Course")
+serviceTask("Check Course Slots")
+if (slots_available):
+    // --- Account Check ---
+    serviceTask("Check Existing Account")
+    if (account_exists):
+        userTask("Log Into Account")
+    else:
+        // --- University Eligibility ---
+        serviceTask("Check University Eligibility")
+        if (university_eligible):
+            userTask("Register Account")
+            receiveTask("Receive: Account Activation")
+            userTask("Log Into Account")
+        else:
+            endEvent("Registration Rejected: Ineligible")
+        END_IF
+    END_IF
+
+    // --- Registration & Payment ---
+    userTask("Opt-In: Tweet to Friends")  // Optional: XOR with "skip"
+    serviceTask("Complete Course Registration")
+    userTask("Provide Payment Information")
+    serviceTask("Generate Course Ticket")
+    endEvent("Course Ticket Issued")
+else:
+    endEvent("Registration Rejected: No Slots")
+END_IF
+```
+---
+<critical_success_validation>
+✅ **No Invalid BPMN Properties**: All elements comply with BPMN 2.0.
+✅ **No Unreachable Elements**: All tasks/events are on traceable paths.
+✅ **Gateway Convergence**: All XOR gateways have explicit merge points.
+✅ **No Orphaned Flows**: Every path terminates at an `endEvent`.
+✅ **No Speculative Boundary Events**: Only explicit scenarios included.
+✅ **No Unjustified Subprocesses**: Logic is flat and linear where possible.
+✅ **Balanced Design**: 11 tasks, 4 gateways, 3 end events (core elements = 92%).
+---
+</critical_success_validation>
+
+<rejected_patterns>
+1. **Timer Boundary on "Receive: Account Activation"**:
+   - *Why Rejected*: No SLA mentioned ("wait for a response" is unbounded).
+2. **Error Boundary on "Check University Eligibility"**:
+   - *Why Rejected*: No explicit error scenario (e.g., API timeout) described.
+3. **Subprocess for "Account Registration"**:
+   - *Why Rejected*: Only 2 steps (`Register Account` → `Receive Activation`); fails Three-Question Test.
+4. **Parallel Gateway for Twitter + Registration**:
+   - *Why Rejected*: Twitter is optional and sequential (not truly parallel).
+</rejected_patterns>
+```

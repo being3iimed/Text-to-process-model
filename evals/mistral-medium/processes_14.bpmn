@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="BudgetPlanningProcess" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="BudgetPlanningProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-BudgetPlanningInitiated-id-0001" name="Budget Planning Initiated">
+      <bpmn:outgoing>SequenceFlow-StartToDraft-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-DraftBudgetPlan-id-0001" name="Draft Budget Plan">
+      <bpmn:incoming>SequenceFlow-StartToDraft-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DraftToStrategicReview-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-StrategicAlignmentReview-id-0002" name="Strategic Alignment Review">
+      <bpmn:incoming>SequenceFlow-DraftToStrategicReview-id-0002</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-DocumentToStrategicReview-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StrategicReviewToGateway-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-StrategicAlignment-id-0001" name="Strategic Alignment Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-StrategicReviewToGateway-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StrategicAlignedToFinance-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-StrategicNeedsAdjustmentToAdjust-id-0005</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-FinanceDepartmentReview-id-0003" name="Finance Department Review">
+      <bpmn:incoming>SequenceFlow-StrategicAlignedToFinance-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FinanceReviewToGateway-id-0008</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-AdjustBudgetPlan-id-0004" name="Adjust Budget Plan">
+      <bpmn:incoming>SequenceFlow-StrategicNeedsAdjustmentToAdjust-id-0005</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-FinanceNeedsAdjustmentToAdjust-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AdjustToDocument-id-0006</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-DocumentAdjustments-id-0001" name="Document Adjustments">
+      <bpmn:incoming>SequenceFlow-AdjustToDocument-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DocumentToStrategicReview-id-0007</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-FinanceReview-id-0002" name="Finance Review Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-FinanceReviewToGateway-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FinanceFeasibleToApproval-id-0009</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-FinanceNeedsAdjustmentToAdjust-id-0010</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-StakeholderApproval-id-0005" name="Stakeholder Approval">
+      <bpmn:incoming>SequenceFlow-FinanceFeasibleToApproval-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ApprovalToAllocate-id-0011</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-AllocateBudget-id-0006" name="Allocate Budget">
+      <bpmn:incoming>SequenceFlow-ApprovalToAllocate-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AllocateToEnd-id-0012</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-BudgetAllocated-id-0001" name="Budget Allocated and Implementation Begins">
+      <bpmn:incoming>SequenceFlow-AllocateToEnd-id-0012</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToDraft-id-0001" sourceRef="StartEvent-BudgetPlanningInitiated-id-0001" targetRef="UserTask-DraftBudgetPlan-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DraftToStrategicReview-id-0002" sourceRef="UserTask-DraftBudgetPlan-id-0001" targetRef="UserTask-StrategicAlignmentReview-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-StrategicReviewToGateway-id-0003" sourceRef="UserTask-StrategicAlignmentReview-id-0002" targetRef="ExclusiveGateway-StrategicAlignment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-StrategicAlignedToFinance-id-0004" name="aligned_with_goals" sourceRef="ExclusiveGateway-StrategicAlignment-id-0001" targetRef="UserTask-FinanceDepartmentReview-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-StrategicNeedsAdjustmentToAdjust-id-0005" name="needs_adjustment" sourceRef="ExclusiveGateway-StrategicAlignment-id-0001" targetRef="UserTask-AdjustBudgetPlan-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-AdjustToDocument-id-0006" sourceRef="UserTask-AdjustBudgetPlan-id-0004" targetRef="ServiceTask-DocumentAdjustments-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DocumentToStrategicReview-id-0007" sourceRef="ServiceTask-DocumentAdjustments-id-0001" targetRef="UserTask-StrategicAlignmentReview-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-FinanceReviewToGateway-id-0008" sourceRef="UserTask-FinanceDepartmentReview-id-0003" targetRef="ExclusiveGateway-FinanceReview-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-FinanceFeasibleToApproval-id-0009" name="feasible" sourceRef="ExclusiveGateway-FinanceReview-id-0002" targetRef="UserTask-StakeholderApproval-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-FinanceNeedsAdjustmentToAdjust-id-0010" name="needs_adjustment" sourceRef="ExclusiveGateway-FinanceReview-id-0002" targetRef="UserTask-AdjustBudgetPlan-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApprovalToAllocate-id-0011" sourceRef="UserTask-StakeholderApproval-id-0005" targetRef="UserTask-AllocateBudget-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-AllocateToEnd-id-0012" sourceRef="UserTask-AllocateBudget-id-0006" targetRef="EndEvent-BudgetAllocated-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_BudgetPlanningProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_BudgetPlanningProcess-id-0001" bpmnElement="BudgetPlanningProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-BudgetPlanningInitiated-id-0001_di" bpmnElement="StartEvent-BudgetPlanningInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-DraftBudgetPlan-id-0001_di" bpmnElement="UserTask-DraftBudgetPlan-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-StrategicAlignmentReview-id-0002_di" bpmnElement="UserTask-StrategicAlignmentReview-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-StrategicAlignment-id-0001_di" bpmnElement="ExclusiveGateway-StrategicAlignment-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-FinanceDepartmentReview-id-0003_di" bpmnElement="UserTask-FinanceDepartmentReview-id-0003">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-FinanceReview-id-0002_di" bpmnElement="ExclusiveGateway-FinanceReview-id-0002" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-StakeholderApproval-id-0005_di" bpmnElement="UserTask-StakeholderApproval-id-0005">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AllocateBudget-id-0006_di" bpmnElement="UserTask-AllocateBudget-id-0006">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-BudgetAllocated-id-0001_di" bpmnElement="EndEvent-BudgetAllocated-id-0001">
+        <dc:Bounds x="1257" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AdjustBudgetPlan-id-0004_di" bpmnElement="UserTask-AdjustBudgetPlan-id-0004">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DocumentAdjustments-id-0001_di" bpmnElement="ServiceTask-DocumentAdjustments-id-0001">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToDraft-id-0001_di" bpmnElement="SequenceFlow-StartToDraft-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DraftToStrategicReview-id-0002_di" bpmnElement="SequenceFlow-DraftToStrategicReview-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StrategicReviewToGateway-id-0003_di" bpmnElement="SequenceFlow-StrategicReviewToGateway-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StrategicAlignedToFinance-id-0004_di" bpmnElement="SequenceFlow-StrategicAlignedToFinance-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StrategicNeedsAdjustmentToAdjust-id-0005_di" bpmnElement="SequenceFlow-StrategicNeedsAdjustmentToAdjust-id-0005">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FinanceReviewToGateway-id-0008_di" bpmnElement="SequenceFlow-FinanceReviewToGateway-id-0008">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FinanceFeasibleToApproval-id-0009_di" bpmnElement="SequenceFlow-FinanceFeasibleToApproval-id-0009">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FinanceNeedsAdjustmentToAdjust-id-0010_di" bpmnElement="SequenceFlow-FinanceNeedsAdjustmentToAdjust-id-0010">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalToAllocate-id-0011_di" bpmnElement="SequenceFlow-ApprovalToAllocate-id-0011">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AllocateToEnd-id-0012_di" bpmnElement="SequenceFlow-AllocateToEnd-id-0012">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1257" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AdjustToDocument-id-0006_di" bpmnElement="SequenceFlow-AdjustToDocument-id-0006">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DocumentToStrategicReview-id-0007_di" bpmnElement="SequenceFlow-DocumentToStrategicReview-id-0007">
+        <di:waypoint x="1125" y="250" />
+        <di:waypoint x="1125" y="280" />
+        <di:waypoint x="375" y="280" />
+        <di:waypoint x="375" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="ContractProjectDefinitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="ContractProjectProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ContractProjectInitiated-id-0001" name="Contract Project Initiated">
+      <bpmn:outgoing>SequenceFlow-ContractInitiatedToOrderParts-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:subProcess id="SubProcess-OrderParts-id-0001" name="Order Parts">
+      <bpmn:incoming>SequenceFlow-ContractInitiatedToOrderParts-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OrderPartsToStockManagement-id-0002</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-OrderingStarted-id-0001" name="Ordering Started">
+        <bpmn:outgoing>SequenceFlow-OrderingStartedToQuery-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-QueryWebshopsForPartsAvailability-id-0001" name="Query Webshops for Parts Availability">
+        <bpmn:incoming>SequenceFlow-OrderingStartedToQuery-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-QueryToCalculate-id-0002</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:scriptTask id="ScriptTask-CalculateOptimalOrderDistribution-id-0001" name="Computation: Calculate Optimal Order Distribution">
+        <bpmn:incoming>SequenceFlow-QueryToCalculate-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CalculateToSplit-id-0003</bpmn:outgoing>
+      </bpmn:scriptTask>
+      <bpmn:parallelGateway id="ParallelGateway-PlaceOrdersSplit-id-0001" name="Place Orders (Split)" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-CalculateToSplit-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SplitToWebshopA-id-0004</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToWebshopB-id-0005</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToWebshopC-id-0006</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:serviceTask id="ServiceTask-PlaceOrdersWithWebshopA-id-0001" name="Place Orders with Webshop A">
+        <bpmn:incoming>SequenceFlow-SplitToWebshopA-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-WebshopAToJoin-id-0007</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-PlaceOrdersWithWebshopB-id-0001" name="Place Orders with Webshop B">
+        <bpmn:incoming>SequenceFlow-SplitToWebshopB-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-WebshopBToJoin-id-0008</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-PlaceOrdersWithWebshopC-id-0001" name="Place Orders with Webshop C">
+        <bpmn:incoming>SequenceFlow-SplitToWebshopC-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-WebshopCToJoin-id-0009</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:parallelGateway id="ParallelGateway-PlaceOrdersJoin-id-0001" name="Place Orders (Join)" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-WebshopAToJoin-id-0007</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-WebshopBToJoin-id-0008</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-WebshopCToJoin-id-0009</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-JoinToOrdersPlaced-id-0010</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:endEvent id="EndEvent-OrdersPlaced-id-0001" name="Orders Placed">
+        <bpmn:incoming>SequenceFlow-JoinToOrdersPlaced-id-0010</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-OrderingStartedToQuery-id-0001" sourceRef="StartEvent-OrderingStarted-id-0001" targetRef="ServiceTask-QueryWebshopsForPartsAvailability-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-QueryToCalculate-id-0002" sourceRef="ServiceTask-QueryWebshopsForPartsAvailability-id-0001" targetRef="ScriptTask-CalculateOptimalOrderDistribution-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CalculateToSplit-id-0003" sourceRef="ScriptTask-CalculateOptimalOrderDistribution-id-0001" targetRef="ParallelGateway-PlaceOrdersSplit-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToWebshopA-id-0004" sourceRef="ParallelGateway-PlaceOrdersSplit-id-0001" targetRef="ServiceTask-PlaceOrdersWithWebshopA-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToWebshopB-id-0005" sourceRef="ParallelGateway-PlaceOrdersSplit-id-0001" targetRef="ServiceTask-PlaceOrdersWithWebshopB-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToWebshopC-id-0006" sourceRef="ParallelGateway-PlaceOrdersSplit-id-0001" targetRef="ServiceTask-PlaceOrdersWithWebshopC-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-WebshopAToJoin-id-0007" sourceRef="ServiceTask-PlaceOrdersWithWebshopA-id-0001" targetRef="ParallelGateway-PlaceOrdersJoin-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-WebshopBToJoin-id-0008" sourceRef="ServiceTask-PlaceOrdersWithWebshopB-id-0001" targetRef="ParallelGateway-PlaceOrdersJoin-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-WebshopCToJoin-id-0009" sourceRef="ServiceTask-PlaceOrdersWithWebshopC-id-0001" targetRef="ParallelGateway-PlaceOrdersJoin-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-JoinToOrdersPlaced-id-0010" sourceRef="ParallelGateway-PlaceOrdersJoin-id-0001" targetRef="EndEvent-OrdersPlaced-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-ManageStockAndReorders-id-0001" name="Manage Stock and Reorders">
+      <bpmn:incoming>SequenceFlow-OrderPartsToStockManagement-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StockManagementToBuilding-id-0003</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-StockManagementStarted-id-0001" name="Stock Management Started">
+        <bpmn:outgoing>SequenceFlow-StockManagementToReceive-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:receiveTask id="ReceiveTask-ReceivePartsDelivery-id-0001" name="Receive: Parts Delivery">
+        <bpmn:incoming>SequenceFlow-StockManagementToReceive-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReceiveToCheckStock-id-0002</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-Timer2Day-PartsDelivery-id-0001" name="2 Day Delivery Buffer" cancelActivity="false" attachedToRef="ReceiveTask-ReceivePartsDelivery-id-0001">
+        <bpmn:outgoing>SequenceFlow-BoundaryToReminder-id-0003</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="BoundaryEvent-Timer2Day-PartsDelivery-id-0001_EventDef">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P2D</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:boundaryEvent>
+      <bpmn:sendTask id="SendTask-SendReminderToWebshops-id-0001" name="Send: Reminder to Webshops">
+        <bpmn:incoming>SequenceFlow-BoundaryToReminder-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReminderToCheckStock-id-0004</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:scriptTask id="ScriptTask-CheckStockLevels-id-0001" name="Computation: Check Stock Levels">
+        <bpmn:incoming>SequenceFlow-ReceiveToCheckStock-id-0002</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ReminderToCheckStock-id-0004</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-TimerToCheckStock-id-0010</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CheckStockToGateway-id-0005</bpmn:outgoing>
+      </bpmn:scriptTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-StockLevels-id-0001" name="Stock Level Decision" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-CheckStockToGateway-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GatewayToReorderCheapest-id-0006</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToReorderFastest-id-0007</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToComplaint-id-0008</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToTimer-id-0009</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-ReorderPartsCheapest-id-0001" name="Reorder Parts (Cheapest)">
+        <bpmn:incoming>SequenceFlow-GatewayToReorderCheapest-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CheapestToStockManaged-id-0011</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-ReorderPartsFastest-id-0001" name="Reorder Parts (Fastest)">
+        <bpmn:incoming>SequenceFlow-GatewayToReorderFastest-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-FastestToStockManaged-id-0012</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-SendComplaintEmailToFriends-id-0001" name="Send: Complaint Email to Friends">
+        <bpmn:incoming>SequenceFlow-GatewayToComplaint-id-0008</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ComplaintToStockManaged-id-0013</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-Timer1Day-id-0001" name="1 Day Recheck">
+        <bpmn:incoming>SequenceFlow-GatewayToTimer-id-0009</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-TimerToCheckStock-id-0010</bpmn:outgoing>
+      </bpmn:intermediateCatchEvent>
+      <bpmn:endEvent id="EndEvent-StockManaged-id-0001" name="Stock Managed">
+        <bpmn:incoming>SequenceFlow-CheapestToStockManaged-id-0011</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-FastestToStockManaged-id-0012</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ComplaintToStockManaged-id-0013</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StockManagementToReceive-id-0001" sourceRef="StartEvent-StockManagementStarted-id-0001" targetRef="ReceiveTask-ReceivePartsDelivery-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReceiveToCheckStock-id-0002" sourceRef="ReceiveTask-ReceivePartsDelivery-id-0001" targetRef="ScriptTask-CheckStockLevels-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BoundaryToReminder-id-0003" sourceRef="BoundaryEvent-Timer2Day-PartsDelivery-id-0001" targetRef="SendTask-SendReminderToWebshops-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReminderToCheckStock-id-0004" sourceRef="SendTask-SendReminderToWebshops-id-0001" targetRef="ScriptTask-CheckStockLevels-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CheckStockToGateway-id-0005" sourceRef="ScriptTask-CheckStockLevels-id-0001" targetRef="ExclusiveGateway-StockLevels-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToReorderCheapest-id-0006" name="stock &#60; 5" sourceRef="ExclusiveGateway-StockLevels-id-0001" targetRef="ServiceTask-ReorderPartsCheapest-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToReorderFastest-id-0007" name="stock &#60; 3" sourceRef="ExclusiveGateway-StockLevels-id-0001" targetRef="ServiceTask-ReorderPartsFastest-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToComplaint-id-0008" name="stock == 0" sourceRef="ExclusiveGateway-StockLevels-id-0001" targetRef="SendTask-SendComplaintEmailToFriends-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToTimer-id-0009" sourceRef="ExclusiveGateway-StockLevels-id-0001" targetRef="IntermediateCatchEvent-Timer1Day-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-TimerToCheckStock-id-0010" sourceRef="IntermediateCatchEvent-Timer1Day-id-0001" targetRef="ScriptTask-CheckStockLevels-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CheapestToStockManaged-id-0011" sourceRef="ServiceTask-ReorderPartsCheapest-id-0001" targetRef="EndEvent-StockManaged-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-FastestToStockManaged-id-0012" sourceRef="ServiceTask-ReorderPartsFastest-id-0001" targetRef="EndEvent-StockManaged-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ComplaintToStockManaged-id-0013" sourceRef="SendTask-SendComplaintEmailToFriends-id-0001" targetRef="EndEvent-StockManaged-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:userTask id="UserTask-StartBuildingContract-id-0001" name="Start Building Contract">
+      <bpmn:incoming>SequenceFlow-StockManagementToBuilding-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BuildingToCompletion-id-0004</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-ContractProjectCompleted-id-0001" name="Contract Project Completed">
+      <bpmn:incoming>SequenceFlow-BuildingToCompletion-id-0004</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-ContractInitiatedToOrderParts-id-0001" sourceRef="StartEvent-ContractProjectInitiated-id-0001" targetRef="SubProcess-OrderParts-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-OrderPartsToStockManagement-id-0002" sourceRef="SubProcess-OrderParts-id-0001" targetRef="SubProcess-ManageStockAndReorders-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-StockManagementToBuilding-id-0003" sourceRef="SubProcess-ManageStockAndReorders-id-0001" targetRef="UserTask-StartBuildingContract-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BuildingToCompletion-id-0004" sourceRef="UserTask-StartBuildingContract-id-0001" targetRef="EndEvent-ContractProjectCompleted-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ContractProjectProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_ContractProjectProcess" bpmnElement="ContractProjectProcess">
+      <bpmndi:BPMNShape id="StartEvent-ContractProjectInitiated-id-0001_di" bpmnElement="StartEvent-ContractProjectInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-OrderParts-id-0001_di" bpmnElement="SubProcess-OrderParts-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-ManageStockAndReorders-id-0001_di" bpmnElement="SubProcess-ManageStockAndReorders-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-StartBuildingContract-id-0001_di" bpmnElement="UserTask-StartBuildingContract-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ContractProjectCompleted-id-0001_di" bpmnElement="EndEvent-ContractProjectCompleted-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-ContractInitiatedToOrderParts-id-0001_di" bpmnElement="SequenceFlow-ContractInitiatedToOrderParts-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderPartsToStockManagement-id-0002_di" bpmnElement="SequenceFlow-OrderPartsToStockManagement-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StockManagementToBuilding-id-0003_di" bpmnElement="SequenceFlow-StockManagementToBuilding-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BuildingToCompletion-id-0004_di" bpmnElement="SequenceFlow-BuildingToCompletion-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-ManageStockAndReorders-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-ManageStockAndReorders-id-0001" bpmnElement="SubProcess-ManageStockAndReorders-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-StockManagementStarted-id-0001_di" bpmnElement="StartEvent-StockManagementStarted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceivePartsDelivery-id-0001_di" bpmnElement="ReceiveTask-ReceivePartsDelivery-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer2Day-PartsDelivery-id-0001_di" bpmnElement="BoundaryEvent-Timer2Day-PartsDelivery-id-0001">
+        <dc:Bounds x="207" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-CheckStockLevels-id-0001_di" bpmnElement="ScriptTask-CheckStockLevels-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-StockLevels-id-0001_di" bpmnElement="ExclusiveGateway-StockLevels-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ReorderPartsCheapest-id-0001_di" bpmnElement="ServiceTask-ReorderPartsCheapest-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-StockManaged-id-0001_di" bpmnElement="EndEvent-StockManaged-id-0001">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendReminderToWebshops-id-0001_di" bpmnElement="SendTask-SendReminderToWebshops-id-0001">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ReorderPartsFastest-id-0001_di" bpmnElement="ServiceTask-ReorderPartsFastest-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendComplaintEmailToFriends-id-0001_di" bpmnElement="SendTask-SendComplaintEmailToFriends-id-0001">
+        <dc:Bounds x="775" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-Timer1Day-id-0001_di" bpmnElement="IntermediateCatchEvent-Timer1Day-id-0001">
+        <dc:Bounds x="807" y="472" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StockManagementToReceive-id-0001_di" bpmnElement="SequenceFlow-StockManagementToReceive-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToCheckStock-id-0002_di" bpmnElement="SequenceFlow-ReceiveToCheckStock-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToReminder-id-0003_di" bpmnElement="SequenceFlow-BoundaryToReminder-id-0003">
+        <di:waypoint x="225" y="128" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckStockToGateway-id-0005_di" bpmnElement="SequenceFlow-CheckStockToGateway-id-0005">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToReorderCheapest-id-0006_di" bpmnElement="SequenceFlow-GatewayToReorderCheapest-id-0006">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToReorderFastest-id-0007_di" bpmnElement="SequenceFlow-GatewayToReorderFastest-id-0007">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToComplaint-id-0008_di" bpmnElement="SequenceFlow-GatewayToComplaint-id-0008">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="350" />
+        <di:waypoint x="775" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToTimer-id-0009_di" bpmnElement="SequenceFlow-GatewayToTimer-id-0009">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="490" />
+        <di:waypoint x="807" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheapestToStockManaged-id-0011_di" bpmnElement="SequenceFlow-CheapestToStockManaged-id-0011">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReminderToCheckStock-id-0004_di" bpmnElement="SequenceFlow-ReminderToCheckStock-id-0004">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FastestToStockManaged-id-0012_di" bpmnElement="SequenceFlow-FastestToStockManaged-id-0012">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="975" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ComplaintToStockManaged-id-0013_di" bpmnElement="SequenceFlow-ComplaintToStockManaged-id-0013">
+        <di:waypoint x="875" y="350" />
+        <di:waypoint x="975" y="350" />
+        <di:waypoint x="975" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TimerToCheckStock-id-0010_di" bpmnElement="SequenceFlow-TimerToCheckStock-id-0010">
+        <di:waypoint x="825" y="508" />
+        <di:waypoint x="825" y="560" />
+        <di:waypoint x="525" y="560" />
+        <di:waypoint x="525" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-OrderParts-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-OrderParts-id-0001" bpmnElement="SubProcess-OrderParts-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-OrderingStarted-id-0001_di" bpmnElement="StartEvent-OrderingStarted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-QueryWebshopsForPartsAvailability-id-0001_di" bpmnElement="ServiceTask-QueryWebshopsForPartsAvailability-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-CalculateOptimalOrderDistribution-id-0001_di" bpmnElement="ScriptTask-CalculateOptimalOrderDistribution-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-PlaceOrdersSplit-id-0001_di" bpmnElement="ParallelGateway-PlaceOrdersSplit-id-0001">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PlaceOrdersWithWebshopA-id-0001_di" bpmnElement="ServiceTask-PlaceOrdersWithWebshopA-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-PlaceOrdersJoin-id-0001_di" bpmnElement="ParallelGateway-PlaceOrdersJoin-id-0001">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-OrdersPlaced-id-0001_di" bpmnElement="EndEvent-OrdersPlaced-id-0001">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PlaceOrdersWithWebshopB-id-0001_di" bpmnElement="ServiceTask-PlaceOrdersWithWebshopB-id-0001">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PlaceOrdersWithWebshopC-id-0001_di" bpmnElement="ServiceTask-PlaceOrdersWithWebshopC-id-0001">
+        <dc:Bounds x="625" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderingStartedToQuery-id-0001_di" bpmnElement="SequenceFlow-OrderingStartedToQuery-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-QueryToCalculate-id-0002_di" bpmnElement="SequenceFlow-QueryToCalculate-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculateToSplit-id-0003_di" bpmnElement="SequenceFlow-CalculateToSplit-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToWebshopA-id-0004_di" bpmnElement="SequenceFlow-SplitToWebshopA-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToWebshopB-id-0005_di" bpmnElement="SequenceFlow-SplitToWebshopB-id-0005">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToWebshopC-id-0006_di" bpmnElement="SequenceFlow-SplitToWebshopC-id-0006">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="625" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WebshopAToJoin-id-0007_di" bpmnElement="SequenceFlow-WebshopAToJoin-id-0007">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToOrdersPlaced-id-0010_di" bpmnElement="SequenceFlow-JoinToOrdersPlaced-id-0010">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WebshopBToJoin-id-0008_di" bpmnElement="SequenceFlow-WebshopBToJoin-id-0008">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="825" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WebshopCToJoin-id-0009_di" bpmnElement="SequenceFlow-WebshopCToJoin-id-0009">
+        <di:waypoint x="725" y="350" />
+        <di:waypoint x="825" y="350" />
+        <di:waypoint x="825" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

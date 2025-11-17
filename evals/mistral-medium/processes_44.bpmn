@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="FastFoodOrderProcess" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="FastFoodOrderProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-OrderReceived-id-0001" name="Order Received">
+      <bpmn:outgoing>SequenceFlow-StartToReceive-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-ReceiveOrder-id-0001" name="Receive Order">
+      <bpmn:incoming>SequenceFlow-StartToReceive-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveToMenuAsk-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-AskMenuOrBurger-id-0002" name="Ask: Menu or Burger Only?">
+      <bpmn:incoming>SequenceFlow-ReceiveToMenuAsk-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MenuAskToGateway-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-MenuDecision-id-0001" name="Menu Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-MenuAskToGateway-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MenuGatewayToDrink-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-MenuGatewayToBurger-id-0005</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-PrepareDrink-id-0001" name="Prepare Drink">
+      <bpmn:incoming>SequenceFlow-MenuGatewayToDrink-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DrinkToSideSubprocess-id-0006</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:subProcess id="SubProcess-PrepareSideDish-id-0001" name="Prepare Side Dish">
+      <bpmn:incoming>SequenceFlow-DrinkToSideSubprocess-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SideSubprocessToBurger-id-0007</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-SideDishPrepStart-id-0001" name="Side Dish Preparation Start">
+        <bpmn:outgoing>SequenceFlow-SideStartToAsk-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-AskFriesOrWedges-id-0001" name="Ask: Fries or Wedges?">
+        <bpmn:incoming>SequenceFlow-SideStartToAsk-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AskToSideGateway-id-0002</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-SideDecision-id-0001" name="Side Decision" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-AskToSideGateway-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SideGatewayToFries-id-0003</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SideGatewayToWedges-id-0004</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-PrepareFries-id-0001" name="Prepare Fries">
+        <bpmn:incoming>SequenceFlow-SideGatewayToFries-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-FriesToSideEnd-id-0005</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-PrepareWedges-id-0001" name="Prepare Wedges">
+        <bpmn:incoming>SequenceFlow-SideGatewayToWedges-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-WedgesToSideEnd-id-0006</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-SideDishReady-id-0001" name="Side Dish Ready">
+        <bpmn:incoming>SequenceFlow-FriesToSideEnd-id-0005</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-WedgesToSideEnd-id-0006</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-SideStartToAsk-id-0001" sourceRef="StartEvent-SideDishPrepStart-id-0001" targetRef="UserTask-AskFriesOrWedges-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-AskToSideGateway-id-0002" sourceRef="UserTask-AskFriesOrWedges-id-0001" targetRef="ExclusiveGateway-SideDecision-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SideGatewayToFries-id-0003" name="fries" sourceRef="ExclusiveGateway-SideDecision-id-0001" targetRef="ServiceTask-PrepareFries-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SideGatewayToWedges-id-0004" name="wedges" sourceRef="ExclusiveGateway-SideDecision-id-0001" targetRef="ServiceTask-PrepareWedges-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-FriesToSideEnd-id-0005" sourceRef="ServiceTask-PrepareFries-id-0001" targetRef="EndEvent-SideDishReady-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-WedgesToSideEnd-id-0006" sourceRef="ServiceTask-PrepareWedges-id-0001" targetRef="EndEvent-SideDishReady-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:serviceTask id="ServiceTask-PrepareBurger-id-0001" name="Prepare Burger">
+      <bpmn:incoming>SequenceFlow-MenuGatewayToBurger-id-0005</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-SideSubprocessToBurger-id-0007</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-StatusUpdateToBurger-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BurgerToDelivery-id-0008</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-StatusUpdateTimer-id-0001" name="30 Second Status Update" cancelActivity="false" attachedToRef="ServiceTask-PrepareBurger-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryToStatusUpdate-id-0010</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-StatusUpdateTimer-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT30S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-StatusUpdate-id-0001" name="Send: Status Update">
+      <bpmn:incoming>SequenceFlow-BoundaryToStatusUpdate-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StatusUpdateToBurger-id-0011</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-DeliverViaConveyor-id-0001" name="Deliver via Conveyor Belt">
+      <bpmn:incoming>SequenceFlow-BurgerToDelivery-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DeliveryToEnd-id-0009</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-OrderDelivered-id-0001" name="Order Delivered">
+      <bpmn:incoming>SequenceFlow-DeliveryToEnd-id-0009</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToReceive-id-0001" sourceRef="StartEvent-OrderReceived-id-0001" targetRef="UserTask-ReceiveOrder-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveToMenuAsk-id-0002" sourceRef="UserTask-ReceiveOrder-id-0001" targetRef="UserTask-AskMenuOrBurger-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-MenuAskToGateway-id-0003" sourceRef="UserTask-AskMenuOrBurger-id-0002" targetRef="ExclusiveGateway-MenuDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MenuGatewayToDrink-id-0004" name="menu" sourceRef="ExclusiveGateway-MenuDecision-id-0001" targetRef="ServiceTask-PrepareDrink-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MenuGatewayToBurger-id-0005" name="burger only" sourceRef="ExclusiveGateway-MenuDecision-id-0001" targetRef="ServiceTask-PrepareBurger-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DrinkToSideSubprocess-id-0006" sourceRef="ServiceTask-PrepareDrink-id-0001" targetRef="SubProcess-PrepareSideDish-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SideSubprocessToBurger-id-0007" sourceRef="SubProcess-PrepareSideDish-id-0001" targetRef="ServiceTask-PrepareBurger-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BurgerToDelivery-id-0008" sourceRef="ServiceTask-PrepareBurger-id-0001" targetRef="ServiceTask-DeliverViaConveyor-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DeliveryToEnd-id-0009" sourceRef="ServiceTask-DeliverViaConveyor-id-0001" targetRef="EndEvent-OrderDelivered-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToStatusUpdate-id-0010" sourceRef="BoundaryEvent-StatusUpdateTimer-id-0001" targetRef="SendTask-StatusUpdate-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-StatusUpdateToBurger-id-0011" sourceRef="SendTask-StatusUpdate-id-0001" targetRef="ServiceTask-PrepareBurger-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_FastFoodOrderProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_FastFoodOrderProcess-id-0001" bpmnElement="FastFoodOrderProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-OrderReceived-id-0001_di" bpmnElement="StartEvent-OrderReceived-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReceiveOrder-id-0001_di" bpmnElement="UserTask-ReceiveOrder-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AskMenuOrBurger-id-0002_di" bpmnElement="UserTask-AskMenuOrBurger-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-MenuDecision-id-0001_di" bpmnElement="ExclusiveGateway-MenuDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareDrink-id-0001_di" bpmnElement="ServiceTask-PrepareDrink-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-PrepareSideDish-id-0001_di" bpmnElement="SubProcess-PrepareSideDish-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareBurger-id-0001_di" bpmnElement="ServiceTask-PrepareBurger-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-StatusUpdateTimer-id-0001_di" bpmnElement="BoundaryEvent-StatusUpdateTimer-id-0001">
+        <dc:Bounds x="957" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DeliverViaConveyor-id-0001_di" bpmnElement="ServiceTask-DeliverViaConveyor-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-OrderDelivered-id-0001_di" bpmnElement="EndEvent-OrderDelivered-id-0001">
+        <dc:Bounds x="1257" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-StatusUpdate-id-0001_di" bpmnElement="SendTask-StatusUpdate-id-0001">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToReceive-id-0001_di" bpmnElement="SequenceFlow-StartToReceive-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToMenuAsk-id-0002_di" bpmnElement="SequenceFlow-ReceiveToMenuAsk-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MenuAskToGateway-id-0003_di" bpmnElement="SequenceFlow-MenuAskToGateway-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MenuGatewayToDrink-id-0004_di" bpmnElement="SequenceFlow-MenuGatewayToDrink-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MenuGatewayToBurger-id-0005_di" bpmnElement="SequenceFlow-MenuGatewayToBurger-id-0005">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="140" />
+        <di:waypoint x="975" y="140" />
+        <di:waypoint x="975" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DrinkToSideSubprocess-id-0006_di" bpmnElement="SequenceFlow-DrinkToSideSubprocess-id-0006">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SideSubprocessToBurger-id-0007_di" bpmnElement="SequenceFlow-SideSubprocessToBurger-id-0007">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BurgerToDelivery-id-0008_di" bpmnElement="SequenceFlow-BurgerToDelivery-id-0008">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToStatusUpdate-id-0010_di" bpmnElement="SequenceFlow-BoundaryToStatusUpdate-id-0010">
+        <di:waypoint x="975" y="128" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DeliveryToEnd-id-0009_di" bpmnElement="SequenceFlow-DeliveryToEnd-id-0009">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1257" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StatusUpdateToBurger-id-0011_di" bpmnElement="SequenceFlow-StatusUpdateToBurger-id-0011">
+        <di:waypoint x="1125" y="250" />
+        <di:waypoint x="1125" y="280" />
+        <di:waypoint x="975" y="280" />
+        <di:waypoint x="975" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-PrepareSideDish-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-PrepareSideDish-id-0001" bpmnElement="SubProcess-PrepareSideDish-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-SideDishPrepStart-id-0001_di" bpmnElement="StartEvent-SideDishPrepStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AskFriesOrWedges-id-0001_di" bpmnElement="UserTask-AskFriesOrWedges-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SideDecision-id-0001_di" bpmnElement="ExclusiveGateway-SideDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareFries-id-0001_di" bpmnElement="ServiceTask-PrepareFries-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-SideDishReady-id-0001_di" bpmnElement="EndEvent-SideDishReady-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareWedges-id-0001_di" bpmnElement="ServiceTask-PrepareWedges-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-SideStartToAsk-id-0001_di" bpmnElement="SequenceFlow-SideStartToAsk-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AskToSideGateway-id-0002_di" bpmnElement="SequenceFlow-AskToSideGateway-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SideGatewayToFries-id-0003_di" bpmnElement="SequenceFlow-SideGatewayToFries-id-0003">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SideGatewayToWedges-id-0004_di" bpmnElement="SequenceFlow-SideGatewayToWedges-id-0004">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FriesToSideEnd-id-0005_di" bpmnElement="SequenceFlow-FriesToSideEnd-id-0005">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WedgesToSideEnd-id-0006_di" bpmnElement="SequenceFlow-WedgesToSideEnd-id-0006">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="675" y="88" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

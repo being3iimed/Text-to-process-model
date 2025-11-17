@@ -1,0 +1,500 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "ecommerce-order-fulfillment-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler (https://bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "ECommerceOrderFulfillmentProcess-id-0001",
+      "name": "E-Commerce Order Fulfillment",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-OrderPlaced-id-0001",
+          "name": "Order Placed"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-RecordOrderDetails-id-0001",
+          "name": "Record Order Details"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProcessPayment-id-0001",
+          "name": "Process Payment"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-PaymentStatus-id-0001",
+          "name": "Payment Successful?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-PaymentFailureNotification-id-0001",
+          "name": "Send: payment failure notification"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-PaymentFailed-id-0001",
+          "name": "Payment Failed"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CheckStockAvailability-id-0001",
+          "name": "Check Stock Availability"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-StockStatus-id-0001",
+          "name": "Items In Stock?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-BackOrderNotification-id-0001",
+          "name": "Send: back-order notification"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-BackOrderItems-id-0001",
+          "name": "Receive: back-order items"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-FulfillmentPreparation-id-0001",
+          "name": "Fulfillment Preparation",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-PreparationStart-id-0001",
+              "name": "Preparation Start"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-PickItemsFromWarehouse-id-0001",
+              "name": "Pick Items from Warehouse"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-PerformQualityControl-id-0001",
+              "name": "Perform Quality Control"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-GiftWrap-id-0001",
+              "name": "Gift Wrap Requested?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-AddGiftWrapping-id-0001",
+              "name": "Add Gift Wrapping"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-PackageItems-id-0001",
+              "name": "Package Items"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-PreparationComplete-id-0001",
+              "name": "Preparation Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SubStartToPick-id-0001",
+              "sourceRef": "StartEvent-PreparationStart-id-0001",
+              "targetRef": "ServiceTask-PickItemsFromWarehouse-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PickToQC-id-0002",
+              "sourceRef": "ServiceTask-PickItemsFromWarehouse-id-0001",
+              "targetRef": "ServiceTask-PerformQualityControl-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-QCToGiftWrapCheck-id-0003",
+              "sourceRef": "ServiceTask-PerformQualityControl-id-0001",
+              "targetRef": "ExclusiveGateway-GiftWrap-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GiftWrapYes-id-0004",
+              "name": "gift_wrap_requested",
+              "sourceRef": "ExclusiveGateway-GiftWrap-id-0001",
+              "targetRef": "ServiceTask-AddGiftWrapping-id-0001",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GiftWrapNo-id-0005",
+              "name": "",
+              "sourceRef": "ExclusiveGateway-GiftWrap-id-0001",
+              "targetRef": "ServiceTask-PackageItems-id-0001",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-WrapToPackage-id-0006",
+              "sourceRef": "ServiceTask-AddGiftWrapping-id-0001",
+              "targetRef": "ServiceTask-PackageItems-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PackageToEnd-id-0007",
+              "sourceRef": "ServiceTask-PackageItems-id-0001",
+              "targetRef": "EndEvent-PreparationComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-ShippingDocs-id-0001",
+          "name": "Prepare Shipping Documents",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-PrepareShippingDocuments-id-0001",
+          "name": "Prepare Shipping Documents"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-InternationalOrder-id-0001",
+          "name": "International Order?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-PrepareCustomsDocumentation-id-0001",
+          "name": "Prepare Customs Documentation"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-ShippingDocsJoin-id-0002",
+          "name": "Shipping Docs Complete",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-DispatchOrder-id-0001",
+          "name": "Dispatch Order"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-ShippingConfirmation-id-0001",
+          "name": "Send: shipping confirmation"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-UpdateInventoryLevels-id-0001",
+          "name": "Update Inventory Levels"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-FeedbackRequest-id-0001",
+          "name": "Send: feedback request"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-DeliveryConfirmation-id-0001",
+          "name": "Receive: delivery confirmation"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-IssuesReported-id-0001",
+          "name": "Customer Reports Issues?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-ReturnsProcess-id-0001",
+          "name": "Returns Process",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-ReturnInitiated-id-0001",
+              "name": "Return Initiated"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-ReturnShippingLabel-id-0001",
+              "name": "Send: return shipping label"
+            },
+            {
+              "$type": "bpmn:ReceiveTask",
+              "id": "ReceiveTask-ReturnedItems-id-0001",
+              "name": "Receive: returned items"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-InspectReturnedItems-id-0001",
+              "name": "Inspect Returned Items"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-RefundOrReplace-id-0001",
+              "name": "Refund or Replace?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-ProcessRefund-id-0001",
+              "name": "Process Refund"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-ProcessReplacement-id-0001",
+              "name": "Process Replacement"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-ReturnsProcessComplete-id-0001",
+              "name": "Returns Process Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReturnStartToLabel-id-0001",
+              "sourceRef": "StartEvent-ReturnInitiated-id-0001",
+              "targetRef": "SendTask-ReturnShippingLabel-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-LabelToReceive-id-0002",
+              "sourceRef": "SendTask-ReturnShippingLabel-id-0001",
+              "targetRef": "ReceiveTask-ReturnedItems-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReceiveToInspect-id-0003",
+              "sourceRef": "ReceiveTask-ReturnedItems-id-0001",
+              "targetRef": "ServiceTask-InspectReturnedItems-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-InspectToDecision-id-0004",
+              "sourceRef": "ServiceTask-InspectReturnedItems-id-0001",
+              "targetRef": "ExclusiveGateway-RefundOrReplace-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RefundPath-id-0005",
+              "name": "refund_approved",
+              "sourceRef": "ExclusiveGateway-RefundOrReplace-id-0001",
+              "targetRef": "ServiceTask-ProcessRefund-id-0001",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReplacePath-id-0006",
+              "name": "",
+              "sourceRef": "ExclusiveGateway-RefundOrReplace-id-0001",
+              "targetRef": "ServiceTask-ProcessReplacement-id-0001",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RefundToEnd-id-0007",
+              "sourceRef": "ServiceTask-ProcessRefund-id-0001",
+              "targetRef": "EndEvent-ReturnsProcessComplete-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReplaceToEnd-id-0008",
+              "sourceRef": "ServiceTask-ProcessReplacement-id-0001",
+              "targetRef": "EndEvent-ReturnsProcessComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-OrderFulfillmentComplete-id-0001",
+          "name": "Order Fulfillment Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToRecord-id-0001",
+          "sourceRef": "StartEvent-OrderPlaced-id-0001",
+          "targetRef": "UserTask-RecordOrderDetails-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RecordToPayment-id-0002",
+          "sourceRef": "UserTask-RecordOrderDetails-id-0001",
+          "targetRef": "ServiceTask-ProcessPayment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PaymentToGateway-id-0003",
+          "sourceRef": "ServiceTask-ProcessPayment-id-0001",
+          "targetRef": "ExclusiveGateway-PaymentStatus-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PaymentFailed-id-0004",
+          "name": "",
+          "sourceRef": "ExclusiveGateway-PaymentStatus-id-0001",
+          "targetRef": "SendTask-PaymentFailureNotification-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PaymentSuccess-id-0005",
+          "name": "payment_successful",
+          "sourceRef": "ExclusiveGateway-PaymentStatus-id-0001",
+          "targetRef": "ServiceTask-CheckStockAvailability-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StockToGateway-id-0006",
+          "sourceRef": "ServiceTask-CheckStockAvailability-id-0001",
+          "targetRef": "ExclusiveGateway-StockStatus-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InStock-id-0007",
+          "name": "items_in_stock",
+          "sourceRef": "ExclusiveGateway-StockStatus-id-0001",
+          "targetRef": "SubProcess-FulfillmentPreparation-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BackOrder-id-0008",
+          "name": "",
+          "sourceRef": "ExclusiveGateway-StockStatus-id-0001",
+          "targetRef": "SendTask-BackOrderNotification-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BackOrderNotifyToReceive-id-0009",
+          "sourceRef": "SendTask-BackOrderNotification-id-0001",
+          "targetRef": "ReceiveTask-BackOrderItems-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BackOrderToPrep-id-0010",
+          "sourceRef": "ReceiveTask-BackOrderItems-id-0001",
+          "targetRef": "SubProcess-FulfillmentPreparation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PrepToShippingDocs-id-0011",
+          "sourceRef": "SubProcess-FulfillmentPreparation-id-0001",
+          "targetRef": "ParallelGateway-ShippingDocs-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ShippingDocsToDocsTask-id-0012",
+          "sourceRef": "ParallelGateway-ShippingDocs-id-0001",
+          "targetRef": "ServiceTask-PrepareShippingDocuments-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ShippingDocsToIntlCheck-id-0013",
+          "sourceRef": "ParallelGateway-ShippingDocs-id-0001",
+          "targetRef": "ExclusiveGateway-InternationalOrder-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DocsToJoin-id-0014",
+          "sourceRef": "ServiceTask-PrepareShippingDocuments-id-0001",
+          "targetRef": "ParallelGateway-ShippingDocsJoin-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-IntlCheckToCustoms-id-0015",
+          "name": "international_order",
+          "sourceRef": "ExclusiveGateway-InternationalOrder-id-0001",
+          "targetRef": "ServiceTask-PrepareCustomsDocumentation-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-IntlCheckToJoin-id-0016",
+          "name": "",
+          "sourceRef": "ExclusiveGateway-InternationalOrder-id-0001",
+          "targetRef": "ParallelGateway-ShippingDocsJoin-id-0002",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CustomsToJoin-id-0017",
+          "sourceRef": "ServiceTask-PrepareCustomsDocumentation-id-0001",
+          "targetRef": "ParallelGateway-ShippingDocsJoin-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinToDispatch-id-0018",
+          "sourceRef": "ParallelGateway-ShippingDocsJoin-id-0002",
+          "targetRef": "ServiceTask-DispatchOrder-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DispatchToConfirmation-id-0019",
+          "sourceRef": "ServiceTask-DispatchOrder-id-0001",
+          "targetRef": "SendTask-ShippingConfirmation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmationToInventory-id-0020",
+          "sourceRef": "SendTask-ShippingConfirmation-id-0001",
+          "targetRef": "ServiceTask-UpdateInventoryLevels-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InventoryToFeedback-id-0021",
+          "sourceRef": "ServiceTask-UpdateInventoryLevels-id-0001",
+          "targetRef": "SendTask-FeedbackRequest-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FeedbackToDelivery-id-0022",
+          "sourceRef": "SendTask-FeedbackRequest-id-0001",
+          "targetRef": "ReceiveTask-DeliveryConfirmation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DeliveryToIssuesCheck-id-0023",
+          "sourceRef": "ReceiveTask-DeliveryConfirmation-id-0001",
+          "targetRef": "ExclusiveGateway-IssuesReported-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-IssuesYes-id-0024",
+          "name": "customer_reports_issues",
+          "sourceRef": "ExclusiveGateway-IssuesReported-id-0001",
+          "targetRef": "SubProcess-ReturnsProcess-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-IssuesNo-id-0025",
+          "name": "",
+          "sourceRef": "ExclusiveGateway-IssuesReported-id-0001",
+          "targetRef": "EndEvent-OrderFulfillmentComplete-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReturnsToEnd-id-0026",
+          "sourceRef": "SubProcess-ReturnsProcess-id-0001",
+          "targetRef": "EndEvent-OrderFulfillmentComplete-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FailureNotifyToEnd-id-0027",
+          "sourceRef": "SendTask-PaymentFailureNotification-id-0001",
+          "targetRef": "EndEvent-PaymentFailed-id-0001"
+        }
+      ]
+    }
+  ]
+}

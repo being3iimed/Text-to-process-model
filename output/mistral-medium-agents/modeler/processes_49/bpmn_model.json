@@ -1,0 +1,227 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "ComputerRepairProcess-Definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "ComputerRepairProcess-id-0001",
+      "name": "Computer Repair Process",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-CustomerBringsDefectiveComputer-id-0001",
+          "name": "Customer Brings Defective Computer"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CheckDefectAndCalculateRepairCost-id-0001",
+          "name": "Check Defect and Calculate Repair Cost"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CustomerAcceptsRejectsCost-id-0002",
+          "name": "Customer Accepts/Rejects Cost"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-CostDecision-id-0001",
+          "name": "Cost Acceptable?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-ParallelRepairActivities-id-0001",
+          "name": "Parallel Repair Activities",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-RepairHardware-id-0001",
+          "name": "Repair Hardware"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-TestHardwareFunctionality-id-0002",
+          "name": "Test Hardware Functionality"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-HardwareTestResult-id-0001",
+          "name": "Hardware Test Passed?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-RepairHardwareRepeat-id-0003",
+          "name": "Repair Hardware (Repeat)"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-TestHardwareFunctionalityRepeat-id-0004",
+          "name": "Test Hardware Functionality (Repeat)"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-RepairSoftware-id-0005",
+          "name": "Repair Software"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-TestSoftwareFunctionality-id-0006",
+          "name": "Test Software Functionality"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-SoftwareTestResult-id-0001",
+          "name": "Software Test Passed?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-RepairSoftwareRepeat-id-0007",
+          "name": "Repair Software (Repeat)"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-TestSoftwareFunctionalityRepeat-id-0008",
+          "name": "Test Software Functionality (Repeat)"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-RepairComplete-id-0001",
+          "name": "Repair Complete"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-CustomerDeclinesRepair-id-0002",
+          "name": "Customer Declines Repair"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToCheckDefect-id-0001",
+          "sourceRef": "StartEvent-CustomerBringsDefectiveComputer-id-0001",
+          "targetRef": "UserTask-CheckDefectAndCalculateRepairCost-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CheckDefectToCustomerDecision-id-0002",
+          "sourceRef": "UserTask-CheckDefectAndCalculateRepairCost-id-0001",
+          "targetRef": "UserTask-CustomerAcceptsRejectsCost-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CustomerDecisionToCostGateway-id-0003",
+          "sourceRef": "UserTask-CustomerAcceptsRejectsCost-id-0002",
+          "targetRef": "ExclusiveGateway-CostDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CostAcceptedToParallelRepair-id-0004",
+          "sourceRef": "ExclusiveGateway-CostDecision-id-0001",
+          "targetRef": "ParallelGateway-ParallelRepairActivities-id-0001",
+          "name": "cost_acceptable == true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CostRejectedToEnd-id-0005",
+          "sourceRef": "ExclusiveGateway-CostDecision-id-0001",
+          "targetRef": "EndEvent-CustomerDeclinesRepair-id-0002",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ParallelToHardwareRepair-id-0006",
+          "sourceRef": "ParallelGateway-ParallelRepairActivities-id-0001",
+          "targetRef": "ServiceTask-RepairHardware-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HardwareRepairToTest-id-0007",
+          "sourceRef": "ServiceTask-RepairHardware-id-0001",
+          "targetRef": "ServiceTask-TestHardwareFunctionality-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HardwareTestToGateway-id-0008",
+          "sourceRef": "ServiceTask-TestHardwareFunctionality-id-0002",
+          "targetRef": "ExclusiveGateway-HardwareTestResult-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HardwareTestPassedToEnd-id-0009",
+          "sourceRef": "ExclusiveGateway-HardwareTestResult-id-0001",
+          "targetRef": "EndEvent-RepairComplete-id-0001",
+          "name": "test_passed == true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HardwareTestFailedToRepairRepeat-id-0010",
+          "sourceRef": "ExclusiveGateway-HardwareTestResult-id-0001",
+          "targetRef": "ServiceTask-RepairHardwareRepeat-id-0003",
+          "name": "test_passed == false"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HardwareRepairRepeatToTestRepeat-id-0011",
+          "sourceRef": "ServiceTask-RepairHardwareRepeat-id-0003",
+          "targetRef": "ServiceTask-TestHardwareFunctionalityRepeat-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HardwareTestRepeatToEnd-id-0012",
+          "sourceRef": "ServiceTask-TestHardwareFunctionalityRepeat-id-0004",
+          "targetRef": "EndEvent-RepairComplete-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ParallelToSoftwareRepair-id-0013",
+          "sourceRef": "ParallelGateway-ParallelRepairActivities-id-0001",
+          "targetRef": "ServiceTask-RepairSoftware-id-0005"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SoftwareRepairToTest-id-0014",
+          "sourceRef": "ServiceTask-RepairSoftware-id-0005",
+          "targetRef": "ServiceTask-TestSoftwareFunctionality-id-0006"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SoftwareTestToGateway-id-0015",
+          "sourceRef": "ServiceTask-TestSoftwareFunctionality-id-0006",
+          "targetRef": "ExclusiveGateway-SoftwareTestResult-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SoftwareTestPassedToEnd-id-0016",
+          "sourceRef": "ExclusiveGateway-SoftwareTestResult-id-0001",
+          "targetRef": "EndEvent-RepairComplete-id-0001",
+          "name": "test_passed == true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SoftwareTestFailedToRepairRepeat-id-0017",
+          "sourceRef": "ExclusiveGateway-SoftwareTestResult-id-0001",
+          "targetRef": "ServiceTask-RepairSoftwareRepeat-id-0007",
+          "name": "test_passed == false"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SoftwareRepairRepeatToTestRepeat-id-0018",
+          "sourceRef": "ServiceTask-RepairSoftwareRepeat-id-0007",
+          "targetRef": "ServiceTask-TestSoftwareFunctionalityRepeat-id-0008"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SoftwareTestRepeatToEnd-id-0019",
+          "sourceRef": "ServiceTask-TestSoftwareFunctionalityRepeat-id-0008",
+          "targetRef": "EndEvent-RepairComplete-id-0001"
+        }
+      ]
+    }
+  ]
+}

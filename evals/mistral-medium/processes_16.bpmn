@@ -1,0 +1,655 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="AuditProcessDefinitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="AuditProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-AuditProcessInitiated-id-0001" name="Audit Process Initiated">
+      <bpmn:outgoing>SequenceFlow-StartToInitialSplit-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:parallelGateway id="ParallelGateway-InitialTasksSplit-id-0001" name="Initial Parallel Tasks" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-StartToInitialSplit-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToSendNotification-id-0002</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToPrepareStatements-id-0003</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToGatherDocuments-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToCheckUpdates-id-0005</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sendTask id="SendTask-SendAuditInitiationNotification-id-0001" name="Send: audit initiation notification">
+      <bpmn:incoming>SequenceFlow-SplitToSendNotification-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotificationToJoin-id-0006</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-PrepareFinancialStatements-id-0001" name="Prepare financial statements">
+      <bpmn:incoming>SequenceFlow-SplitToPrepareStatements-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PrepareStatementsToJoin-id-0007</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-GatherSupportingDocuments-id-0001" name="Gather supporting documents">
+      <bpmn:incoming>SequenceFlow-SplitToGatherDocuments-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatherDocumentsToJoin-id-0008</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-CheckRegulatoryUpdates-id-0001" name="Check regulatory updates">
+      <bpmn:incoming>SequenceFlow-SplitToCheckUpdates-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckUpdatesToJoin-id-0009</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-InitialTasksJoin-id-0002" name="Synchronize Initial Tasks" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-NotificationToJoin-id-0006</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-PrepareStatementsToJoin-id-0007</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-GatherDocumentsToJoin-id-0008</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-CheckUpdatesToJoin-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToSubmit-id-0010</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sendTask id="SendTask-SubmitAuditDocuments-id-0002" name="Submit: audit documents">
+      <bpmn:incoming>SequenceFlow-JoinToSubmit-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SubmitToReview-id-0011</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-ReviewSubmission-id-0001" name="Review submission">
+      <bpmn:incoming>SequenceFlow-SubmitToReview-id-0011</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ProvideToReReview-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToDiscrepanciesCheck-id-0012</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-DiscrepanciesFound-id-0001" name="Discrepancies Found?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewToDiscrepanciesCheck-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DiscrepanciesToRequestClarifications-id-0013</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-NoDiscrepanciesToRiskAssessment-id-0014</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-RequestClarifications-id-0001" name="Request: clarifications">
+      <bpmn:incoming>SequenceFlow-DiscrepanciesToRequestClarifications-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RequestToProvideClarifications-id-0015</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-ProvideClarifications-id-0001" name="Provide clarifications">
+      <bpmn:incoming>SequenceFlow-RequestToProvideClarifications-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProvideToReReview-id-0016</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="SubProcess-RiskAssessment-id-0001" name="Risk Assessment">
+      <bpmn:incoming>SequenceFlow-NoDiscrepanciesToRiskAssessment-id-0014</bpmn:incoming>
+      <bpmn:startEvent id="StartEvent-RiskAssessmentStart-id-0001" name="Risk Assessment Start">
+        <bpmn:outgoing>SequenceFlow-RiskStartToSplit-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:parallelGateway id="ParallelGateway-RiskAssessmentSplit-id-0001" name="Risk Assessment Split" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-RiskStartToSplit-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SplitToFinancialRisks-id-0002</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToOperationalRisks-id-0003</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToComplianceRisks-id-0004</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:userTask id="UserTask-EvaluateFinancialRisks-id-0001" name="Evaluate financial risks">
+        <bpmn:incoming>SequenceFlow-SplitToFinancialRisks-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-FinancialRisksToJoin-id-0005</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-EvaluateOperationalRisks-id-0001" name="Evaluate operational risks">
+        <bpmn:incoming>SequenceFlow-SplitToOperationalRisks-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-OperationalRisksToJoin-id-0006</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-EvaluateComplianceRisks-id-0001" name="Evaluate compliance risks">
+        <bpmn:incoming>SequenceFlow-SplitToComplianceRisks-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ComplianceRisksToJoin-id-0007</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:parallelGateway id="ParallelGateway-RiskAssessmentJoin-id-0002" name="Risk Assessment Join" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-FinancialRisksToJoin-id-0005</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-OperationalRisksToJoin-id-0006</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ComplianceRisksToJoin-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-JoinToHighRiskCheck-id-0008</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-HighRiskIdentified-id-0001" name="High Risk Identified?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-JoinToHighRiskCheck-id-0008</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-HighRiskToEnd-id-0009</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-NoHighRiskToEnd-id-0010</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="EndEvent-HighRiskIdentified-id-0001" name="High Risk Identified">
+        <bpmn:incoming>SequenceFlow-HighRiskToEnd-id-0009</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RiskAssessmentToHighRiskCheck-id-0017</bpmn:outgoing>
+      </bpmn:endEvent>
+      <bpmn:endEvent id="EndEvent-RiskAssessmentComplete-id-0002" name="Risk Assessment Complete">
+        <bpmn:incoming>SequenceFlow-NoHighRiskToEnd-id-0010</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RiskAssessmentCompleteToReport-id-0018</bpmn:outgoing>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-RiskStartToSplit-id-0001" sourceRef="StartEvent-RiskAssessmentStart-id-0001" targetRef="ParallelGateway-RiskAssessmentSplit-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToFinancialRisks-id-0002" sourceRef="ParallelGateway-RiskAssessmentSplit-id-0001" targetRef="UserTask-EvaluateFinancialRisks-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToOperationalRisks-id-0003" sourceRef="ParallelGateway-RiskAssessmentSplit-id-0001" targetRef="UserTask-EvaluateOperationalRisks-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToComplianceRisks-id-0004" sourceRef="ParallelGateway-RiskAssessmentSplit-id-0001" targetRef="UserTask-EvaluateComplianceRisks-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-FinancialRisksToJoin-id-0005" sourceRef="UserTask-EvaluateFinancialRisks-id-0001" targetRef="ParallelGateway-RiskAssessmentJoin-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-OperationalRisksToJoin-id-0006" sourceRef="UserTask-EvaluateOperationalRisks-id-0001" targetRef="ParallelGateway-RiskAssessmentJoin-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-ComplianceRisksToJoin-id-0007" sourceRef="UserTask-EvaluateComplianceRisks-id-0001" targetRef="ParallelGateway-RiskAssessmentJoin-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-JoinToHighRiskCheck-id-0008" sourceRef="ParallelGateway-RiskAssessmentJoin-id-0002" targetRef="ExclusiveGateway-HighRiskIdentified-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-HighRiskToEnd-id-0009" name="high_risk_identified" sourceRef="ExclusiveGateway-HighRiskIdentified-id-0001" targetRef="EndEvent-HighRiskIdentified-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-NoHighRiskToEnd-id-0010" sourceRef="ExclusiveGateway-HighRiskIdentified-id-0001" targetRef="EndEvent-RiskAssessmentComplete-id-0002" />
+    </bpmn:subProcess>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-HighRiskCheck-id-0002" name="High Risk Check" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-RiskAssessmentToHighRiskCheck-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-HighRiskToInvestigation-id-0019</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-NoHighRiskToReport-id-0020</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:subProcess id="SubProcess-DetailedInvestigation-id-0001" name="Detailed Investigation">
+      <bpmn:incoming>SequenceFlow-HighRiskToInvestigation-id-0019</bpmn:incoming>
+      <bpmn:startEvent id="StartEvent-InvestigationStart-id-0001" name="Investigation Start">
+        <bpmn:outgoing>SequenceFlow-InvestigationStartToDataAnalysis-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-PerformDataAnalysis-id-0001" name="Perform data analysis">
+        <bpmn:incoming>SequenceFlow-InvestigationStartToDataAnalysis-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-DataAnalysisToInterviews-id-0002</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-ConductInterviews-id-0001" name="Conduct interviews">
+        <bpmn:incoming>SequenceFlow-DataAnalysisToInterviews-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-InterviewsToSiteVisitCheck-id-0003</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-SiteVisitRequired-id-0001" name="Site Visit Required?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-InterviewsToSiteVisitCheck-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SiteVisitRequiredToSiteVisit-id-0004</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-NoSiteVisitToComplete-id-0005</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:userTask id="UserTask-PerformSiteVisit-id-0001" name="Perform site visit">
+        <bpmn:incoming>SequenceFlow-SiteVisitRequiredToSiteVisit-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SiteVisitToComplete-id-0006</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:endEvent id="EndEvent-InvestigationComplete-id-0001" name="Investigation Complete">
+        <bpmn:incoming>SequenceFlow-NoSiteVisitToComplete-id-0005</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-SiteVisitToComplete-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-InvestigationToReport-id-0021</bpmn:outgoing>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-InvestigationStartToDataAnalysis-id-0001" sourceRef="StartEvent-InvestigationStart-id-0001" targetRef="UserTask-PerformDataAnalysis-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-DataAnalysisToInterviews-id-0002" sourceRef="UserTask-PerformDataAnalysis-id-0001" targetRef="UserTask-ConductInterviews-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-InterviewsToSiteVisitCheck-id-0003" sourceRef="UserTask-ConductInterviews-id-0001" targetRef="ExclusiveGateway-SiteVisitRequired-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SiteVisitRequiredToSiteVisit-id-0004" name="site_visit_required" sourceRef="ExclusiveGateway-SiteVisitRequired-id-0001" targetRef="UserTask-PerformSiteVisit-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-NoSiteVisitToComplete-id-0005" sourceRef="ExclusiveGateway-SiteVisitRequired-id-0001" targetRef="EndEvent-InvestigationComplete-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SiteVisitToComplete-id-0006" sourceRef="UserTask-PerformSiteVisit-id-0001" targetRef="EndEvent-InvestigationComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:userTask id="UserTask-CompileAuditReport-id-0001" name="Compile audit report">
+      <bpmn:incoming>SequenceFlow-RiskAssessmentCompleteToReport-id-0018</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-NoHighRiskToReport-id-0020</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-InvestigationToReport-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CompileToReviewReport-id-0022</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ReviewAuditReport-id-0001" name="Review audit report">
+      <bpmn:incoming>SequenceFlow-CompileToReviewReport-id-0022</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-UpdateToReReview-id-0026</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToRevisionsCheck-id-0023</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-RevisionsRequired-id-0001" name="Revisions Required?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewToRevisionsCheck-id-0023</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RevisionsToUpdate-id-0024</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-NoRevisionsToDistribute-id-0025</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-UpdateReport-id-0001" name="Update report">
+      <bpmn:incoming>SequenceFlow-RevisionsToUpdate-id-0024</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateToReReview-id-0026</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="SendTask-DistributeFinalReport-id-0001" name="Distribute: final report">
+      <bpmn:incoming>SequenceFlow-NoRevisionsToDistribute-id-0025</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DistributeToArchive-id-0027</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-ArchiveAuditRecords-id-0001" name="Archive audit records">
+      <bpmn:incoming>SequenceFlow-DistributeToArchive-id-0027</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ArchiveToEnd-id-0028</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-AuditProcessClosed-id-0001" name="Audit Process Closed">
+      <bpmn:incoming>SequenceFlow-ArchiveToEnd-id-0028</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToInitialSplit-id-0001" sourceRef="StartEvent-AuditProcessInitiated-id-0001" targetRef="ParallelGateway-InitialTasksSplit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToSendNotification-id-0002" sourceRef="ParallelGateway-InitialTasksSplit-id-0001" targetRef="SendTask-SendAuditInitiationNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToPrepareStatements-id-0003" sourceRef="ParallelGateway-InitialTasksSplit-id-0001" targetRef="UserTask-PrepareFinancialStatements-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToGatherDocuments-id-0004" sourceRef="ParallelGateway-InitialTasksSplit-id-0001" targetRef="UserTask-GatherSupportingDocuments-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToCheckUpdates-id-0005" sourceRef="ParallelGateway-InitialTasksSplit-id-0001" targetRef="ServiceTask-CheckRegulatoryUpdates-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotificationToJoin-id-0006" sourceRef="SendTask-SendAuditInitiationNotification-id-0001" targetRef="ParallelGateway-InitialTasksJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrepareStatementsToJoin-id-0007" sourceRef="UserTask-PrepareFinancialStatements-id-0001" targetRef="ParallelGateway-InitialTasksJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatherDocumentsToJoin-id-0008" sourceRef="UserTask-GatherSupportingDocuments-id-0001" targetRef="ParallelGateway-InitialTasksJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckUpdatesToJoin-id-0009" sourceRef="ServiceTask-CheckRegulatoryUpdates-id-0001" targetRef="ParallelGateway-InitialTasksJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToSubmit-id-0010" sourceRef="ParallelGateway-InitialTasksJoin-id-0002" targetRef="SendTask-SubmitAuditDocuments-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubmitToReview-id-0011" sourceRef="SendTask-SubmitAuditDocuments-id-0002" targetRef="UserTask-ReviewSubmission-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToDiscrepanciesCheck-id-0012" sourceRef="UserTask-ReviewSubmission-id-0001" targetRef="ExclusiveGateway-DiscrepanciesFound-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DiscrepanciesToRequestClarifications-id-0013" name="discrepancies_found" sourceRef="ExclusiveGateway-DiscrepanciesFound-id-0001" targetRef="SendTask-RequestClarifications-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NoDiscrepanciesToRiskAssessment-id-0014" sourceRef="ExclusiveGateway-DiscrepanciesFound-id-0001" targetRef="SubProcess-RiskAssessment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RequestToProvideClarifications-id-0015" sourceRef="SendTask-RequestClarifications-id-0001" targetRef="UserTask-ProvideClarifications-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProvideToReReview-id-0016" sourceRef="UserTask-ProvideClarifications-id-0001" targetRef="UserTask-ReviewSubmission-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RiskAssessmentToHighRiskCheck-id-0017" sourceRef="EndEvent-HighRiskIdentified-id-0001" targetRef="ExclusiveGateway-HighRiskCheck-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-RiskAssessmentCompleteToReport-id-0018" sourceRef="EndEvent-RiskAssessmentComplete-id-0002" targetRef="UserTask-CompileAuditReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-HighRiskToInvestigation-id-0019" name="high_risk_identified" sourceRef="ExclusiveGateway-HighRiskCheck-id-0002" targetRef="SubProcess-DetailedInvestigation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NoHighRiskToReport-id-0020" sourceRef="ExclusiveGateway-HighRiskCheck-id-0002" targetRef="UserTask-CompileAuditReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InvestigationToReport-id-0021" sourceRef="EndEvent-InvestigationComplete-id-0001" targetRef="UserTask-CompileAuditReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CompileToReviewReport-id-0022" sourceRef="UserTask-CompileAuditReport-id-0001" targetRef="UserTask-ReviewAuditReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToRevisionsCheck-id-0023" sourceRef="UserTask-ReviewAuditReport-id-0001" targetRef="ExclusiveGateway-RevisionsRequired-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RevisionsToUpdate-id-0024" name="revisions_required" sourceRef="ExclusiveGateway-RevisionsRequired-id-0001" targetRef="UserTask-UpdateReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NoRevisionsToDistribute-id-0025" sourceRef="ExclusiveGateway-RevisionsRequired-id-0001" targetRef="SendTask-DistributeFinalReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateToReReview-id-0026" sourceRef="UserTask-UpdateReport-id-0001" targetRef="UserTask-ReviewAuditReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DistributeToArchive-id-0027" sourceRef="SendTask-DistributeFinalReport-id-0001" targetRef="ServiceTask-ArchiveAuditRecords-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ArchiveToEnd-id-0028" sourceRef="ServiceTask-ArchiveAuditRecords-id-0001" targetRef="EndEvent-AuditProcessClosed-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_AuditProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_AuditProcess" bpmnElement="AuditProcess">
+      <bpmndi:BPMNShape id="StartEvent-AuditProcessInitiated-id-0001_di" bpmnElement="StartEvent-AuditProcessInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-InitialTasksSplit-id-0001_di" bpmnElement="ParallelGateway-InitialTasksSplit-id-0001">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendAuditInitiationNotification-id-0001_di" bpmnElement="SendTask-SendAuditInitiationNotification-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-InitialTasksJoin-id-0002_di" bpmnElement="ParallelGateway-InitialTasksJoin-id-0002">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SubmitAuditDocuments-id-0002_di" bpmnElement="SendTask-SubmitAuditDocuments-id-0002">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewSubmission-id-0001_di" bpmnElement="UserTask-ReviewSubmission-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-DiscrepanciesFound-id-0001_di" bpmnElement="ExclusiveGateway-DiscrepanciesFound-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RequestClarifications-id-0001_di" bpmnElement="SendTask-RequestClarifications-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ProvideClarifications-id-0001_di" bpmnElement="UserTask-ProvideClarifications-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PrepareFinancialStatements-id-0001_di" bpmnElement="UserTask-PrepareFinancialStatements-id-0001">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-RiskAssessment-id-0001_di" bpmnElement="SubProcess-RiskAssessment-id-0001">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-GatherSupportingDocuments-id-0001_di" bpmnElement="UserTask-GatherSupportingDocuments-id-0001">
+        <dc:Bounds x="325" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckRegulatoryUpdates-id-0001_di" bpmnElement="ServiceTask-CheckRegulatoryUpdates-id-0001">
+        <dc:Bounds x="325" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-HighRiskCheck-id-0002_di" bpmnElement="ExclusiveGateway-HighRiskCheck-id-0002" isMarkerVisible="true">
+        <dc:Bounds x="50" y="605" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-DetailedInvestigation-id-0001_di" bpmnElement="SubProcess-DetailedInvestigation-id-0001">
+        <dc:Bounds x="175" y="590" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToInitialSplit-id-0001_di" bpmnElement="SequenceFlow-StartToInitialSplit-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToSendNotification-id-0002_di" bpmnElement="SequenceFlow-SplitToSendNotification-id-0002">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToPrepareStatements-id-0003_di" bpmnElement="SequenceFlow-SplitToPrepareStatements-id-0003">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToGatherDocuments-id-0004_di" bpmnElement="SequenceFlow-SplitToGatherDocuments-id-0004">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="350" />
+        <di:waypoint x="325" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToCheckUpdates-id-0005_di" bpmnElement="SequenceFlow-SplitToCheckUpdates-id-0005">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="490" />
+        <di:waypoint x="325" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotificationToJoin-id-0006_di" bpmnElement="SequenceFlow-NotificationToJoin-id-0006">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToSubmit-id-0010_di" bpmnElement="SequenceFlow-JoinToSubmit-id-0010">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubmitToReview-id-0011_di" bpmnElement="SequenceFlow-SubmitToReview-id-0011">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToDiscrepanciesCheck-id-0012_di" bpmnElement="SequenceFlow-ReviewToDiscrepanciesCheck-id-0012">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DiscrepanciesToRequestClarifications-id-0013_di" bpmnElement="SequenceFlow-DiscrepanciesToRequestClarifications-id-0013">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NoDiscrepanciesToRiskAssessment-id-0014_di" bpmnElement="SequenceFlow-NoDiscrepanciesToRiskAssessment-id-0014">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RequestToProvideClarifications-id-0015_di" bpmnElement="SequenceFlow-RequestToProvideClarifications-id-0015">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProvideToReReview-id-0016_di" bpmnElement="SequenceFlow-ProvideToReReview-id-0016">
+        <di:waypoint x="1275" y="110" />
+        <di:waypoint x="1275" y="140" />
+        <di:waypoint x="825" y="140" />
+        <di:waypoint x="825" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrepareStatementsToJoin-id-0007_di" bpmnElement="SequenceFlow-PrepareStatementsToJoin-id-0007">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatherDocumentsToJoin-id-0008_di" bpmnElement="SequenceFlow-GatherDocumentsToJoin-id-0008">
+        <di:waypoint x="425" y="350" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckUpdatesToJoin-id-0009_di" bpmnElement="SequenceFlow-CheckUpdatesToJoin-id-0009">
+        <di:waypoint x="425" y="490" />
+        <di:waypoint x="525" y="490" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HighRiskToInvestigation-id-0019_di" bpmnElement="SequenceFlow-HighRiskToInvestigation-id-0019">
+        <di:waypoint x="100" y="630" />
+        <di:waypoint x="175" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NoHighRiskToReport-id-0020_di" bpmnElement="SequenceFlow-NoHighRiskToReport-id-0020">
+        <di:waypoint x="100" y="630" />
+        <di:waypoint x="150" y="630" />
+        <di:waypoint x="150" y="140" />
+        <di:waypoint x="900" y="140" />
+        <di:waypoint x="900" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-DetailedInvestigation-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-DetailedInvestigation-id-0001" bpmnElement="SubProcess-DetailedInvestigation-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-InvestigationStart-id-0001_di" bpmnElement="StartEvent-InvestigationStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PerformDataAnalysis-id-0001_di" bpmnElement="UserTask-PerformDataAnalysis-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConductInterviews-id-0001_di" bpmnElement="UserTask-ConductInterviews-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SiteVisitRequired-id-0001_di" bpmnElement="ExclusiveGateway-SiteVisitRequired-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PerformSiteVisit-id-0001_di" bpmnElement="UserTask-PerformSiteVisit-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-InvestigationComplete-id-0001_di" bpmnElement="EndEvent-InvestigationComplete-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CompileAuditReport-id-0001_di" bpmnElement="UserTask-CompileAuditReport-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewAuditReport-id-0001_di" bpmnElement="UserTask-ReviewAuditReport-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RevisionsRequired-id-0001_di" bpmnElement="ExclusiveGateway-RevisionsRequired-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-UpdateReport-id-0001_di" bpmnElement="UserTask-UpdateReport-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-DistributeFinalReport-id-0001_di" bpmnElement="SendTask-DistributeFinalReport-id-0001">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ArchiveAuditRecords-id-0001_di" bpmnElement="ServiceTask-ArchiveAuditRecords-id-0001">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AuditProcessClosed-id-0001_di" bpmnElement="EndEvent-AuditProcessClosed-id-0001">
+        <dc:Bounds x="1707" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvestigationStartToDataAnalysis-id-0001_di" bpmnElement="SequenceFlow-InvestigationStartToDataAnalysis-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DataAnalysisToInterviews-id-0002_di" bpmnElement="SequenceFlow-DataAnalysisToInterviews-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InterviewsToSiteVisitCheck-id-0003_di" bpmnElement="SequenceFlow-InterviewsToSiteVisitCheck-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SiteVisitRequiredToSiteVisit-id-0004_di" bpmnElement="SequenceFlow-SiteVisitRequiredToSiteVisit-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NoSiteVisitToComplete-id-0005_di" bpmnElement="SequenceFlow-NoSiteVisitToComplete-id-0005">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="140" />
+        <di:waypoint x="825" y="140" />
+        <di:waypoint x="825" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SiteVisitToComplete-id-0006_di" bpmnElement="SequenceFlow-SiteVisitToComplete-id-0006">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvestigationToReport-id-0021_di" bpmnElement="SequenceFlow-InvestigationToReport-id-0021">
+        <di:waypoint x="843" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompileToReviewReport-id-0022_di" bpmnElement="SequenceFlow-CompileToReviewReport-id-0022">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToRevisionsCheck-id-0023_di" bpmnElement="SequenceFlow-ReviewToRevisionsCheck-id-0023">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RevisionsToUpdate-id-0024_di" bpmnElement="SequenceFlow-RevisionsToUpdate-id-0024">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NoRevisionsToDistribute-id-0025_di" bpmnElement="SequenceFlow-NoRevisionsToDistribute-id-0025">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateToReReview-id-0026_di" bpmnElement="SequenceFlow-UpdateToReReview-id-0026">
+        <di:waypoint x="1425" y="110" />
+        <di:waypoint x="1425" y="140" />
+        <di:waypoint x="1125" y="140" />
+        <di:waypoint x="1125" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DistributeToArchive-id-0027_di" bpmnElement="SequenceFlow-DistributeToArchive-id-0027">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ArchiveToEnd-id-0028_di" bpmnElement="SequenceFlow-ArchiveToEnd-id-0028">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1707" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-RiskAssessment-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-RiskAssessment-id-0001" bpmnElement="SubProcess-RiskAssessment-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-RiskAssessmentStart-id-0001_di" bpmnElement="StartEvent-RiskAssessmentStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-RiskAssessmentSplit-id-0001_di" bpmnElement="ParallelGateway-RiskAssessmentSplit-id-0001">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EvaluateFinancialRisks-id-0001_di" bpmnElement="UserTask-EvaluateFinancialRisks-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-RiskAssessmentJoin-id-0002_di" bpmnElement="ParallelGateway-RiskAssessmentJoin-id-0002">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-HighRiskIdentified-id-0001_di" bpmnElement="ExclusiveGateway-HighRiskIdentified-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-HighRiskIdentified-id-0001_di" bpmnElement="EndEvent-HighRiskIdentified-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-HighRiskCheck-id-0002_di" bpmnElement="ExclusiveGateway-HighRiskCheck-id-0002" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-DetailedInvestigation-id-0001_di" bpmnElement="SubProcess-DetailedInvestigation-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EvaluateOperationalRisks-id-0001_di" bpmnElement="UserTask-EvaluateOperationalRisks-id-0001">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-RiskAssessmentComplete-id-0002_di" bpmnElement="EndEvent-RiskAssessmentComplete-id-0002">
+        <dc:Bounds x="807" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EvaluateComplianceRisks-id-0001_di" bpmnElement="UserTask-EvaluateComplianceRisks-id-0001">
+        <dc:Bounds x="325" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-RiskStartToSplit-id-0001_di" bpmnElement="SequenceFlow-RiskStartToSplit-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToFinancialRisks-id-0002_di" bpmnElement="SequenceFlow-SplitToFinancialRisks-id-0002">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToOperationalRisks-id-0003_di" bpmnElement="SequenceFlow-SplitToOperationalRisks-id-0003">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToComplianceRisks-id-0004_di" bpmnElement="SequenceFlow-SplitToComplianceRisks-id-0004">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="350" />
+        <di:waypoint x="325" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FinancialRisksToJoin-id-0005_di" bpmnElement="SequenceFlow-FinancialRisksToJoin-id-0005">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToHighRiskCheck-id-0008_di" bpmnElement="SequenceFlow-JoinToHighRiskCheck-id-0008">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HighRiskToEnd-id-0009_di" bpmnElement="SequenceFlow-HighRiskToEnd-id-0009">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NoHighRiskToEnd-id-0010_di" bpmnElement="SequenceFlow-NoHighRiskToEnd-id-0010">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="807" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RiskAssessmentToHighRiskCheck-id-0017_di" bpmnElement="SequenceFlow-RiskAssessmentToHighRiskCheck-id-0017">
+        <di:waypoint x="843" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HighRiskToInvestigation-id-0019_di" bpmnElement="SequenceFlow-HighRiskToInvestigation-id-0019">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NoHighRiskToReport-id-0020_di" bpmnElement="SequenceFlow-NoHighRiskToReport-id-0020">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1050" y="70" />
+        <di:waypoint x="1050" y="0" />
+        <di:waypoint x="975" y="0" />
+        <di:waypoint x="975" y="30" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OperationalRisksToJoin-id-0006_di" bpmnElement="SequenceFlow-OperationalRisksToJoin-id-0006">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RiskAssessmentCompleteToReport-id-0018_di" bpmnElement="SequenceFlow-RiskAssessmentCompleteToReport-id-0018">
+        <di:waypoint x="843" y="210" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="975" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ComplianceRisksToJoin-id-0007_di" bpmnElement="SequenceFlow-ComplianceRisksToJoin-id-0007">
+        <di:waypoint x="425" y="350" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-DetailedInvestigation-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-DetailedInvestigation-id-0001" bpmnElement="SubProcess-DetailedInvestigation-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-InvestigationStart-id-0001_di" bpmnElement="StartEvent-InvestigationStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PerformDataAnalysis-id-0001_di" bpmnElement="UserTask-PerformDataAnalysis-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConductInterviews-id-0001_di" bpmnElement="UserTask-ConductInterviews-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SiteVisitRequired-id-0001_di" bpmnElement="ExclusiveGateway-SiteVisitRequired-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PerformSiteVisit-id-0001_di" bpmnElement="UserTask-PerformSiteVisit-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-InvestigationComplete-id-0001_di" bpmnElement="EndEvent-InvestigationComplete-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CompileAuditReport-id-0001_di" bpmnElement="UserTask-CompileAuditReport-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewAuditReport-id-0001_di" bpmnElement="UserTask-ReviewAuditReport-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RevisionsRequired-id-0001_di" bpmnElement="ExclusiveGateway-RevisionsRequired-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-UpdateReport-id-0001_di" bpmnElement="UserTask-UpdateReport-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-DistributeFinalReport-id-0001_di" bpmnElement="SendTask-DistributeFinalReport-id-0001">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ArchiveAuditRecords-id-0001_di" bpmnElement="ServiceTask-ArchiveAuditRecords-id-0001">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AuditProcessClosed-id-0001_di" bpmnElement="EndEvent-AuditProcessClosed-id-0001">
+        <dc:Bounds x="1707" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvestigationStartToDataAnalysis-id-0001_di" bpmnElement="SequenceFlow-InvestigationStartToDataAnalysis-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DataAnalysisToInterviews-id-0002_di" bpmnElement="SequenceFlow-DataAnalysisToInterviews-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InterviewsToSiteVisitCheck-id-0003_di" bpmnElement="SequenceFlow-InterviewsToSiteVisitCheck-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SiteVisitRequiredToSiteVisit-id-0004_di" bpmnElement="SequenceFlow-SiteVisitRequiredToSiteVisit-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NoSiteVisitToComplete-id-0005_di" bpmnElement="SequenceFlow-NoSiteVisitToComplete-id-0005">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="140" />
+        <di:waypoint x="825" y="140" />
+        <di:waypoint x="825" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SiteVisitToComplete-id-0006_di" bpmnElement="SequenceFlow-SiteVisitToComplete-id-0006">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvestigationToReport-id-0021_di" bpmnElement="SequenceFlow-InvestigationToReport-id-0021">
+        <di:waypoint x="843" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompileToReviewReport-id-0022_di" bpmnElement="SequenceFlow-CompileToReviewReport-id-0022">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToRevisionsCheck-id-0023_di" bpmnElement="SequenceFlow-ReviewToRevisionsCheck-id-0023">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RevisionsToUpdate-id-0024_di" bpmnElement="SequenceFlow-RevisionsToUpdate-id-0024">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NoRevisionsToDistribute-id-0025_di" bpmnElement="SequenceFlow-NoRevisionsToDistribute-id-0025">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateToReReview-id-0026_di" bpmnElement="SequenceFlow-UpdateToReReview-id-0026">
+        <di:waypoint x="1425" y="110" />
+        <di:waypoint x="1425" y="140" />
+        <di:waypoint x="1125" y="140" />
+        <di:waypoint x="1125" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DistributeToArchive-id-0027_di" bpmnElement="SequenceFlow-DistributeToArchive-id-0027">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ArchiveToEnd-id-0028_di" bpmnElement="SequenceFlow-ArchiveToEnd-id-0028">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1707" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

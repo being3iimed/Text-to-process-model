@@ -1,0 +1,283 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "LegoMachineBuildingProcess",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler",
+    "exporterVersion": "1.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "LegoMachineBuildingProcess-id-0001",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-StartLegoMachineProject-id-0001",
+            "name": "Start Lego Machine Project"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-DevelopBasicMachineDesign-id-0001",
+            "name": "Develop basic machine design"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-OrderLegoBrickSets-id-0001",
+            "name": "Order Lego brick sets"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-GiveSetsToChildrenForSorting-id-0001",
+            "name": "Give sets to children for sorting"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-SortPartsIntoContainers-id-0001",
+            "name": "Sort parts into containers"
+          },
+          {
+            "$type": "bpmn:SubProcess",
+            "id": "SubProcess-SubcomponentLifecycle-id-0001",
+            "name": "Subcomponent Lifecycle",
+            "triggeredByEvent": false,
+            "flowElements": [
+              {
+                "$type": "bpmn:StartEvent",
+                "id": "StartEvent-BeginSubcomponent-id-0001",
+                "name": "Begin Subcomponent"
+              },
+              {
+                "$type": "bpmn:UserTask",
+                "id": "UserTask-BuildSubcomponent-id-0001",
+                "name": "Build subcomponent"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-TestSubcomponent-id-0001",
+                "name": "Test subcomponent"
+              },
+              {
+                "$type": "bpmn:ExclusiveGateway",
+                "id": "ExclusiveGateway-TestResult-id-0001",
+                "name": "Test Result?",
+                "gatewayDirection": "Diverging"
+              },
+              {
+                "$type": "bpmn:UserTask",
+                "id": "UserTask-RedesignSubcomponent-id-0001",
+                "name": "Redesign subcomponent"
+              },
+              {
+                "$type": "bpmn:EndEvent",
+                "id": "EndEvent-SubcomponentReady-id-0001",
+                "name": "Subcomponent Ready"
+              },
+              {
+                "$type": "bpmn:ExclusiveGateway",
+                "id": "ExclusiveGateway-ContainerCheck-id-0001",
+                "name": "Container Empty?",
+                "gatewayDirection": "Diverging"
+              },
+              {
+                "$type": "bpmn:IntermediateCatchEvent",
+                "id": "IntermediateCatchEvent-PartReorderDelay-id-0001",
+                "name": "Wait for parts",
+                "eventDefinitions": [
+                  {
+                    "$type": "bpmn:TimerEventDefinition",
+                    "timeDuration": "PT48H"
+                  }
+                ]
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-ReorderIndividualParts-id-0001",
+                "name": "Reorder individual parts"
+              },
+              {
+                "$type": "bpmn:UserTask",
+                "id": "UserTask-AddNewPartsToContainer-id-0001",
+                "name": "Add new parts to container"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-BeginToBuild-id-0001",
+                "sourceRef": "StartEvent-BeginSubcomponent-id-0001",
+                "targetRef": "UserTask-BuildSubcomponent-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-BuildToTest-id-0002",
+                "sourceRef": "UserTask-BuildSubcomponent-id-0001",
+                "targetRef": "ServiceTask-TestSubcomponent-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-TestToGateway-id-0003",
+                "sourceRef": "ServiceTask-TestSubcomponent-id-0001",
+                "targetRef": "ExclusiveGateway-TestResult-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-TestPassToReady-id-0004",
+                "name": "test_successful",
+                "sourceRef": "ExclusiveGateway-TestResult-id-0001",
+                "targetRef": "ExclusiveGateway-ContainerCheck-id-0001",
+                "isDefault": false
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-TestFailToRedesign-id-0005",
+                "name": "test_failed",
+                "sourceRef": "ExclusiveGateway-TestResult-id-0001",
+                "targetRef": "UserTask-RedesignSubcomponent-id-0001",
+                "isDefault": true
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-RedesignToBuild-id-0006",
+                "sourceRef": "UserTask-RedesignSubcomponent-id-0001",
+                "targetRef": "UserTask-BuildSubcomponent-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ReadyToContainerCheck-id-0007",
+                "sourceRef": "ExclusiveGateway-ContainerCheck-id-0001",
+                "targetRef": "EndEvent-SubcomponentReady-id-0001",
+                "name": "container_not_empty",
+                "isDefault": true
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ContainerEmptyToWait-id-0008",
+                "name": "container_empty",
+                "sourceRef": "ExclusiveGateway-ContainerCheck-id-0001",
+                "targetRef": "IntermediateCatchEvent-PartReorderDelay-id-0001",
+                "isDefault": false
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-WaitToReorder-id-0009",
+                "sourceRef": "IntermediateCatchEvent-PartReorderDelay-id-0001",
+                "targetRef": "ServiceTask-ReorderIndividualParts-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ReorderToAddParts-id-0010",
+                "sourceRef": "ServiceTask-ReorderIndividualParts-id-0001",
+                "targetRef": "UserTask-AddNewPartsToContainer-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-AddPartsToReady-id-0011",
+                "sourceRef": "UserTask-AddNewPartsToContainer-id-0001",
+                "targetRef": "EndEvent-SubcomponentReady-id-0001"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:ParallelGateway",
+            "id": "ParallelGateway-SubcomponentSplit-id-0001",
+            "name": "Parallel Subcomponent Building",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ParallelGateway",
+            "id": "ParallelGateway-SubcomponentJoin-id-0001",
+            "name": "Synchronize Subcomponents",
+            "gatewayDirection": "Converging"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-AssembleFinalMachine-id-0001",
+            "name": "Assemble final machine"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-MachineAssemblyComplete-id-0001",
+            "name": "Machine Assembly Complete"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToDesign-id-0001",
+            "sourceRef": "StartEvent-StartLegoMachineProject-id-0001",
+            "targetRef": "UserTask-DevelopBasicMachineDesign-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DesignToOrder-id-0002",
+            "sourceRef": "UserTask-DevelopBasicMachineDesign-id-0001",
+            "targetRef": "ServiceTask-OrderLegoBrickSets-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-OrderToGiveSets-id-0003",
+            "sourceRef": "ServiceTask-OrderLegoBrickSets-id-0001",
+            "targetRef": "UserTask-GiveSetsToChildrenForSorting-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GiveSetsToSort-id-0004",
+            "sourceRef": "UserTask-GiveSetsToChildrenForSorting-id-0001",
+            "targetRef": "UserTask-SortPartsIntoContainers-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SortToSubcomponentSplit-id-0005",
+            "sourceRef": "UserTask-SortPartsIntoContainers-id-0001",
+            "targetRef": "ParallelGateway-SubcomponentSplit-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SubcomponentSplitToLifecycle-id-0006",
+            "sourceRef": "ParallelGateway-SubcomponentSplit-id-0001",
+            "targetRef": "SubProcess-SubcomponentLifecycle-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-LifecycleToJoin-id-0007",
+            "sourceRef": "SubProcess-SubcomponentLifecycle-id-0001",
+            "targetRef": "ParallelGateway-SubcomponentJoin-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-JoinToAssembly-id-0008",
+            "sourceRef": "ParallelGateway-SubcomponentJoin-id-0001",
+            "targetRef": "UserTask-AssembleFinalMachine-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AssemblyToComplete-id-0009",
+            "sourceRef": "UserTask-AssembleFinalMachine-id-0001",
+            "targetRef": "EndEvent-MachineAssemblyComplete-id-0001"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-large-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11895,
+        "total_tokens": 14569,
+        "completion_tokens": 2674
+      },
+      "model_name": "mistral-large-latest",
+      "model": "mistral-large-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11895,
+      "output_tokens": 2674,
+      "total_tokens": 14569
+    },
+    "id": "lc_run--5bd8d938-ec70-4149-b6ef-20ceade325f8-0"
+  },
+  "status": "success"
+}

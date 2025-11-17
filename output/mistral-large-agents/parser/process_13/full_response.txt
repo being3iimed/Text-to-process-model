@@ -1,0 +1,143 @@
+```
+<summary_of_elements>
+
+## Summary of Elements
+
+### TASKS:
+- **userTask("Log Complaint")** - Customer service manually logs complaint details
+- **serviceTask("Assign to Department")** - System automatically routes to correct team
+- **userTask("Review Complaint")** - Department investigates validity and refund justification
+- **sendTask("Send: Decision Notification")** - System notifies customer of decision
+- **serviceTask("Process Refund")** - Financial team executes reimbursement
+- **userTask("Mark as Resolved")** - System marks case as closed
+- **receiveTask("Receive: Customer Feedback")** - Optional customer satisfaction input
+
+### GATEWAYS:
+- **XOR** after complaint review with 2 branches:
+  - `refund_approved == true`
+  - `refund_approved == false` (default)
+
+### EVENTS:
+- **startEvent("Complaint Filed")** - Trigger: Manual customer action
+- **endEvent("Case Closed")** - Normal completion
+- **intermediateEvent** - None (no explicit delays)
+
+### BOUNDARY EVENTS:
+- **None** - No hard SLAs or expected error scenarios mentioned
+
+### SUBPROCESSES:
+- **None** - All tasks are linear/sequential with single decision point
+
+---
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+```pseudocode
+startEvent("Complaint Filed")
+
+userTask("Log Complaint")
+serviceTask("Assign to Department")
+userTask("Review Complaint")
+
+if (refund_approved == true):
+    sendTask("Send: Decision Notification (Approval)")
+    serviceTask("Process Refund")
+else:
+    sendTask("Send: Decision Notification (Rejection)")
+
+userTask("Mark as Resolved")
+receiveTask("Receive: Customer Feedback")
+endEvent("Case Closed")
+```
+
+---
+</bpmn_pseudocode>
+
+<compliance_verification>
+
+## BPMN Compliance Verification
+
+### ✅ **Timer Events**: N/A (No timers used)
+### ✅ **Gateways**:
+- XOR gateway has 2 mutually exclusive branches
+- Default flow explicitly marked (`refund_approved == false`)
+- No convergence needed (linear flow post-decision)
+### ✅ **Sequence Flows**:
+- All conditional flows have descriptive labels
+- No empty string labels
+### ✅ **Boundary Events**: N/A (None added; no SLAs/errors mentioned)
+### ✅ **Subprocesses**: N/A (None needed; linear flow)
+### ✅ **Flow Paths**:
+- All paths traceable start-to-end
+- No orphaned flows
+- No unreachable tasks
+### ✅ **Task Classification**:
+- Human judgment: `userTask` (Log/Review/Mark)
+- System actions: `serviceTask` (Assign/Process)
+- Communication: `sendTask`/`receiveTask` (Notification/Feedback)
+
+---
+</compliance_verification>
+
+<design_rationale>
+
+## Key Design Decisions
+
+1. **No Boundary Events**:
+   - Description lacked hard SLAs (e.g., "must respond within X hours")
+   - No expected error scenarios (e.g., "if system fails during refund")
+   - *Compliance*: Avoids speculative patterns per `<boundary_event_gating>`
+
+2. **No Subprocesses**:
+   - All tasks are part of a single linear investigation → resolution flow
+   - Single decision point (refund approval) doesn’t warrant abstraction
+   - *Compliance*: Passes `<subprocess_validation>` Three-Question Test (Q1: "No single cohesive purpose beyond main flow")
+
+3. **XOR Gateway**:
+   - Binary decision (refund: yes/no) with mutually exclusive outcomes
+   - Default flow handles rejection case explicitly
+   - *Compliance*: Meets `<gateway_convergence>` requirements
+
+4. **Receive Task for Feedback**:
+   - Marked as optional (no timerBoundary) since description didn’t specify SLA
+   - *Compliance*: Avoids defensive timer addition per `<timer_positioning>`
+
+---
+</design_rationale>
+
+<assumptions>
+
+## Documented Assumptions
+1. **Refund Processing**:
+   - Assumed financial team action is automated (`serviceTask`) unless manual steps are required (would then be `userTask`).
+   - *Clarification Needed*: Is "process reimbursement" fully automated or requires manual approval?
+
+2. **Feedback Collection**:
+   - Assumed optional (no enforcement) since description used "can provide feedback."
+   - *Clarification Needed*: Should feedback have a deadline (e.g., "must be submitted within 7 days")?
+
+3. **Department Assignment**:
+   - Assumed system routing (`serviceTask`) unless manual triage is required.
+   - *Clarification Needed*: Is department assignment automated or manual?
+
+---
+</assumptions>
+
+<critical_success_validation>
+
+## Critical Success Criteria Validation
+| **Criteria**               | **Status** | **Evidence**                                                                 |
+|----------------------------|------------|------------------------------------------------------------------------------|
+| No invalid BPMN properties | ✅ PASS    | No timers/events/tasks violate BPMN 2.0 spec                                |
+| No unreachable elements    | ✅ PASS    | All paths trace from `startEvent` to `endEvent`                              |
+| No missing convergence     | ✅ PASS    | XOR gateway doesn’t require convergence (linear post-decision flow)        |
+| No orphaned flows          | ✅ PASS    | Every task/event is connected                                               |
+| No speculative boundaries   | ✅ PASS    | No boundary events added without explicit SLAs/errors                       |
+| No unjustified subprocesses | ✅ PASS    | All tasks are inline; no abstraction without clear purpose                  |
+| All labels present         | ✅ PASS    | All conditional flows have descriptive labels (`refund_approved == true`)  |
+| Balanced design            | ✅ PASS    | Core elements (tasks/gateways) comprise 100% of design; no over-engineering |
+
+---
+</critical_success_validation>
+```

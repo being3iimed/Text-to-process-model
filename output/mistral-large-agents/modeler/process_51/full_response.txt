@@ -1,0 +1,111 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "vacation-request-process-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "VacationRequestProcess-id-0001",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-VacationRequestSubmitted-id-0001",
+          "name": "Vacation Request Submitted"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SubmitVacationRequest-id-0001",
+          "name": "Submit Vacation Request"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SupervisorReviewsRequest-id-0002",
+          "name": "Supervisor Reviews Request"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ApprovalDecision-id-0001",
+          "name": "Approval Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-HRNotification-id-0001",
+          "name": "Send: HR Notification"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-HRCompletesProcedures-id-0003",
+          "name": "HR Completes Procedures"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ReviewRejectionReasons-id-0004",
+          "name": "Review Rejection Reasons"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-RequestProcessed-id-0001",
+          "name": "Request Processed"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToSubmit-id-0001",
+          "sourceRef": "StartEvent-VacationRequestSubmitted-id-0001",
+          "targetRef": "UserTask-SubmitVacationRequest-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SubmitToReview-id-0002",
+          "sourceRef": "UserTask-SubmitVacationRequest-id-0001",
+          "targetRef": "UserTask-SupervisorReviewsRequest-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReviewToGateway-id-0003",
+          "sourceRef": "UserTask-SupervisorReviewsRequest-id-0002",
+          "targetRef": "ExclusiveGateway-ApprovalDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToHRNotification-id-0004",
+          "sourceRef": "ExclusiveGateway-ApprovalDecision-id-0001",
+          "targetRef": "SendTask-HRNotification-id-0001",
+          "name": "approved == true",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HRNotificationToHRProcedures-id-0005",
+          "sourceRef": "SendTask-HRNotification-id-0001",
+          "targetRef": "UserTask-HRCompletesProcedures-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HRProceduresToEnd-id-0006",
+          "sourceRef": "UserTask-HRCompletesProcedures-id-0003",
+          "targetRef": "EndEvent-RequestProcessed-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToReviewRejection-id-0007",
+          "sourceRef": "ExclusiveGateway-ApprovalDecision-id-0001",
+          "targetRef": "UserTask-ReviewRejectionReasons-id-0004",
+          "name": "approved == false",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReviewRejectionToEnd-id-0008",
+          "sourceRef": "UserTask-ReviewRejectionReasons-id-0004",
+          "targetRef": "EndEvent-RequestProcessed-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

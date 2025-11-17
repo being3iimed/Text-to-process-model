@@ -1,0 +1,351 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "TreeHouseProject-Definitions-id-0001",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler (https://bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "TreeHouseProjectProcess-id-0001",
+      "name": "Build Tree House and Host Party",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-TreeHouseProjectInitiated-id-0001",
+          "name": "Tree House Project Initiated"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CollectTreeHouseRequirements-id-0001",
+          "name": "Collect Tree House Requirements"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendRequirementsToArchitect-id-0001",
+          "name": "Send: requirements to architect"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-ReceiveDraftFromArchitect-id-0001",
+          "name": "Receive: draft from architect"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-DraftRefinement-id-0001",
+          "name": "Draft Needs Refinement?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-RefineDraftWithRequirements-id-0001",
+          "name": "Refine draft with additional requirements"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendRefinedRequirements-id-0001",
+          "name": "Send: refined requirements to architect"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-ReceiveUpdatedDraft-id-0001",
+          "name": "Receive: updated draft from architect"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateMaterialsList-id-0001",
+          "name": "Generate materials list from plan"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-MaterialOrdering-id-0001",
+          "name": "Material Ordering",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-OrderingStart-id-0001",
+              "name": "Ordering Start"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-CategorizeMaterials-id-0001",
+              "name": "Categorize materials"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-SplitOrdering-id-0001",
+              "name": "Parallel Ordering",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-OrderFromStoreA-id-0001",
+              "name": "Order materials from Store A"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-OrderFromStoreB-id-0001",
+              "name": "Order materials from Store B"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-OrderFromStoreC-id-0001",
+              "name": "Order materials from Store C"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-JoinOrdering-id-0001",
+              "name": "Ordering Complete",
+              "gatewayDirection": "Converging"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-OrderingComplete-id-0001",
+              "name": "Ordering Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-OrderingStartToCategorize-id-0001",
+              "sourceRef": "StartEvent-OrderingStart-id-0001",
+              "targetRef": "ServiceTask-CategorizeMaterials-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CategorizeToSplit-id-0001",
+              "sourceRef": "ServiceTask-CategorizeMaterials-id-0001",
+              "targetRef": "ParallelGateway-SplitOrdering-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToStoreA-id-0001",
+              "sourceRef": "ParallelGateway-SplitOrdering-id-0001",
+              "targetRef": "ServiceTask-OrderFromStoreA-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToStoreB-id-0001",
+              "sourceRef": "ParallelGateway-SplitOrdering-id-0001",
+              "targetRef": "ServiceTask-OrderFromStoreB-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToStoreC-id-0001",
+              "sourceRef": "ParallelGateway-SplitOrdering-id-0001",
+              "targetRef": "ServiceTask-OrderFromStoreC-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StoreAToJoin-id-0001",
+              "sourceRef": "ServiceTask-OrderFromStoreA-id-0001",
+              "targetRef": "ParallelGateway-JoinOrdering-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StoreBToJoin-id-0001",
+              "sourceRef": "ServiceTask-OrderFromStoreB-id-0001",
+              "targetRef": "ParallelGateway-JoinOrdering-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StoreCToJoin-id-0001",
+              "sourceRef": "ServiceTask-OrderFromStoreC-id-0001",
+              "targetRef": "ParallelGateway-JoinOrdering-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-JoinToEnd-id-0001",
+              "sourceRef": "ParallelGateway-JoinOrdering-id-0001",
+              "targetRef": "EndEvent-OrderingComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-SplitBuildPhase-id-0001",
+          "name": "Build Phase",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendBuildRequests-id-0001",
+          "name": "Send: build requests to friends"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-ReceiveBuildCompletion-id-0001",
+          "name": "Receive: build completion confirmation"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-BuildTimeout-id-0001",
+          "name": "7 Day Build Timeout",
+          "attachedToRef": "ReceiveTask-ReceiveBuildCompletion-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "P7D"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendReminderToFriends-id-0001",
+          "name": "Send: reminder to friends"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-JoinBuildPhase-id-0001",
+          "name": "Build Phase Complete",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendPartyInvitations-id-0001",
+          "name": "Send: party invitations to friends"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-ReceiveRSVP-id-0001",
+          "name": "Receive: RSVP responses"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateSnacksList-id-0001",
+          "name": "Generate snacks list based on attendees"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-TreeHousePartyComplete-id-0001",
+          "name": "Tree House Party Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToCollectRequirements-id-0001",
+          "sourceRef": "StartEvent-TreeHouseProjectInitiated-id-0001",
+          "targetRef": "UserTask-CollectTreeHouseRequirements-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CollectToSendRequirements-id-0001",
+          "sourceRef": "UserTask-CollectTreeHouseRequirements-id-0001",
+          "targetRef": "SendTask-SendRequirementsToArchitect-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendToReceiveDraft-id-0001",
+          "sourceRef": "SendTask-SendRequirementsToArchitect-id-0001",
+          "targetRef": "ReceiveTask-ReceiveDraftFromArchitect-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReceiveDraftToGateway-id-0001",
+          "sourceRef": "ReceiveTask-ReceiveDraftFromArchitect-id-0001",
+          "targetRef": "ExclusiveGateway-DraftRefinement-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToRefine-id-0001",
+          "name": "needs_refinement == true",
+          "sourceRef": "ExclusiveGateway-DraftRefinement-id-0001",
+          "targetRef": "UserTask-RefineDraftWithRequirements-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToGenerateMaterials-id-0001",
+          "sourceRef": "ExclusiveGateway-DraftRefinement-id-0001",
+          "targetRef": "ServiceTask-GenerateMaterialsList-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RefineToSendRefined-id-0001",
+          "sourceRef": "UserTask-RefineDraftWithRequirements-id-0001",
+          "targetRef": "SendTask-SendRefinedRequirements-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendRefinedToReceiveUpdated-id-0001",
+          "sourceRef": "SendTask-SendRefinedRequirements-id-0001",
+          "targetRef": "ReceiveTask-ReceiveUpdatedDraft-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReceiveUpdatedToGateway-id-0001",
+          "sourceRef": "ReceiveTask-ReceiveUpdatedDraft-id-0001",
+          "targetRef": "ExclusiveGateway-DraftRefinement-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GenerateMaterialsToOrdering-id-0001",
+          "sourceRef": "ServiceTask-GenerateMaterialsList-id-0001",
+          "targetRef": "SubProcess-MaterialOrdering-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OrderingToBuildSplit-id-0001",
+          "sourceRef": "SubProcess-MaterialOrdering-id-0001",
+          "targetRef": "ParallelGateway-SplitBuildPhase-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BuildSplitToSendRequests-id-0001",
+          "sourceRef": "ParallelGateway-SplitBuildPhase-id-0001",
+          "targetRef": "SendTask-SendBuildRequests-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BuildSplitToReceiveCompletion-id-0001",
+          "sourceRef": "ParallelGateway-SplitBuildPhase-id-0001",
+          "targetRef": "ReceiveTask-ReceiveBuildCompletion-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryToReminder-id-0001",
+          "sourceRef": "BoundaryEvent-BuildTimeout-id-0001",
+          "targetRef": "SendTask-SendReminderToFriends-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReminderToJoin-id-0001",
+          "sourceRef": "SendTask-SendReminderToFriends-id-0001",
+          "targetRef": "ParallelGateway-JoinBuildPhase-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReceiveCompletionToJoin-id-0001",
+          "sourceRef": "ReceiveTask-ReceiveBuildCompletion-id-0001",
+          "targetRef": "ParallelGateway-JoinBuildPhase-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BuildJoinToInvitations-id-0001",
+          "sourceRef": "ParallelGateway-JoinBuildPhase-id-0001",
+          "targetRef": "SendTask-SendPartyInvitations-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InvitationsToRSVP-id-0001",
+          "sourceRef": "SendTask-SendPartyInvitations-id-0001",
+          "targetRef": "ReceiveTask-ReceiveRSVP-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RSVPToSnacks-id-0001",
+          "sourceRef": "ReceiveTask-ReceiveRSVP-id-0001",
+          "targetRef": "ServiceTask-GenerateSnacksList-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SnacksToEnd-id-0001",
+          "sourceRef": "ServiceTask-GenerateSnacksList-id-0001",
+          "targetRef": "EndEvent-TreeHousePartyComplete-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

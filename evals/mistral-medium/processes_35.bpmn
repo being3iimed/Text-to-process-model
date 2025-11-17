@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_CustomChainsawProduction" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process_CustomChainsawProduction" name="Custom Chainsaw Production" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-OrderReceived-id-0001" name="Custom Chainsaw Order Received">
+      <bpmn:outgoing>SequenceFlow-StartToCollectReq-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-CollectRequirements-id-0001" name="Collect Customer Requirements">
+      <bpmn:incoming>SequenceFlow-StartToCollectReq-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CollectToOrdering-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="SubProcess-ParallelPartsOrdering-id-0001" name="Parallel Parts Ordering">
+      <bpmn:incoming>SequenceFlow-CollectToOrdering-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OrderingToInspect-id-0003</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-OrderingInitiated-id-0001" name="Ordering Initiated">
+        <bpmn:outgoing>SequenceFlow-StartToSplit-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:parallelGateway id="ParallelGateway-Split-id-0001" name="Parallel Ordering" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-StartToSplit-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SplitToSupplierA-id-0002</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToSupplierB-id-0003</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToSupplierC-id-0004</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:serviceTask id="ServiceTask-OrderSupplierA-id-0001" name="Order Parts from Supplier A">
+        <bpmn:incoming>SequenceFlow-SplitToSupplierA-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SupplierAToJoin-id-0005</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-OrderSupplierB-id-0002" name="Order Parts from Supplier B">
+        <bpmn:incoming>SequenceFlow-SplitToSupplierB-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SupplierBToJoin-id-0006</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-OrderSupplierC-id-0003" name="Order Parts from Supplier C">
+        <bpmn:incoming>SequenceFlow-SplitToSupplierC-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SupplierCToJoin-id-0007</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:parallelGateway id="ParallelGateway-Join-id-0002" name="Synchronize Orders" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-SupplierAToJoin-id-0005</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-SupplierBToJoin-id-0006</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-SupplierCToJoin-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-JoinToEnd-id-0008</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:endEvent id="EndEvent-PartsOrdered-id-0001" name="All Parts Ordered">
+        <bpmn:incoming>SequenceFlow-JoinToEnd-id-0008</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToSplit-id-0001" sourceRef="StartEvent-OrderingInitiated-id-0001" targetRef="ParallelGateway-Split-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToSupplierA-id-0002" sourceRef="ParallelGateway-Split-id-0001" targetRef="ServiceTask-OrderSupplierA-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToSupplierB-id-0003" sourceRef="ParallelGateway-Split-id-0001" targetRef="ServiceTask-OrderSupplierB-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToSupplierC-id-0004" sourceRef="ParallelGateway-Split-id-0001" targetRef="ServiceTask-OrderSupplierC-id-0003" />
+      <bpmn:sequenceFlow id="SequenceFlow-SupplierAToJoin-id-0005" sourceRef="ServiceTask-OrderSupplierA-id-0001" targetRef="ParallelGateway-Join-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-SupplierBToJoin-id-0006" sourceRef="ServiceTask-OrderSupplierB-id-0002" targetRef="ParallelGateway-Join-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-SupplierCToJoin-id-0007" sourceRef="ServiceTask-OrderSupplierC-id-0003" targetRef="ParallelGateway-Join-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-JoinToEnd-id-0008" sourceRef="ParallelGateway-Join-id-0002" targetRef="EndEvent-PartsOrdered-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:userTask id="UserTask-InspectParts-id-0002" name="Inspect Received Parts">
+      <bpmn:incoming>SequenceFlow-OrderingToInspect-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InspectToAssemble-id-0004</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-AssembleChainsaw-id-0003" name="Assemble Chainsaw">
+      <bpmn:incoming>SequenceFlow-InspectToAssemble-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AssembleToUpdate-id-0005</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="SendTask-ProductionUpdate-id-0001" name="Send: Production Update to Customer">
+      <bpmn:incoming>SequenceFlow-AssembleToUpdate-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateToApproval-id-0006</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:subProcess id="SubProcess-CustomerApproval-id-0001" name="Customer Approval Cycle">
+      <bpmn:incoming>SequenceFlow-UpdateToApproval-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ApprovalToFulfilled-id-0007</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-ApprovalStarted-id-0001" name="Approval Process Started">
+        <bpmn:outgoing>SequenceFlow-StartToSendSample-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:sendTask id="SendTask-SendSample-id-0001" name="Send: First Chainsaw for Approval">
+        <bpmn:incoming>SequenceFlow-StartToSendSample-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SendToReceive-id-0002</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:receiveTask id="ReceiveTask-CustomerApproval-id-0001" name="Receive: Customer Approval">
+        <bpmn:incoming>SequenceFlow-SendToReceive-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReceiveToGateway-id-0003</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-ApprovalDecision-id-0001" name="Approval Decision" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-ReceiveToGateway-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GatewayToProduce-id-0004</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToCancel-id-0005</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-ProduceBatch-id-0001" name="Produce Remaining Chainsaws">
+        <bpmn:incoming>SequenceFlow-GatewayToProduce-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ProduceToEnd-id-0006</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-BatchComplete-id-0001" name="Batch Production Complete">
+        <bpmn:incoming>SequenceFlow-ProduceToEnd-id-0006</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:endEvent id="EndEvent-OrderCancelled-id-0002" name="Order Cancelled">
+        <bpmn:incoming>SequenceFlow-GatewayToCancel-id-0005</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToSendSample-id-0001" sourceRef="StartEvent-ApprovalStarted-id-0001" targetRef="SendTask-SendSample-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SendToReceive-id-0002" sourceRef="SendTask-SendSample-id-0001" targetRef="ReceiveTask-CustomerApproval-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReceiveToGateway-id-0003" sourceRef="ReceiveTask-CustomerApproval-id-0001" targetRef="ExclusiveGateway-ApprovalDecision-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToProduce-id-0004" name="customer_approved == true" sourceRef="ExclusiveGateway-ApprovalDecision-id-0001" targetRef="ServiceTask-ProduceBatch-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToCancel-id-0005" name="customer_approved == false (default)" sourceRef="ExclusiveGateway-ApprovalDecision-id-0001" targetRef="EndEvent-OrderCancelled-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-ProduceToEnd-id-0006" sourceRef="ServiceTask-ProduceBatch-id-0001" targetRef="EndEvent-BatchComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:endEvent id="EndEvent-OrderFulfilled-id-0001" name="Order Fulfilled">
+      <bpmn:incoming>SequenceFlow-ApprovalToFulfilled-id-0007</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToCollectReq-id-0001" sourceRef="StartEvent-OrderReceived-id-0001" targetRef="UserTask-CollectRequirements-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CollectToOrdering-id-0002" sourceRef="UserTask-CollectRequirements-id-0001" targetRef="SubProcess-ParallelPartsOrdering-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-OrderingToInspect-id-0003" sourceRef="SubProcess-ParallelPartsOrdering-id-0001" targetRef="UserTask-InspectParts-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-InspectToAssemble-id-0004" sourceRef="UserTask-InspectParts-id-0002" targetRef="UserTask-AssembleChainsaw-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-AssembleToUpdate-id-0005" sourceRef="UserTask-AssembleChainsaw-id-0003" targetRef="SendTask-ProductionUpdate-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateToApproval-id-0006" sourceRef="SendTask-ProductionUpdate-id-0001" targetRef="SubProcess-CustomerApproval-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApprovalToFulfilled-id-0007" sourceRef="SubProcess-CustomerApproval-id-0001" targetRef="EndEvent-OrderFulfilled-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process_CustomChainsawProduction">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process_CustomChainsawProduction" bpmnElement="Process_CustomChainsawProduction">
+      <bpmndi:BPMNShape id="StartEvent-OrderReceived-id-0001_di" bpmnElement="StartEvent-OrderReceived-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CollectRequirements-id-0001_di" bpmnElement="UserTask-CollectRequirements-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-ParallelPartsOrdering-id-0001_di" bpmnElement="SubProcess-ParallelPartsOrdering-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-InspectParts-id-0002_di" bpmnElement="UserTask-InspectParts-id-0002">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AssembleChainsaw-id-0003_di" bpmnElement="UserTask-AssembleChainsaw-id-0003">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ProductionUpdate-id-0001_di" bpmnElement="SendTask-ProductionUpdate-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-CustomerApproval-id-0001_di" bpmnElement="SubProcess-CustomerApproval-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-OrderFulfilled-id-0001_di" bpmnElement="EndEvent-OrderFulfilled-id-0001">
+        <dc:Bounds x="1107" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToCollectReq-id-0001_di" bpmnElement="SequenceFlow-StartToCollectReq-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CollectToOrdering-id-0002_di" bpmnElement="SequenceFlow-CollectToOrdering-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderingToInspect-id-0003_di" bpmnElement="SequenceFlow-OrderingToInspect-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InspectToAssemble-id-0004_di" bpmnElement="SequenceFlow-InspectToAssemble-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AssembleToUpdate-id-0005_di" bpmnElement="SequenceFlow-AssembleToUpdate-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateToApproval-id-0006_di" bpmnElement="SequenceFlow-UpdateToApproval-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalToFulfilled-id-0007_di" bpmnElement="SequenceFlow-ApprovalToFulfilled-id-0007">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1107" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-CustomerApproval-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-CustomerApproval-id-0001" bpmnElement="SubProcess-CustomerApproval-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ApprovalStarted-id-0001_di" bpmnElement="StartEvent-ApprovalStarted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendSample-id-0001_di" bpmnElement="SendTask-SendSample-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-CustomerApproval-id-0001_di" bpmnElement="ReceiveTask-CustomerApproval-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ApprovalDecision-id-0001_di" bpmnElement="ExclusiveGateway-ApprovalDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProduceBatch-id-0001_di" bpmnElement="ServiceTask-ProduceBatch-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-BatchComplete-id-0001_di" bpmnElement="EndEvent-BatchComplete-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-OrderCancelled-id-0002_di" bpmnElement="EndEvent-OrderCancelled-id-0002">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSendSample-id-0001_di" bpmnElement="SequenceFlow-StartToSendSample-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToReceive-id-0002_di" bpmnElement="SequenceFlow-SendToReceive-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToGateway-id-0003_di" bpmnElement="SequenceFlow-ReceiveToGateway-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToProduce-id-0004_di" bpmnElement="SequenceFlow-GatewayToProduce-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToCancel-id-0005_di" bpmnElement="SequenceFlow-GatewayToCancel-id-0005">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProduceToEnd-id-0006_di" bpmnElement="SequenceFlow-ProduceToEnd-id-0006">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-ParallelPartsOrdering-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-ParallelPartsOrdering-id-0001" bpmnElement="SubProcess-ParallelPartsOrdering-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-OrderingInitiated-id-0001_di" bpmnElement="StartEvent-OrderingInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0001_di" bpmnElement="ParallelGateway-Split-id-0001">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-OrderSupplierA-id-0001_di" bpmnElement="ServiceTask-OrderSupplierA-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0002_di" bpmnElement="ParallelGateway-Join-id-0002">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-PartsOrdered-id-0001_di" bpmnElement="EndEvent-PartsOrdered-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-OrderSupplierB-id-0002_di" bpmnElement="ServiceTask-OrderSupplierB-id-0002">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-OrderSupplierC-id-0003_di" bpmnElement="ServiceTask-OrderSupplierC-id-0003">
+        <dc:Bounds x="325" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSplit-id-0001_di" bpmnElement="SequenceFlow-StartToSplit-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToSupplierA-id-0002_di" bpmnElement="SequenceFlow-SplitToSupplierA-id-0002">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToSupplierB-id-0003_di" bpmnElement="SequenceFlow-SplitToSupplierB-id-0003">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToSupplierC-id-0004_di" bpmnElement="SequenceFlow-SplitToSupplierC-id-0004">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="350" />
+        <di:waypoint x="325" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SupplierAToJoin-id-0005_di" bpmnElement="SequenceFlow-SupplierAToJoin-id-0005">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToEnd-id-0008_di" bpmnElement="SequenceFlow-JoinToEnd-id-0008">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SupplierBToJoin-id-0006_di" bpmnElement="SequenceFlow-SupplierBToJoin-id-0006">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SupplierCToJoin-id-0007_di" bpmnElement="SequenceFlow-SupplierCToJoin-id-0007">
+        <di:waypoint x="425" y="350" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

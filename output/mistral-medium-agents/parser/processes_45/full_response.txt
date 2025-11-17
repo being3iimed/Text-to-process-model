@@ -1,0 +1,139 @@
+```
+<summary_of_elements>
+
+### TASKS:
+- **userTask("Enter Login Credentials")** - Customer provides username/password
+- **serviceTask("Check Credentials")** - System validates login
+- **userTask("Select Product")** - Customer chooses item
+- **userTask("Add to Cart")** - Customer confirms product selection
+- **serviceTask("Save Product to Cart")** - System persists selection
+- **serviceTask("Check All Products Selected")** - System validates cart completeness
+- **serviceTask("Finish Order")** - System finalizes order
+- **userTask("Enter Payment Data")** - Customer provides payment info
+- **receiveTask("Receive: bank confirmation")** - System waits for bank response
+- **userTask("Enter Shipping Address")** - Customer provides delivery address
+- **userTask("Enter Billing Address (if different)")** - Optional billing address
+- **serviceTask("Finalize Order")** - System completes transaction
+
+### GATEWAYS:
+- **XOR** after credential check (success/failure)
+- **XOR** after product selection check (complete/incomplete)
+- **AND** after order finish (parallel payment/shipment prep)
+- **XOR** after address entry (same/different billing)
+
+### EVENTS:
+- **startEvent("Customer Initiates Login")** - Manual trigger
+- **endEvent("Order Completed")** - Normal completion
+- **endEvent("Login Failed")** - Error termination
+
+### BOUNDARY EVENTS:
+- **timerBoundary("PT10M")** on receiveTask("Receive: bank confirmation")
+  - SLA: Payment confirmation must arrive within 10 minutes
+  - Handler: sendTask("Send: payment timeout notification")
+
+### SUBPROCESSES:
+- **Subprocess "Payment Processing"**
+  - Purpose: Isolate payment validation and address collection
+  - Justification: Cohesive logical grouping with internal parallelism
+
+</summary_of_elements>
+
+<pseudocode>
+
+```
+startEvent("Customer Initiates Login")
+
+userTask("Enter Login Credentials")
+serviceTask("Check Credentials")
+
+if (credentials_valid):
+    userTask("Select Product")
+    userTask("Add to Cart")
+    serviceTask("Save Product to Cart")
+    serviceTask("Check All Products Selected")
+
+    if (all_products_selected):
+        serviceTask("Finish Order")
+
+        AND:  // Parallel preparation
+            subProcess("Payment Processing"):
+                startEvent("Payment Start")
+                userTask("Enter Payment Data")
+                receiveTask("Receive: bank confirmation"):
+                    timerBoundary("PT10M"):
+                        sendTask("Send: payment timeout notification")
+
+                userTask("Enter Shipping Address")
+
+                if (billing_different):
+                    userTask("Enter Billing Address (if different)")
+
+                endEvent("Payment Complete")
+            endSubProcess
+
+            serviceTask("Prepare Shipment")
+        END_AND
+
+        serviceTask("Finalize Order")
+        endEvent("Order Completed")
+
+    else:
+        // Loop back to product selection
+        -> userTask("Select Product")
+
+else:
+    endEvent("Login Failed")
+```
+
+</pseudocode>
+
+<compliance_validation>
+
+### TIMER EVENTS:
+- **Valid**: `timerBoundary("PT10M")` uses ISO 8601 duration
+- **Justified**: Explicit 10-minute SLA for payment confirmation
+
+### GATEWAYS:
+- **XOR** after credential check (mutually exclusive)
+- **XOR** after product selection check (complete/incomplete)
+- **AND** for parallel payment/shipment (independent)
+- **XOR** for address decision (same/different)
+- **All converged**: Implicit merge after parallel branches
+
+### SEQUENCE FLOWS:
+- **Labeled**: All conditional flows have clear conditions
+- **No orphans**: Every path traces start-to-end
+- **Default handling**: Product selection loop covers incomplete case
+
+### BOUNDARY EVENTS:
+- **Single justified**: Only payment timeout boundary (explicit SLA)
+- **Simple handler**: One sendTask notification
+- **No speculation**: Directly tied to business requirement
+
+### SUBPROCESSES:
+- **Necessary**: "Payment Processing" passes Three-Question Test:
+  1. Clear purpose: "Handle payment validation and address collection"
+  2. 4+ related tasks with cohesion
+  3. Removing would clutter main flow
+- **Structural**: 1 startEvent, 1 endEvent, all paths terminate
+
+### FLOW CONSISTENCY:
+- **Complete paths**: Login → Selection → Payment/Shipment → Completion
+- **No breaks**: All branches reconverge
+- **Dependencies**: Payment must complete before finalization
+
+</compliance_validation>
+
+<critical_success_verification>
+
+✅ **NO invalid BPMN properties** - All timer events use valid ISO 8601
+✅ **NO unreachable elements** - Payment timer is on receiveTask (correct positioning)
+✅ **NO missing convergence** - Parallel branches merge implicitly before finalization
+✅ **NO orphaned flows** - All paths traceable start-to-end
+✅ **NO speculative boundaries** - Only explicit payment SLA boundary
+✅ **NO unjustified subprocess** - "Payment Processing" meets necessity criteria
+✅ **All labels present** - Every conditional flow has descriptive label
+✅ **Balanced design** - 12 core elements vs. 1 subprocess (92% core)
+
+</critical_success_verification>
+```

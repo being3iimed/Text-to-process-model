@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="IncidentResolutionProcess" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="IncidentResolutionProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-IncidentReported-id-0001" name="Incident Reported">
+      <bpmn:outgoing>SequenceFlow-StartToLogIncident-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-LogIncident-id-0001" name="Log Incident in Tracking System">
+      <bpmn:incoming>SequenceFlow-StartToLogIncident-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogToAssignTeam-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-AssignTeam-id-0001" name="Assign to Appropriate Team">
+      <bpmn:incoming>SequenceFlow-LogToAssignTeam-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AssignToGatherInfo-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-GatherInfo-id-0001" name="Gather Necessary Information">
+      <bpmn:incoming>SequenceFlow-AssignToGatherInfo-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatherToIdentifyCause-id-0004</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-IdentifyCause-id-0001" name="Identify Root Cause">
+      <bpmn:incoming>SequenceFlow-GatherToIdentifyCause-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-IdentifyToGateway-id-0005</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-CorrectiveAction-id-0001" name="Corrective Action Type?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-IdentifyToGateway-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToTechnicalFix-id-0006</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToTraining-id-0007</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToPolicyUpdate-id-0008</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-TechnicalFix-id-0001" name="Implement Technical Fix">
+      <bpmn:incoming>SequenceFlow-GatewayToTechnicalFix-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TechnicalFixToVerify-id-0009</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-ConductTraining-id-0001" name="Conduct Training Session">
+      <bpmn:incoming>SequenceFlow-GatewayToTraining-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TrainingToVerify-id-0010</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-UpdatePolicy-id-0001" name="Update Policy Documentation">
+      <bpmn:incoming>SequenceFlow-GatewayToPolicyUpdate-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PolicyUpdateToVerify-id-0011</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-VerifySolution-id-0001" name="Verify Solution Effectiveness">
+      <bpmn:incoming>SequenceFlow-TechnicalFixToVerify-id-0009</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-TrainingToVerify-id-0010</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-PolicyUpdateToVerify-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VerifyToFollowUp-id-0012</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-FollowUp-id-0001" name="Conduct Follow-Up with Stakeholders">
+      <bpmn:incoming>SequenceFlow-VerifyToFollowUp-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FollowUpToClose-id-0013</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-CloseIncident-id-0001" name="Close Incident Report">
+      <bpmn:incoming>SequenceFlow-FollowUpToClose-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CloseToNotification-id-0014</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-ResolutionNotification-id-0001" name="Send: Resolution Notification to All Stakeholders">
+      <bpmn:incoming>SequenceFlow-CloseToNotification-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotificationToEnd-id-0015</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-IncidentResolved-id-0001" name="Incident Resolved">
+      <bpmn:incoming>SequenceFlow-NotificationToEnd-id-0015</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToLogIncident-id-0001" sourceRef="StartEvent-IncidentReported-id-0001" targetRef="UserTask-LogIncident-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogToAssignTeam-id-0002" sourceRef="UserTask-LogIncident-id-0001" targetRef="ServiceTask-AssignTeam-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AssignToGatherInfo-id-0003" sourceRef="ServiceTask-AssignTeam-id-0001" targetRef="UserTask-GatherInfo-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatherToIdentifyCause-id-0004" sourceRef="UserTask-GatherInfo-id-0001" targetRef="UserTask-IdentifyCause-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-IdentifyToGateway-id-0005" sourceRef="UserTask-IdentifyCause-id-0001" targetRef="ExclusiveGateway-CorrectiveAction-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToTechnicalFix-id-0006" name="requires_technical_fix" sourceRef="ExclusiveGateway-CorrectiveAction-id-0001" targetRef="ServiceTask-TechnicalFix-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToTraining-id-0007" name="requires_training" sourceRef="ExclusiveGateway-CorrectiveAction-id-0001" targetRef="UserTask-ConductTraining-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToPolicyUpdate-id-0008" sourceRef="ExclusiveGateway-CorrectiveAction-id-0001" targetRef="UserTask-UpdatePolicy-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TechnicalFixToVerify-id-0009" sourceRef="ServiceTask-TechnicalFix-id-0001" targetRef="UserTask-VerifySolution-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TrainingToVerify-id-0010" sourceRef="UserTask-ConductTraining-id-0001" targetRef="UserTask-VerifySolution-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PolicyUpdateToVerify-id-0011" sourceRef="UserTask-UpdatePolicy-id-0001" targetRef="UserTask-VerifySolution-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-VerifyToFollowUp-id-0012" sourceRef="UserTask-VerifySolution-id-0001" targetRef="UserTask-FollowUp-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FollowUpToClose-id-0013" sourceRef="UserTask-FollowUp-id-0001" targetRef="ServiceTask-CloseIncident-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CloseToNotification-id-0014" sourceRef="ServiceTask-CloseIncident-id-0001" targetRef="SendTask-ResolutionNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotificationToEnd-id-0015" sourceRef="SendTask-ResolutionNotification-id-0001" targetRef="EndEvent-IncidentResolved-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_IncidentResolutionProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_IncidentResolutionProcess-id-0001" bpmnElement="IncidentResolutionProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-IncidentReported-id-0001_di" bpmnElement="StartEvent-IncidentReported-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-LogIncident-id-0001_di" bpmnElement="UserTask-LogIncident-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AssignTeam-id-0001_di" bpmnElement="ServiceTask-AssignTeam-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-GatherInfo-id-0001_di" bpmnElement="UserTask-GatherInfo-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-IdentifyCause-id-0001_di" bpmnElement="UserTask-IdentifyCause-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CorrectiveAction-id-0001_di" bpmnElement="ExclusiveGateway-CorrectiveAction-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-TechnicalFix-id-0001_di" bpmnElement="ServiceTask-TechnicalFix-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-VerifySolution-id-0001_di" bpmnElement="UserTask-VerifySolution-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-FollowUp-id-0001_di" bpmnElement="UserTask-FollowUp-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CloseIncident-id-0001_di" bpmnElement="ServiceTask-CloseIncident-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ResolutionNotification-id-0001_di" bpmnElement="SendTask-ResolutionNotification-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-IncidentResolved-id-0001_di" bpmnElement="EndEvent-IncidentResolved-id-0001">
+        <dc:Bounds x="1707" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConductTraining-id-0001_di" bpmnElement="UserTask-ConductTraining-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-UpdatePolicy-id-0001_di" bpmnElement="UserTask-UpdatePolicy-id-0001">
+        <dc:Bounds x="925" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToLogIncident-id-0001_di" bpmnElement="SequenceFlow-StartToLogIncident-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogToAssignTeam-id-0002_di" bpmnElement="SequenceFlow-LogToAssignTeam-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AssignToGatherInfo-id-0003_di" bpmnElement="SequenceFlow-AssignToGatherInfo-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatherToIdentifyCause-id-0004_di" bpmnElement="SequenceFlow-GatherToIdentifyCause-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IdentifyToGateway-id-0005_di" bpmnElement="SequenceFlow-IdentifyToGateway-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToTechnicalFix-id-0006_di" bpmnElement="SequenceFlow-GatewayToTechnicalFix-id-0006">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToTraining-id-0007_di" bpmnElement="SequenceFlow-GatewayToTraining-id-0007">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToPolicyUpdate-id-0008_di" bpmnElement="SequenceFlow-GatewayToPolicyUpdate-id-0008">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="350" />
+        <di:waypoint x="925" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TechnicalFixToVerify-id-0009_di" bpmnElement="SequenceFlow-TechnicalFixToVerify-id-0009">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VerifyToFollowUp-id-0012_di" bpmnElement="SequenceFlow-VerifyToFollowUp-id-0012">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FollowUpToClose-id-0013_di" bpmnElement="SequenceFlow-FollowUpToClose-id-0013">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CloseToNotification-id-0014_di" bpmnElement="SequenceFlow-CloseToNotification-id-0014">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotificationToEnd-id-0015_di" bpmnElement="SequenceFlow-NotificationToEnd-id-0015">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1707" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TrainingToVerify-id-0010_di" bpmnElement="SequenceFlow-TrainingToVerify-id-0010">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1125" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PolicyUpdateToVerify-id-0011_di" bpmnElement="SequenceFlow-PolicyUpdateToVerify-id-0011">
+        <di:waypoint x="1025" y="350" />
+        <di:waypoint x="1125" y="350" />
+        <di:waypoint x="1125" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

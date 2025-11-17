@@ -1,0 +1,302 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "chainsaw-production-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Chainsaw-Production-Process-id-0001",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-OrderReceived-id-0001",
+          "name": "Order Received"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CollectCustomerRequirements-id-0001",
+          "name": "Collect Customer Requirements"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-PartOrdering-id-0001",
+          "name": "Part Ordering",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-OrderingStarted-id-0001",
+              "name": "Ordering Started"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-Split-id-0001",
+              "name": "Parallel Ordering",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-OrderPartsSupplierA-id-0001",
+              "name": "Order Parts from Supplier A"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-OrderPartsSupplierB-id-0002",
+              "name": "Order Parts from Supplier B"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-OrderPartsSupplierC-id-0003",
+              "name": "Order Parts from Supplier C"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-Join-id-0002",
+              "name": "Synchronize Orders",
+              "gatewayDirection": "Converging"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-AllPartsOrdered-id-0001",
+              "name": "All Parts Ordered"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StartToSplit-id-0001",
+              "sourceRef": "StartEvent-OrderingStarted-id-0001",
+              "targetRef": "ParallelGateway-Split-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToSupplierA-id-0002",
+              "sourceRef": "ParallelGateway-Split-id-0001",
+              "targetRef": "ServiceTask-OrderPartsSupplierA-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToSupplierB-id-0003",
+              "sourceRef": "ParallelGateway-Split-id-0001",
+              "targetRef": "ServiceTask-OrderPartsSupplierB-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToSupplierC-id-0004",
+              "sourceRef": "ParallelGateway-Split-id-0001",
+              "targetRef": "ServiceTask-OrderPartsSupplierC-id-0003"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SupplierAToJoin-id-0005",
+              "sourceRef": "ServiceTask-OrderPartsSupplierA-id-0001",
+              "targetRef": "ParallelGateway-Join-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SupplierBToJoin-id-0006",
+              "sourceRef": "ServiceTask-OrderPartsSupplierB-id-0002",
+              "targetRef": "ParallelGateway-Join-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SupplierCToJoin-id-0007",
+              "sourceRef": "ServiceTask-OrderPartsSupplierC-id-0003",
+              "targetRef": "ParallelGateway-Join-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-JoinToEnd-id-0008",
+              "sourceRef": "ParallelGateway-Join-id-0002",
+              "targetRef": "EndEvent-AllPartsOrdered-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-Production-id-0002",
+          "name": "Production",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-ProductionStarted-id-0001",
+              "name": "Production Started"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ManualInspectionOfParts-id-0001",
+              "name": "Manual Inspection of Parts"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-AssembleChainsaw-id-0002",
+              "name": "Assemble Chainsaw"
+            },
+            {
+              "$type": "bpmn:IntermediateCatchEvent",
+              "id": "IntermediateCatchEvent-UpdateTimer-id-0001",
+              "name": "Wait for Next Update",
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:TimerEventDefinition",
+                  "timeDuration": "PT1H"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-ProductionUpdate-id-0001",
+              "name": "Send: Production Update to Customer"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-FirstSawReady-id-0001",
+              "name": "First Saw Ready"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StartToInspection-id-0001",
+              "sourceRef": "StartEvent-ProductionStarted-id-0001",
+              "targetRef": "UserTask-ManualInspectionOfParts-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-InspectionToAssembly-id-0002",
+              "sourceRef": "UserTask-ManualInspectionOfParts-id-0001",
+              "targetRef": "UserTask-AssembleChainsaw-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-AssemblyToUpdate-id-0003",
+              "sourceRef": "UserTask-AssembleChainsaw-id-0002",
+              "targetRef": "SendTask-ProductionUpdate-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-UpdateToTimer-id-0004",
+              "sourceRef": "SendTask-ProductionUpdate-id-0001",
+              "targetRef": "IntermediateCatchEvent-UpdateTimer-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-TimerToUpdate-id-0005",
+              "sourceRef": "IntermediateCatchEvent-UpdateTimer-id-0001",
+              "targetRef": "SendTask-ProductionUpdate-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-UpdateToEnd-id-0006",
+              "sourceRef": "SendTask-ProductionUpdate-id-0001",
+              "targetRef": "EndEvent-FirstSawReady-id-0001",
+              "name": "production_ongoing = false"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CustomerApprovalOfFirstSaw-id-0001",
+          "name": "Customer Approval of First Saw"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-Timer24H-Approval-id-0001",
+          "name": "24 Hour Approval Deadline",
+          "attachedToRef": "UserTask-CustomerApprovalOfFirstSaw-id-0001",
+          "cancelActivity": false,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT24H"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-ApprovalReminder-id-0001",
+          "name": "Send: Approval Reminder"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ApprovalDecision-id-0001",
+          "name": "Approval Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ProduceRemainingSaws-id-0001",
+          "name": "Produce Remaining Saws"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-OrderFulfilled-id-0001",
+          "name": "Order Fulfilled"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-OrderCancelled-id-0002",
+          "name": "Order Cancelled"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToCollect-id-0001",
+          "sourceRef": "StartEvent-OrderReceived-id-0001",
+          "targetRef": "UserTask-CollectCustomerRequirements-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CollectToOrdering-id-0002",
+          "sourceRef": "UserTask-CollectCustomerRequirements-id-0001",
+          "targetRef": "SubProcess-PartOrdering-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OrderingToProduction-id-0003",
+          "sourceRef": "SubProcess-PartOrdering-id-0001",
+          "targetRef": "SubProcess-Production-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProductionToApproval-id-0004",
+          "sourceRef": "SubProcess-Production-id-0002",
+          "targetRef": "UserTask-CustomerApprovalOfFirstSaw-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryToReminder-id-0005",
+          "sourceRef": "BoundaryEvent-Timer24H-Approval-id-0001",
+          "targetRef": "SendTask-ApprovalReminder-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ApprovalToGateway-id-0006",
+          "sourceRef": "UserTask-CustomerApprovalOfFirstSaw-id-0001",
+          "targetRef": "ExclusiveGateway-ApprovalDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToProduce-id-0007",
+          "sourceRef": "ExclusiveGateway-ApprovalDecision-id-0001",
+          "targetRef": "UserTask-ProduceRemainingSaws-id-0001",
+          "name": "customer_approval == \"approved\"",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToCancel-id-0008",
+          "sourceRef": "ExclusiveGateway-ApprovalDecision-id-0001",
+          "targetRef": "EndEvent-OrderCancelled-id-0002",
+          "name": "customer_approval == \"rejected\"",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProduceToFulfilled-id-0009",
+          "sourceRef": "UserTask-ProduceRemainingSaws-id-0001",
+          "targetRef": "EndEvent-OrderFulfilled-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

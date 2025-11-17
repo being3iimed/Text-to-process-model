@@ -1,0 +1,70 @@
+```
+<summary_of_elements>
+
+TASKS:
+- sendTask("Send: dismissal to MSPO") - MSPN initiates process by sending dismissal
+- userTask("MSPO reviews dismissal") - Human judgment required for review
+- userTask("MSPO rejects dismissal") - Explicit rejection action
+- userTask("MSPO confirms dismissal") - Explicit confirmation action
+
+GATEWAYS:
+- XOR after "MSPO reviews dismissal" with 2 branches:
+  1. "rejected" → userTask("MSPO rejects dismissal")
+  2. "confirmed" → userTask("MSPO confirms dismissal")
+
+EVENTS:
+- startEvent("Dismissal Process Initiated") - Manual trigger
+- endEvent("Dismissal Process Complete") - Normal completion
+
+BOUNDARY EVENTS:
+- None (no explicit SLA or error scenarios mentioned)
+
+SUBPROCESSES:
+- None (no cohesive grouping needed; only 3 simple tasks)
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+startEvent("Dismissal Process Initiated")
+sendTask("Send: dismissal to MSPO")
+userTask("MSPO reviews dismissal")
+
+if (dismissal_rejected):
+    userTask("MSPO rejects dismissal")
+else:  # dismissal_confirmed
+    userTask("MSPO confirms dismissal")
+
+endEvent("Dismissal Process Complete")
+
+</bpmn_pseudocode>
+
+<compliance_verification>
+
+TIMER EVENTS:
+- None used (no scheduled triggers or delays)
+
+GATEWAYS:
+- XOR gateway after review task with 2 mutually exclusive branches
+- No convergence needed (branches merge naturally to endEvent)
+
+SEQUENCE FLOWS:
+- All flows labeled with clear conditions:
+  - "dismissal_rejected"
+  - "dismissal_confirmed (default)"
+- No empty strings
+
+BOUNDARY EVENTS:
+- None added (no SLA or error scenarios mentioned)
+
+SUBPROCESSES:
+- None created (fails necessity test: only 3 simple tasks)
+
+FLOW PATHS:
+- All paths traceable:
+  1. Start → Send → Review → Reject → End
+  2. Start → Send → Review → Confirm → End
+- No orphaned flows
+
+</compliance_verification>
+```

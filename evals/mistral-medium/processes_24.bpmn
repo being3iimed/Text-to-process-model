@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="RestaurantOrderProcess" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process-RestaurantOrder-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-GuestEnters-id-0001" name="Guest enters restaurant">
+      <bpmn:outgoing>SequenceFlow-StartToChooseDish-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-ChooseDish-id-0001" name="Guest chooses dish">
+      <bpmn:incoming>SequenceFlow-StartToChooseDish-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ChooseDishToPlaceOrder-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-PlaceOrder-id-0002" name="Guest places order">
+      <bpmn:incoming>SequenceFlow-ChooseDishToPlaceOrder-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PlaceOrderToEnterPOS-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-EnterOrderPOS-id-0001" name="Employee enters order in POS">
+      <bpmn:incoming>SequenceFlow-PlaceOrderToEnterPOS-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EnterPOSToCollectPayment-id-0004</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-CollectPayment-id-0001" name="Employee collects payment">
+      <bpmn:incoming>SequenceFlow-EnterPOSToCollectPayment-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CollectPaymentToSetupBuzzer-id-0005</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-SetupBuzzer-id-0001" name="Employee sets up buzzer">
+      <bpmn:incoming>SequenceFlow-CollectPaymentToSetupBuzzer-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SetupBuzzerToOrderChef-id-0006</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-OrderToChef-id-0001" name="Send: order to chef">
+      <bpmn:incoming>SequenceFlow-SetupBuzzerToOrderChef-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OrderChefToPrepareMeal-id-0007</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-PrepareMeal-id-0001" name="Chef prepares meal">
+      <bpmn:incoming>SequenceFlow-OrderChefToPrepareMeal-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PrepareMealToPlaceHatch-id-0008</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-PlaceMealHatch-id-0001" name="Chef places meal in hatch">
+      <bpmn:incoming>SequenceFlow-PrepareMealToPlaceHatch-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PlaceHatchToMealReady-id-0009</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-MealReadyNotification-id-0001" name="Send: meal ready notification">
+      <bpmn:incoming>SequenceFlow-PlaceHatchToMealReady-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MealReadyToTriggerBuzzer-id-0010</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-TriggerBuzzer-id-0001" name="Employee triggers buzzer">
+      <bpmn:incoming>SequenceFlow-MealReadyToTriggerBuzzer-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TriggerBuzzerToCollectMeal-id-0011</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer5Min-TriggerBuzzer-id-0001" name="5 Minute Timeout" attachedToRef="ServiceTask-TriggerBuzzer-id-0001">
+      <bpmn:outgoing>SequenceFlow-TimerBoundaryToCallGuest-id-0013</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer5Min-TriggerBuzzer-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT5M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-CallForGuest-id-0001" name="Call for guest">
+      <bpmn:incoming>SequenceFlow-TimerBoundaryToCallGuest-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CallGuestToCollectMeal-id-0014</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-CollectMeal-id-0001" name="Guest collects meal">
+      <bpmn:incoming>SequenceFlow-TriggerBuzzerToCollectMeal-id-0011</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-CallGuestToCollectMeal-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CollectMealToEnd-id-0012</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-MealServed-id-0001" name="Meal served">
+      <bpmn:incoming>SequenceFlow-CollectMealToEnd-id-0012</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToChooseDish-id-0001" sourceRef="StartEvent-GuestEnters-id-0001" targetRef="UserTask-ChooseDish-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ChooseDishToPlaceOrder-id-0002" sourceRef="UserTask-ChooseDish-id-0001" targetRef="UserTask-PlaceOrder-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-PlaceOrderToEnterPOS-id-0003" sourceRef="UserTask-PlaceOrder-id-0002" targetRef="ServiceTask-EnterOrderPOS-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EnterPOSToCollectPayment-id-0004" sourceRef="ServiceTask-EnterOrderPOS-id-0001" targetRef="ServiceTask-CollectPayment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CollectPaymentToSetupBuzzer-id-0005" sourceRef="ServiceTask-CollectPayment-id-0001" targetRef="ServiceTask-SetupBuzzer-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SetupBuzzerToOrderChef-id-0006" sourceRef="ServiceTask-SetupBuzzer-id-0001" targetRef="SendTask-OrderToChef-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-OrderChefToPrepareMeal-id-0007" sourceRef="SendTask-OrderToChef-id-0001" targetRef="ServiceTask-PrepareMeal-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrepareMealToPlaceHatch-id-0008" sourceRef="ServiceTask-PrepareMeal-id-0001" targetRef="ServiceTask-PlaceMealHatch-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PlaceHatchToMealReady-id-0009" sourceRef="ServiceTask-PlaceMealHatch-id-0001" targetRef="SendTask-MealReadyNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MealReadyToTriggerBuzzer-id-0010" sourceRef="SendTask-MealReadyNotification-id-0001" targetRef="ServiceTask-TriggerBuzzer-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TriggerBuzzerToCollectMeal-id-0011" sourceRef="ServiceTask-TriggerBuzzer-id-0001" targetRef="UserTask-CollectMeal-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CollectMealToEnd-id-0012" sourceRef="UserTask-CollectMeal-id-0001" targetRef="EndEvent-MealServed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TimerBoundaryToCallGuest-id-0013" sourceRef="BoundaryEvent-Timer5Min-TriggerBuzzer-id-0001" targetRef="SendTask-CallForGuest-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CallGuestToCollectMeal-id-0014" sourceRef="SendTask-CallForGuest-id-0001" targetRef="UserTask-CollectMeal-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process-RestaurantOrder-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process-RestaurantOrder-id-0001" bpmnElement="Process-RestaurantOrder-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-GuestEnters-id-0001_di" bpmnElement="StartEvent-GuestEnters-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ChooseDish-id-0001_di" bpmnElement="UserTask-ChooseDish-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PlaceOrder-id-0002_di" bpmnElement="UserTask-PlaceOrder-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-EnterOrderPOS-id-0001_di" bpmnElement="ServiceTask-EnterOrderPOS-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CollectPayment-id-0001_di" bpmnElement="ServiceTask-CollectPayment-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SetupBuzzer-id-0001_di" bpmnElement="ServiceTask-SetupBuzzer-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-OrderToChef-id-0001_di" bpmnElement="SendTask-OrderToChef-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareMeal-id-0001_di" bpmnElement="ServiceTask-PrepareMeal-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PlaceMealHatch-id-0001_di" bpmnElement="ServiceTask-PlaceMealHatch-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-MealReadyNotification-id-0001_di" bpmnElement="SendTask-MealReadyNotification-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-TriggerBuzzer-id-0001_di" bpmnElement="ServiceTask-TriggerBuzzer-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer5Min-TriggerBuzzer-id-0001_di" bpmnElement="BoundaryEvent-Timer5Min-TriggerBuzzer-id-0001">
+        <dc:Bounds x="1557" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CollectMeal-id-0001_di" bpmnElement="UserTask-CollectMeal-id-0001">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-MealServed-id-0001_di" bpmnElement="EndEvent-MealServed-id-0001">
+        <dc:Bounds x="2007" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-CallForGuest-id-0001_di" bpmnElement="SendTask-CallForGuest-id-0001">
+        <dc:Bounds x="1675" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToChooseDish-id-0001_di" bpmnElement="SequenceFlow-StartToChooseDish-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ChooseDishToPlaceOrder-id-0002_di" bpmnElement="SequenceFlow-ChooseDishToPlaceOrder-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PlaceOrderToEnterPOS-id-0003_di" bpmnElement="SequenceFlow-PlaceOrderToEnterPOS-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EnterPOSToCollectPayment-id-0004_di" bpmnElement="SequenceFlow-EnterPOSToCollectPayment-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CollectPaymentToSetupBuzzer-id-0005_di" bpmnElement="SequenceFlow-CollectPaymentToSetupBuzzer-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SetupBuzzerToOrderChef-id-0006_di" bpmnElement="SequenceFlow-SetupBuzzerToOrderChef-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderChefToPrepareMeal-id-0007_di" bpmnElement="SequenceFlow-OrderChefToPrepareMeal-id-0007">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrepareMealToPlaceHatch-id-0008_di" bpmnElement="SequenceFlow-PrepareMealToPlaceHatch-id-0008">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PlaceHatchToMealReady-id-0009_di" bpmnElement="SequenceFlow-PlaceHatchToMealReady-id-0009">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MealReadyToTriggerBuzzer-id-0010_di" bpmnElement="SequenceFlow-MealReadyToTriggerBuzzer-id-0010">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TriggerBuzzerToCollectMeal-id-0011_di" bpmnElement="SequenceFlow-TriggerBuzzerToCollectMeal-id-0011">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TimerBoundaryToCallGuest-id-0013_di" bpmnElement="SequenceFlow-TimerBoundaryToCallGuest-id-0013">
+        <di:waypoint x="1575" y="128" />
+        <di:waypoint x="1575" y="210" />
+        <di:waypoint x="1675" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CollectMealToEnd-id-0012_di" bpmnElement="SequenceFlow-CollectMealToEnd-id-0012">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="2007" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CallGuestToCollectMeal-id-0014_di" bpmnElement="SequenceFlow-CallGuestToCollectMeal-id-0014">
+        <di:waypoint x="1775" y="210" />
+        <di:waypoint x="1875" y="210" />
+        <di:waypoint x="1875" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

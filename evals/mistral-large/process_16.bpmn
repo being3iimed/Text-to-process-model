@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_AnnualAuditWorkflow" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process_AnnualAuditWorkflow" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-InitiateAnnualAudit-id-0001" name="Initiate Annual Audit">
+      <bpmn:outgoing>SequenceFlow-StartToNotification-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sendTask id="SendTask-SendAuditInitiationNotification-id-0001" name="Send: audit initiation notification">
+      <bpmn:incoming>SequenceFlow-StartToNotification-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotificationToParallel-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:parallelGateway id="ParallelGateway-ParallelPreparation-id-0001" name="Parallel Preparation" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-NotificationToParallel-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ParallelToFinancials-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ParallelToRegulatory-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-PrepareFinancialStatements-id-0001" name="Prepare financial statements">
+      <bpmn:incoming>SequenceFlow-ParallelToFinancials-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FinancialsToDocuments-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-GatherSupportingDocuments-id-0001" name="Gather supporting documents">
+      <bpmn:incoming>SequenceFlow-FinancialsToDocuments-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DocumentsToSubmission-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="SendTask-SendDocumentSubmission-id-0001" name="Send: document submission">
+      <bpmn:incoming>SequenceFlow-DocumentsToSubmission-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SubmissionToConverge-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-CheckRegulatoryUpdates-id-0001" name="Check regulatory updates">
+      <bpmn:incoming>SequenceFlow-ParallelToRegulatory-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RegulatoryToConverge-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-ConvergePreparation-id-0001" name="Converge Preparation" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-RegulatoryToConverge-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-SubmissionToConverge-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConvergeToReview-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-ReviewSubmission-id-0001" name="Review submission">
+      <bpmn:incoming>SequenceFlow-ConvergeToReview-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ProvideToReview-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToDiscrepancies-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-DiscrepanciesFound-id-0001" name="Discrepancies Found?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewToDiscrepancies-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DiscrepanciesToClarification-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-DiscrepanciesToRiskAssessment-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-SendClarificationRequest-id-0001" name="Send: clarification request">
+      <bpmn:incoming>SequenceFlow-DiscrepanciesToClarification-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ClarificationToProvide-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-ProvideClarifications-id-0001" name="Provide clarifications">
+      <bpmn:incoming>SequenceFlow-ClarificationToProvide-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProvideToReview-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="SubProcess-RiskAssessment-id-0001" name="Risk Assessment">
+      <bpmn:incoming>SequenceFlow-DiscrepanciesToRiskAssessment-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RiskAssessmentToCompile-id-0001</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-RiskAssessmentStart-id-0001" name="Risk Assessment Start">
+        <bpmn:outgoing>SequenceFlow-RiskStartToSplit-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:parallelGateway id="ParallelGateway-RiskEvaluationSplit-id-0001" name="Risk Evaluation Split" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-RiskStartToSplit-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SplitToFinancial-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToOperational-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToCompliance-id-0001</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:userTask id="UserTask-EvaluateFinancialRisks-id-0001" name="Evaluate financial risks">
+        <bpmn:incoming>SequenceFlow-SplitToFinancial-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-FinancialToJoin-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-EvaluateOperationalRisks-id-0001" name="Evaluate operational risks">
+        <bpmn:incoming>SequenceFlow-SplitToOperational-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-OperationalToJoin-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-EvaluateComplianceRisks-id-0001" name="Evaluate compliance risks">
+        <bpmn:incoming>SequenceFlow-SplitToCompliance-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ComplianceToJoin-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:parallelGateway id="ParallelGateway-RiskEvaluationJoin-id-0001" name="Risk Evaluation Join" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-FinancialToJoin-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-OperationalToJoin-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ComplianceToJoin-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-JoinToHighRisk-id-0001</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-HighRiskIdentified-id-0001" name="High Risk Identified?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-JoinToHighRisk-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-HighRiskToInvestigation-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-HighRiskToComplete-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:userTask id="UserTask-LaunchDetailedInvestigation-id-0001" name="Launch detailed investigation">
+        <bpmn:incoming>SequenceFlow-HighRiskToInvestigation-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-InvestigationToData-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:serviceTask id="ServiceTask-PerformDataAnalysis-id-0001" name="Perform data analysis">
+        <bpmn:incoming>SequenceFlow-InvestigationToData-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-DataToInterviews-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:userTask id="UserTask-ConductInterviews-id-0001" name="Conduct interviews">
+        <bpmn:incoming>SequenceFlow-DataToInterviews-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-InterviewsToSiteVisit-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-SiteVisitRequired-id-0001" name="Site Visit Required?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-InterviewsToSiteVisit-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SiteVisitToVisit-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-InterviewsToJoin-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:userTask id="UserTask-PerformSiteVisit-id-0001" name="Perform site visit">
+        <bpmn:incoming>SequenceFlow-SiteVisitToVisit-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SiteVisitToJoin-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:parallelGateway id="ParallelGateway-InvestigationJoin-id-0001" name="Investigation Join" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-SiteVisitToJoin-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-InterviewsToJoin-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-InvestigationJoinToComplete-id-0001</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:endEvent id="EndEvent-RiskAssessmentComplete-id-0001" name="Risk Assessment Complete">
+        <bpmn:incoming>SequenceFlow-InvestigationJoinToComplete-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-HighRiskToComplete-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-RiskStartToSplit-id-0001" sourceRef="StartEvent-RiskAssessmentStart-id-0001" targetRef="ParallelGateway-RiskEvaluationSplit-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToFinancial-id-0001" sourceRef="ParallelGateway-RiskEvaluationSplit-id-0001" targetRef="UserTask-EvaluateFinancialRisks-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToOperational-id-0001" sourceRef="ParallelGateway-RiskEvaluationSplit-id-0001" targetRef="UserTask-EvaluateOperationalRisks-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToCompliance-id-0001" sourceRef="ParallelGateway-RiskEvaluationSplit-id-0001" targetRef="UserTask-EvaluateComplianceRisks-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-FinancialToJoin-id-0001" sourceRef="UserTask-EvaluateFinancialRisks-id-0001" targetRef="ParallelGateway-RiskEvaluationJoin-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-OperationalToJoin-id-0001" sourceRef="UserTask-EvaluateOperationalRisks-id-0001" targetRef="ParallelGateway-RiskEvaluationJoin-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ComplianceToJoin-id-0001" sourceRef="UserTask-EvaluateComplianceRisks-id-0001" targetRef="ParallelGateway-RiskEvaluationJoin-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-JoinToHighRisk-id-0001" sourceRef="ParallelGateway-RiskEvaluationJoin-id-0001" targetRef="ExclusiveGateway-HighRiskIdentified-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-HighRiskToInvestigation-id-0001" name="high_risk_identified" sourceRef="ExclusiveGateway-HighRiskIdentified-id-0001" targetRef="UserTask-LaunchDetailedInvestigation-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-InvestigationToData-id-0001" sourceRef="UserTask-LaunchDetailedInvestigation-id-0001" targetRef="ServiceTask-PerformDataAnalysis-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-DataToInterviews-id-0001" sourceRef="ServiceTask-PerformDataAnalysis-id-0001" targetRef="UserTask-ConductInterviews-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-InterviewsToSiteVisit-id-0001" sourceRef="UserTask-ConductInterviews-id-0001" targetRef="ExclusiveGateway-SiteVisitRequired-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SiteVisitToVisit-id-0001" name="site_visit_required" sourceRef="ExclusiveGateway-SiteVisitRequired-id-0001" targetRef="UserTask-PerformSiteVisit-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SiteVisitToJoin-id-0001" sourceRef="UserTask-PerformSiteVisit-id-0001" targetRef="ParallelGateway-InvestigationJoin-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-InterviewsToJoin-id-0001" sourceRef="ExclusiveGateway-SiteVisitRequired-id-0001" targetRef="ParallelGateway-InvestigationJoin-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-InvestigationJoinToComplete-id-0001" sourceRef="ParallelGateway-InvestigationJoin-id-0001" targetRef="EndEvent-RiskAssessmentComplete-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-HighRiskToComplete-id-0001" sourceRef="ExclusiveGateway-HighRiskIdentified-id-0001" targetRef="EndEvent-RiskAssessmentComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:userTask id="UserTask-CompileAuditReport-id-0001" name="Compile audit report">
+      <bpmn:incoming>SequenceFlow-RiskAssessmentToCompile-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CompileToReview-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ReviewAuditReport-id-0001" name="Review audit report">
+      <bpmn:incoming>SequenceFlow-CompileToReview-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-UpdateToReview-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToApproval-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ReportApproved-id-0001" name="Report Approved?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewToApproval-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ApprovalToFinalReport-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ApprovalToRevision-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-SendFinalReportToExecutiveBoard-id-0001" name="Send: final report to executive board">
+      <bpmn:incoming>SequenceFlow-ApprovalToFinalReport-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FinalReportToArchive-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-ArchiveAuditRecords-id-0001" name="Archive audit records">
+      <bpmn:incoming>SequenceFlow-FinalReportToArchive-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ArchiveToEnd-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-AuditProcessClosed-id-0001" name="Audit Process Closed">
+      <bpmn:incoming>SequenceFlow-ArchiveToEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="SendTask-SendRevisionRequest-id-0001" name="Send: revision request">
+      <bpmn:incoming>SequenceFlow-ApprovalToRevision-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RevisionToUpdate-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-UpdateAuditReport-id-0001" name="Update audit report">
+      <bpmn:incoming>SequenceFlow-RevisionToUpdate-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateToReview-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToNotification-id-0001" sourceRef="StartEvent-InitiateAnnualAudit-id-0001" targetRef="SendTask-SendAuditInitiationNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotificationToParallel-id-0001" sourceRef="SendTask-SendAuditInitiationNotification-id-0001" targetRef="ParallelGateway-ParallelPreparation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelToFinancials-id-0001" sourceRef="ParallelGateway-ParallelPreparation-id-0001" targetRef="UserTask-PrepareFinancialStatements-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FinancialsToDocuments-id-0001" sourceRef="UserTask-PrepareFinancialStatements-id-0001" targetRef="UserTask-GatherSupportingDocuments-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DocumentsToSubmission-id-0001" sourceRef="UserTask-GatherSupportingDocuments-id-0001" targetRef="SendTask-SendDocumentSubmission-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelToRegulatory-id-0001" sourceRef="ParallelGateway-ParallelPreparation-id-0001" targetRef="ServiceTask-CheckRegulatoryUpdates-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RegulatoryToConverge-id-0001" sourceRef="ServiceTask-CheckRegulatoryUpdates-id-0001" targetRef="ParallelGateway-ConvergePreparation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubmissionToConverge-id-0001" sourceRef="SendTask-SendDocumentSubmission-id-0001" targetRef="ParallelGateway-ConvergePreparation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConvergeToReview-id-0001" sourceRef="ParallelGateway-ConvergePreparation-id-0001" targetRef="UserTask-ReviewSubmission-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToDiscrepancies-id-0001" sourceRef="UserTask-ReviewSubmission-id-0001" targetRef="ExclusiveGateway-DiscrepanciesFound-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DiscrepanciesToClarification-id-0001" name="discrepancies_found" sourceRef="ExclusiveGateway-DiscrepanciesFound-id-0001" targetRef="SendTask-SendClarificationRequest-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ClarificationToProvide-id-0001" sourceRef="SendTask-SendClarificationRequest-id-0001" targetRef="UserTask-ProvideClarifications-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProvideToReview-id-0001" sourceRef="UserTask-ProvideClarifications-id-0001" targetRef="UserTask-ReviewSubmission-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DiscrepanciesToRiskAssessment-id-0001" sourceRef="ExclusiveGateway-DiscrepanciesFound-id-0001" targetRef="SubProcess-RiskAssessment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RiskAssessmentToCompile-id-0001" sourceRef="SubProcess-RiskAssessment-id-0001" targetRef="UserTask-CompileAuditReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CompileToReview-id-0001" sourceRef="UserTask-CompileAuditReport-id-0001" targetRef="UserTask-ReviewAuditReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToApproval-id-0001" sourceRef="UserTask-ReviewAuditReport-id-0001" targetRef="ExclusiveGateway-ReportApproved-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApprovalToFinalReport-id-0001" name="report_approved" sourceRef="ExclusiveGateway-ReportApproved-id-0001" targetRef="SendTask-SendFinalReportToExecutiveBoard-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FinalReportToArchive-id-0001" sourceRef="SendTask-SendFinalReportToExecutiveBoard-id-0001" targetRef="ServiceTask-ArchiveAuditRecords-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ArchiveToEnd-id-0001" sourceRef="ServiceTask-ArchiveAuditRecords-id-0001" targetRef="EndEvent-AuditProcessClosed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApprovalToRevision-id-0001" sourceRef="ExclusiveGateway-ReportApproved-id-0001" targetRef="SendTask-SendRevisionRequest-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RevisionToUpdate-id-0001" sourceRef="SendTask-SendRevisionRequest-id-0001" targetRef="UserTask-UpdateAuditReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateToReview-id-0001" sourceRef="UserTask-UpdateAuditReport-id-0001" targetRef="UserTask-ReviewAuditReport-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process_AnnualAuditWorkflow">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process_AnnualAuditWorkflow" bpmnElement="Process_AnnualAuditWorkflow">
+      <bpmndi:BPMNShape id="StartEvent-InitiateAnnualAudit-id-0001_di" bpmnElement="StartEvent-InitiateAnnualAudit-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendAuditInitiationNotification-id-0001_di" bpmnElement="SendTask-SendAuditInitiationNotification-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-ParallelPreparation-id-0001_di" bpmnElement="ParallelGateway-ParallelPreparation-id-0001">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PrepareFinancialStatements-id-0001_di" bpmnElement="UserTask-PrepareFinancialStatements-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-GatherSupportingDocuments-id-0001_di" bpmnElement="UserTask-GatherSupportingDocuments-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendDocumentSubmission-id-0001_di" bpmnElement="SendTask-SendDocumentSubmission-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-ConvergePreparation-id-0001_di" bpmnElement="ParallelGateway-ConvergePreparation-id-0001">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewSubmission-id-0001_di" bpmnElement="UserTask-ReviewSubmission-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-DiscrepanciesFound-id-0001_di" bpmnElement="ExclusiveGateway-DiscrepanciesFound-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendClarificationRequest-id-0001_di" bpmnElement="SendTask-SendClarificationRequest-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ProvideClarifications-id-0001_di" bpmnElement="UserTask-ProvideClarifications-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckRegulatoryUpdates-id-0001_di" bpmnElement="ServiceTask-CheckRegulatoryUpdates-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-RiskAssessment-id-0001_di" bpmnElement="SubProcess-RiskAssessment-id-0001">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CompileAuditReport-id-0001_di" bpmnElement="UserTask-CompileAuditReport-id-0001">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewAuditReport-id-0001_di" bpmnElement="UserTask-ReviewAuditReport-id-0001">
+        <dc:Bounds x="1675" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ReportApproved-id-0001_di" bpmnElement="ExclusiveGateway-ReportApproved-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1850" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendFinalReportToExecutiveBoard-id-0001_di" bpmnElement="SendTask-SendFinalReportToExecutiveBoard-id-0001">
+        <dc:Bounds x="1975" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ArchiveAuditRecords-id-0001_di" bpmnElement="ServiceTask-ArchiveAuditRecords-id-0001">
+        <dc:Bounds x="2125" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AuditProcessClosed-id-0001_di" bpmnElement="EndEvent-AuditProcessClosed-id-0001">
+        <dc:Bounds x="2307" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendRevisionRequest-id-0001_di" bpmnElement="SendTask-SendRevisionRequest-id-0001">
+        <dc:Bounds x="1975" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-UpdateAuditReport-id-0001_di" bpmnElement="UserTask-UpdateAuditReport-id-0001">
+        <dc:Bounds x="2125" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToNotification-id-0001_di" bpmnElement="SequenceFlow-StartToNotification-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotificationToParallel-id-0001_di" bpmnElement="SequenceFlow-NotificationToParallel-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelToFinancials-id-0001_di" bpmnElement="SequenceFlow-ParallelToFinancials-id-0001">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelToRegulatory-id-0001_di" bpmnElement="SequenceFlow-ParallelToRegulatory-id-0001">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FinancialsToDocuments-id-0001_di" bpmnElement="SequenceFlow-FinancialsToDocuments-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DocumentsToSubmission-id-0001_di" bpmnElement="SequenceFlow-DocumentsToSubmission-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubmissionToConverge-id-0001_di" bpmnElement="SequenceFlow-SubmissionToConverge-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConvergeToReview-id-0001_di" bpmnElement="SequenceFlow-ConvergeToReview-id-0001">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToDiscrepancies-id-0001_di" bpmnElement="SequenceFlow-ReviewToDiscrepancies-id-0001">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DiscrepanciesToClarification-id-0001_di" bpmnElement="SequenceFlow-DiscrepanciesToClarification-id-0001">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DiscrepanciesToRiskAssessment-id-0001_di" bpmnElement="SequenceFlow-DiscrepanciesToRiskAssessment-id-0001">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ClarificationToProvide-id-0001_di" bpmnElement="SequenceFlow-ClarificationToProvide-id-0001">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProvideToReview-id-0001_di" bpmnElement="SequenceFlow-ProvideToReview-id-0001">
+        <di:waypoint x="1575" y="110" />
+        <di:waypoint x="1575" y="140" />
+        <di:waypoint x="1125" y="140" />
+        <di:waypoint x="1125" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RegulatoryToConverge-id-0001_di" bpmnElement="SequenceFlow-RegulatoryToConverge-id-0001">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="975" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RiskAssessmentToCompile-id-0001_di" bpmnElement="SequenceFlow-RiskAssessmentToCompile-id-0001">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompileToReview-id-0001_di" bpmnElement="SequenceFlow-CompileToReview-id-0001">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1675" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToApproval-id-0001_di" bpmnElement="SequenceFlow-ReviewToApproval-id-0001">
+        <di:waypoint x="1775" y="210" />
+        <di:waypoint x="1850" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalToFinalReport-id-0001_di" bpmnElement="SequenceFlow-ApprovalToFinalReport-id-0001">
+        <di:waypoint x="1900" y="210" />
+        <di:waypoint x="1975" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalToRevision-id-0001_di" bpmnElement="SequenceFlow-ApprovalToRevision-id-0001">
+        <di:waypoint x="1875" y="235" />
+        <di:waypoint x="1875" y="350" />
+        <di:waypoint x="1975" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FinalReportToArchive-id-0001_di" bpmnElement="SequenceFlow-FinalReportToArchive-id-0001">
+        <di:waypoint x="2075" y="210" />
+        <di:waypoint x="2125" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ArchiveToEnd-id-0001_di" bpmnElement="SequenceFlow-ArchiveToEnd-id-0001">
+        <di:waypoint x="2225" y="210" />
+        <di:waypoint x="2307" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RevisionToUpdate-id-0001_di" bpmnElement="SequenceFlow-RevisionToUpdate-id-0001">
+        <di:waypoint x="2075" y="350" />
+        <di:waypoint x="2125" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateToReview-id-0001_di" bpmnElement="SequenceFlow-UpdateToReview-id-0001">
+        <di:waypoint x="2175" y="390" />
+        <di:waypoint x="2175" y="420" />
+        <di:waypoint x="1725" y="420" />
+        <di:waypoint x="1725" y="250" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-RiskAssessment-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-RiskAssessment-id-0001" bpmnElement="SubProcess-RiskAssessment-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-RiskAssessmentStart-id-0001_di" bpmnElement="StartEvent-RiskAssessmentStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-RiskEvaluationSplit-id-0001_di" bpmnElement="ParallelGateway-RiskEvaluationSplit-id-0001">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EvaluateFinancialRisks-id-0001_di" bpmnElement="UserTask-EvaluateFinancialRisks-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-RiskEvaluationJoin-id-0001_di" bpmnElement="ParallelGateway-RiskEvaluationJoin-id-0001">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-HighRiskIdentified-id-0001_di" bpmnElement="ExclusiveGateway-HighRiskIdentified-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-LaunchDetailedInvestigation-id-0001_di" bpmnElement="UserTask-LaunchDetailedInvestigation-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PerformDataAnalysis-id-0001_di" bpmnElement="ServiceTask-PerformDataAnalysis-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConductInterviews-id-0001_di" bpmnElement="UserTask-ConductInterviews-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SiteVisitRequired-id-0001_di" bpmnElement="ExclusiveGateway-SiteVisitRequired-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PerformSiteVisit-id-0001_di" bpmnElement="UserTask-PerformSiteVisit-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-InvestigationJoin-id-0001_di" bpmnElement="ParallelGateway-InvestigationJoin-id-0001">
+        <dc:Bounds x="1550" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-RiskAssessmentComplete-id-0001_di" bpmnElement="EndEvent-RiskAssessmentComplete-id-0001">
+        <dc:Bounds x="1707" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EvaluateOperationalRisks-id-0001_di" bpmnElement="UserTask-EvaluateOperationalRisks-id-0001">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EvaluateComplianceRisks-id-0001_di" bpmnElement="UserTask-EvaluateComplianceRisks-id-0001">
+        <dc:Bounds x="325" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-RiskStartToSplit-id-0001_di" bpmnElement="SequenceFlow-RiskStartToSplit-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToFinancial-id-0001_di" bpmnElement="SequenceFlow-SplitToFinancial-id-0001">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToOperational-id-0001_di" bpmnElement="SequenceFlow-SplitToOperational-id-0001">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToCompliance-id-0001_di" bpmnElement="SequenceFlow-SplitToCompliance-id-0001">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="350" />
+        <di:waypoint x="325" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FinancialToJoin-id-0001_di" bpmnElement="SequenceFlow-FinancialToJoin-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToHighRisk-id-0001_di" bpmnElement="SequenceFlow-JoinToHighRisk-id-0001">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HighRiskToInvestigation-id-0001_di" bpmnElement="SequenceFlow-HighRiskToInvestigation-id-0001">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HighRiskToComplete-id-0001_di" bpmnElement="SequenceFlow-HighRiskToComplete-id-0001">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="140" />
+        <di:waypoint x="1725" y="140" />
+        <di:waypoint x="1725" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvestigationToData-id-0001_di" bpmnElement="SequenceFlow-InvestigationToData-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DataToInterviews-id-0001_di" bpmnElement="SequenceFlow-DataToInterviews-id-0001">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InterviewsToSiteVisit-id-0001_di" bpmnElement="SequenceFlow-InterviewsToSiteVisit-id-0001">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SiteVisitToVisit-id-0001_di" bpmnElement="SequenceFlow-SiteVisitToVisit-id-0001">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InterviewsToJoin-id-0001_di" bpmnElement="SequenceFlow-InterviewsToJoin-id-0001">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="140" />
+        <di:waypoint x="1575" y="140" />
+        <di:waypoint x="1575" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SiteVisitToJoin-id-0001_di" bpmnElement="SequenceFlow-SiteVisitToJoin-id-0001">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1550" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvestigationJoinToComplete-id-0001_di" bpmnElement="SequenceFlow-InvestigationJoinToComplete-id-0001">
+        <di:waypoint x="1600" y="70" />
+        <di:waypoint x="1707" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OperationalToJoin-id-0001_di" bpmnElement="SequenceFlow-OperationalToJoin-id-0001">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ComplianceToJoin-id-0001_di" bpmnElement="SequenceFlow-ComplianceToJoin-id-0001">
+        <di:waypoint x="425" y="350" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

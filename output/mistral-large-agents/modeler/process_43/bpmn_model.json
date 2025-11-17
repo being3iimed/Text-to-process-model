@@ -1,0 +1,395 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "Definitions_CarServiceReminder",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process_CarServiceReminder",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-AnnualServiceReminder-id-0001",
+          "name": "Annual Service Reminder",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeCycle": "RRULE:FREQ=YEARLY;INTERVAL=1;BYMONTHDAY={last_service_day};BYMONTH={last_service_month}"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToRegistrationCheck-id-0001",
+          "sourceRef": "StartEvent-AnnualServiceReminder-id-0001",
+          "targetRef": "ServiceTask-CheckCarRegistration-id-0001"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CheckCarRegistration-id-0001",
+          "name": "Check Car Registration Status"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RegistrationCheckToGateway-id-0002",
+          "sourceRef": "ServiceTask-CheckCarRegistration-id-0001",
+          "targetRef": "ExclusiveGateway-CarRegistered-id-0001"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-CarRegistered-id-0001",
+          "name": "Car Registered?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToNotification-id-0003",
+          "name": "car_registered == true",
+          "sourceRef": "ExclusiveGateway-CarRegistered-id-0001",
+          "targetRef": "SendTask-ServiceReminderNotification-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToEnd-id-0004",
+          "name": "car_registered == false",
+          "sourceRef": "ExclusiveGateway-CarRegistered-id-0001",
+          "targetRef": "EndEvent-ProcessComplete-id-0002"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-ServiceReminderNotification-id-0001",
+          "name": "Send: Service Reminder Notification"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NotificationToConfirmation-id-0005",
+          "sourceRef": "SendTask-ServiceReminderNotification-id-0001",
+          "targetRef": "ReceiveTask-ServiceAttendanceConfirmation-id-0001"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-ServiceAttendanceConfirmation-id-0001",
+          "name": "Receive: Service Attendance Confirmation"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-Timer30Day-id-0001",
+          "name": "30-Day Fine Timer",
+          "attachedToRef": "ReceiveTask-ServiceAttendanceConfirmation-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "P30D"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmationToRepair-id-0006",
+          "name": "owner_attended == true",
+          "sourceRef": "ReceiveTask-ServiceAttendanceConfirmation-id-0001",
+          "targetRef": "SubProcess-HandleCarRepair-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryToFine-id-0007",
+          "name": "owner_attended == false",
+          "sourceRef": "BoundaryEvent-Timer30Day-id-0001",
+          "targetRef": "SendTask-FineNotification-id-0001"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-FineNotification-id-0001",
+          "name": "Send: Fine Notification"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FineToEnd-id-0008",
+          "sourceRef": "SendTask-FineNotification-id-0001",
+          "targetRef": "EndEvent-FineIssued-id-0001"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-FineIssued-id-0001",
+          "name": "Fine Issued"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-HandleCarRepair-id-0001",
+          "name": "Handle Car Repair",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-RepairProcessStarted-id-0001",
+              "name": "Repair Process Started"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RepairStartToEnterProblems-id-0001",
+              "sourceRef": "StartEvent-RepairProcessStarted-id-0001",
+              "targetRef": "UserTask-MechanicEntersProblems-id-0001"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-MechanicEntersProblems-id-0001",
+              "name": "Mechanic Enters Car Problems"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-EnterProblemsToDiagnosis-id-0002",
+              "sourceRef": "UserTask-MechanicEntersProblems-id-0001",
+              "targetRef": "ParallelGateway-Diagnosis-id-0001"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-Diagnosis-id-0001",
+              "name": "Diagnosis Complete",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-DiagnosisToUpdateStatus-id-0003",
+              "sourceRef": "ParallelGateway-Diagnosis-id-0001",
+              "targetRef": "ServiceTask-UpdateRepairStatus1-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-DiagnosisToSendEmail-id-0004",
+              "sourceRef": "ParallelGateway-Diagnosis-id-0001",
+              "targetRef": "SendTask-RepairStatusEmail1-id-0001"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-UpdateRepairStatus1-id-0001",
+              "name": "Update Repair Status: Diagnosis Complete"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-RepairStatusEmail1-id-0001",
+              "name": "Send: Repair Status Email (Diagnosis)"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-UpdateStatusToMerge-id-0005",
+              "sourceRef": "ServiceTask-UpdateRepairStatus1-id-0001",
+              "targetRef": "ParallelGateway-Merge1-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendEmailToMerge-id-0006",
+              "sourceRef": "SendTask-RepairStatusEmail1-id-0001",
+              "targetRef": "ParallelGateway-Merge1-id-0001"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-Merge1-id-0001",
+              "name": "Merge Diagnosis Paths",
+              "gatewayDirection": "Converging"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MergeToParts-id-0007",
+              "sourceRef": "ParallelGateway-Merge1-id-0001",
+              "targetRef": "ParallelGateway-Parts-id-0001"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-Parts-id-0001",
+              "name": "Parts Ordered",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PartsToUpdateStatus-id-0008",
+              "sourceRef": "ParallelGateway-Parts-id-0001",
+              "targetRef": "ServiceTask-UpdateRepairStatus2-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PartsToSendEmail-id-0009",
+              "sourceRef": "ParallelGateway-Parts-id-0001",
+              "targetRef": "SendTask-RepairStatusEmail2-id-0001"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-UpdateRepairStatus2-id-0001",
+              "name": "Update Repair Status: Parts Ordered"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-RepairStatusEmail2-id-0001",
+              "name": "Send: Repair Status Email (Parts)"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-UpdateStatusToMerge2-id-0010",
+              "sourceRef": "ServiceTask-UpdateRepairStatus2-id-0001",
+              "targetRef": "ParallelGateway-Merge2-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendEmailToMerge2-id-0011",
+              "sourceRef": "SendTask-RepairStatusEmail2-id-0001",
+              "targetRef": "ParallelGateway-Merge2-id-0001"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-Merge2-id-0001",
+              "name": "Merge Parts Paths",
+              "gatewayDirection": "Converging"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MergeToRepair-id-0012",
+              "sourceRef": "ParallelGateway-Merge2-id-0001",
+              "targetRef": "ParallelGateway-Repair-id-0001"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-Repair-id-0001",
+              "name": "Repair Started",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RepairToUpdateStatus-id-0013",
+              "sourceRef": "ParallelGateway-Repair-id-0001",
+              "targetRef": "ServiceTask-UpdateRepairStatus3-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RepairToSendEmail-id-0014",
+              "sourceRef": "ParallelGateway-Repair-id-0001",
+              "targetRef": "SendTask-RepairStatusEmail3-id-0001"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-UpdateRepairStatus3-id-0001",
+              "name": "Update Repair Status: Repair Started"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-RepairStatusEmail3-id-0001",
+              "name": "Send: Repair Status Email (In Progress)"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-UpdateStatusToMerge3-id-0015",
+              "sourceRef": "ServiceTask-UpdateRepairStatus3-id-0001",
+              "targetRef": "ParallelGateway-Merge3-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendEmailToMerge3-id-0016",
+              "sourceRef": "SendTask-RepairStatusEmail3-id-0001",
+              "targetRef": "ParallelGateway-Merge3-id-0001"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-Merge3-id-0001",
+              "name": "Merge Repair Paths",
+              "gatewayDirection": "Converging"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MergeToReady-id-0017",
+              "sourceRef": "ParallelGateway-Merge3-id-0001",
+              "targetRef": "ServiceTask-UpdateRepairStatus4-id-0001"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-UpdateRepairStatus4-id-0001",
+              "name": "Update Repair Status: Ready for Pickup"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReadyToSendEmail-id-0018",
+              "sourceRef": "ServiceTask-UpdateRepairStatus4-id-0001",
+              "targetRef": "SendTask-RepairStatusEmail4-id-0001"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-RepairStatusEmail4-id-0001",
+              "name": "Send: Repair Status Email (Completion)"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendEmailToPayment-id-0019",
+              "sourceRef": "SendTask-RepairStatusEmail4-id-0001",
+              "targetRef": "UserTask-OwnerPayment-id-0001"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-OwnerPayment-id-0001",
+              "name": "Owner Pays via App"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PaymentToConfirmation-id-0020",
+              "sourceRef": "UserTask-OwnerPayment-id-0001",
+              "targetRef": "UserTask-MechanicConfirmation-id-0001"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-MechanicConfirmation-id-0001",
+              "name": "Mechanic Confirms Repair Success"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ConfirmationToPickerl-id-0021",
+              "sourceRef": "UserTask-MechanicConfirmation-id-0001",
+              "targetRef": "ServiceTask-GeneratePickerl-id-0001"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-GeneratePickerl-id-0001",
+              "name": "Generate Pickerl Certificate"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PickerlToSchedule-id-0022",
+              "sourceRef": "ServiceTask-GeneratePickerl-id-0001",
+              "targetRef": "ServiceTask-ScheduleNextService-id-0001"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-ScheduleNextService-id-0001",
+              "name": "Schedule Next Service"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ScheduleToEnd-id-0023",
+              "sourceRef": "ServiceTask-ScheduleNextService-id-0001",
+              "targetRef": "EndEvent-RepairComplete-id-0001"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-RepairComplete-id-0001",
+              "name": "Repair Process Complete"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RepairToComplete-id-0009",
+          "sourceRef": "SubProcess-HandleCarRepair-id-0001",
+          "targetRef": "EndEvent-ProcessComplete-id-0001"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProcessComplete-id-0001",
+          "name": "Service Reminder Process Complete"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProcessComplete-id-0002",
+          "name": "Service Reminder Process Complete"
+        }
+      ]
+    }
+  ]
+}

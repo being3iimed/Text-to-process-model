@@ -1,0 +1,128 @@
+```
+<summary_of_elements>
+
+### TASKS:
+- **serviceTask("Query Webshops for Parts Availability")** - Automated system queries all webshops for part availability, pricing, and delivery times.
+- **scriptTask("Computation: Calculate Optimal Order Distribution")** - Computation to determine the cheapest parts and optimal distribution across webshops.
+- **serviceTask("Place Orders with Webshops")** - Automated system places orders based on computed distribution.
+- **receiveTask("Receive: Parts Delivery")** - Waits for parts to arrive in batches.
+- **userTask("Start Building Contract")** - Human task to begin building once parts arrive.
+- **scriptTask("Computation: Check Stock Levels")** - Computation to check stock levels for each part.
+- **serviceTask("Reorder Parts (Cheapest)")** - Automated reorder if stock falls below 5.
+- **serviceTask("Reorder Parts (Fastest)")** - Automated reorder if stock falls below 3.
+- **sendTask("Send: Complaint Email to Friends")** - Sends a complaint email if stock reaches zero.
+
+### GATEWAYS:
+- **XOR at "Check Stock Levels"** - Conditions: `stock < 5`, `stock < 3`, `stock == 0`, default (no action).
+- **AND at "Place Orders"** - Parallel branches for placing orders with multiple webshops.
+
+### EVENTS:
+- **startEvent("Contract Project Initiated")** - Manual trigger to start the process.
+- **endEvent("Contract Project Completed")** - Normal completion of the process.
+- **intermediateEvent(timerBoundary("2 days"))** - Waits for parts delivery with a 2-day buffer for variability.
+
+### BOUNDARY EVENTS:
+- **timerBoundary("2 days") on "Receive: Parts Delivery"** - SLA: Parts delivery variability of +/- 2 days.
+
+### SUBPROCESSES:
+- **Subprocess "Order Parts"** - Purpose: Handles the querying, computation, and ordering of parts.
+  - Justification: Cohesive grouping of related tasks (querying, computation, ordering) with clear purpose and reusability.
+
+- **Subprocess "Manage Stock and Reorders"** - Purpose: Handles stock level checks and reordering logic.
+  - Justification: Cohesive grouping of stock management tasks with clear purpose and internal decision logic.
+
+</summary_of_elements>
+
+<pseudocode>
+
+```
+startEvent("Contract Project Initiated")
+
+subProcess("Order Parts"):
+    startEvent("Ordering Started")
+    serviceTask("Query Webshops for Parts Availability")
+    scriptTask("Computation: Calculate Optimal Order Distribution")
+    AND:
+        serviceTask("Place Orders with Webshop A")
+        serviceTask("Place Orders with Webshop B")
+        serviceTask("Place Orders with Webshop C")
+    END_AND
+    endEvent("Orders Placed")
+endSubProcess
+
+subProcess("Manage Stock and Reorders"):
+    startEvent("Stock Management Started")
+    receiveTask("Receive: Parts Delivery"):
+        timerBoundary("2 days"):
+            sendTask("Send: Reminder to Webshops")
+    scriptTask("Computation: Check Stock Levels")
+    if (stock < 5):
+        serviceTask("Reorder Parts (Cheapest)")
+    else if (stock < 3):
+        serviceTask("Reorder Parts (Fastest)")
+    else if (stock == 0):
+        sendTask("Send: Complaint Email to Friends")
+    else:
+        intermediateEvent(timerBoundary("1 day"))  // Recheck stock after 1 day
+    endEvent("Stock Managed")
+endSubProcess
+
+userTask("Start Building Contract")
+
+endEvent("Contract Project Completed")
+```
+
+</pseudocode>
+
+<compliance_checks>
+
+### TIMER EVENTS:
+- **timerBoundary("2 days")** on `receiveTask("Receive: Parts Delivery")`:
+  - Valid: Uses `timeDuration` with ISO 8601 format (`P2D`).
+  - Justified: Explicit SLA for delivery variability (+/- 2 days).
+
+- **intermediateEvent(timerBoundary("1 day"))**:
+  - Valid: Uses `timeDuration` with ISO 8601 format (`P1D`).
+  - Justified: Recheck stock levels after a delay.
+
+### GATEWAYS:
+- **XOR at "Check Stock Levels"**:
+  - Conditions: `stock < 5`, `stock < 3`, `stock == 0`, default.
+  - Valid: Mutually exclusive and exhaustive.
+  - Convergence: Implicit (no parallel paths).
+
+- **AND at "Place Orders"**:
+  - Valid: Parallel independent tasks (ordering from multiple webshops).
+  - Convergence: All paths merge at `endEvent("Orders Placed")`.
+
+### SEQUENCE FLOWS:
+- All conditional flows labeled with clear conditions (e.g., `stock < 5`).
+- No empty labels on decision branches.
+
+### BOUNDARY EVENTS:
+- **timerBoundary("2 days") on `receiveTask("Receive: Parts Delivery")`**:
+  - Justified: Explicit SLA for delivery variability.
+  - Handler: Single action (`sendTask("Send: Reminder to Webshops")`).
+
+### SUBPROCESSES:
+- **Subprocess "Order Parts"**:
+  - Justified: Passes Three-Question Test (clear purpose, 3+ related tasks, improves readability).
+  - Structure: 1 startEvent, 1 endEvent, all paths terminate.
+
+- **Subprocess "Manage Stock and Reorders"**:
+  - Justified: Passes Three-Question Test (clear purpose, cohesive stock management logic).
+  - Structure: 1 startEvent, 1 endEvent, all paths terminate.
+
+### FLOW PATHS:
+- All paths traceable from `startEvent` to `endEvent`.
+- No orphaned flows or unreachable tasks.
+
+</compliance_checks>
+
+<assumptions>
+- Parts delivery variability is modeled as a 2-day buffer (timerBoundary).
+- Stock levels are checked after every delivery or reorder.
+- "Cheapest" and "fastest" reorder logic assumes real-time pricing/delivery data is available.
+- Complaint email is sent only if stock reaches zero (critical failure).
+</assumptions>
+```

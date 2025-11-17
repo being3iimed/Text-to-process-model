@@ -1,0 +1,149 @@
+```
+<summary_of_elements>
+
+### TASKS:
+- **userTask("Issue Request for Proposals (RFP)")**
+  Reason: Human judgment required to draft and issue RFP.
+- **receiveTask("Receive Supplier Proposals")**
+  Reason: Process waits for external responses; no hard SLA mentioned → no timerBoundary.
+- **userTask("Evaluate Proposals")**
+  Reason: Human analysis of cost, quality, and delivery time.
+- **userTask("Conduct Site Visits/Interviews")**
+  Reason: Human interaction with suppliers (optional path).
+- **userTask("Select Supplier")**
+  Reason: Human decision based on evaluation.
+- **userTask("Negotiate Contract Terms")**
+  Reason: Human negotiation with selected supplier.
+- **userTask("Sign Contract")**
+  Reason: Human approval and signing.
+- **serviceTask("Onboard Supplier")**
+  Reason: Automated/system actions (e.g., updating ERP, granting access).
+
+### GATEWAYS:
+- **XOR after "Evaluate Proposals"**:
+  Conditions:
+  1. `site_visit_required == true` → "Conduct Site Visits/Interviews"
+  2. `site_visit_required == false` (default) → "Select Supplier"
+
+### EVENTS:
+- **startEvent("Need for New Supplier Identified")**
+  Trigger: Manual (business need).
+- **endEvent("Supplier Onboarded and Contract Executed")**
+  Trigger: Process completion.
+
+### BOUNDARY EVENTS:
+- **None justified**:
+  - No hard SLAs mentioned (e.g., "proposals must be received within X days").
+  - No explicit error scenarios (e.g., "if RFP fails to send").
+  - All tasks are human-driven with no deterministic timeouts.
+
+### SUBPROCESSES:
+- **None justified**:
+  - No cohesive logical grouping of 3+ tasks.
+  - No repeated structures or complexity isolation needed.
+  - All tasks are linear or simple branches.
+
+---
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+```pseudocode
+startEvent("Need for New Supplier Identified")
+
+// Main Process Flow
+userTask("Issue Request for Proposals (RFP)")
+receiveTask("Receive Supplier Proposals")
+userTask("Evaluate Proposals")
+
+// Decision: Site Visit Required?
+if (site_visit_required == true):
+    userTask("Conduct Site Visits/Interviews")
+else:  // Default path
+    // No action; proceed to selection
+endIf
+
+userTask("Select Supplier")
+userTask("Negotiate Contract Terms")
+userTask("Sign Contract")
+serviceTask("Onboard Supplier")
+
+endEvent("Supplier Onboarded and Contract Executed")
+```
+
+---
+</bpmn_pseudocode>
+
+<compliance_validation>
+
+### **1. Timer Events**:
+✅ **Compliant**: No timer events used (none justified by description).
+
+### **2. Gateway Convergence**:
+✅ **Compliant**:
+   - XOR gateway ("site_visit_required") has **explicit default path** (`else`).
+   - No parallel (AND) gateways → no convergence needed.
+
+### **3. Sequence Flow Labels**:
+✅ **Compliant**:
+   - Conditional flow labeled clearly: `site_visit_required == true`.
+   - Default flow implicitly labeled via `else`.
+
+### **4. Boundary Events**:
+✅ **Compliant**:
+   - **No boundary events added** (none met gating criteria).
+   - No speculative timeouts/errors (e.g., no "if RFP fails").
+
+### **5. Subprocesses**:
+✅ **Compliant**:
+   - **No subprocesses added** (failed necessity test).
+   - All tasks are linear or simple branches; no cohesive grouping.
+
+### **6. Flow Consistency**:
+✅ **Compliant**:
+   - All paths traceable from start to end.
+   - No orphaned tasks (e.g., "Conduct Site Visits" reconnects via `endIf`).
+   - No unreachable endEvent.
+
+### **7. Task Classification**:
+✅ **Compliant**:
+   - Human judgment tasks: `userTask` (e.g., "Evaluate Proposals").
+   - Automated actions: `serviceTask` (e.g., "Onboard Supplier").
+   - External wait: `receiveTask` (no timerBoundary, as no SLA mentioned).
+
+### **8. Event Triggers**:
+✅ **Compliant**:
+   - Start: Manual (`startEvent`).
+   - End: Process completion (`endEvent`).
+   - No intermediate events (none needed).
+
+---
+</compliance_validation>
+
+<assumptions>
+1. **"Site visits/interviews are optional"**:
+   - Modeled as XOR gateway with `site_visit_required` flag.
+   - Default path skips site visits if not needed.
+
+2. **"No hard SLAs"**:
+   - `receiveTask("Receive Supplier Proposals")` has no `timerBoundary` because the description does not specify a deadline (e.g., "proposals due in 14 days").
+
+3. **"Onboarding is automated"**:
+   - Assumed "Onboard Supplier" involves system updates (e.g., ERP access), hence `serviceTask`. If manual steps are involved, this would change to `userTask`.
+
+4. **"Contract signing is final"**:
+   - No parallel approvals or escalations mentioned → linear flow.
+</assumptions>
+
+<critical_success_checklist>
+| **Criteria**               | **Status** | **Notes**                                  |
+|----------------------------|------------|--------------------------------------------|
+| No invalid BPMN properties | ✅ PASS    | No timer misconfigurations.               |
+| No unreachable elements    | ✅ PASS    | All paths traceable.                      |
+| Explicit gateway convergence| ✅ PASS   | XOR has default path.                     |
+| No orphaned flows          | ✅ PASS    | All branches reconnect.                   |
+| No speculative boundaries  | ✅ PASS    | No unbounded timeouts/errors.             |
+| Balanced design            | ✅ PASS    | 100% core elements (tasks/gateways/events).|
+| Subprocess necessity       | ✅ PASS    | None added (failed necessity test).       |
+</critical_success_checklist>
+```

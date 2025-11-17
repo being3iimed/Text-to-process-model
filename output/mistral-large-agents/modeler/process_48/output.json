@@ -1,0 +1,220 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "ViennaNightRunProcess",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler",
+    "exporterVersion": "1.0.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "ViennaNightRunProcess-id-0001",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-StartViennaNightRun-id-0001",
+            "name": "Start Vienna Night Run Participation"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-SelectStartingBlock-id-0001",
+            "name": "Select Starting Block"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-Measure5kmTime-id-0001",
+            "name": "Measure 5km Time"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-QualificationCheck-id-0001",
+            "name": "Qualification Check",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-GetStartingNumber-id-0001",
+            "name": "Get Starting Number"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-TrainUntilGoal-id-0001",
+            "name": "Train Until Goal Achieved"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-Measure5kmTimeAfterTraining-id-0002",
+            "name": "Measure 5km Time (After Training)"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-CheckWorkdayEndTime-id-0001",
+            "name": "Check Workday End Time"
+          },
+          {
+            "$type": "bpmn:ScriptTask",
+            "id": "ScriptTask-CalculateTimeDifference-id-0001",
+            "name": "Calculate Time Difference between Work End and Start Time"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-TravelDecision-id-0001",
+            "name": "Travel Decision",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-DecideTravelRouteFromHome-id-0001",
+            "name": "Decide Travel Route: From Home"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-DecideTravelRouteFromWork-id-0001",
+            "name": "Decide Travel Route: From Work"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-RunAndDrink-id-0001",
+            "name": "Run and Drink Simultaneously"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ReceiveFinalTime-id-0001",
+            "name": "Receive Final Running Time"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-FinalTimeReceived-id-0001",
+            "name": "Final Time Received"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToSelectBlock-id-0001",
+            "sourceRef": "StartEvent-StartViennaNightRun-id-0001",
+            "targetRef": "UserTask-SelectStartingBlock-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SelectBlockToMeasureTime-id-0001",
+            "sourceRef": "UserTask-SelectStartingBlock-id-0001",
+            "targetRef": "ServiceTask-Measure5kmTime-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-MeasureTimeToQualification-id-0001",
+            "sourceRef": "ServiceTask-Measure5kmTime-id-0001",
+            "targetRef": "ExclusiveGateway-QualificationCheck-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-QualifiedToGetNumber-id-0001",
+            "name": "measured_time ≤ PT25M",
+            "sourceRef": "ExclusiveGateway-QualificationCheck-id-0001",
+            "targetRef": "ServiceTask-GetStartingNumber-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-NeedTrainingToTrain-id-0001",
+            "name": "measured_time > PT25M",
+            "sourceRef": "ExclusiveGateway-QualificationCheck-id-0001",
+            "targetRef": "UserTask-TrainUntilGoal-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-TrainToMeasureAgain-id-0001",
+            "sourceRef": "UserTask-TrainUntilGoal-id-0001",
+            "targetRef": "ServiceTask-Measure5kmTimeAfterTraining-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-MeasureAgainToGetNumber-id-0001",
+            "sourceRef": "ServiceTask-Measure5kmTimeAfterTraining-id-0002",
+            "targetRef": "ServiceTask-GetStartingNumber-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GetNumberToCheckWorkday-id-0001",
+            "sourceRef": "ServiceTask-GetStartingNumber-id-0001",
+            "targetRef": "UserTask-CheckWorkdayEndTime-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CheckWorkdayToCalculate-id-0001",
+            "sourceRef": "UserTask-CheckWorkdayEndTime-id-0001",
+            "targetRef": "ScriptTask-CalculateTimeDifference-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CalculateToTravelDecision-id-0001",
+            "sourceRef": "ScriptTask-CalculateTimeDifference-id-0001",
+            "targetRef": "ExclusiveGateway-TravelDecision-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-TravelFromHome-id-0001",
+            "name": "time_difference > PT1H",
+            "sourceRef": "ExclusiveGateway-TravelDecision-id-0001",
+            "targetRef": "UserTask-DecideTravelRouteFromHome-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-TravelFromWork-id-0001",
+            "name": "time_difference ≤ PT1H",
+            "sourceRef": "ExclusiveGateway-TravelDecision-id-0001",
+            "targetRef": "UserTask-DecideTravelRouteFromWork-id-0001",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-HomeRouteToRun-id-0001",
+            "sourceRef": "UserTask-DecideTravelRouteFromHome-id-0001",
+            "targetRef": "ServiceTask-RunAndDrink-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-WorkRouteToRun-id-0001",
+            "sourceRef": "UserTask-DecideTravelRouteFromWork-id-0001",
+            "targetRef": "ServiceTask-RunAndDrink-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RunToReceiveTime-id-0001",
+            "sourceRef": "ServiceTask-RunAndDrink-id-0001",
+            "targetRef": "ServiceTask-ReceiveFinalTime-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReceiveTimeToEnd-id-0001",
+            "sourceRef": "ServiceTask-ReceiveFinalTime-id-0001",
+            "targetRef": "EndEvent-FinalTimeReceived-id-0001"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-large-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 12126,
+        "total_tokens": 14231,
+        "completion_tokens": 2105
+      },
+      "model_name": "mistral-large-latest",
+      "model": "mistral-large-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 12126,
+      "output_tokens": 2105,
+      "total_tokens": 14231
+    },
+    "id": "lc_run--b5db1f59-a372-4027-8617-0fe52fb36686-0"
+  },
+  "status": "success"
+}

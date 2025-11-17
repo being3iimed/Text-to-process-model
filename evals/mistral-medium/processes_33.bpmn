@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions-3DPrintingProcess-id-0001" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process-3DPrintingWorkflow-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-CravingCustomModel-id-0001" name="Craving custom 3D model">
+      <bpmn:outgoing>SequenceFlow-StartToInitialSketches-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-SendInitialSketches-id-0001" name="Send initial sketches to artist">
+      <bpmn:incoming>SequenceFlow-StartToInitialSketches-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InitialSketchesToReview-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ReviewDraft-id-0002" name="Review artist&#39;s draft and request changes">
+      <bpmn:incoming>SequenceFlow-InitialSketchesToReview-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToSTLReceive-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:receiveTask id="ReceiveTask-FinalSTLFile-id-0001" name="Receive: final STL file from artist">
+      <bpmn:incoming>SequenceFlow-ReviewToSTLReceive-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-STLToColorSelection-id-0004</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:userTask id="UserTask-SelectPlasticColor-id-0001" name="Select plastic color for printing">
+      <bpmn:incoming>SequenceFlow-STLToColorSelection-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ColorToPlasticAcquisition-id-0005</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="SubProcess-PlasticAcquisition-id-0001" name="Plastic Acquisition">
+      <bpmn:incoming>SequenceFlow-ColorToPlasticAcquisition-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PlasticAcquisitionToPrinterSetup-id-0006</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-AcquisitionStart-id-0001" name="Acquisition Start">
+        <bpmn:outgoing>SequenceFlow-AcquisitionStartToColorCheck-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-ColorAvailability-id-0001" name="Color available at home?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-AcquisitionStartToColorCheck-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ColorAvailableToStockCheck-id-0002</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-ColorNotAvailableToOrder-id-0003</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:userTask id="UserTask-CheckPlasticStock-id-0001" name="Check plastic stock at home">
+        <bpmn:incoming>SequenceFlow-ColorAvailableToStockCheck-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-StockCheckToStockGateway-id-0004</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-StockCheck-id-0001" name="Stock ≥ 100g?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-StockCheckToStockGateway-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-StockSufficientToReady-id-0005</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-StockInsufficientToAddList-id-0006</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="EndEvent-PlasticReady-id-0001" name="Plastic Ready">
+        <bpmn:incoming>SequenceFlow-StockSufficientToReady-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PlasticReadyToConverge-id-0009</bpmn:outgoing>
+      </bpmn:endEvent>
+      <bpmn:userTask id="UserTask-AddToShoppingList-id-0001" name="Add plastic to shopping list">
+        <bpmn:incoming>SequenceFlow-StockInsufficientToAddList-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AddListToConverge-id-0007</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:endEvent id="EndEvent-PlasticOrderedScheduled-id-0001" name="Plastic Ordered/Scheduled">
+        <bpmn:incoming>SequenceFlow-AddListToConverge-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PlasticScheduledToConverge-id-0011</bpmn:outgoing>
+      </bpmn:endEvent>
+      <bpmn:serviceTask id="ServiceTask-OrderPlasticOnline-id-0001" name="Order plastic online">
+        <bpmn:incoming>SequenceFlow-ColorNotAvailableToOrder-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-OrderToConverge-id-0008</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-PlasticOrdered-id-0001" name="Plastic Ordered">
+        <bpmn:incoming>SequenceFlow-OrderToConverge-id-0008</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PlasticOrderedToConverge-id-0010</bpmn:outgoing>
+      </bpmn:endEvent>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-ConvergeAcquisition-id-0001" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-PlasticReadyToConverge-id-0009</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-PlasticOrderedToConverge-id-0010</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-PlasticScheduledToConverge-id-0011</bpmn:incoming>
+      </bpmn:exclusiveGateway>
+      <bpmn:sequenceFlow id="SequenceFlow-AcquisitionStartToColorCheck-id-0001" sourceRef="StartEvent-AcquisitionStart-id-0001" targetRef="ExclusiveGateway-ColorAvailability-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ColorAvailableToStockCheck-id-0002" name="Color available at home" sourceRef="ExclusiveGateway-ColorAvailability-id-0001" targetRef="UserTask-CheckPlasticStock-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ColorNotAvailableToOrder-id-0003" name="Color not available" sourceRef="ExclusiveGateway-ColorAvailability-id-0001" targetRef="ServiceTask-OrderPlasticOnline-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-StockCheckToStockGateway-id-0004" sourceRef="UserTask-CheckPlasticStock-id-0001" targetRef="ExclusiveGateway-StockCheck-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-StockSufficientToReady-id-0005" name="Stock ≥ 100g" sourceRef="ExclusiveGateway-StockCheck-id-0001" targetRef="EndEvent-PlasticReady-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-StockInsufficientToAddList-id-0006" name="Stock &#60; 100g" sourceRef="ExclusiveGateway-StockCheck-id-0001" targetRef="UserTask-AddToShoppingList-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-AddListToConverge-id-0007" sourceRef="UserTask-AddToShoppingList-id-0001" targetRef="EndEvent-PlasticOrderedScheduled-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-OrderToConverge-id-0008" sourceRef="ServiceTask-OrderPlasticOnline-id-0001" targetRef="EndEvent-PlasticOrdered-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-PlasticReadyToConverge-id-0009" sourceRef="EndEvent-PlasticReady-id-0001" targetRef="ExclusiveGateway-ConvergeAcquisition-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-PlasticOrderedToConverge-id-0010" sourceRef="EndEvent-PlasticOrdered-id-0001" targetRef="ExclusiveGateway-ConvergeAcquisition-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-PlasticScheduledToConverge-id-0011" sourceRef="EndEvent-PlasticOrderedScheduled-id-0001" targetRef="ExclusiveGateway-ConvergeAcquisition-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:parallelGateway id="ParallelGateway-PrinterSetupSplit-id-0001" name="Parallel Printer Setup" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-PlasticAcquisitionToPrinterSetup-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PrinterSetupSplitToTurnOn-id-0007</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-PrinterSetupSplitToHeat-id-0008</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-TurnOnPrinter-id-0001" name="Turn on 3D printer">
+      <bpmn:incoming>SequenceFlow-PrinterSetupSplitToTurnOn-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TurnOnToPrinterSetupJoin-id-0009</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-HeatPrinterBed-id-0001" name="Heat printer bed and extruder">
+      <bpmn:incoming>SequenceFlow-PrinterSetupSplitToHeat-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-HeatToPrinterSetupJoin-id-0010</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-PrinterHeatingTimeout-id-0001" name="30 Minute Heating Timeout" attachedToRef="ServiceTask-HeatPrinterBed-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryTimeoutToAlert-id-0011</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-PrinterHeatingTimeout-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT30M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-HeatingTimeoutAlert-id-0001" name="Send: printer heating timeout alert">
+      <bpmn:incoming>SequenceFlow-BoundaryTimeoutToAlert-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AlertToPrinterSetupJoin-id-0012</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:parallelGateway id="ParallelGateway-PrinterSetupJoin-id-0001" name="Printer Setup Complete" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-TurnOnToPrinterSetupJoin-id-0009</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-HeatToPrinterSetupJoin-id-0010</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-AlertToPrinterSetupJoin-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PrinterSetupJoinToGcode-id-0013</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-GenerateGcode-id-0001" name="Generate gcode from STL">
+      <bpmn:incoming>SequenceFlow-PrinterSetupJoinToGcode-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GcodeToPrint-id-0014</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-PrintModel-id-0001" name="Print 3D model">
+      <bpmn:incoming>SequenceFlow-GcodeToPrint-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PrintToEnd-id-0015</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-ModelPrinted-id-0001" name="3D model printed successfully">
+      <bpmn:incoming>SequenceFlow-PrintToEnd-id-0015</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToInitialSketches-id-0001" sourceRef="StartEvent-CravingCustomModel-id-0001" targetRef="UserTask-SendInitialSketches-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InitialSketchesToReview-id-0002" sourceRef="UserTask-SendInitialSketches-id-0001" targetRef="UserTask-ReviewDraft-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToSTLReceive-id-0003" sourceRef="UserTask-ReviewDraft-id-0002" targetRef="ReceiveTask-FinalSTLFile-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-STLToColorSelection-id-0004" sourceRef="ReceiveTask-FinalSTLFile-id-0001" targetRef="UserTask-SelectPlasticColor-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ColorToPlasticAcquisition-id-0005" sourceRef="UserTask-SelectPlasticColor-id-0001" targetRef="SubProcess-PlasticAcquisition-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PlasticAcquisitionToPrinterSetup-id-0006" sourceRef="SubProcess-PlasticAcquisition-id-0001" targetRef="ParallelGateway-PrinterSetupSplit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrinterSetupSplitToTurnOn-id-0007" sourceRef="ParallelGateway-PrinterSetupSplit-id-0001" targetRef="ServiceTask-TurnOnPrinter-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrinterSetupSplitToHeat-id-0008" sourceRef="ParallelGateway-PrinterSetupSplit-id-0001" targetRef="ServiceTask-HeatPrinterBed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TurnOnToPrinterSetupJoin-id-0009" sourceRef="ServiceTask-TurnOnPrinter-id-0001" targetRef="ParallelGateway-PrinterSetupJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-HeatToPrinterSetupJoin-id-0010" sourceRef="ServiceTask-HeatPrinterBed-id-0001" targetRef="ParallelGateway-PrinterSetupJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryTimeoutToAlert-id-0011" sourceRef="BoundaryEvent-PrinterHeatingTimeout-id-0001" targetRef="SendTask-HeatingTimeoutAlert-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AlertToPrinterSetupJoin-id-0012" sourceRef="SendTask-HeatingTimeoutAlert-id-0001" targetRef="ParallelGateway-PrinterSetupJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrinterSetupJoinToGcode-id-0013" sourceRef="ParallelGateway-PrinterSetupJoin-id-0001" targetRef="ServiceTask-GenerateGcode-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GcodeToPrint-id-0014" sourceRef="ServiceTask-GenerateGcode-id-0001" targetRef="ServiceTask-PrintModel-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrintToEnd-id-0015" sourceRef="ServiceTask-PrintModel-id-0001" targetRef="EndEvent-ModelPrinted-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process-3DPrintingWorkflow-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process-3DPrintingWorkflow-id-0001" bpmnElement="Process-3DPrintingWorkflow-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-CravingCustomModel-id-0001_di" bpmnElement="StartEvent-CravingCustomModel-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SendInitialSketches-id-0001_di" bpmnElement="UserTask-SendInitialSketches-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewDraft-id-0002_di" bpmnElement="UserTask-ReviewDraft-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-FinalSTLFile-id-0001_di" bpmnElement="ReceiveTask-FinalSTLFile-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectPlasticColor-id-0001_di" bpmnElement="UserTask-SelectPlasticColor-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-PlasticAcquisition-id-0001_di" bpmnElement="SubProcess-PlasticAcquisition-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-PrinterSetupSplit-id-0001_di" bpmnElement="ParallelGateway-PrinterSetupSplit-id-0001">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-TurnOnPrinter-id-0001_di" bpmnElement="ServiceTask-TurnOnPrinter-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-PrinterSetupJoin-id-0001_di" bpmnElement="ParallelGateway-PrinterSetupJoin-id-0001">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateGcode-id-0001_di" bpmnElement="ServiceTask-GenerateGcode-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrintModel-id-0001_di" bpmnElement="ServiceTask-PrintModel-id-0001">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ModelPrinted-id-0001_di" bpmnElement="EndEvent-ModelPrinted-id-0001">
+        <dc:Bounds x="1857" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-HeatPrinterBed-id-0001_di" bpmnElement="ServiceTask-HeatPrinterBed-id-0001">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-PrinterHeatingTimeout-id-0001_di" bpmnElement="BoundaryEvent-PrinterHeatingTimeout-id-0001">
+        <dc:Bounds x="1107" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-HeatingTimeoutAlert-id-0001_di" bpmnElement="SendTask-HeatingTimeoutAlert-id-0001">
+        <dc:Bounds x="1225" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToInitialSketches-id-0001_di" bpmnElement="SequenceFlow-StartToInitialSketches-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InitialSketchesToReview-id-0002_di" bpmnElement="SequenceFlow-InitialSketchesToReview-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToSTLReceive-id-0003_di" bpmnElement="SequenceFlow-ReviewToSTLReceive-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-STLToColorSelection-id-0004_di" bpmnElement="SequenceFlow-STLToColorSelection-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ColorToPlasticAcquisition-id-0005_di" bpmnElement="SequenceFlow-ColorToPlasticAcquisition-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PlasticAcquisitionToPrinterSetup-id-0006_di" bpmnElement="SequenceFlow-PlasticAcquisitionToPrinterSetup-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrinterSetupSplitToTurnOn-id-0007_di" bpmnElement="SequenceFlow-PrinterSetupSplitToTurnOn-id-0007">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrinterSetupSplitToHeat-id-0008_di" bpmnElement="SequenceFlow-PrinterSetupSplitToHeat-id-0008">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TurnOnToPrinterSetupJoin-id-0009_di" bpmnElement="SequenceFlow-TurnOnToPrinterSetupJoin-id-0009">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrinterSetupJoinToGcode-id-0013_di" bpmnElement="SequenceFlow-PrinterSetupJoinToGcode-id-0013">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GcodeToPrint-id-0014_di" bpmnElement="SequenceFlow-GcodeToPrint-id-0014">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrintToEnd-id-0015_di" bpmnElement="SequenceFlow-PrintToEnd-id-0015">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1857" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HeatToPrinterSetupJoin-id-0010_di" bpmnElement="SequenceFlow-HeatToPrinterSetupJoin-id-0010">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1425" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryTimeoutToAlert-id-0011_di" bpmnElement="SequenceFlow-BoundaryTimeoutToAlert-id-0011">
+        <di:waypoint x="1125" y="268" />
+        <di:waypoint x="1125" y="350" />
+        <di:waypoint x="1225" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlertToPrinterSetupJoin-id-0012_di" bpmnElement="SequenceFlow-AlertToPrinterSetupJoin-id-0012">
+        <di:waypoint x="1325" y="350" />
+        <di:waypoint x="1425" y="350" />
+        <di:waypoint x="1425" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-PlasticAcquisition-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-PlasticAcquisition-id-0001" bpmnElement="SubProcess-PlasticAcquisition-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-AcquisitionStart-id-0001_di" bpmnElement="StartEvent-AcquisitionStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ColorAvailability-id-0001_di" bpmnElement="ExclusiveGateway-ColorAvailability-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CheckPlasticStock-id-0001_di" bpmnElement="UserTask-CheckPlasticStock-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-StockCheck-id-0001_di" bpmnElement="ExclusiveGateway-StockCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-PlasticReady-id-0001_di" bpmnElement="EndEvent-PlasticReady-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ConvergeAcquisition-id-0001_di" bpmnElement="ExclusiveGateway-ConvergeAcquisition-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-OrderPlasticOnline-id-0001_di" bpmnElement="ServiceTask-OrderPlasticOnline-id-0001">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-PlasticOrdered-id-0001_di" bpmnElement="EndEvent-PlasticOrdered-id-0001">
+        <dc:Bounds x="507" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AddToShoppingList-id-0001_di" bpmnElement="UserTask-AddToShoppingList-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-PlasticOrderedScheduled-id-0001_di" bpmnElement="EndEvent-PlasticOrderedScheduled-id-0001">
+        <dc:Bounds x="1107" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-AcquisitionStartToColorCheck-id-0001_di" bpmnElement="SequenceFlow-AcquisitionStartToColorCheck-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ColorAvailableToStockCheck-id-0002_di" bpmnElement="SequenceFlow-ColorAvailableToStockCheck-id-0002">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ColorNotAvailableToOrder-id-0003_di" bpmnElement="SequenceFlow-ColorNotAvailableToOrder-id-0003">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StockCheckToStockGateway-id-0004_di" bpmnElement="SequenceFlow-StockCheckToStockGateway-id-0004">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StockSufficientToReady-id-0005_di" bpmnElement="SequenceFlow-StockSufficientToReady-id-0005">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StockInsufficientToAddList-id-0006_di" bpmnElement="SequenceFlow-StockInsufficientToAddList-id-0006">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="600" y="70" />
+        <di:waypoint x="600" y="140" />
+        <di:waypoint x="900" y="140" />
+        <di:waypoint x="900" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PlasticReadyToConverge-id-0009_di" bpmnElement="SequenceFlow-PlasticReadyToConverge-id-0009">
+        <di:waypoint x="693" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderToConverge-id-0008_di" bpmnElement="SequenceFlow-OrderToConverge-id-0008">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="507" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PlasticOrderedToConverge-id-0010_di" bpmnElement="SequenceFlow-PlasticOrderedToConverge-id-0010">
+        <di:waypoint x="543" y="210" />
+        <di:waypoint x="600" y="210" />
+        <di:waypoint x="600" y="140" />
+        <di:waypoint x="1200" y="140" />
+        <di:waypoint x="1200" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AddListToConverge-id-0007_di" bpmnElement="SequenceFlow-AddListToConverge-id-0007">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1107" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PlasticScheduledToConverge-id-0011_di" bpmnElement="SequenceFlow-PlasticScheduledToConverge-id-0011">
+        <di:waypoint x="1143" y="210" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1275" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Complaint-Handling-Process-Definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="Complaint-Handling-Process-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ComplaintFiled-id-0001" name="Complaint Filed">
+      <bpmn:outgoing>SequenceFlow-StartToLogComplaint-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-LogComplaint-id-0001" name="Log Complaint">
+      <bpmn:incoming>SequenceFlow-StartToLogComplaint-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogToAssign-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-AssignToDepartment-id-0001" name="Assign to Department">
+      <bpmn:incoming>SequenceFlow-LogToAssign-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AssignToReview-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-ReviewComplaint-id-0001" name="Review Complaint">
+      <bpmn:incoming>SequenceFlow-AssignToReview-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToGateway-id-0004</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-RefundDecision-id-0001" name="Refund Approved?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewToGateway-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToApprovalNotification-id-0005</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToRejectionNotification-id-0007</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-SendApprovalNotification-id-0001" name="Send: Decision Notification (Approval)">
+      <bpmn:incoming>SequenceFlow-GatewayToApprovalNotification-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ApprovalToRefund-id-0006</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-ProcessRefund-id-0001" name="Process Refund">
+      <bpmn:incoming>SequenceFlow-ApprovalToRefund-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RefundToMarkResolved-id-0008</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendRejectionNotification-id-0001" name="Send: Decision Notification (Rejection)">
+      <bpmn:incoming>SequenceFlow-GatewayToRejectionNotification-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RejectionToMarkResolved-id-0009</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-MarkAsResolved-id-0001" name="Mark as Resolved">
+      <bpmn:incoming>SequenceFlow-RefundToMarkResolved-id-0008</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-RejectionToMarkResolved-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MarkToFeedback-id-0010</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:receiveTask id="ReceiveTask-CustomerFeedback-id-0001" name="Receive: Customer Feedback">
+      <bpmn:incoming>SequenceFlow-MarkToFeedback-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FeedbackToEnd-id-0011</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:endEvent id="EndEvent-CaseClosed-id-0001" name="Case Closed">
+      <bpmn:incoming>SequenceFlow-FeedbackToEnd-id-0011</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToLogComplaint-id-0001" sourceRef="StartEvent-ComplaintFiled-id-0001" targetRef="UserTask-LogComplaint-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogToAssign-id-0002" sourceRef="UserTask-LogComplaint-id-0001" targetRef="ServiceTask-AssignToDepartment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AssignToReview-id-0003" sourceRef="ServiceTask-AssignToDepartment-id-0001" targetRef="UserTask-ReviewComplaint-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToGateway-id-0004" sourceRef="UserTask-ReviewComplaint-id-0001" targetRef="ExclusiveGateway-RefundDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToApprovalNotification-id-0005" name="refund_approved == true" sourceRef="ExclusiveGateway-RefundDecision-id-0001" targetRef="SendTask-SendApprovalNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApprovalToRefund-id-0006" sourceRef="SendTask-SendApprovalNotification-id-0001" targetRef="ServiceTask-ProcessRefund-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToRejectionNotification-id-0007" name="refund_approved == false" sourceRef="ExclusiveGateway-RefundDecision-id-0001" targetRef="SendTask-SendRejectionNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RefundToMarkResolved-id-0008" sourceRef="ServiceTask-ProcessRefund-id-0001" targetRef="UserTask-MarkAsResolved-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RejectionToMarkResolved-id-0009" sourceRef="SendTask-SendRejectionNotification-id-0001" targetRef="UserTask-MarkAsResolved-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MarkToFeedback-id-0010" sourceRef="UserTask-MarkAsResolved-id-0001" targetRef="ReceiveTask-CustomerFeedback-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FeedbackToEnd-id-0011" sourceRef="ReceiveTask-CustomerFeedback-id-0001" targetRef="EndEvent-CaseClosed-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Complaint-Handling-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Complaint-Handling-Process-id-0001" bpmnElement="Complaint-Handling-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ComplaintFiled-id-0001_di" bpmnElement="StartEvent-ComplaintFiled-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-LogComplaint-id-0001_di" bpmnElement="UserTask-LogComplaint-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AssignToDepartment-id-0001_di" bpmnElement="ServiceTask-AssignToDepartment-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewComplaint-id-0001_di" bpmnElement="UserTask-ReviewComplaint-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RefundDecision-id-0001_di" bpmnElement="ExclusiveGateway-RefundDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendApprovalNotification-id-0001_di" bpmnElement="SendTask-SendApprovalNotification-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessRefund-id-0001_di" bpmnElement="ServiceTask-ProcessRefund-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-MarkAsResolved-id-0001_di" bpmnElement="UserTask-MarkAsResolved-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-CustomerFeedback-id-0001_di" bpmnElement="ReceiveTask-CustomerFeedback-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CaseClosed-id-0001_di" bpmnElement="EndEvent-CaseClosed-id-0001">
+        <dc:Bounds x="1407" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendRejectionNotification-id-0001_di" bpmnElement="SendTask-SendRejectionNotification-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToLogComplaint-id-0001_di" bpmnElement="SequenceFlow-StartToLogComplaint-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogToAssign-id-0002_di" bpmnElement="SequenceFlow-LogToAssign-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AssignToReview-id-0003_di" bpmnElement="SequenceFlow-AssignToReview-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToGateway-id-0004_di" bpmnElement="SequenceFlow-ReviewToGateway-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToApprovalNotification-id-0005_di" bpmnElement="SequenceFlow-GatewayToApprovalNotification-id-0005">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToRejectionNotification-id-0007_di" bpmnElement="SequenceFlow-GatewayToRejectionNotification-id-0007">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalToRefund-id-0006_di" bpmnElement="SequenceFlow-ApprovalToRefund-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RefundToMarkResolved-id-0008_di" bpmnElement="SequenceFlow-RefundToMarkResolved-id-0008">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MarkToFeedback-id-0010_di" bpmnElement="SequenceFlow-MarkToFeedback-id-0010">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FeedbackToEnd-id-0011_di" bpmnElement="SequenceFlow-FeedbackToEnd-id-0011">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1407" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RejectionToMarkResolved-id-0009_di" bpmnElement="SequenceFlow-RejectionToMarkResolved-id-0009">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1125" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

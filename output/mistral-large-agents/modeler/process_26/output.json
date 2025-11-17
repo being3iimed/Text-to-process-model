@@ -1,0 +1,359 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "MaternityLeaveProcess-Definitions-id-0001",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler",
+    "exporterVersion": "1.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "MaternityLeaveProcess-id-0001",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-MaternityLeaveInitiated-id-0001",
+            "name": "Maternity leave planning initiated"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-FetchLeaveModels-id-0001",
+            "name": "Fetch available leave models"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ReviewModels-id-0001",
+            "name": "Review maternity leave models"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-SelectModel-id-0001",
+            "name": "Select preferred model"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ProvideDetails-id-0001",
+            "name": "Provide personal details"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ValidateEligibility-id-0001",
+            "name": "Validate eligibility"
+          },
+          {
+            "$type": "bpmn:SubProcess",
+            "id": "SubProcess-NotificationProcess-id-0001",
+            "name": "Notification Process",
+            "flowElements": [
+              {
+                "$type": "bpmn:StartEvent",
+                "id": "StartEvent-NotificationStart-id-0001",
+                "name": "Notification process start"
+              },
+              {
+                "$type": "bpmn:ParallelGateway",
+                "id": "ParallelGateway-NotificationSplit-id-0001",
+                "name": "Parallel Notification",
+                "gatewayDirection": "Diverging"
+              },
+              {
+                "$type": "bpmn:SendTask",
+                "id": "SendTask-SocialSecurityNotification-id-0001",
+                "name": "Send: Social Security notification"
+              },
+              {
+                "$type": "bpmn:SendTask",
+                "id": "SendTask-CompanyNotification-id-0001",
+                "name": "Send: Company notification"
+              },
+              {
+                "$type": "bpmn:ReceiveTask",
+                "id": "ReceiveTask-CompanyConfirmation-id-0001",
+                "name": "Receive: Company confirmation"
+              },
+              {
+                "$type": "bpmn:ReceiveTask",
+                "id": "ReceiveTask-SocialSecurityConfirmation-id-0001",
+                "name": "Receive: Social Security confirmation"
+              },
+              {
+                "$type": "bpmn:BoundaryEvent",
+                "id": "BoundaryEvent-CompanyTimeout-id-0001",
+                "name": "5 Business Day Timeout",
+                "attachedToRef": "ReceiveTask-CompanyConfirmation-id-0001",
+                "cancelActivity": true,
+                "eventDefinitions": [
+                  {
+                    "$type": "bpmn:TimerEventDefinition",
+                    "timeDuration": "P5D"
+                  }
+                ]
+              },
+              {
+                "$type": "bpmn:BoundaryEvent",
+                "id": "BoundaryEvent-SocialSecurityTimeout-id-0001",
+                "name": "7 Business Day Timeout",
+                "attachedToRef": "ReceiveTask-SocialSecurityConfirmation-id-0001",
+                "cancelActivity": true,
+                "eventDefinitions": [
+                  {
+                    "$type": "bpmn:TimerEventDefinition",
+                    "timeDuration": "P7D"
+                  }
+                ]
+              },
+              {
+                "$type": "bpmn:SendTask",
+                "id": "SendTask-CompanyFollowup-id-0001",
+                "name": "Send: Company follow-up reminder"
+              },
+              {
+                "$type": "bpmn:SendTask",
+                "id": "SendTask-SocialSecurityFollowup-id-0001",
+                "name": "Send: Social Security follow-up reminder"
+              },
+              {
+                "$type": "bpmn:ParallelGateway",
+                "id": "ParallelGateway-NotificationJoin-id-0001",
+                "name": "Notification Complete",
+                "gatewayDirection": "Converging"
+              },
+              {
+                "$type": "bpmn:EndEvent",
+                "id": "EndEvent-NotificationsConfirmed-id-0001",
+                "name": "All notifications confirmed"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-NotificationStartToSplit-id-0001",
+                "sourceRef": "StartEvent-NotificationStart-id-0001",
+                "targetRef": "ParallelGateway-NotificationSplit-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SplitToSSNotification-id-0001",
+                "sourceRef": "ParallelGateway-NotificationSplit-id-0001",
+                "targetRef": "SendTask-SocialSecurityNotification-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SplitToCompanyNotification-id-0001",
+                "sourceRef": "ParallelGateway-NotificationSplit-id-0001",
+                "targetRef": "SendTask-CompanyNotification-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SSNotificationToReceive-id-0001",
+                "sourceRef": "SendTask-SocialSecurityNotification-id-0001",
+                "targetRef": "ReceiveTask-SocialSecurityConfirmation-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-CompanyNotificationToReceive-id-0001",
+                "sourceRef": "SendTask-CompanyNotification-id-0001",
+                "targetRef": "ReceiveTask-CompanyConfirmation-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-CompanyTimeoutToFollowup-id-0001",
+                "sourceRef": "BoundaryEvent-CompanyTimeout-id-0001",
+                "targetRef": "SendTask-CompanyFollowup-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SSTimeoutToFollowup-id-0001",
+                "sourceRef": "BoundaryEvent-SocialSecurityTimeout-id-0001",
+                "targetRef": "SendTask-SocialSecurityFollowup-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-CompanyFollowupToJoin-id-0001",
+                "sourceRef": "SendTask-CompanyFollowup-id-0001",
+                "targetRef": "ParallelGateway-NotificationJoin-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SSFollowupToJoin-id-0001",
+                "sourceRef": "SendTask-SocialSecurityFollowup-id-0001",
+                "targetRef": "ParallelGateway-NotificationJoin-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-CompanyReceiveToJoin-id-0001",
+                "sourceRef": "ReceiveTask-CompanyConfirmation-id-0001",
+                "targetRef": "ParallelGateway-NotificationJoin-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SSReceiveToJoin-id-0001",
+                "sourceRef": "ReceiveTask-SocialSecurityConfirmation-id-0001",
+                "targetRef": "ParallelGateway-NotificationJoin-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-NotificationJoinToEnd-id-0001",
+                "sourceRef": "ParallelGateway-NotificationJoin-id-0001",
+                "targetRef": "EndEvent-NotificationsConfirmed-id-0001"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:IntermediateCatchEvent",
+            "id": "IntermediateCatchEvent-LeavePeriod-id-0001",
+            "name": "Leave Period",
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:TimerEventDefinition",
+                "timeDuration": "P[selected_duration]M"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ConfirmExtension-id-0001",
+            "name": "Confirm extension decision"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-ExtensionDecision-id-0001",
+            "name": "Extension Decision",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ProcessExtension-id-0001",
+            "name": "Process extension paperwork"
+          },
+          {
+            "$type": "bpmn:IntermediateCatchEvent",
+            "id": "IntermediateCatchEvent-ExtensionPeriod-id-0001",
+            "name": "Extension Period",
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:TimerEventDefinition",
+                "timeDuration": "P[extension_duration]M"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-LeaveCompleted-id-0001",
+            "name": "Leave period completed"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ExtensionCompleted-id-0001",
+            "name": "Extension period completed"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToFetchModels-id-0001",
+            "sourceRef": "StartEvent-MaternityLeaveInitiated-id-0001",
+            "targetRef": "ServiceTask-FetchLeaveModels-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-FetchToReview-id-0001",
+            "sourceRef": "ServiceTask-FetchLeaveModels-id-0001",
+            "targetRef": "UserTask-ReviewModels-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReviewToSelect-id-0001",
+            "sourceRef": "UserTask-ReviewModels-id-0001",
+            "targetRef": "UserTask-SelectModel-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SelectToProvideDetails-id-0001",
+            "sourceRef": "UserTask-SelectModel-id-0001",
+            "targetRef": "UserTask-ProvideDetails-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ProvideToValidate-id-0001",
+            "sourceRef": "UserTask-ProvideDetails-id-0001",
+            "targetRef": "ServiceTask-ValidateEligibility-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ValidateToNotification-id-0001",
+            "sourceRef": "ServiceTask-ValidateEligibility-id-0001",
+            "targetRef": "SubProcess-NotificationProcess-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-NotificationToLeavePeriod-id-0001",
+            "sourceRef": "SubProcess-NotificationProcess-id-0001",
+            "targetRef": "IntermediateCatchEvent-LeavePeriod-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-LeavePeriodToExtension-id-0001",
+            "sourceRef": "IntermediateCatchEvent-LeavePeriod-id-0001",
+            "targetRef": "UserTask-ConfirmExtension-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ExtensionToGateway-id-0001",
+            "sourceRef": "UserTask-ConfirmExtension-id-0001",
+            "targetRef": "ExclusiveGateway-ExtensionDecision-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToExtensionProcess-id-0001",
+            "name": "extend_leave = true",
+            "sourceRef": "ExclusiveGateway-ExtensionDecision-id-0001",
+            "targetRef": "ServiceTask-ProcessExtension-id-0001",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToLeaveEnd-id-0001",
+            "name": "extend_leave = false",
+            "sourceRef": "ExclusiveGateway-ExtensionDecision-id-0001",
+            "targetRef": "EndEvent-LeaveCompleted-id-0001",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ExtensionProcessToPeriod-id-0001",
+            "sourceRef": "ServiceTask-ProcessExtension-id-0001",
+            "targetRef": "IntermediateCatchEvent-ExtensionPeriod-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ExtensionPeriodToEnd-id-0001",
+            "sourceRef": "IntermediateCatchEvent-ExtensionPeriod-id-0001",
+            "targetRef": "EndEvent-ExtensionCompleted-id-0001"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-large-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11889,
+        "total_tokens": 15233,
+        "completion_tokens": 3344
+      },
+      "model_name": "mistral-large-latest",
+      "model": "mistral-large-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11889,
+      "output_tokens": 3344,
+      "total_tokens": 15233
+    },
+    "id": "lc_run--971dfc20-067b-4d96-a81b-8874498ef59a-0"
+  },
+  "status": "success"
+}

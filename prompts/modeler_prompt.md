@@ -981,7 +981,7 @@ Before generating final JSON output, perform comprehensive validation across all
 #### 2.3 Start Event Validation
 
 - **Rule**: StartEvent cannot have incoming SequenceFlows
-- **Check**: Verify no SequenceFlow has targetRef pointing to any StartEvent
+- **Check**: Verify no 'SequenceFlow' has targetRef pointing to the StartEvent
 - **Action**: Correct error if violation found
 
 #### 2.4 End Event Validation
@@ -1300,5 +1300,414 @@ Before generating final JSON output, perform comprehensive validation across all
     - Core BPMN elements (tasks, gateways, events) form 85%+ of model
 
 </instructions>
+
+<Output_examples>
+
+#### Example 1:
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "Hiring-Process-Definitions-id-0001",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "bpmn-js (https://demo.bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Hiring-Process-id-0001",
+      "isExecutable": false,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-NewHireNeedIdentified-id-0001",
+          "name": "New Hire Need Identified"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CreateJobDescription-id-0001",
+          "name": "Create Job Description"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-PostJobonBoards-id-0001",
+          "name": "Post Job on Boards"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ScreenResumes-id-0002",
+          "name": "Screen Resumes"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ConductPhoneInterviews-id-0003",
+          "name": "Conduct Phone Interviews"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-InterviewSplit-id-0001",
+          "name": "Interview Format?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ConductInPersonInterview-id-0004",
+          "name": "Conduct In-Person Interview"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ConductVirtualInterview-id-0005",
+          "name": "Conduct Virtual Interview"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-InterviewConverge-id-0002",
+          "name": "Interview Converged",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-JobOffer-id-0002",
+          "name": "Send: Job Offer"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-OfferResponse-id-0001",
+          "name": "Receive: Offer Response"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-OfferDecision-id-0003",
+          "name": "Offer Response?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ConductSalaryNegotiation-id-0006",
+          "name": "Conduct Salary Negotiation"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-RevisedOffer-id-0003",
+          "name": "Send: Revised Offer"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-HiringFailedOfferRejected-id-0001",
+          "name": "Hiring Failed - Offer Rejected"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-OnboardingandIntegration-id-0001",
+          "name": "Onboarding and Integration",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-OnboardingStart-id-0002",
+              "name": "Onboarding Start"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-CompletePaperwork-id-0007",
+              "name": "Complete Paperwork"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ConductOrientation-id-0008",
+              "name": "Conduct Orientation"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ProvideTraining-id-0009",
+              "name": "Provide Training"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-IntegrationComplete-id-0002",
+              "name": "Integration Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-OnboardingStartToPaperwork-id-0019",
+              "sourceRef": "StartEvent-OnboardingStart-id-0002",
+              "targetRef": "UserTask-CompletePaperwork-id-0007"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PaperworkToOrientation-id-0020",
+              "sourceRef": "UserTask-CompletePaperwork-id-0007",
+              "targetRef": "UserTask-ConductOrientation-id-0008"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-OrientationToTraining-id-0021",
+              "sourceRef": "UserTask-ConductOrientation-id-0008",
+              "targetRef": "UserTask-ProvideTraining-id-0009"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-TrainingToIntegrationEnd-id-0022",
+              "sourceRef": "UserTask-ProvideTraining-id-0009",
+              "targetRef": "EndEvent-IntegrationComplete-id-0002"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-NewHireIntegrated-id-0003",
+          "name": "New Hire Integrated"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToCreateJob-id-0001",
+          "sourceRef": "StartEvent-NewHireNeedIdentified-id-0001",
+          "targetRef": "UserTask-CreateJobDescription-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CreateJobToPostJob-id-0002",
+          "sourceRef": "UserTask-CreateJobDescription-id-0001",
+          "targetRef": "SendTask-PostJobonBoards-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PostJobToScreenResumes-id-0003",
+          "sourceRef": "SendTask-PostJobonBoards-id-0001",
+          "targetRef": "UserTask-ScreenResumes-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ScreenResumesToPhoneInterview-id-0004",
+          "sourceRef": "UserTask-ScreenResumes-id-0002",
+          "targetRef": "UserTask-ConductPhoneInterviews-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PhoneInterviewToInterviewSplit-id-0005",
+          "sourceRef": "UserTask-ConductPhoneInterviews-id-0003",
+          "targetRef": "ExclusiveGateway-InterviewSplit-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InterviewSplitToInPerson-id-0006",
+          "name": "in-person",
+          "sourceRef": "ExclusiveGateway-InterviewSplit-id-0001",
+          "targetRef": "UserTask-ConductInPersonInterview-id-0004",
+          "conditionExpression": {
+            "$type": "bpmn:FormalExpression",
+            "body": "candidate_prefers == 'in-person'"
+          }
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InterviewSplitToVirtual-id-0007",
+          "name": "virtual (Default)",
+          "sourceRef": "ExclusiveGateway-InterviewSplit-id-0001",
+          "targetRef": "UserTask-ConductVirtualInterview-id-0005",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InPersonToInterviewConverge-id-0008",
+          "sourceRef": "UserTask-ConductInPersonInterview-id-0004",
+          "targetRef": "ExclusiveGateway-InterviewConverge-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-VirtualToInterviewConverge-id-0009",
+          "sourceRef": "UserTask-ConductVirtualInterview-id-0005",
+          "targetRef": "ExclusiveGateway-InterviewConverge-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InterviewConvergeToSendOffer-id-0010",
+          "sourceRef": "ExclusiveGateway-InterviewConverge-id-0002",
+          "targetRef": "SendTask-JobOffer-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendOfferToReceiveResponse-id-0011",
+          "sourceRef": "SendTask-JobOffer-id-0002",
+          "targetRef": "ReceiveTask-OfferResponse-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReceiveResponseToOfferDecision-id-0012",
+          "sourceRef": "ReceiveTask-OfferResponse-id-0001",
+          "targetRef": "ExclusiveGateway-OfferDecision-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OfferDecisionToOnboarding-id-0013",
+          "name": "Accepted",
+          "sourceRef": "ExclusiveGateway-OfferDecision-id-0003",
+          "targetRef": "SubProcess-OnboardingandIntegration-id-0001",
+          "conditionExpression": {
+            "$type": "bpmn:FormalExpression",
+            "body": "response == 'accepted'"
+          }
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OfferDecisionToNegotiation-id-0014",
+          "name": "Negotiation Required",
+          "sourceRef": "ExclusiveGateway-OfferDecision-id-0003",
+          "targetRef": "UserTask-ConductSalaryNegotiation-id-0006",
+          "conditionExpression": {
+            "$type": "bpmn:FormalExpression",
+            "body": "response == 'negotiation_required'"
+          }
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OfferDecisionToRejectedEnd-id-0015",
+          "name": "Rejected (Default)",
+          "sourceRef": "ExclusiveGateway-OfferDecision-id-0003",
+          "targetRef": "EndEvent-HiringFailedOfferRejected-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NegotiationToRevisedOffer-id-0016",
+          "sourceRef": "UserTask-ConductSalaryNegotiation-id-0006",
+          "targetRef": "SendTask-RevisedOffer-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RevisedOfferToReceiveResponse-id-0017",
+          "sourceRef": "SendTask-RevisedOffer-id-0003",
+          "targetRef": "ReceiveTask-OfferResponse-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OnboardingToEnd-id-0018",
+          "sourceRef": "SubProcess-OnboardingandIntegration-id-0001",
+          "targetRef": "EndEvent-NewHireIntegrated-id-0003"
+        }
+      ]
+    }
+  ]
+}
+```
+
+#### Example 2:
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "DismissalProcessDefinitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "DismissalProcess",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "MessageStartEvent-DismissalReceivedFromMPON-id-0001",
+          "name": "Dismissal Process Initiated",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:MessageEventDefinition",
+              "name": "DismissalReceivedFromMPON"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-ReceiveDismissalFromMPON-id-0001",
+          "name": "Receive: dismissal from MPON"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-MPOOReviewsDismissal-id-0001",
+          "name": "MPOO reviews dismissal"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-DismissalDecision-id-0001",
+          "name": "Dismissal Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendOppositionToDismissal-id-0001",
+          "name": "Send: opposition to dismissal"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendConfirmationOfDismissal-id-0002",
+          "name": "Send: confirmation of dismissal"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ConvergePaths-id-0002",
+          "name": "Converge Paths",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-DismissalProcessComplete-id-0001",
+          "name": "Dismissal Process Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToReceive-id-0001",
+          "sourceRef": "MessageStartEvent-DismissalReceivedFromMPON-id-0001",
+          "targetRef": "ReceiveTask-ReceiveDismissalFromMPON-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReceiveToReview-id-0002",
+          "sourceRef": "ReceiveTask-ReceiveDismissalFromMPON-id-0001",
+          "targetRef": "UserTask-MPOOReviewsDismissal-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReviewToDecision-id-0003",
+          "sourceRef": "UserTask-MPOOReviewsDismissal-id-0001",
+          "targetRef": "ExclusiveGateway-DismissalDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DecisionToOppose-id-0004",
+          "name": "MPOO opposes dismissal",
+          "sourceRef": "ExclusiveGateway-DismissalDecision-id-0001",
+          "targetRef": "SendTask-SendOppositionToDismissal-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DecisionToConfirm-id-0005",
+          "name": "MPOO confirms dismissal",
+          "sourceRef": "ExclusiveGateway-DismissalDecision-id-0001",
+          "targetRef": "SendTask-SendConfirmationOfDismissal-id-0002",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OpposeToConverge-id-0006",
+          "sourceRef": "SendTask-SendOppositionToDismissal-id-0001",
+          "targetRef": "ExclusiveGateway-ConvergePaths-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmToConverge-id-0007",
+          "sourceRef": "SendTask-SendConfirmationOfDismissal-id-0002",
+          "targetRef": "ExclusiveGateway-ConvergePaths-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConvergeToEnd-id-0008",
+          "sourceRef": "ExclusiveGateway-ConvergePaths-id-0002",
+          "targetRef": "EndEvent-DismissalProcessComplete-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```
+
+</Output_examples>
 
 **Now model the pseudocode description of a business process, perform comprehensive proactive validation across all phases, generate valid BPMN 2.0 JSON, and provide complete output.**

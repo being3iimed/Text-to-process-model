@@ -1,0 +1,320 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "OEE-Monitoring-Definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "2.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process-OEE-Monitoring-id-0001",
+      "name": "OEE Monitoring Process",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "MessageStartEvent-MachineConnected-id-0001",
+          "name": "Machine Connected",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:MessageEventDefinition",
+              "name": "MachineConnected"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-OEECalculationLoop-id-0001",
+          "name": "OEE Calculation Loop",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-MeasurementCycleStart-id-0001",
+              "name": "Measurement Cycle Start"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-CollectMachineData-id-0001",
+              "name": "Collect Machine Data"
+            },
+            {
+              "$type": "bpmn:BoundaryEvent",
+              "id": "BoundaryEvent-Error-CollectMachineData-id-0001",
+              "name": "Sensor/API Failure",
+              "attachedToRef": "ServiceTask-CollectMachineData-id-0001",
+              "cancelActivity": true,
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:ErrorEventDefinition",
+                  "errorRef": "SENSOR_API_FAILURE"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-SensorFailureAlert-id-0001",
+              "name": "Send: Sensor Failure Alert"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-MeasurementAborted-id-0001",
+              "name": "Measurement Aborted"
+            },
+            {
+              "$type": "bpmn:ScriptTask",
+              "id": "ScriptTask-CalculateOEE-id-0001",
+              "name": "Computation: Calculate OEE"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-OEEThresholdCheck-id-0001",
+              "name": "OEE Threshold Check?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-StopMachine-id-0001",
+              "name": "Stop Machine"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-OEEAlertToEngineer-id-0001",
+              "name": "Send: OEE Alert to Engineer"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-MachineRestartCheck-id-0001",
+              "name": "Machine Restarted?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:IntermediateCatchEvent",
+              "id": "IntermediateCatchEvent-Timer1Min-id-0001",
+              "name": "Wait 1 Minute",
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:TimerEventDefinition",
+                  "timeDuration": "PT1M"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-MachineDisconnected-id-0001",
+              "name": "Machine Disconnected"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-OEEThresholdMerge-id-0001",
+              "name": "OEE Threshold Merge",
+              "gatewayDirection": "Converging"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-MachineRestartMerge-id-0001",
+              "name": "Machine Restart Merge",
+              "gatewayDirection": "Converging"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StartToCollectData-id-0001",
+              "sourceRef": "StartEvent-MeasurementCycleStart-id-0001",
+              "targetRef": "ServiceTask-CollectMachineData-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CollectToCalculate-id-0002",
+              "sourceRef": "ServiceTask-CollectMachineData-id-0001",
+              "targetRef": "ScriptTask-CalculateOEE-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CalculateToThresholdCheck-id-0003",
+              "sourceRef": "ScriptTask-CalculateOEE-id-0001",
+              "targetRef": "ExclusiveGateway-OEEThresholdCheck-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ErrorBoundaryToAlert-id-0004",
+              "sourceRef": "BoundaryEvent-Error-CollectMachineData-id-0001",
+              "targetRef": "SendTask-SensorFailureAlert-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-AlertToAbort-id-0005",
+              "sourceRef": "SendTask-SensorFailureAlert-id-0001",
+              "targetRef": "EndEvent-MeasurementAborted-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BelowThresholdToStop-id-0006",
+              "sourceRef": "ExclusiveGateway-OEEThresholdCheck-id-0001",
+              "targetRef": "ServiceTask-StopMachine-id-0001",
+              "name": "OEE < threshold_percentage"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StopToAlert-id-0007",
+              "sourceRef": "ServiceTask-StopMachine-id-0001",
+              "targetRef": "SendTask-OEEAlertToEngineer-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-AlertToRestartCheck-id-0008",
+              "sourceRef": "SendTask-OEEAlertToEngineer-id-0001",
+              "targetRef": "ExclusiveGateway-MachineRestartCheck-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MachineRestartedToTimer-id-0009",
+              "sourceRef": "ExclusiveGateway-MachineRestartCheck-id-0001",
+              "targetRef": "IntermediateCatchEvent-Timer1Min-id-0001",
+              "name": "machine_restarted"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MachineDisconnectedToEnd-id-0010",
+              "sourceRef": "ExclusiveGateway-MachineRestartCheck-id-0001",
+              "targetRef": "EndEvent-MachineDisconnected-id-0001",
+              "name": "machine_disconnected",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-TimerToMerge-id-0011",
+              "sourceRef": "IntermediateCatchEvent-Timer1Min-id-0001",
+              "targetRef": "ExclusiveGateway-MachineRestartMerge-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-AtOrAboveThresholdToTimer-id-0012",
+              "sourceRef": "ExclusiveGateway-OEEThresholdCheck-id-0001",
+              "targetRef": "IntermediateCatchEvent-Timer1Min-id-0002",
+              "name": "OEE >= threshold_percentage",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-TimerToThresholdMerge-id-0013",
+              "sourceRef": "IntermediateCatchEvent-Timer1Min-id-0002",
+              "targetRef": "ExclusiveGateway-OEEThresholdMerge-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MachineRestartMergeToThresholdMerge-id-0014",
+              "sourceRef": "ExclusiveGateway-MachineRestartMerge-id-0001",
+              "targetRef": "ExclusiveGateway-OEEThresholdMerge-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ThresholdMergeToStart-id-0015",
+              "sourceRef": "ExclusiveGateway-OEEThresholdMerge-id-0001",
+              "targetRef": "StartEvent-MeasurementCycleStart-id-0001"
+            },
+            {
+              "$type": "bpmn:IntermediateCatchEvent",
+              "id": "IntermediateCatchEvent-Timer1Min-id-0002",
+              "name": "Wait 1 Minute",
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:TimerEventDefinition",
+                  "timeDuration": "PT1M"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-ParallelSplit-id-0001",
+          "name": "Parallel Execution",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-MonitorMachineConnection-id-0001",
+          "name": "Monitor Machine Connection"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-Timer5Min-MonitorConnection-id-0001",
+          "name": "5 Minute Connection Timeout",
+          "attachedToRef": "ServiceTask-MonitorMachineConnection-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT5M"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-ConnectionTimeoutAlert-id-0001",
+          "name": "Send: Connection Timeout Alert"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-ParallelJoin-id-0001",
+          "name": "Synchronize Parallel Branches",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProcessTerminated-id-0001",
+          "name": "Process Terminated"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToParallelSplit-id-0001",
+          "sourceRef": "MessageStartEvent-MachineConnected-id-0001",
+          "targetRef": "ParallelGateway-ParallelSplit-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ParallelSplitToCalculationLoop-id-0002",
+          "sourceRef": "ParallelGateway-ParallelSplit-id-0001",
+          "targetRef": "SubProcess-OEECalculationLoop-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ParallelSplitToMonitorConnection-id-0003",
+          "sourceRef": "ParallelGateway-ParallelSplit-id-0001",
+          "targetRef": "ServiceTask-MonitorMachineConnection-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TimerBoundaryToAlert-id-0004",
+          "sourceRef": "BoundaryEvent-Timer5Min-MonitorConnection-id-0001",
+          "targetRef": "SendTask-ConnectionTimeoutAlert-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AlertToMonitor-id-0005",
+          "sourceRef": "SendTask-ConnectionTimeoutAlert-id-0001",
+          "targetRef": "ServiceTask-MonitorMachineConnection-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CalculationLoopToJoin-id-0006",
+          "sourceRef": "SubProcess-OEECalculationLoop-id-0001",
+          "targetRef": "ParallelGateway-ParallelJoin-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MonitorToJoin-id-0007",
+          "sourceRef": "ServiceTask-MonitorMachineConnection-id-0001",
+          "targetRef": "ParallelGateway-ParallelJoin-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinToEnd-id-0008",
+          "sourceRef": "ParallelGateway-ParallelJoin-id-0001",
+          "targetRef": "EndEvent-ProcessTerminated-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

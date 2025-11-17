@@ -1,0 +1,184 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "Definitions-OrderFulfillment-id-0001",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process-OrderFulfillment-id-0001",
+      "name": "Order Fulfillment Process",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "MessageStartEvent-OrderPlaced-id-0001",
+          "name": "Order Placed",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:MessageEventDefinition",
+              "name": "OrderMessage"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateOrderConfirmation-id-0001",
+          "name": "Generate Order Confirmation"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendOrderConfirmation-id-0001",
+          "name": "Send: order confirmation to customer"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-WarehousePickPack-id-0001",
+          "name": "Warehouse: pick and pack items"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateShippingLabel-id-0001",
+          "name": "Generate Shipping Label"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-HandoverToLogistics-id-0001",
+          "name": "Handover Order to Logistics Provider"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendTrackingInfo-id-0001",
+          "name": "Send: tracking information to customer"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-MonitorShipment-id-0001",
+          "name": "Monitor Shipment Status"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-OrderDelivered-id-0001",
+          "name": "Order Delivered"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-HandleFeedbackReturns-id-0001",
+          "name": "Handle Feedback/Returns",
+          "triggeredByEvent": false,
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-FeedbackReturnReceived-id-0001",
+              "name": "Feedback/Return Request Received"
+            },
+            {
+              "$type": "bpmn:ReceiveTask",
+              "id": "ReceiveTask-ReceiveFeedbackReturn-id-0001",
+              "name": "Receive: customer feedback or return request"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-AssessReturnEligibility-id-0001",
+              "name": "Assess Return Eligibility"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-ProcessRefundReplacement-id-0001",
+              "name": "Process Refund or Replacement"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-SendResolutionConfirmation-id-0001",
+              "name": "Send: resolution confirmation to customer"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-FeedbackReturnResolved-id-0001",
+              "name": "Feedback/Return Resolved"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SubStartToReceive-id-0001",
+              "sourceRef": "StartEvent-FeedbackReturnReceived-id-0001",
+              "targetRef": "ReceiveTask-ReceiveFeedbackReturn-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReceiveToAssess-id-0002",
+              "sourceRef": "ReceiveTask-ReceiveFeedbackReturn-id-0001",
+              "targetRef": "UserTask-AssessReturnEligibility-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-AssessToProcess-id-0003",
+              "sourceRef": "UserTask-AssessReturnEligibility-id-0001",
+              "targetRef": "ServiceTask-ProcessRefundReplacement-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ProcessToSend-id-0004",
+              "sourceRef": "ServiceTask-ProcessRefundReplacement-id-0001",
+              "targetRef": "SendTask-SendResolutionConfirmation-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendToSubEnd-id-0005",
+              "sourceRef": "SendTask-SendResolutionConfirmation-id-0001",
+              "targetRef": "EndEvent-FeedbackReturnResolved-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToGenerateConfirmation-id-0001",
+          "sourceRef": "MessageStartEvent-OrderPlaced-id-0001",
+          "targetRef": "ServiceTask-GenerateOrderConfirmation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GenerateToSendConfirmation-id-0002",
+          "sourceRef": "ServiceTask-GenerateOrderConfirmation-id-0001",
+          "targetRef": "SendTask-SendOrderConfirmation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendToWarehouse-id-0003",
+          "sourceRef": "SendTask-SendOrderConfirmation-id-0001",
+          "targetRef": "UserTask-WarehousePickPack-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-WarehouseToLabel-id-0004",
+          "sourceRef": "UserTask-WarehousePickPack-id-0001",
+          "targetRef": "ServiceTask-GenerateShippingLabel-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LabelToHandover-id-0005",
+          "sourceRef": "ServiceTask-GenerateShippingLabel-id-0001",
+          "targetRef": "ServiceTask-HandoverToLogistics-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HandoverToTracking-id-0006",
+          "sourceRef": "ServiceTask-HandoverToLogistics-id-0001",
+          "targetRef": "SendTask-SendTrackingInfo-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TrackingToMonitor-id-0007",
+          "sourceRef": "SendTask-SendTrackingInfo-id-0001",
+          "targetRef": "ServiceTask-MonitorShipment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MonitorToEnd-id-0008",
+          "sourceRef": "ServiceTask-MonitorShipment-id-0001",
+          "targetRef": "EndEvent-OrderDelivered-id-0001"
+        }
+      ]
+    }
+  ]
+}

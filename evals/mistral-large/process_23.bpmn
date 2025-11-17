@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="CreditScoringProcess-Definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="CreditScoringProcess" isExecutable="true">
+    <bpmn:startEvent id="MessageStartEvent-CreditScoringRequested-id-0001" name="Credit Scoring Requested">
+      <bpmn:outgoing>SequenceFlow-StartToRequest-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-SendScoringRequest-id-0001" name="Send scoring request to agency">
+      <bpmn:incoming>SequenceFlow-StartToRequest-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RequestToGateway-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ResultAvailability-id-0001" name="Result Availability Check" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-RequestToGateway-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToLevel1Receive-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToLevel2Delay-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:receiveTask id="ReceiveTask-Level1Result-id-0001" name="Receive: level 1 scoring result">
+      <bpmn:incoming>SequenceFlow-GatewayToLevel1Receive-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Level1ReceiveToDisplay-id-0001</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:sendTask id="SendTask-DisplayLevel1Result-id-0001" name="Send: display level 1 result to clerk">
+      <bpmn:incoming>SequenceFlow-Level1ReceiveToDisplay-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DisplayToEnd1-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ScoringResultDisplayed-id-0001" name="Scoring Result Displayed">
+      <bpmn:incoming>SequenceFlow-DisplayToEnd1-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:receiveTask id="ReceiveTask-Level2Delay-id-0001" name="Receive: level 2 scoring delay notification">
+      <bpmn:incoming>SequenceFlow-GatewayToLevel2Delay-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DelayToDisplayDelay-id-0001</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:sendTask id="SendTask-DisplayDelayNotification-id-0001" name="Send: display delay notification to clerk">
+      <bpmn:incoming>SequenceFlow-DelayToDisplayDelay-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DisplayDelayToLevel2Receive-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-Level2Result-id-0001" name="Receive: level 2 scoring result">
+      <bpmn:incoming>SequenceFlow-DisplayDelayToLevel2Receive-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Level2ReceiveToDisplay-id-0001</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:sendTask id="SendTask-DisplayLevel2Result-id-0001" name="Send: display level 2 result to clerk">
+      <bpmn:incoming>SequenceFlow-Level2ReceiveToDisplay-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DisplayToEnd2-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ScoringResultDisplayed-id-0002" name="Scoring Result Displayed">
+      <bpmn:incoming>SequenceFlow-DisplayToEnd2-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToRequest-id-0001" sourceRef="MessageStartEvent-CreditScoringRequested-id-0001" targetRef="ServiceTask-SendScoringRequest-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RequestToGateway-id-0001" sourceRef="ServiceTask-SendScoringRequest-id-0001" targetRef="ExclusiveGateway-ResultAvailability-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToLevel1Receive-id-0001" name="immediate_result_available" sourceRef="ExclusiveGateway-ResultAvailability-id-0001" targetRef="ReceiveTask-Level1Result-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-Level1ReceiveToDisplay-id-0001" sourceRef="ReceiveTask-Level1Result-id-0001" targetRef="SendTask-DisplayLevel1Result-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DisplayToEnd1-id-0001" sourceRef="SendTask-DisplayLevel1Result-id-0001" targetRef="EndEvent-ScoringResultDisplayed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToLevel2Delay-id-0001" name="delayed_processing_required" sourceRef="ExclusiveGateway-ResultAvailability-id-0001" targetRef="ReceiveTask-Level2Delay-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DelayToDisplayDelay-id-0001" sourceRef="ReceiveTask-Level2Delay-id-0001" targetRef="SendTask-DisplayDelayNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DisplayDelayToLevel2Receive-id-0001" sourceRef="SendTask-DisplayDelayNotification-id-0001" targetRef="ReceiveTask-Level2Result-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-Level2ReceiveToDisplay-id-0001" sourceRef="ReceiveTask-Level2Result-id-0001" targetRef="SendTask-DisplayLevel2Result-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DisplayToEnd2-id-0001" sourceRef="SendTask-DisplayLevel2Result-id-0001" targetRef="EndEvent-ScoringResultDisplayed-id-0002" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_CreditScoringProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_CreditScoringProcess" bpmnElement="CreditScoringProcess">
+      <bpmndi:BPMNShape id="MessageStartEvent-CreditScoringRequested-id-0001_di" bpmnElement="MessageStartEvent-CreditScoringRequested-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SendScoringRequest-id-0001_di" bpmnElement="ServiceTask-SendScoringRequest-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ResultAvailability-id-0001_di" bpmnElement="ExclusiveGateway-ResultAvailability-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-Level1Result-id-0001_di" bpmnElement="ReceiveTask-Level1Result-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-DisplayLevel1Result-id-0001_di" bpmnElement="SendTask-DisplayLevel1Result-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ScoringResultDisplayed-id-0001_di" bpmnElement="EndEvent-ScoringResultDisplayed-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-Level2Delay-id-0001_di" bpmnElement="ReceiveTask-Level2Delay-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-DisplayDelayNotification-id-0001_di" bpmnElement="SendTask-DisplayDelayNotification-id-0001">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-Level2Result-id-0001_di" bpmnElement="ReceiveTask-Level2Result-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-DisplayLevel2Result-id-0001_di" bpmnElement="SendTask-DisplayLevel2Result-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ScoringResultDisplayed-id-0002_di" bpmnElement="EndEvent-ScoringResultDisplayed-id-0002">
+        <dc:Bounds x="1107" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToRequest-id-0001_di" bpmnElement="SequenceFlow-StartToRequest-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RequestToGateway-id-0001_di" bpmnElement="SequenceFlow-RequestToGateway-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToLevel1Receive-id-0001_di" bpmnElement="SequenceFlow-GatewayToLevel1Receive-id-0001">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToLevel2Delay-id-0001_di" bpmnElement="SequenceFlow-GatewayToLevel2Delay-id-0001">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Level1ReceiveToDisplay-id-0001_di" bpmnElement="SequenceFlow-Level1ReceiveToDisplay-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DisplayToEnd1-id-0001_di" bpmnElement="SequenceFlow-DisplayToEnd1-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DelayToDisplayDelay-id-0001_di" bpmnElement="SequenceFlow-DelayToDisplayDelay-id-0001">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DisplayDelayToLevel2Receive-id-0001_di" bpmnElement="SequenceFlow-DisplayDelayToLevel2Receive-id-0001">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Level2ReceiveToDisplay-id-0001_di" bpmnElement="SequenceFlow-Level2ReceiveToDisplay-id-0001">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DisplayToEnd2-id-0001_di" bpmnElement="SequenceFlow-DisplayToEnd2-id-0001">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1107" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

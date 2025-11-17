@@ -1,0 +1,112 @@
+Here's the BPMN pseudocode for the fridge service process, with rigorous semantic validation and compliance checks:
+
+```
+<Summary of Elements>
+
+TASKS:
+- userTask("Describe fridge symptoms") - Customer describes issues
+- userTask("Confirm fridge type") - Customer selects fridge model
+- serviceTask("Route to local facility") - Central system assigns service provider
+- receiveTask("Receive: appointment details") - Customer gets appointment info
+- userTask("Confirm appointment") - Customer acknowledges time
+- userTask("Evaluate repair attempt") - Customer checks if fridge is fixed
+- userTask("Rate service facility") - Customer provides feedback
+
+GATEWAYS:
+- XOR after repair attempt with conditions:
+  - "fridge_repaired == true"
+  - "fridge_repaired == false (needs parts)"
+
+EVENTS:
+- startEvent("Service Request Initiated") - Manual trigger
+- endEvent("Service Complete") - Normal completion
+- intermediateEvent(timerBoundary("24 hours")) - For appointment confirmation
+
+BOUNDARY EVENTS:
+- timerBoundary("48 hours") on "Evaluate repair attempt" - SLA for follow-up
+  Justification: Business requirement to ensure customer follow-up
+
+SUBPROCESSES:
+- None identified (all tasks are linear or simple branching)
+
+<BPMN Pseudocode>
+
+startEvent("Service Request Initiated")
+
+// Customer interaction phase
+userTask("Describe fridge symptoms")
+userTask("Confirm fridge type")
+
+// Service routing phase
+serviceTask("Route to local facility")
+
+// Appointment scheduling
+receiveTask("Receive: appointment details"):
+    timerBoundary("24 hours"):
+        sendTask("Send: reminder notification")
+
+userTask("Confirm appointment")
+
+// Service execution phase
+intermediateEvent("Technician arrives at random time")
+
+if (fridge_repaired == true):
+    userTask("Evaluate repair attempt"):
+        timerBoundary("48 hours"):
+            sendTask("Send: follow-up request")
+    userTask("Rate service facility")
+    endEvent("Service Complete")
+else: // fridge_repaired == false (needs parts)
+    sendTask("Send: parts order notification")
+    intermediateEvent("Parts arrive")
+    serviceTask("Schedule second visit")
+    userTask("Evaluate repair attempt"):
+        timerBoundary("48 hours"):
+            sendTask("Send: follow-up request")
+    userTask("Rate service facility")
+    endEvent("Service Complete")
+
+<Compliance Validation>
+
+TIMER EVENTS:
+- All timer properties are valid ISO 8601 durations
+- "24 hours" → PT24H
+- "48 hours" → PT48H
+- No timeDate/timeCycle conflicts
+
+GATEWAYS:
+- Single XOR gateway with exhaustive conditions
+- No missing convergence (implicit merge after branches)
+
+BOUNDARY EVENTS:
+- timerBoundary on "Evaluate repair attempt" justified:
+  1. Hard SLA mentioned in requirements ("ensure follow-up")
+  2. Handler is simple (single sendTask)
+  3. Business requirement (customer satisfaction)
+
+FLOW PATHS:
+- All paths traceable start to end
+- No orphaned flows
+- Appointment confirmation has timer boundary for SLA
+- Repair evaluation has timer boundary for follow-up
+
+BALANCE:
+- 7 core tasks (85%+ of design)
+- 1 gateway (simple branching)
+- 2 boundary events (justified)
+- No subprocesses (not needed)
+```
+
+Key Validation Notes:
+1. The random technician arrival is modeled as an intermediate event since it's an external trigger
+2. Parts ordering creates a simple linear extension rather than complex subprocess
+3. All timer boundaries meet the 3-criteria gating test
+4. The process maintains clean linear flow with minimal branching
+5. Customer rating is always collected regardless of repair outcome
+6. All receiveTasks have justified timer boundaries where SLAs exist
+
+The design avoids:
+- Speculative error boundaries (no "just in case" error handling)
+- Unnecessary subprocesses (all logic is simple and linear)
+- Complex parallel paths (only sequential or simple branching)
+- Invalid timer properties (all durations are ISO 8601 compliant)

@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_InspectionProcess" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process_InspectionProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-InspectionProcessStarted-id-0001" name="Inspection Process Started">
+      <bpmn:outgoing>SequenceFlow-StartToEnterType-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-EnterMachineType-id-0001" name="Enter machine type">
+      <bpmn:incoming>SequenceFlow-StartToEnterType-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EnterTypeToSerial-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-EnterSerialNumber-id-0002" name="Enter serial number">
+      <bpmn:incoming>SequenceFlow-EnterTypeToSerial-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SerialToValidate-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ValidateMachineData-id-0001" name="Validate machine type and serial number">
+      <bpmn:incoming>SequenceFlow-SerialToValidate-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidateToGateway-id-0004</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ValidationResult-id-0001" name="Validation Result?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ValidateToGateway-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToAbort-id-0005</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToSubprocess-id-0006</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="EndEvent-InspectionAborted-id-0001" name="Inspection Aborted">
+      <bpmn:incoming>SequenceFlow-GatewayToAbort-id-0005</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:subProcess id="SubProcess-SensorDataCollection-id-0001" name="Sensor Data Collection">
+      <bpmn:incoming>SequenceFlow-GatewayToSubprocess-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SubprocessToVisual-id-0007</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-BeginDataCollection-id-0001" name="Begin Data Collection">
+        <bpmn:outgoing>SequenceFlow-StartToSplit-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:parallelGateway id="ParallelGateway-Split-id-0001" name="Parallel Data Collection" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-StartToSplit-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SplitToTemp-id-0002</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToPressure-id-0003</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToFlow-id-0004</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:serviceTask id="ServiceTask-CollectTemperature-id-0001" name="Collect temperature readings">
+        <bpmn:incoming>SequenceFlow-SplitToTemp-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-TempToJoin-id-0005</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-CollectPressure-id-0002" name="Collect pressure readings">
+        <bpmn:incoming>SequenceFlow-SplitToPressure-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PressureToJoin-id-0006</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-CollectFlowRate-id-0003" name="Collect flow rate measurements">
+        <bpmn:incoming>SequenceFlow-SplitToFlow-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-FlowToJoin-id-0007</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:parallelGateway id="ParallelGateway-Join-id-0002" name="Synchronize Data Collection" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-TempToJoin-id-0005</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-PressureToJoin-id-0006</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-FlowToJoin-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-JoinToReview-id-0008</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:userTask id="UserTask-ReviewSensorValues-id-0001" name="Review collected sensor values">
+        <bpmn:incoming>SequenceFlow-JoinToReview-id-0008</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReviewToSensorCheck-id-0009</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-SensorReadings-id-0001" name="Sensor readings status?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-ReviewToSensorCheck-id-0009</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SensorCheckToEnd-id-0010</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SensorCheckToDeviation-id-0011</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:userTask id="UserTask-ExplainDeviation-id-0001" name="Answer: Explain deviation cause">
+        <bpmn:incoming>SequenceFlow-SensorCheckToDeviation-id-0011</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-DeviationToAction-id-0012</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-CorrectiveAction-id-0002" name="Answer: Corrective action taken?">
+        <bpmn:incoming>SequenceFlow-DeviationToAction-id-0012</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ActionToEnd-id-0013</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:endEvent id="EndEvent-DataCollectionComplete-id-0001" name="Data Collection Complete">
+        <bpmn:incoming>SequenceFlow-SensorCheckToEnd-id-0010</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ActionToEnd-id-0013</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToSplit-id-0001" sourceRef="StartEvent-BeginDataCollection-id-0001" targetRef="ParallelGateway-Split-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToTemp-id-0002" sourceRef="ParallelGateway-Split-id-0001" targetRef="ServiceTask-CollectTemperature-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToPressure-id-0003" sourceRef="ParallelGateway-Split-id-0001" targetRef="ServiceTask-CollectPressure-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToFlow-id-0004" sourceRef="ParallelGateway-Split-id-0001" targetRef="ServiceTask-CollectFlowRate-id-0003" />
+      <bpmn:sequenceFlow id="SequenceFlow-TempToJoin-id-0005" sourceRef="ServiceTask-CollectTemperature-id-0001" targetRef="ParallelGateway-Join-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-PressureToJoin-id-0006" sourceRef="ServiceTask-CollectPressure-id-0002" targetRef="ParallelGateway-Join-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-FlowToJoin-id-0007" sourceRef="ServiceTask-CollectFlowRate-id-0003" targetRef="ParallelGateway-Join-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-JoinToReview-id-0008" sourceRef="ParallelGateway-Join-id-0002" targetRef="UserTask-ReviewSensorValues-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReviewToSensorCheck-id-0009" sourceRef="UserTask-ReviewSensorValues-id-0001" targetRef="ExclusiveGateway-SensorReadings-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SensorCheckToEnd-id-0010" name="within spec" sourceRef="ExclusiveGateway-SensorReadings-id-0001" targetRef="EndEvent-DataCollectionComplete-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SensorCheckToDeviation-id-0011" name="out of spec" sourceRef="ExclusiveGateway-SensorReadings-id-0001" targetRef="UserTask-ExplainDeviation-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-DeviationToAction-id-0012" sourceRef="UserTask-ExplainDeviation-id-0001" targetRef="UserTask-CorrectiveAction-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-ActionToEnd-id-0013" sourceRef="UserTask-CorrectiveAction-id-0002" targetRef="EndEvent-DataCollectionComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:userTask id="UserTask-VisualInspection-id-0001" name="Answer: Visual inspection of seals">
+      <bpmn:incoming>SequenceFlow-SubprocessToVisual-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VisualToSealCheck-id-0008</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-SealIssue-id-0001" name="Seal issue detected?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-VisualToSealCheck-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SealCheckToNoise-id-0009</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SealCheckToSeverity-id-0010</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-SealIssueSeverity-id-0001" name="Answer: Seal issue severity">
+      <bpmn:incoming>SequenceFlow-SealCheckToSeverity-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SeverityToAction-id-0011</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ImmediateAction-id-0002" name="Answer: Immediate action required?">
+      <bpmn:incoming>SequenceFlow-SeverityToAction-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ActionToNoise-id-0012</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-NoiseAssessment-id-0001" name="Answer: Noise level assessment">
+      <bpmn:incoming>SequenceFlow-SealCheckToNoise-id-0009</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ActionToNoise-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NoiseToVibration-id-0013</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-VibrationCheck-id-0002" name="Answer: Vibration check">
+      <bpmn:incoming>SequenceFlow-NoiseToVibration-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VibrationToReview-id-0014</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ReviewFindings-id-0001" name="Review all inspection findings">
+      <bpmn:incoming>SequenceFlow-VibrationToReview-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToConfirm-id-0015</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ConfirmCompletion-id-0002" name="Confirm inspection completion">
+      <bpmn:incoming>SequenceFlow-ReviewToConfirm-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmToEnd-id-0016</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-InspectionComplete-id-0002" name="Inspection Complete">
+      <bpmn:incoming>SequenceFlow-ConfirmToEnd-id-0016</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToEnterType-id-0001" sourceRef="StartEvent-InspectionProcessStarted-id-0001" targetRef="UserTask-EnterMachineType-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EnterTypeToSerial-id-0002" sourceRef="UserTask-EnterMachineType-id-0001" targetRef="UserTask-EnterSerialNumber-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SerialToValidate-id-0003" sourceRef="UserTask-EnterSerialNumber-id-0002" targetRef="ServiceTask-ValidateMachineData-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidateToGateway-id-0004" sourceRef="ServiceTask-ValidateMachineData-id-0001" targetRef="ExclusiveGateway-ValidationResult-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToAbort-id-0005" name="invalid" sourceRef="ExclusiveGateway-ValidationResult-id-0001" targetRef="EndEvent-InspectionAborted-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToSubprocess-id-0006" name="valid" sourceRef="ExclusiveGateway-ValidationResult-id-0001" targetRef="SubProcess-SensorDataCollection-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubprocessToVisual-id-0007" sourceRef="SubProcess-SensorDataCollection-id-0001" targetRef="UserTask-VisualInspection-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-VisualToSealCheck-id-0008" sourceRef="UserTask-VisualInspection-id-0001" targetRef="ExclusiveGateway-SealIssue-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SealCheckToNoise-id-0009" name="no issue" sourceRef="ExclusiveGateway-SealIssue-id-0001" targetRef="UserTask-NoiseAssessment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SealCheckToSeverity-id-0010" name="issue detected" sourceRef="ExclusiveGateway-SealIssue-id-0001" targetRef="UserTask-SealIssueSeverity-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SeverityToAction-id-0011" sourceRef="UserTask-SealIssueSeverity-id-0001" targetRef="UserTask-ImmediateAction-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ActionToNoise-id-0012" sourceRef="UserTask-ImmediateAction-id-0002" targetRef="UserTask-NoiseAssessment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NoiseToVibration-id-0013" sourceRef="UserTask-NoiseAssessment-id-0001" targetRef="UserTask-VibrationCheck-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-VibrationToReview-id-0014" sourceRef="UserTask-VibrationCheck-id-0002" targetRef="UserTask-ReviewFindings-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToConfirm-id-0015" sourceRef="UserTask-ReviewFindings-id-0001" targetRef="UserTask-ConfirmCompletion-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmToEnd-id-0016" sourceRef="UserTask-ConfirmCompletion-id-0002" targetRef="EndEvent-InspectionComplete-id-0002" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process_InspectionProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process_InspectionProcess" bpmnElement="Process_InspectionProcess">
+      <bpmndi:BPMNShape id="StartEvent-InspectionProcessStarted-id-0001_di" bpmnElement="StartEvent-InspectionProcessStarted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterMachineType-id-0001_di" bpmnElement="UserTask-EnterMachineType-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterSerialNumber-id-0002_di" bpmnElement="UserTask-EnterSerialNumber-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ValidateMachineData-id-0001_di" bpmnElement="ServiceTask-ValidateMachineData-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ValidationResult-id-0001_di" bpmnElement="ExclusiveGateway-ValidationResult-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-InspectionAborted-id-0001_di" bpmnElement="EndEvent-InspectionAborted-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-SensorDataCollection-id-0001_di" bpmnElement="SubProcess-SensorDataCollection-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-VisualInspection-id-0001_di" bpmnElement="UserTask-VisualInspection-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SealIssue-id-0001_di" bpmnElement="ExclusiveGateway-SealIssue-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-NoiseAssessment-id-0001_di" bpmnElement="UserTask-NoiseAssessment-id-0001">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-VibrationCheck-id-0002_di" bpmnElement="UserTask-VibrationCheck-id-0002">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewFindings-id-0001_di" bpmnElement="UserTask-ReviewFindings-id-0001">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConfirmCompletion-id-0002_di" bpmnElement="UserTask-ConfirmCompletion-id-0002">
+        <dc:Bounds x="1675" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-InspectionComplete-id-0002_di" bpmnElement="EndEvent-InspectionComplete-id-0002">
+        <dc:Bounds x="1857" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SealIssueSeverity-id-0001_di" bpmnElement="UserTask-SealIssueSeverity-id-0001">
+        <dc:Bounds x="1225" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ImmediateAction-id-0002_di" bpmnElement="UserTask-ImmediateAction-id-0002">
+        <dc:Bounds x="1375" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToEnterType-id-0001_di" bpmnElement="SequenceFlow-StartToEnterType-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EnterTypeToSerial-id-0002_di" bpmnElement="SequenceFlow-EnterTypeToSerial-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SerialToValidate-id-0003_di" bpmnElement="SequenceFlow-SerialToValidate-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidateToGateway-id-0004_di" bpmnElement="SequenceFlow-ValidateToGateway-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToAbort-id-0005_di" bpmnElement="SequenceFlow-GatewayToAbort-id-0005">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToSubprocess-id-0006_di" bpmnElement="SequenceFlow-GatewayToSubprocess-id-0006">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubprocessToVisual-id-0007_di" bpmnElement="SequenceFlow-SubprocessToVisual-id-0007">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VisualToSealCheck-id-0008_di" bpmnElement="SequenceFlow-VisualToSealCheck-id-0008">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1100" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SealCheckToNoise-id-0009_di" bpmnElement="SequenceFlow-SealCheckToNoise-id-0009">
+        <di:waypoint x="1150" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SealCheckToSeverity-id-0010_di" bpmnElement="SequenceFlow-SealCheckToSeverity-id-0010">
+        <di:waypoint x="1125" y="235" />
+        <di:waypoint x="1125" y="350" />
+        <di:waypoint x="1225" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NoiseToVibration-id-0013_di" bpmnElement="SequenceFlow-NoiseToVibration-id-0013">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VibrationToReview-id-0014_di" bpmnElement="SequenceFlow-VibrationToReview-id-0014">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToConfirm-id-0015_di" bpmnElement="SequenceFlow-ReviewToConfirm-id-0015">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1675" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmToEnd-id-0016_di" bpmnElement="SequenceFlow-ConfirmToEnd-id-0016">
+        <di:waypoint x="1775" y="210" />
+        <di:waypoint x="1857" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SeverityToAction-id-0011_di" bpmnElement="SequenceFlow-SeverityToAction-id-0011">
+        <di:waypoint x="1325" y="350" />
+        <di:waypoint x="1375" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ActionToNoise-id-0012_di" bpmnElement="SequenceFlow-ActionToNoise-id-0012">
+        <di:waypoint x="1425" y="390" />
+        <di:waypoint x="1425" y="420" />
+        <di:waypoint x="1275" y="420" />
+        <di:waypoint x="1275" y="250" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-SensorDataCollection-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-SensorDataCollection-id-0001" bpmnElement="SubProcess-SensorDataCollection-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-BeginDataCollection-id-0001_di" bpmnElement="StartEvent-BeginDataCollection-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0001_di" bpmnElement="ParallelGateway-Split-id-0001">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CollectTemperature-id-0001_di" bpmnElement="ServiceTask-CollectTemperature-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0002_di" bpmnElement="ParallelGateway-Join-id-0002">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewSensorValues-id-0001_di" bpmnElement="UserTask-ReviewSensorValues-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SensorReadings-id-0001_di" bpmnElement="ExclusiveGateway-SensorReadings-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ExplainDeviation-id-0001_di" bpmnElement="UserTask-ExplainDeviation-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CorrectiveAction-id-0002_di" bpmnElement="UserTask-CorrectiveAction-id-0002">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-DataCollectionComplete-id-0001_di" bpmnElement="EndEvent-DataCollectionComplete-id-0001">
+        <dc:Bounds x="1257" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CollectPressure-id-0002_di" bpmnElement="ServiceTask-CollectPressure-id-0002">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CollectFlowRate-id-0003_di" bpmnElement="ServiceTask-CollectFlowRate-id-0003">
+        <dc:Bounds x="325" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSplit-id-0001_di" bpmnElement="SequenceFlow-StartToSplit-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToTemp-id-0002_di" bpmnElement="SequenceFlow-SplitToTemp-id-0002">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToPressure-id-0003_di" bpmnElement="SequenceFlow-SplitToPressure-id-0003">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToFlow-id-0004_di" bpmnElement="SequenceFlow-SplitToFlow-id-0004">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="350" />
+        <di:waypoint x="325" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TempToJoin-id-0005_di" bpmnElement="SequenceFlow-TempToJoin-id-0005">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToReview-id-0008_di" bpmnElement="SequenceFlow-JoinToReview-id-0008">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToSensorCheck-id-0009_di" bpmnElement="SequenceFlow-ReviewToSensorCheck-id-0009">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SensorCheckToEnd-id-0010_di" bpmnElement="SequenceFlow-SensorCheckToEnd-id-0010">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="140" />
+        <di:waypoint x="1275" y="140" />
+        <di:waypoint x="1275" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SensorCheckToDeviation-id-0011_di" bpmnElement="SequenceFlow-SensorCheckToDeviation-id-0011">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DeviationToAction-id-0012_di" bpmnElement="SequenceFlow-DeviationToAction-id-0012">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ActionToEnd-id-0013_di" bpmnElement="SequenceFlow-ActionToEnd-id-0013">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1257" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PressureToJoin-id-0006_di" bpmnElement="SequenceFlow-PressureToJoin-id-0006">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FlowToJoin-id-0007_di" bpmnElement="SequenceFlow-FlowToJoin-id-0007">
+        <di:waypoint x="425" y="350" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

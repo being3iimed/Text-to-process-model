@@ -46,7 +46,7 @@ class ParserAgent:
         self.model = ChatMistralAI(
             api_key=self.api_key,
             model=MISTRAL_MODEL,
-            temperature=0.2,
+            temperature=0.05,
         )
 
         # Create the agent with loaded prompt

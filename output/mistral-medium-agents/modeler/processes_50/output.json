@@ -1,0 +1,179 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "claims-review-definitions",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "bpmn-js (https://demo.bpmn.io)",
+    "exporterVersion": "18.0.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "ClaimsReviewProcess",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-ClaimRegistered-id-0001",
+            "name": "Claim Registered"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ExamineClaim-id-0001",
+            "name": "Examine Claim"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-WriteSettlementRecommendation-id-0002",
+            "name": "Write Settlement Recommendation"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ReviewRecommendation-id-0003",
+            "name": "Review Recommendation"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-RecommendationStatus-id-0001",
+            "name": "Recommendation Status?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-RecommendationApproved-id-0001",
+            "name": "Recommendation Approved"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ReviseRecommendation-id-0004",
+            "name": "Revise Recommendation"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-RecommendationStatus-id-0002",
+            "name": "Recommendation Status?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ScriptTask",
+            "id": "ScriptTask-IncrementRevisionCounter-id-0001",
+            "name": "Computation: increment revision_counter"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-MaxRevisions-id-0001",
+            "name": "Max Revisions Reached?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-EscalateToCommittee-id-0001",
+            "name": "Escalate to Committee Review"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-EscalatedForReview-id-0002",
+            "name": "Escalated for Committee Review"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToExamine-id-0001",
+            "sourceRef": "StartEvent-ClaimRegistered-id-0001",
+            "targetRef": "UserTask-ExamineClaim-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ExamineToWrite-id-0002",
+            "sourceRef": "UserTask-ExamineClaim-id-0001",
+            "targetRef": "UserTask-WriteSettlementRecommendation-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-WriteToReview-id-0003",
+            "sourceRef": "UserTask-WriteSettlementRecommendation-id-0002",
+            "targetRef": "UserTask-ReviewRecommendation-id-0003"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReviewToGateway-id-0004",
+            "sourceRef": "UserTask-ReviewRecommendation-id-0003",
+            "targetRef": "ExclusiveGateway-RecommendationStatus-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToApprove-id-0005",
+            "name": "recommendation_status == 'OK'",
+            "sourceRef": "ExclusiveGateway-RecommendationStatus-id-0001",
+            "targetRef": "EndEvent-RecommendationApproved-id-0001",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToRevise-id-0006",
+            "name": "recommendation_status == 'Not OK'",
+            "sourceRef": "ExclusiveGateway-RecommendationStatus-id-0001",
+            "targetRef": "ScriptTask-IncrementRevisionCounter-id-0001",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-IncrementToMaxCheck-id-0007",
+            "sourceRef": "ScriptTask-IncrementRevisionCounter-id-0001",
+            "targetRef": "ExclusiveGateway-MaxRevisions-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-MaxCheckToEscalate-id-0008",
+            "name": "revision_counter > 3",
+            "sourceRef": "ExclusiveGateway-MaxRevisions-id-0001",
+            "targetRef": "UserTask-EscalateToCommittee-id-0001",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-MaxCheckToRevise-id-0009",
+            "name": "revision_counter <= 3",
+            "sourceRef": "ExclusiveGateway-MaxRevisions-id-0001",
+            "targetRef": "UserTask-ReviseRecommendation-id-0004",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReviseToReview-id-0010",
+            "sourceRef": "UserTask-ReviseRecommendation-id-0004",
+            "targetRef": "UserTask-ReviewRecommendation-id-0003"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-EscalateToEnd-id-0011",
+            "sourceRef": "UserTask-EscalateToCommittee-id-0001",
+            "targetRef": "EndEvent-EscalatedForReview-id-0002"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-medium-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11796,
+        "total_tokens": 13404,
+        "completion_tokens": 1608
+      },
+      "model_name": "mistral-medium-latest",
+      "model": "mistral-medium-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11796,
+      "output_tokens": 1608,
+      "total_tokens": 13404
+    },
+    "id": "lc_run--eba2c2e8-340b-419c-aea3-83b9f7cf657a-0"
+  },
+  "status": "success"
+}

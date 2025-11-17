@@ -1,0 +1,246 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "ShippingProcessDefinitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "ShippingProcess",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-ShippingProcessInitiated-id-0001",
+          "name": "Shipping Process Initiated"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ClarifyShippingResponsibility-id-0001",
+          "name": "Clarify Shipping Responsibility"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ShippingAmount-id-0001",
+          "name": "Shipping Amount Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-InviteLogisticCompanies-id-0002",
+          "name": "Invite Logistic Companies for Offers"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SelectLogisticCompany-id-0003",
+          "name": "Select Logistic Company"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-SplitLargeShipment-id-0001",
+          "name": "Parallel Preparation (Large)",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-PackageGoodsLarge-id-0001",
+          "name": "Package Goods (Large Shipment)"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-WritePackageLabelLarge-id-0001",
+          "name": "Write Package Label (Large Shipment)"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-JoinLargeShipment-id-0002",
+          "name": "Synchronize Large Shipment",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-DecideOnParcelInsurance-id-0001",
+          "name": "Decide on Parcel Insurance"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-InsuranceDecision-id-0001",
+          "name": "Insurance Needed?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-TakeParcelInsurance-id-0001",
+          "name": "Take Parcel Insurance"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-SplitSmallShipment-id-0003",
+          "name": "Parallel Preparation (Small)",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-PackageGoodsSmall-id-0002",
+          "name": "Package Goods (Small Shipment)"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-WritePackageLabelSmall-id-0002",
+          "name": "Write Package Label (Small Shipment)"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-JoinSmallShipment-id-0004",
+          "name": "Synchronize Small Shipment",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-PrepareForPickup-id-0001",
+          "name": "Prepare for Pickup"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-GoodsReadyForPickup-id-0001",
+          "name": "Goods Ready for Pickup"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToClarify-id-0001",
+          "sourceRef": "StartEvent-ShippingProcessInitiated-id-0001",
+          "targetRef": "UserTask-ClarifyShippingResponsibility-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ClarifyToAmountDecision-id-0002",
+          "sourceRef": "UserTask-ClarifyShippingResponsibility-id-0001",
+          "targetRef": "ExclusiveGateway-ShippingAmount-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LargeAmountToInvite-id-0003",
+          "name": "amount == \"large\"",
+          "sourceRef": "ExclusiveGateway-ShippingAmount-id-0001",
+          "targetRef": "UserTask-InviteLogisticCompanies-id-0002",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InviteToSelect-id-0004",
+          "sourceRef": "UserTask-InviteLogisticCompanies-id-0002",
+          "targetRef": "UserTask-SelectLogisticCompany-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SelectToSplitLarge-id-0005",
+          "sourceRef": "UserTask-SelectLogisticCompany-id-0003",
+          "targetRef": "ParallelGateway-SplitLargeShipment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitLargeToPackage-id-0006",
+          "sourceRef": "ParallelGateway-SplitLargeShipment-id-0001",
+          "targetRef": "ServiceTask-PackageGoodsLarge-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitLargeToLabel-id-0007",
+          "sourceRef": "ParallelGateway-SplitLargeShipment-id-0001",
+          "targetRef": "UserTask-WritePackageLabelLarge-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PackageLargeToJoin-id-0008",
+          "sourceRef": "ServiceTask-PackageGoodsLarge-id-0001",
+          "targetRef": "ParallelGateway-JoinLargeShipment-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LabelLargeToJoin-id-0009",
+          "sourceRef": "UserTask-WritePackageLabelLarge-id-0001",
+          "targetRef": "ParallelGateway-JoinLargeShipment-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinLargeToInsurance-id-0010",
+          "sourceRef": "ParallelGateway-JoinLargeShipment-id-0002",
+          "targetRef": "UserTask-DecideOnParcelInsurance-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InsuranceToDecision-id-0011",
+          "sourceRef": "UserTask-DecideOnParcelInsurance-id-0001",
+          "targetRef": "ExclusiveGateway-InsuranceDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InsuranceYesToTake-id-0012",
+          "name": "insurance_needed == true",
+          "sourceRef": "ExclusiveGateway-InsuranceDecision-id-0001",
+          "targetRef": "UserTask-TakeParcelInsurance-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InsuranceNoToPrepare-id-0013",
+          "name": "",
+          "sourceRef": "ExclusiveGateway-InsuranceDecision-id-0001",
+          "targetRef": "ServiceTask-PrepareForPickup-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TakeInsuranceToPrepare-id-0014",
+          "sourceRef": "UserTask-TakeParcelInsurance-id-0001",
+          "targetRef": "ServiceTask-PrepareForPickup-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SmallAmountToSplitSmall-id-0015",
+          "name": "amount == \"small\"",
+          "sourceRef": "ExclusiveGateway-ShippingAmount-id-0001",
+          "targetRef": "ParallelGateway-SplitSmallShipment-id-0003",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitSmallToPackage-id-0016",
+          "sourceRef": "ParallelGateway-SplitSmallShipment-id-0003",
+          "targetRef": "ServiceTask-PackageGoodsSmall-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitSmallToLabel-id-0017",
+          "sourceRef": "ParallelGateway-SplitSmallShipment-id-0003",
+          "targetRef": "UserTask-WritePackageLabelSmall-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PackageSmallToJoin-id-0018",
+          "sourceRef": "ServiceTask-PackageGoodsSmall-id-0002",
+          "targetRef": "ParallelGateway-JoinSmallShipment-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LabelSmallToJoin-id-0019",
+          "sourceRef": "UserTask-WritePackageLabelSmall-id-0002",
+          "targetRef": "ParallelGateway-JoinSmallShipment-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinSmallToPrepare-id-0020",
+          "sourceRef": "ParallelGateway-JoinSmallShipment-id-0004",
+          "targetRef": "ServiceTask-PrepareForPickup-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PrepareToEnd-id-0021",
+          "sourceRef": "ServiceTask-PrepareForPickup-id-0001",
+          "targetRef": "EndEvent-GoodsReadyForPickup-id-0001"
+        }
+      ]
+    }
+  ]
+}

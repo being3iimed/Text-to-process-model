@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Customer-Inquiry-Process-Definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0.0">
+  <bpmn:process id="Customer-Inquiry-Process-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-CustomerInquiryReceived-id-0001" name="Customer Inquiry Received">
+      <bpmn:outgoing>SequenceFlow-StartToCollectDetails-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-CollectCustomerInquiryDetails-id-0001" name="Collect Customer Inquiry Details">
+      <bpmn:incoming>SequenceFlow-StartToCollectDetails-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CollectToAddressConcerns-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-AddressCustomerConcerns-id-0002" name="Address Customer Concerns">
+      <bpmn:incoming>SequenceFlow-CollectToAddressConcerns-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AddressToGateway-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-CustomerInterest-id-0001" name="Customer Interested?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-AddressToGateway-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToGuideSelection-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToInquiryClosed-id-0010</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-GuideProductSelection-id-0003" name="Guide Product/Service Selection">
+      <bpmn:incoming>SequenceFlow-GatewayToGuideSelection-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GuideToGenerateQuote-id-0005</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-GenerateQuote-id-0001" name="Generate Quote">
+      <bpmn:incoming>SequenceFlow-GuideToGenerateQuote-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-QuoteToReceiveApproval-id-0006</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveCustomerApproval-id-0001" name="Receive: Customer Approval">
+      <bpmn:incoming>SequenceFlow-QuoteToReceiveApproval-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ApprovalToRecordOrder-id-0007</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:serviceTask id="ServiceTask-RecordOrder-id-0001" name="Record Order in System">
+      <bpmn:incoming>SequenceFlow-ApprovalToRecordOrder-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RecordToSendConfirmation-id-0008</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendOrderConfirmation-id-0001" name="Send: Order Confirmation">
+      <bpmn:incoming>SequenceFlow-RecordToSendConfirmation-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendToOrderConfirmed-id-0009</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-OrderPlacedConfirmed-id-0001" name="Order Placed and Confirmed">
+      <bpmn:incoming>SequenceFlow-SendToOrderConfirmed-id-0009</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-InquiryClosedNoOrder-id-0002" name="Inquiry Closed - No Order">
+      <bpmn:incoming>SequenceFlow-GatewayToInquiryClosed-id-0010</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToCollectDetails-id-0001" sourceRef="StartEvent-CustomerInquiryReceived-id-0001" targetRef="UserTask-CollectCustomerInquiryDetails-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CollectToAddressConcerns-id-0002" sourceRef="UserTask-CollectCustomerInquiryDetails-id-0001" targetRef="UserTask-AddressCustomerConcerns-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-AddressToGateway-id-0003" sourceRef="UserTask-AddressCustomerConcerns-id-0002" targetRef="ExclusiveGateway-CustomerInterest-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToGuideSelection-id-0004" name="customer_interested == true" sourceRef="ExclusiveGateway-CustomerInterest-id-0001" targetRef="UserTask-GuideProductSelection-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-GuideToGenerateQuote-id-0005" sourceRef="UserTask-GuideProductSelection-id-0003" targetRef="ServiceTask-GenerateQuote-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-QuoteToReceiveApproval-id-0006" sourceRef="ServiceTask-GenerateQuote-id-0001" targetRef="ReceiveTask-ReceiveCustomerApproval-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApprovalToRecordOrder-id-0007" sourceRef="ReceiveTask-ReceiveCustomerApproval-id-0001" targetRef="ServiceTask-RecordOrder-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RecordToSendConfirmation-id-0008" sourceRef="ServiceTask-RecordOrder-id-0001" targetRef="SendTask-SendOrderConfirmation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendToOrderConfirmed-id-0009" sourceRef="SendTask-SendOrderConfirmation-id-0001" targetRef="EndEvent-OrderPlacedConfirmed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToInquiryClosed-id-0010" name="customer_interested == false" sourceRef="ExclusiveGateway-CustomerInterest-id-0001" targetRef="EndEvent-InquiryClosedNoOrder-id-0002" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Customer-Inquiry-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Customer-Inquiry-Process-id-0001" bpmnElement="Customer-Inquiry-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-CustomerInquiryReceived-id-0001_di" bpmnElement="StartEvent-CustomerInquiryReceived-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CollectCustomerInquiryDetails-id-0001_di" bpmnElement="UserTask-CollectCustomerInquiryDetails-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AddressCustomerConcerns-id-0002_di" bpmnElement="UserTask-AddressCustomerConcerns-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CustomerInterest-id-0001_di" bpmnElement="ExclusiveGateway-CustomerInterest-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-GuideProductSelection-id-0003_di" bpmnElement="UserTask-GuideProductSelection-id-0003">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateQuote-id-0001_di" bpmnElement="ServiceTask-GenerateQuote-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveCustomerApproval-id-0001_di" bpmnElement="ReceiveTask-ReceiveCustomerApproval-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RecordOrder-id-0001_di" bpmnElement="ServiceTask-RecordOrder-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendOrderConfirmation-id-0001_di" bpmnElement="SendTask-SendOrderConfirmation-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-OrderPlacedConfirmed-id-0001_di" bpmnElement="EndEvent-OrderPlacedConfirmed-id-0001">
+        <dc:Bounds x="1407" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-InquiryClosedNoOrder-id-0002_di" bpmnElement="EndEvent-InquiryClosedNoOrder-id-0002">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToCollectDetails-id-0001_di" bpmnElement="SequenceFlow-StartToCollectDetails-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CollectToAddressConcerns-id-0002_di" bpmnElement="SequenceFlow-CollectToAddressConcerns-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AddressToGateway-id-0003_di" bpmnElement="SequenceFlow-AddressToGateway-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToGuideSelection-id-0004_di" bpmnElement="SequenceFlow-GatewayToGuideSelection-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToInquiryClosed-id-0010_di" bpmnElement="SequenceFlow-GatewayToInquiryClosed-id-0010">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GuideToGenerateQuote-id-0005_di" bpmnElement="SequenceFlow-GuideToGenerateQuote-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-QuoteToReceiveApproval-id-0006_di" bpmnElement="SequenceFlow-QuoteToReceiveApproval-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalToRecordOrder-id-0007_di" bpmnElement="SequenceFlow-ApprovalToRecordOrder-id-0007">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RecordToSendConfirmation-id-0008_di" bpmnElement="SequenceFlow-RecordToSendConfirmation-id-0008">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToOrderConfirmed-id-0009_di" bpmnElement="SequenceFlow-SendToOrderConfirmed-id-0009">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1407" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,264 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "subrogation-process-definitions",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler",
+    "exporterVersion": "2.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "SubrogationProcess-id-0001",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-SubrogationCaseReceived-id-0001",
+            "name": "Subrogation case received"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-CheckSubrogationPossibility-id-0001",
+            "name": "Check subrogation possibility"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-SubrogationPossible-id-0001",
+            "name": "Subrogation possible?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-SendPaymentRequest-id-0001",
+            "name": "Send payment request to insurant"
+          },
+          {
+            "$type": "bpmn:IntermediateCatchEvent",
+            "id": "IntermediateCatchEvent-ReminderTimer-id-0001",
+            "name": "7-day reminder",
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:TimerEventDefinition",
+                "timeDuration": "P7D"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-SendReminder-id-0001",
+            "name": "Send: reminder to insurant"
+          },
+          {
+            "$type": "bpmn:ReceiveTask",
+            "id": "ReceiveTask-WaitForResponse-id-0001",
+            "name": "Receive: payment or disagreement"
+          },
+          {
+            "$type": "bpmn:BoundaryEvent",
+            "id": "BoundaryEvent-DisagreementDeadline-id-0001",
+            "name": "30-day disagreement deadline",
+            "attachedToRef": "ReceiveTask-WaitForResponse-id-0001",
+            "cancelActivity": true,
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:TimerEventDefinition",
+                "timeDuration": "P30D"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-ForwardToCollection-id-0001",
+            "name": "Send: case to collection agency"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ForwardedToCollection-id-0001",
+            "name": "Case forwarded to collection"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-ResponseReceived-id-0001",
+            "name": "Response received?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-MakeFinancialBooking-id-0001",
+            "name": "Make financial booking"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-PaymentBooked-id-0001",
+            "name": "Case closed - payment booked"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-CheckDisagreementReasoning-id-0001",
+            "name": "Check disagreement reasoning"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-InsurantCorrect-id-0001",
+            "name": "Insurant correct?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-InsurantCorrect-id-0001",
+            "name": "Case closed - insurant correct"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-ForwardToCollection-id-0002",
+            "name": "Send: case to collection agency"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ForwardedToCollection-id-0002",
+            "name": "Case forwarded to collection"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-NoSubrogation-id-0001",
+            "name": "Case closed - no subrogation"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToCheckSubrogation-id-0001",
+            "sourceRef": "StartEvent-SubrogationCaseReceived-id-0001",
+            "targetRef": "UserTask-CheckSubrogationPossibility-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CheckToGateway-id-0001",
+            "sourceRef": "UserTask-CheckSubrogationPossibility-id-0001",
+            "targetRef": "ExclusiveGateway-SubrogationPossible-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToPaymentRequest-id-0001",
+            "sourceRef": "ExclusiveGateway-SubrogationPossible-id-0001",
+            "targetRef": "ServiceTask-SendPaymentRequest-id-0001",
+            "name": "subrogation_possible == true"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToNoSubrogation-id-0001",
+            "sourceRef": "ExclusiveGateway-SubrogationPossible-id-0001",
+            "targetRef": "EndEvent-NoSubrogation-id-0001",
+            "name": "subrogation_possible == false",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-PaymentRequestToReminder-id-0001",
+            "sourceRef": "ServiceTask-SendPaymentRequest-id-0001",
+            "targetRef": "IntermediateCatchEvent-ReminderTimer-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReminderToSendReminder-id-0001",
+            "sourceRef": "IntermediateCatchEvent-ReminderTimer-id-0001",
+            "targetRef": "SendTask-SendReminder-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SendReminderToWait-id-0001",
+            "sourceRef": "SendTask-SendReminder-id-0001",
+            "targetRef": "ReceiveTask-WaitForResponse-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-BoundaryToCollection-id-0001",
+            "sourceRef": "BoundaryEvent-DisagreementDeadline-id-0001",
+            "targetRef": "SendTask-ForwardToCollection-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CollectionToEnd-id-0001",
+            "sourceRef": "SendTask-ForwardToCollection-id-0001",
+            "targetRef": "EndEvent-ForwardedToCollection-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-WaitToResponseGateway-id-0001",
+            "sourceRef": "ReceiveTask-WaitForResponse-id-0001",
+            "targetRef": "ExclusiveGateway-ResponseReceived-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ResponseToBooking-id-0001",
+            "sourceRef": "ExclusiveGateway-ResponseReceived-id-0001",
+            "targetRef": "ServiceTask-MakeFinancialBooking-id-0001",
+            "name": "payment_received == true"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ResponseToDisagreementCheck-id-0001",
+            "sourceRef": "ExclusiveGateway-ResponseReceived-id-0001",
+            "targetRef": "UserTask-CheckDisagreementReasoning-id-0001",
+            "name": "disagreement_received == true"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-BookingToEnd-id-0001",
+            "sourceRef": "ServiceTask-MakeFinancialBooking-id-0001",
+            "targetRef": "EndEvent-PaymentBooked-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DisagreementToCorrectCheck-id-0001",
+            "sourceRef": "UserTask-CheckDisagreementReasoning-id-0001",
+            "targetRef": "ExclusiveGateway-InsurantCorrect-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CorrectCheckToInsurantCorrect-id-0001",
+            "sourceRef": "ExclusiveGateway-InsurantCorrect-id-0001",
+            "targetRef": "EndEvent-InsurantCorrect-id-0001",
+            "name": "insurant_correct == true"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CorrectCheckToCollection-id-0001",
+            "sourceRef": "ExclusiveGateway-InsurantCorrect-id-0001",
+            "targetRef": "SendTask-ForwardToCollection-id-0002",
+            "name": "insurant_correct == false",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CollectionToEnd-id-0002",
+            "sourceRef": "SendTask-ForwardToCollection-id-0002",
+            "targetRef": "EndEvent-ForwardedToCollection-id-0002"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-medium-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 12499,
+        "total_tokens": 14995,
+        "completion_tokens": 2496
+      },
+      "model_name": "mistral-medium-latest",
+      "model": "mistral-medium-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 12499,
+      "output_tokens": 2496,
+      "total_tokens": 14995
+    },
+    "id": "lc_run--3d78c361-e078-40e8-84fb-1ae78ccb3df9-0"
+  },
+  "status": "success"
+}

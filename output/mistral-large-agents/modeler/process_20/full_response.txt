@@ -1,0 +1,182 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "RoomServiceProcess-Definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "RoomServiceProcess",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-OrderReceived-id-0001",
+          "name": "Room Service Order Received"
+        },
+
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-TakeOrder-id-0001",
+          "name": "Take Room Service Order"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToTakeOrder-id-0001",
+          "sourceRef": "StartEvent-OrderReceived-id-0001",
+          "targetRef": "UserTask-TakeOrder-id-0001"
+        },
+
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-SplitPreparations-id-0001",
+          "name": "Split Preparations",
+          "gatewayDirection": "Diverging"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TakeOrderToSplit-id-0002",
+          "sourceRef": "UserTask-TakeOrder-id-0001",
+          "targetRef": "ParallelGateway-SplitPreparations-id-0001"
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-SubmitToKitchen-id-0001",
+          "name": "Submit Order to Kitchen"
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-SubmitToSommelier-id-0002",
+          "name": "Submit Order to Sommelier"
+        },
+
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-AssignWaiter-id-0001",
+          "name": "Assign Order to Waiter"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToKitchen-id-0003",
+          "sourceRef": "ParallelGateway-SplitPreparations-id-0001",
+          "targetRef": "ServiceTask-SubmitToKitchen-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToSommelier-id-0004",
+          "sourceRef": "ParallelGateway-SplitPreparations-id-0001",
+          "targetRef": "ServiceTask-SubmitToSommelier-id-0002"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToAssignWaiter-id-0005",
+          "sourceRef": "ParallelGateway-SplitPreparations-id-0001",
+          "targetRef": "UserTask-AssignWaiter-id-0001"
+        },
+
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-PrepareCart-id-0001",
+          "name": "Prepare Cart"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AssignToPrepareCart-id-0006",
+          "sourceRef": "UserTask-AssignWaiter-id-0001",
+          "targetRef": "UserTask-PrepareCart-id-0001"
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-PrepareDrinks-id-0001",
+          "name": "Prepare Nonalcoholic Drinks"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PrepareCartToDrinks-id-0007",
+          "sourceRef": "UserTask-PrepareCart-id-0001",
+          "targetRef": "ServiceTask-PrepareDrinks-id-0001"
+        },
+
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-JoinPreparations-id-0001",
+          "name": "Join Preparations",
+          "gatewayDirection": "Converging"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-KitchenToJoin-id-0008",
+          "sourceRef": "ServiceTask-SubmitToKitchen-id-0001",
+          "targetRef": "ParallelGateway-JoinPreparations-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SommelierToJoin-id-0009",
+          "sourceRef": "ServiceTask-SubmitToSommelier-id-0002",
+          "targetRef": "ParallelGateway-JoinPreparations-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DrinksToJoin-id-0010",
+          "sourceRef": "ServiceTask-PrepareDrinks-id-0001",
+          "targetRef": "ParallelGateway-JoinPreparations-id-0001"
+        },
+
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-DeliverOrder-id-0001",
+          "name": "Deliver Order to Guest"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinToDeliver-id-0011",
+          "sourceRef": "ParallelGateway-JoinPreparations-id-0001",
+          "targetRef": "UserTask-DeliverOrder-id-0001"
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-DebitAccount-id-0001",
+          "name": "Debit Guest Account"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DeliverToDebit-id-0012",
+          "sourceRef": "UserTask-DeliverOrder-id-0001",
+          "targetRef": "ServiceTask-DebitAccount-id-0001"
+        },
+
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-OrderFulfilled-id-0001",
+          "name": "Order Fulfilled and Billed"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DebitToEnd-id-0013",
+          "sourceRef": "ServiceTask-DebitAccount-id-0001",
+          "targetRef": "EndEvent-OrderFulfilled-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

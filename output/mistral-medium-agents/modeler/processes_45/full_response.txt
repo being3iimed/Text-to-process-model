@@ -1,0 +1,337 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "ecommerce-order-process",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "2.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "EcommerceOrderProcess-id-0001",
+      "isExecutable": false,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-CustomerInitiatesLogin-id-0001",
+          "name": "Customer Initiates Login"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-EnterLoginCredentials-id-0001",
+          "name": "Enter Login Credentials"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CheckCredentials-id-0001",
+          "name": "Check Credentials"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-CredentialsValid-id-0001",
+          "name": "Credentials Valid?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-LoginFailed-id-0001",
+          "name": "Login Failed"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SelectProduct-id-0001",
+          "name": "Select Product"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-AddToCart-id-0001",
+          "name": "Add to Cart"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-SaveProductToCart-id-0001",
+          "name": "Save Product to Cart"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CheckAllProductsSelected-id-0001",
+          "name": "Check All Products Selected"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-AllProductsSelected-id-0001",
+          "name": "All Products Selected?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-FinishOrder-id-0001",
+          "name": "Finish Order"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-Split-id-0001",
+          "name": "Parallel Execution",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-PaymentProcessing-id-0001",
+          "name": "Payment Processing",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-PaymentStart-id-0001",
+              "name": "Payment Start"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-EnterPaymentData-id-0001",
+              "name": "Enter Payment Data"
+            },
+            {
+              "$type": "bpmn:ReceiveTask",
+              "id": "ReceiveTask-ReceiveBankConfirmation-id-0001",
+              "name": "Receive: bank confirmation"
+            },
+            {
+              "$type": "bpmn:BoundaryEvent",
+              "id": "BoundaryEvent-Timer10Min-BankConfirmation-id-0001",
+              "name": "10 Minute Timeout",
+              "attachedToRef": "ReceiveTask-ReceiveBankConfirmation-id-0001",
+              "cancelActivity": true,
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:TimerEventDefinition",
+                  "timeDuration": "PT10M"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-PaymentTimeoutNotification-id-0001",
+              "name": "Send: payment timeout notification"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-EnterShippingAddress-id-0001",
+              "name": "Enter Shipping Address"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-BillingDifferent-id-0001",
+              "name": "Billing Different?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-EnterBillingAddress-id-0001",
+              "name": "Enter Billing Address (if different)"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-PaymentComplete-id-0001",
+              "name": "Payment Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PaymentStartToEnterData-id-0001",
+              "sourceRef": "StartEvent-PaymentStart-id-0001",
+              "targetRef": "UserTask-EnterPaymentData-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-EnterDataToReceiveConfirmation-id-0002",
+              "sourceRef": "UserTask-EnterPaymentData-id-0001",
+              "targetRef": "ReceiveTask-ReceiveBankConfirmation-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BankConfirmationToShipping-id-0003",
+              "sourceRef": "ReceiveTask-ReceiveBankConfirmation-id-0001",
+              "targetRef": "UserTask-EnterShippingAddress-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BoundaryToTimeoutNotification-id-0004",
+              "sourceRef": "BoundaryEvent-Timer10Min-BankConfirmation-id-0001",
+              "targetRef": "SendTask-PaymentTimeoutNotification-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-TimeoutNotificationToShipping-id-0005",
+              "sourceRef": "SendTask-PaymentTimeoutNotification-id-0001",
+              "targetRef": "UserTask-EnterShippingAddress-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ShippingToBillingDecision-id-0006",
+              "sourceRef": "UserTask-EnterShippingAddress-id-0001",
+              "targetRef": "ExclusiveGateway-BillingDifferent-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BillingDecisionToBillingAddress-id-0007",
+              "sourceRef": "ExclusiveGateway-BillingDifferent-id-0001",
+              "targetRef": "UserTask-EnterBillingAddress-id-0001",
+              "name": "billing_different",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BillingDecisionToPaymentComplete-id-0008",
+              "sourceRef": "ExclusiveGateway-BillingDifferent-id-0001",
+              "targetRef": "EndEvent-PaymentComplete-id-0001",
+              "name": "",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BillingAddressToPaymentComplete-id-0009",
+              "sourceRef": "UserTask-EnterBillingAddress-id-0001",
+              "targetRef": "EndEvent-PaymentComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-PrepareShipment-id-0001",
+          "name": "Prepare Shipment"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-Join-id-0001",
+          "name": "Synchronize Branches",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-FinalizeOrder-id-0001",
+          "name": "Finalize Order"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-OrderCompleted-id-0001",
+          "name": "Order Completed"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToEnterCredentials-id-0001",
+          "sourceRef": "StartEvent-CustomerInitiatesLogin-id-0001",
+          "targetRef": "UserTask-EnterLoginCredentials-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-EnterCredentialsToCheck-id-0002",
+          "sourceRef": "UserTask-EnterLoginCredentials-id-0001",
+          "targetRef": "ServiceTask-CheckCredentials-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CheckToCredentialsValid-id-0003",
+          "sourceRef": "ServiceTask-CheckCredentials-id-0001",
+          "targetRef": "ExclusiveGateway-CredentialsValid-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CredentialsValidToLoginFailed-id-0004",
+          "sourceRef": "ExclusiveGateway-CredentialsValid-id-0001",
+          "targetRef": "EndEvent-LoginFailed-id-0001",
+          "name": "credentials_invalid",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CredentialsValidToSelectProduct-id-0005",
+          "sourceRef": "ExclusiveGateway-CredentialsValid-id-0001",
+          "targetRef": "UserTask-SelectProduct-id-0001",
+          "name": "credentials_valid",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SelectProductToAddCart-id-0006",
+          "sourceRef": "UserTask-SelectProduct-id-0001",
+          "targetRef": "UserTask-AddToCart-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AddCartToSaveProduct-id-0007",
+          "sourceRef": "UserTask-AddToCart-id-0001",
+          "targetRef": "ServiceTask-SaveProductToCart-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SaveProductToCheckAll-id-0008",
+          "sourceRef": "ServiceTask-SaveProductToCart-id-0001",
+          "targetRef": "ServiceTask-CheckAllProductsSelected-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CheckAllToProductsSelected-id-0009",
+          "sourceRef": "ServiceTask-CheckAllProductsSelected-id-0001",
+          "targetRef": "ExclusiveGateway-AllProductsSelected-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProductsSelectedToFinishOrder-id-0010",
+          "sourceRef": "ExclusiveGateway-AllProductsSelected-id-0001",
+          "targetRef": "ServiceTask-FinishOrder-id-0001",
+          "name": "all_products_selected",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProductsSelectedToSelectProduct-id-0011",
+          "sourceRef": "ExclusiveGateway-AllProductsSelected-id-0001",
+          "targetRef": "UserTask-SelectProduct-id-0001",
+          "name": "incomplete_selection",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FinishOrderToSplit-id-0012",
+          "sourceRef": "ServiceTask-FinishOrder-id-0001",
+          "targetRef": "ParallelGateway-Split-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToPaymentProcessing-id-0013",
+          "sourceRef": "ParallelGateway-Split-id-0001",
+          "targetRef": "SubProcess-PaymentProcessing-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToPrepareShipment-id-0014",
+          "sourceRef": "ParallelGateway-Split-id-0001",
+          "targetRef": "ServiceTask-PrepareShipment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PaymentProcessingToJoin-id-0015",
+          "sourceRef": "SubProcess-PaymentProcessing-id-0001",
+          "targetRef": "ParallelGateway-Join-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PrepareShipmentToJoin-id-0016",
+          "sourceRef": "ServiceTask-PrepareShipment-id-0001",
+          "targetRef": "ParallelGateway-Join-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinToFinalizeOrder-id-0017",
+          "sourceRef": "ParallelGateway-Join-id-0001",
+          "targetRef": "ServiceTask-FinalizeOrder-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FinalizeOrderToOrderCompleted-id-0018",
+          "sourceRef": "ServiceTask-FinalizeOrder-id-0001",
+          "targetRef": "EndEvent-OrderCompleted-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

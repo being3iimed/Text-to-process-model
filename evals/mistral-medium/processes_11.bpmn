@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="subscription-process-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="SubscriptionProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-SubscriptionInitiated-id-0001" name="Subscription Process Initiated">
+      <bpmn:outgoing>SequenceFlow-StartToSignup-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-CustomerSignup-id-0001" name="Customer Submits Signup">
+      <bpmn:incoming>SequenceFlow-StartToSignup-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SignupToGenerateAccount-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-GenerateAccount-id-0001" name="Generate Account">
+      <bpmn:incoming>SequenceFlow-SignupToGenerateAccount-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GenerateToAssign-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-AssignAccess-id-0001" name="Assign Access">
+      <bpmn:incoming>SequenceFlow-GenerateToAssign-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AssignToRecurringTriggers-id-0004</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-RecurringTriggers-id-0001" name="Recurring Triggers" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-AssignToRecurringTriggers-id-0004</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-CancellationCheckToLoop-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RecurringToBilling-id-0005</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-RecurringToUpdates-id-0006</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-RecurringToRenewal-id-0007</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:subProcess id="SubProcess-BillingCycle-id-0001" name="Handle Billing Cycle">
+      <bpmn:incoming>SequenceFlow-RecurringToBilling-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BillingToJoin-id-0009</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-BillingCycleStart-id-0001" name="Billing Cycle Start">
+        <bpmn:outgoing>SequenceFlow-BillingStartToCharge-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-ChargePayment-id-0001" name="Charge Payment Method">
+        <bpmn:incoming>SequenceFlow-BillingStartToCharge-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ChargeToInvoice-id-0002</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-GenerateInvoice-id-0001" name="Generate Invoice">
+        <bpmn:incoming>SequenceFlow-ChargeToInvoice-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-InvoiceToReceipt-id-0003</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-PaymentReceipt-id-0001" name="Send: Payment Receipt">
+        <bpmn:incoming>SequenceFlow-InvoiceToReceipt-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReceiptToEnd-id-0004</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:endEvent id="EndEvent-BillingComplete-id-0001" name="Billing Complete">
+        <bpmn:incoming>SequenceFlow-ReceiptToEnd-id-0004</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-BillingStartToCharge-id-0001" sourceRef="StartEvent-BillingCycleStart-id-0001" targetRef="ServiceTask-ChargePayment-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ChargeToInvoice-id-0002" sourceRef="ServiceTask-ChargePayment-id-0001" targetRef="ServiceTask-GenerateInvoice-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-InvoiceToReceipt-id-0003" sourceRef="ServiceTask-GenerateInvoice-id-0001" targetRef="SendTask-PaymentReceipt-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReceiptToEnd-id-0004" sourceRef="SendTask-PaymentReceipt-id-0001" targetRef="EndEvent-BillingComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-SendUpdates-id-0001" name="Send Updates/Enhancements">
+      <bpmn:incoming>SequenceFlow-RecurringToUpdates-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdatesToJoin-id-0010</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-UpdatesStart-id-0001" name="Updates Start">
+        <bpmn:outgoing>SequenceFlow-UpdatesStartToPersonalize-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:scriptTask id="ScriptTask-PersonalizeContent-id-0001" name="Computation: Personalize Update Content">
+        <bpmn:incoming>SequenceFlow-UpdatesStartToPersonalize-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PersonalizeToSend-id-0002</bpmn:outgoing>
+      </bpmn:scriptTask>
+      <bpmn:sendTask id="SendTask-ProductEnhancements-id-0001" name="Send: Product Enhancements">
+        <bpmn:incoming>SequenceFlow-PersonalizeToSend-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SendToEnd-id-0003</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:endEvent id="EndEvent-UpdatesSent-id-0001" name="Updates Sent">
+        <bpmn:incoming>SequenceFlow-SendToEnd-id-0003</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-UpdatesStartToPersonalize-id-0001" sourceRef="StartEvent-UpdatesStart-id-0001" targetRef="ScriptTask-PersonalizeContent-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-PersonalizeToSend-id-0002" sourceRef="ScriptTask-PersonalizeContent-id-0001" targetRef="SendTask-ProductEnhancements-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SendToEnd-id-0003" sourceRef="SendTask-ProductEnhancements-id-0001" targetRef="EndEvent-UpdatesSent-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:startEvent id="StartEvent-RenewalNotice-id-0001" name="Renewal Notice">
+      <bpmn:incoming>SequenceFlow-RecurringToRenewal-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RenewalStartToSend-id-0017</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sendTask id="SendTask-RenewalReminder-id-0001" name="Send: Renewal Reminder">
+      <bpmn:incoming>SequenceFlow-RenewalStartToSend-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RenewalToJoin-id-0008</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:parallelGateway id="ParallelGateway-RecurringTriggersJoin-id-0002" name="Recurring Triggers Join" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-RenewalToJoin-id-0008</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-BillingToJoin-id-0009</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-UpdatesToJoin-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToCancellationCheck-id-0011</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-CancellationCheck-id-0001" name="Cancellation Check?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-JoinToCancellationCheck-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CancellationCheckToProcess-id-0012</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-CancellationCheckToLoop-id-0013</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-ProcessCancellation-id-0001" name="Support Processes Cancellation">
+      <bpmn:incoming>SequenceFlow-CancellationCheckToProcess-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProcessToSettle-id-0014</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-SettleAccount-id-0001" name="Settle Account Balance">
+      <bpmn:incoming>SequenceFlow-ProcessToSettle-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SettleToDeactivate-id-0015</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-DeactivateSubscription-id-0001" name="Deactivate Subscription">
+      <bpmn:incoming>SequenceFlow-SettleToDeactivate-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DeactivateToEnd-id-0016</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-SubscriptionDeactivated-id-0001" name="Subscription Deactivated">
+      <bpmn:incoming>SequenceFlow-DeactivateToEnd-id-0016</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSignup-id-0001" sourceRef="StartEvent-SubscriptionInitiated-id-0001" targetRef="UserTask-CustomerSignup-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SignupToGenerateAccount-id-0002" sourceRef="UserTask-CustomerSignup-id-0001" targetRef="ServiceTask-GenerateAccount-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GenerateToAssign-id-0003" sourceRef="ServiceTask-GenerateAccount-id-0001" targetRef="ServiceTask-AssignAccess-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AssignToRecurringTriggers-id-0004" sourceRef="ServiceTask-AssignAccess-id-0001" targetRef="ParallelGateway-RecurringTriggers-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RecurringToBilling-id-0005" sourceRef="ParallelGateway-RecurringTriggers-id-0001" targetRef="SubProcess-BillingCycle-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RecurringToUpdates-id-0006" sourceRef="ParallelGateway-RecurringTriggers-id-0001" targetRef="SubProcess-SendUpdates-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RecurringToRenewal-id-0007" sourceRef="ParallelGateway-RecurringTriggers-id-0001" targetRef="StartEvent-RenewalNotice-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RenewalToJoin-id-0008" sourceRef="SendTask-RenewalReminder-id-0001" targetRef="ParallelGateway-RecurringTriggersJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-BillingToJoin-id-0009" sourceRef="SubProcess-BillingCycle-id-0001" targetRef="ParallelGateway-RecurringTriggersJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdatesToJoin-id-0010" sourceRef="SubProcess-SendUpdates-id-0001" targetRef="ParallelGateway-RecurringTriggersJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToCancellationCheck-id-0011" sourceRef="ParallelGateway-RecurringTriggersJoin-id-0002" targetRef="ExclusiveGateway-CancellationCheck-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CancellationCheckToProcess-id-0012" name="customer_cancels == true" sourceRef="ExclusiveGateway-CancellationCheck-id-0001" targetRef="UserTask-ProcessCancellation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CancellationCheckToLoop-id-0013" sourceRef="ExclusiveGateway-CancellationCheck-id-0001" targetRef="ParallelGateway-RecurringTriggers-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProcessToSettle-id-0014" sourceRef="UserTask-ProcessCancellation-id-0001" targetRef="ServiceTask-SettleAccount-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SettleToDeactivate-id-0015" sourceRef="ServiceTask-SettleAccount-id-0001" targetRef="ServiceTask-DeactivateSubscription-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DeactivateToEnd-id-0016" sourceRef="ServiceTask-DeactivateSubscription-id-0001" targetRef="EndEvent-SubscriptionDeactivated-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RenewalStartToSend-id-0017" sourceRef="StartEvent-RenewalNotice-id-0001" targetRef="SendTask-RenewalReminder-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubscriptionProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubscriptionProcess-id-0001" bpmnElement="SubscriptionProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-SubscriptionInitiated-id-0001_di" bpmnElement="StartEvent-SubscriptionInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CustomerSignup-id-0001_di" bpmnElement="UserTask-CustomerSignup-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateAccount-id-0001_di" bpmnElement="ServiceTask-GenerateAccount-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AssignAccess-id-0001_di" bpmnElement="ServiceTask-AssignAccess-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-RecurringTriggers-id-0001_di" bpmnElement="ParallelGateway-RecurringTriggers-id-0001">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-BillingCycle-id-0001_di" bpmnElement="SubProcess-BillingCycle-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-RecurringTriggersJoin-id-0002_di" bpmnElement="ParallelGateway-RecurringTriggersJoin-id-0002">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CancellationCheck-id-0001_di" bpmnElement="ExclusiveGateway-CancellationCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ProcessCancellation-id-0001_di" bpmnElement="UserTask-ProcessCancellation-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SettleAccount-id-0001_di" bpmnElement="ServiceTask-SettleAccount-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DeactivateSubscription-id-0001_di" bpmnElement="ServiceTask-DeactivateSubscription-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-SubscriptionDeactivated-id-0001_di" bpmnElement="EndEvent-SubscriptionDeactivated-id-0001">
+        <dc:Bounds x="1707" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-SendUpdates-id-0001_di" bpmnElement="SubProcess-SendUpdates-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent-RenewalNotice-id-0001_di" bpmnElement="StartEvent-RenewalNotice-id-0001">
+        <dc:Bounds x="807" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RenewalReminder-id-0001_di" bpmnElement="SendTask-RenewalReminder-id-0001">
+        <dc:Bounds x="925" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSignup-id-0001_di" bpmnElement="SequenceFlow-StartToSignup-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SignupToGenerateAccount-id-0002_di" bpmnElement="SequenceFlow-SignupToGenerateAccount-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateToAssign-id-0003_di" bpmnElement="SequenceFlow-GenerateToAssign-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AssignToRecurringTriggers-id-0004_di" bpmnElement="SequenceFlow-AssignToRecurringTriggers-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RecurringToBilling-id-0005_di" bpmnElement="SequenceFlow-RecurringToBilling-id-0005">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RecurringToUpdates-id-0006_di" bpmnElement="SequenceFlow-RecurringToUpdates-id-0006">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RecurringToRenewal-id-0007_di" bpmnElement="SequenceFlow-RecurringToRenewal-id-0007">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="350" />
+        <di:waypoint x="807" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BillingToJoin-id-0009_di" bpmnElement="SequenceFlow-BillingToJoin-id-0009">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToCancellationCheck-id-0011_di" bpmnElement="SequenceFlow-JoinToCancellationCheck-id-0011">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CancellationCheckToProcess-id-0012_di" bpmnElement="SequenceFlow-CancellationCheckToProcess-id-0012">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CancellationCheckToLoop-id-0013_di" bpmnElement="SequenceFlow-CancellationCheckToLoop-id-0013">
+        <di:waypoint x="1125" y="95" />
+        <di:waypoint x="1125" y="140" />
+        <di:waypoint x="675" y="140" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessToSettle-id-0014_di" bpmnElement="SequenceFlow-ProcessToSettle-id-0014">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SettleToDeactivate-id-0015_di" bpmnElement="SequenceFlow-SettleToDeactivate-id-0015">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DeactivateToEnd-id-0016_di" bpmnElement="SequenceFlow-DeactivateToEnd-id-0016">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1707" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdatesToJoin-id-0010_di" bpmnElement="SequenceFlow-UpdatesToJoin-id-0010">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="975" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RenewalStartToSend-id-0017_di" bpmnElement="SequenceFlow-RenewalStartToSend-id-0017">
+        <di:waypoint x="843" y="350" />
+        <di:waypoint x="925" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RenewalToJoin-id-0008_di" bpmnElement="SequenceFlow-RenewalToJoin-id-0008">
+        <di:waypoint x="975" y="310" />
+        <di:waypoint x="975" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-SendUpdates-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-SendUpdates-id-0001" bpmnElement="SubProcess-SendUpdates-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-UpdatesStart-id-0001_di" bpmnElement="StartEvent-UpdatesStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-PersonalizeContent-id-0001_di" bpmnElement="ScriptTask-PersonalizeContent-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ProductEnhancements-id-0001_di" bpmnElement="SendTask-ProductEnhancements-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-UpdatesSent-id-0001_di" bpmnElement="EndEvent-UpdatesSent-id-0001">
+        <dc:Bounds x="507" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdatesStartToPersonalize-id-0001_di" bpmnElement="SequenceFlow-UpdatesStartToPersonalize-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PersonalizeToSend-id-0002_di" bpmnElement="SequenceFlow-PersonalizeToSend-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToEnd-id-0003_di" bpmnElement="SequenceFlow-SendToEnd-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="507" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-BillingCycle-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-BillingCycle-id-0001" bpmnElement="SubProcess-BillingCycle-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-BillingCycleStart-id-0001_di" bpmnElement="StartEvent-BillingCycleStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ChargePayment-id-0001_di" bpmnElement="ServiceTask-ChargePayment-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateInvoice-id-0001_di" bpmnElement="ServiceTask-GenerateInvoice-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-PaymentReceipt-id-0001_di" bpmnElement="SendTask-PaymentReceipt-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-BillingComplete-id-0001_di" bpmnElement="EndEvent-BillingComplete-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-BillingStartToCharge-id-0001_di" bpmnElement="SequenceFlow-BillingStartToCharge-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ChargeToInvoice-id-0002_di" bpmnElement="SequenceFlow-ChargeToInvoice-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvoiceToReceipt-id-0003_di" bpmnElement="SequenceFlow-InvoiceToReceipt-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiptToEnd-id-0004_di" bpmnElement="SequenceFlow-ReceiptToEnd-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

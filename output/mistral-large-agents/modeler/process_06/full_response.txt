@@ -1,0 +1,162 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "order-fulfillment-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "OrderFulfillmentProcess-id-0001",
+      "name": "Order Fulfillment Process",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-OrderPlaced-id-0001",
+          "name": "Order Placed"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateOrderConfirmation-id-0001",
+          "name": "Generate Order Confirmation"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-OrderConfirmation-id-0001",
+          "name": "Send: Order Confirmation"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-PickAndPackItems-id-0001",
+          "name": "Pick and Pack Items"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateShippingLabel-id-0001",
+          "name": "Generate Shipping Label"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-HandoverToLogistics-id-0001",
+          "name": "Handover to Logistics Provider"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-TrackingInformation-id-0001",
+          "name": "Send: Tracking Information"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-MonitorShipment-id-0001",
+          "name": "Monitor Shipment"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ConfirmDelivery-id-0001",
+          "name": "Confirm Delivery"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-DeliveryStatus-id-0001",
+          "name": "Delivery Status Check",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProcessComplete-id-0001",
+          "name": "Process Complete"
+        },
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-FeedbackReturnInitiated-id-0002",
+          "name": "Feedback/Return Initiated",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:MessageEventDefinition",
+              "name": "CustomerFeedbackMessage"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToGenerateConfirmation-id-0001",
+          "sourceRef": "StartEvent-OrderPlaced-id-0001",
+          "targetRef": "ServiceTask-GenerateOrderConfirmation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GenerateToSendConfirmation-id-0002",
+          "sourceRef": "ServiceTask-GenerateOrderConfirmation-id-0001",
+          "targetRef": "SendTask-OrderConfirmation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendConfirmationToPickPack-id-0003",
+          "sourceRef": "SendTask-OrderConfirmation-id-0001",
+          "targetRef": "ServiceTask-PickAndPackItems-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PickPackToGenerateLabel-id-0004",
+          "sourceRef": "ServiceTask-PickAndPackItems-id-0001",
+          "targetRef": "ServiceTask-GenerateShippingLabel-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GenerateLabelToHandover-id-0005",
+          "sourceRef": "ServiceTask-GenerateShippingLabel-id-0001",
+          "targetRef": "ServiceTask-HandoverToLogistics-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HandoverToSendTracking-id-0006",
+          "sourceRef": "ServiceTask-HandoverToLogistics-id-0001",
+          "targetRef": "SendTask-TrackingInformation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendTrackingToMonitor-id-0007",
+          "sourceRef": "SendTask-TrackingInformation-id-0001",
+          "targetRef": "ServiceTask-MonitorShipment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MonitorToConfirm-id-0008",
+          "sourceRef": "ServiceTask-MonitorShipment-id-0001",
+          "targetRef": "ServiceTask-ConfirmDelivery-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmToGateway-id-0009",
+          "sourceRef": "ServiceTask-ConfirmDelivery-id-0001",
+          "targetRef": "ExclusiveGateway-DeliveryStatus-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToEndSuccess-id-0010",
+          "sourceRef": "ExclusiveGateway-DeliveryStatus-id-0001",
+          "targetRef": "EndEvent-ProcessComplete-id-0001",
+          "name": "delivery_successful AND no_feedback",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToFeedbackStart-id-0011",
+          "sourceRef": "ExclusiveGateway-DeliveryStatus-id-0001",
+          "targetRef": "StartEvent-FeedbackReturnInitiated-id-0002",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FeedbackStartToEnd-id-0012",
+          "sourceRef": "StartEvent-FeedbackReturnInitiated-id-0002",
+          "targetRef": "EndEvent-ProcessComplete-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

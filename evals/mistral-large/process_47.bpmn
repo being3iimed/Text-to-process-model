@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="USI-Course-Registration-Definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="USI-Course-Registration-Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-NewApplicationStarted-id-0001" name="New Application Started">
+      <bpmn:outgoing>SequenceFlow-StartToSelectCourse-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-SelectDesiredCourse-id-0001" name="Select Desired Course">
+      <bpmn:incoming>SequenceFlow-StartToSelectCourse-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectToSlotsCheck-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-SlotsAvailable-id-0001" name="Slots Available?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-SelectToSlotsCheck-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SlotsYesToShowCourses-id-0003</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SlotsNoToEnd-id-0004</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-SystemShowsCourses-id-0001" name="System Shows Available Courses/Dates">
+      <bpmn:incoming>SequenceFlow-SlotsYesToShowCourses-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ShowToSelectInstance-id-0005</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-SelectCourseInstance-id-0001" name="Select Course Instance">
+      <bpmn:incoming>SequenceFlow-ShowToSelectInstance-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectInstanceToAccountCheck-id-0006</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-NoSlotsAvailable-id-0001" name="Registration Closed (No Slots)">
+      <bpmn:incoming>SequenceFlow-SlotsNoToEnd-id-0004</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-CheckExistingAccount-id-0001" name="Check for Existing Account">
+      <bpmn:incoming>SequenceFlow-SelectInstanceToAccountCheck-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AccountCheckToGateway-id-0007</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-AccountExists-id-0001" name="Account Exists?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-AccountCheckToGateway-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AccountYesToLogin-id-0008</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-AccountNoToEligibilityCheck-id-0009</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-LogIntoAccount-id-0001" name="Log into Account">
+      <bpmn:incoming>SequenceFlow-AccountYesToLogin-id-0008</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-RegisterToLogin-id-0013</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ActivationToLogin-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LoginToTweetGateway-id-0016</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-CheckEligibleUniversity-id-0001" name="Check Eligible University Registration">
+      <bpmn:incoming>SequenceFlow-AccountNoToEligibilityCheck-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EligibilityToGateway-id-0010</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-EligibleUniversity-id-0001" name="Eligible University?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-EligibilityToGateway-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EligibleYesToRegister-id-0011</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-EligibleNoToActivation-id-0012</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-RegisterNewAccount-id-0001" name="Register New Account">
+      <bpmn:incoming>SequenceFlow-EligibleYesToRegister-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RegisterToLogin-id-0013</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="SendTask-RequestActivation-id-0001" name="Send: Activation Request">
+      <bpmn:incoming>SequenceFlow-EligibleNoToActivation-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ActivationToReceive-id-0014</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-WaitForActivation-id-0001" name="Receive: Activation Response">
+      <bpmn:incoming>SequenceFlow-ActivationToReceive-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ActivationToLogin-id-0015</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-TweetOption-id-0001" name="Share on Twitter?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-LoginToTweetGateway-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TweetYesToSend-id-0017</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-TweetNoToRegistration-id-0018</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-TweetToFriends-id-0001" name="Send: Tweet to Friends">
+      <bpmn:incoming>SequenceFlow-TweetYesToSend-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TweetToRegistration-id-0019</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-CompleteRegistration-id-0001" name="Complete Course Registration">
+      <bpmn:incoming>SequenceFlow-TweetNoToRegistration-id-0018</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-TweetToRegistration-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RegistrationToPayment-id-0020</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ProcessPayment-id-0001" name="Process Payment Information">
+      <bpmn:incoming>SequenceFlow-RegistrationToPayment-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PaymentToEnd-id-0021</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-CourseTicketIssued-id-0001" name="Course Ticket Issued">
+      <bpmn:incoming>SequenceFlow-PaymentToEnd-id-0021</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSelectCourse-id-0001" sourceRef="StartEvent-NewApplicationStarted-id-0001" targetRef="UserTask-SelectDesiredCourse-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectToSlotsCheck-id-0002" sourceRef="UserTask-SelectDesiredCourse-id-0001" targetRef="ExclusiveGateway-SlotsAvailable-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SlotsYesToShowCourses-id-0003" name="slots_available = true" sourceRef="ExclusiveGateway-SlotsAvailable-id-0001" targetRef="ServiceTask-SystemShowsCourses-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SlotsNoToEnd-id-0004" name="slots_available = false" sourceRef="ExclusiveGateway-SlotsAvailable-id-0001" targetRef="EndEvent-NoSlotsAvailable-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ShowToSelectInstance-id-0005" sourceRef="ServiceTask-SystemShowsCourses-id-0001" targetRef="UserTask-SelectCourseInstance-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectInstanceToAccountCheck-id-0006" sourceRef="UserTask-SelectCourseInstance-id-0001" targetRef="ServiceTask-CheckExistingAccount-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AccountCheckToGateway-id-0007" sourceRef="ServiceTask-CheckExistingAccount-id-0001" targetRef="ExclusiveGateway-AccountExists-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AccountYesToLogin-id-0008" name="account_exists = true" sourceRef="ExclusiveGateway-AccountExists-id-0001" targetRef="UserTask-LogIntoAccount-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AccountNoToEligibilityCheck-id-0009" name="account_exists = false" sourceRef="ExclusiveGateway-AccountExists-id-0001" targetRef="ServiceTask-CheckEligibleUniversity-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EligibilityToGateway-id-0010" sourceRef="ServiceTask-CheckEligibleUniversity-id-0001" targetRef="ExclusiveGateway-EligibleUniversity-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EligibleYesToRegister-id-0011" name="eligible_university = true" sourceRef="ExclusiveGateway-EligibleUniversity-id-0001" targetRef="UserTask-RegisterNewAccount-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EligibleNoToActivation-id-0012" name="eligible_university = false" sourceRef="ExclusiveGateway-EligibleUniversity-id-0001" targetRef="SendTask-RequestActivation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RegisterToLogin-id-0013" sourceRef="UserTask-RegisterNewAccount-id-0001" targetRef="UserTask-LogIntoAccount-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ActivationToReceive-id-0014" sourceRef="SendTask-RequestActivation-id-0001" targetRef="ReceiveTask-WaitForActivation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ActivationToLogin-id-0015" sourceRef="ReceiveTask-WaitForActivation-id-0001" targetRef="UserTask-LogIntoAccount-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-LoginToTweetGateway-id-0016" sourceRef="UserTask-LogIntoAccount-id-0001" targetRef="ExclusiveGateway-TweetOption-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TweetYesToSend-id-0017" name="share_on_twitter = true" sourceRef="ExclusiveGateway-TweetOption-id-0001" targetRef="SendTask-TweetToFriends-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TweetNoToRegistration-id-0018" name="share_on_twitter = false" sourceRef="ExclusiveGateway-TweetOption-id-0001" targetRef="UserTask-CompleteRegistration-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TweetToRegistration-id-0019" sourceRef="SendTask-TweetToFriends-id-0001" targetRef="UserTask-CompleteRegistration-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RegistrationToPayment-id-0020" sourceRef="UserTask-CompleteRegistration-id-0001" targetRef="ServiceTask-ProcessPayment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PaymentToEnd-id-0021" sourceRef="ServiceTask-ProcessPayment-id-0001" targetRef="EndEvent-CourseTicketIssued-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_USI-Course-Registration-Process">
+    <bpmndi:BPMNPlane id="BPMNPlane_USI-Course-Registration-Process" bpmnElement="USI-Course-Registration-Process">
+      <bpmndi:BPMNShape id="StartEvent-NewApplicationStarted-id-0001_di" bpmnElement="StartEvent-NewApplicationStarted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectDesiredCourse-id-0001_di" bpmnElement="UserTask-SelectDesiredCourse-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SlotsAvailable-id-0001_di" bpmnElement="ExclusiveGateway-SlotsAvailable-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SystemShowsCourses-id-0001_di" bpmnElement="ServiceTask-SystemShowsCourses-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectCourseInstance-id-0001_di" bpmnElement="UserTask-SelectCourseInstance-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckExistingAccount-id-0001_di" bpmnElement="ServiceTask-CheckExistingAccount-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-AccountExists-id-0001_di" bpmnElement="ExclusiveGateway-AccountExists-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckEligibleUniversity-id-0001_di" bpmnElement="ServiceTask-CheckEligibleUniversity-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-EligibleUniversity-id-0001_di" bpmnElement="ExclusiveGateway-EligibleUniversity-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-RegisterNewAccount-id-0001_di" bpmnElement="UserTask-RegisterNewAccount-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-LogIntoAccount-id-0001_di" bpmnElement="UserTask-LogIntoAccount-id-0001">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-TweetOption-id-0001_di" bpmnElement="ExclusiveGateway-TweetOption-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1850" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-TweetToFriends-id-0001_di" bpmnElement="SendTask-TweetToFriends-id-0001">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CompleteRegistration-id-0001_di" bpmnElement="UserTask-CompleteRegistration-id-0001">
+        <dc:Bounds x="2125" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessPayment-id-0001_di" bpmnElement="ServiceTask-ProcessPayment-id-0001">
+        <dc:Bounds x="2275" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CourseTicketIssued-id-0001_di" bpmnElement="EndEvent-CourseTicketIssued-id-0001">
+        <dc:Bounds x="2457" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-NoSlotsAvailable-id-0001_di" bpmnElement="EndEvent-NoSlotsAvailable-id-0001">
+        <dc:Bounds x="507" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RequestActivation-id-0001_di" bpmnElement="SendTask-RequestActivation-id-0001">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-WaitForActivation-id-0001_di" bpmnElement="ReceiveTask-WaitForActivation-id-0001">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSelectCourse-id-0001_di" bpmnElement="SequenceFlow-StartToSelectCourse-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectToSlotsCheck-id-0002_di" bpmnElement="SequenceFlow-SelectToSlotsCheck-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SlotsYesToShowCourses-id-0003_di" bpmnElement="SequenceFlow-SlotsYesToShowCourses-id-0003">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SlotsNoToEnd-id-0004_di" bpmnElement="SequenceFlow-SlotsNoToEnd-id-0004">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="507" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ShowToSelectInstance-id-0005_di" bpmnElement="SequenceFlow-ShowToSelectInstance-id-0005">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectInstanceToAccountCheck-id-0006_di" bpmnElement="SequenceFlow-SelectInstanceToAccountCheck-id-0006">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AccountCheckToGateway-id-0007_di" bpmnElement="SequenceFlow-AccountCheckToGateway-id-0007">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AccountYesToLogin-id-0008_di" bpmnElement="SequenceFlow-AccountYesToLogin-id-0008">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="140" />
+        <di:waypoint x="1725" y="140" />
+        <di:waypoint x="1725" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AccountNoToEligibilityCheck-id-0009_di" bpmnElement="SequenceFlow-AccountNoToEligibilityCheck-id-0009">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EligibilityToGateway-id-0010_di" bpmnElement="SequenceFlow-EligibilityToGateway-id-0010">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EligibleYesToRegister-id-0011_di" bpmnElement="SequenceFlow-EligibleYesToRegister-id-0011">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EligibleNoToActivation-id-0012_di" bpmnElement="SequenceFlow-EligibleNoToActivation-id-0012">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RegisterToLogin-id-0013_di" bpmnElement="SequenceFlow-RegisterToLogin-id-0013">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LoginToTweetGateway-id-0016_di" bpmnElement="SequenceFlow-LoginToTweetGateway-id-0016">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1850" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TweetYesToSend-id-0017_di" bpmnElement="SequenceFlow-TweetYesToSend-id-0017">
+        <di:waypoint x="1900" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TweetNoToRegistration-id-0018_di" bpmnElement="SequenceFlow-TweetNoToRegistration-id-0018">
+        <di:waypoint x="1875" y="95" />
+        <di:waypoint x="1875" y="140" />
+        <di:waypoint x="2175" y="140" />
+        <di:waypoint x="2175" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TweetToRegistration-id-0019_di" bpmnElement="SequenceFlow-TweetToRegistration-id-0019">
+        <di:waypoint x="2075" y="70" />
+        <di:waypoint x="2125" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RegistrationToPayment-id-0020_di" bpmnElement="SequenceFlow-RegistrationToPayment-id-0020">
+        <di:waypoint x="2225" y="70" />
+        <di:waypoint x="2275" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentToEnd-id-0021_di" bpmnElement="SequenceFlow-PaymentToEnd-id-0021">
+        <di:waypoint x="2375" y="70" />
+        <di:waypoint x="2457" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ActivationToReceive-id-0014_di" bpmnElement="SequenceFlow-ActivationToReceive-id-0014">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ActivationToLogin-id-0015_di" bpmnElement="SequenceFlow-ActivationToLogin-id-0015">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1725" y="210" />
+        <di:waypoint x="1725" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

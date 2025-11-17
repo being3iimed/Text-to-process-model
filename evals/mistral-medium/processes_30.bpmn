@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="LANPartyPlanningProcess" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process-LANPartyPlanning-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-LANPartyPlanningBegins-id-0001" name="LAN Party Planning Begins">
+      <bpmn:outgoing>SequenceFlow-StartToSendInvitations-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sendTask id="SendTask-SendInvitations-id-0001" name="Send: invitations to 10 friends">
+      <bpmn:incoming>SequenceFlow-StartToSendInvitations-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendInvitationsToReceiveGamePreferences-id-0002</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveGamePreferences-id-0001" name="Receive: game preferences">
+      <bpmn:incoming>SequenceFlow-SendInvitationsToReceiveGamePreferences-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveGamePreferencesToAppointDate-id-0005</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer72H-ReceiveGamePreferences-id-0001" name="72 Hour Timeout for Game Preferences" attachedToRef="ReceiveTask-ReceiveGamePreferences-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryToReminderGamePreferences-id-0003</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer72H-ReceiveGamePreferences-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT72H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-SendGamePreferencesReminder-id-0001" name="Send: reminder for game preferences">
+      <bpmn:incoming>SequenceFlow-BoundaryToReminderGamePreferences-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReminderGamePreferencesToAppointDate-id-0004</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-AppointLANPartyDate-id-0001" name="Appoint LAN party date">
+      <bpmn:incoming>SequenceFlow-ReminderGamePreferencesToAppointDate-id-0004</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ReceiveGamePreferencesToAppointDate-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AppointDateToReceiveConfirmations-id-0006</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveDateConfirmations-id-0001" name="Receive: date confirmations">
+      <bpmn:incoming>SequenceFlow-AppointDateToReceiveConfirmations-id-0006</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ReminderDateConfirmationsToConfirmationsCheck-id-0008</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-AppointNewDateToReceiveConfirmations-id-0027</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveConfirmationsToConfirmationsCheck-id-0009</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer48H-ReceiveDateConfirmations-id-0001" name="48 Hour Timeout for Date Confirmations" attachedToRef="ReceiveTask-ReceiveDateConfirmations-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryToReminderDateConfirmations-id-0007</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer48H-ReceiveDateConfirmations-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT48H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-SendDateConfirmationReminder-id-0001" name="Send: reminder for date confirmation">
+      <bpmn:incoming>SequenceFlow-BoundaryToReminderDateConfirmations-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReminderDateConfirmationsToConfirmationsCheck-id-0008</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ConfirmationsCheck-id-0001" name="Enough confirmations?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReceiveConfirmationsToConfirmationsCheck-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmationsCheckToPreparationSplit-id-0010</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ConfirmationsCheckToNotifyFriends-id-0011</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:parallelGateway id="ParallelGateway-PreparationSplit-id-0001" name="Parallel Preparation" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ConfirmationsCheckToPreparationSplit-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PreparationSplitToCheckGameLibrary-id-0012</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-PreparationSplitToCalculateBeer-id-0013</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-CheckGameLibrary-id-0001" name="Check game library">
+      <bpmn:incoming>SequenceFlow-PreparationSplitToCheckGameLibrary-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckGameLibraryToGamesCheck-id-0014</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-GamesAvailable-id-0001" name="All games available?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CheckGameLibraryToGamesCheck-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GamesCheckToGamesJoin-id-0015</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GamesCheckToDownloadMissing-id-0016</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-DownloadMissingGames-id-0001" name="Download missing games">
+      <bpmn:incoming>SequenceFlow-GamesCheckToDownloadMissing-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DownloadMissingToGamesJoin-id-0017</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-GamesJoin-id-0001" name="Games Preparation Complete" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-GamesCheckToGamesJoin-id-0015</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-DownloadMissingToGamesJoin-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GamesJoinToPreparationJoin-id-0018</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-CalculateBeerRequirements-id-0001" name="Calculate beer requirements">
+      <bpmn:incoming>SequenceFlow-PreparationSplitToCalculateBeer-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CalculateBeerToBeerCheck-id-0019</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-BeerCheck-id-0001" name="Enough beer?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CalculateBeerToBeerCheck-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BeerCheckToBeerJoin-id-0020</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-BeerCheckToBuyMissing-id-0021</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-BuyMissingBeer-id-0001" name="Buy missing beer">
+      <bpmn:incoming>SequenceFlow-BeerCheckToBuyMissing-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BuyMissingToBeerJoin-id-0022</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-BeerJoin-id-0001" name="Beer Preparation Complete" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-BeerCheckToBeerJoin-id-0020</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-BuyMissingToBeerJoin-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BeerJoinToPreparationJoin-id-0023</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:parallelGateway id="ParallelGateway-PreparationJoin-id-0001" name="All Preparations Complete" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-GamesJoinToPreparationJoin-id-0018</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-BeerJoinToPreparationJoin-id-0023</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PreparationJoinToEnjoyLANParty-id-0024</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-EnjoyLANParty-id-0001" name="Enjoy LAN party">
+      <bpmn:incoming>SequenceFlow-PreparationJoinToEnjoyLANParty-id-0024</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EnjoyLANPartyToEnd-id-0025</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-LANPartyEnjoyed-id-0001" name="LAN Party Enjoyed">
+      <bpmn:incoming>SequenceFlow-EnjoyLANPartyToEnd-id-0025</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="UserTask-NotifyFriendsDateChange-id-0001" name="Notify friends about date change">
+      <bpmn:incoming>SequenceFlow-ConfirmationsCheckToNotifyFriends-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotifyFriendsToAppointNewDate-id-0026</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-AppointNewLANPartyDate-id-0001" name="Appoint new LAN party date">
+      <bpmn:incoming>SequenceFlow-NotifyFriendsToAppointNewDate-id-0026</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AppointNewDateToReceiveConfirmations-id-0027</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSendInvitations-id-0001" sourceRef="StartEvent-LANPartyPlanningBegins-id-0001" targetRef="SendTask-SendInvitations-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendInvitationsToReceiveGamePreferences-id-0002" sourceRef="SendTask-SendInvitations-id-0001" targetRef="ReceiveTask-ReceiveGamePreferences-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToReminderGamePreferences-id-0003" sourceRef="BoundaryEvent-Timer72H-ReceiveGamePreferences-id-0001" targetRef="SendTask-SendGamePreferencesReminder-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReminderGamePreferencesToAppointDate-id-0004" sourceRef="SendTask-SendGamePreferencesReminder-id-0001" targetRef="UserTask-AppointLANPartyDate-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveGamePreferencesToAppointDate-id-0005" sourceRef="ReceiveTask-ReceiveGamePreferences-id-0001" targetRef="UserTask-AppointLANPartyDate-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AppointDateToReceiveConfirmations-id-0006" sourceRef="UserTask-AppointLANPartyDate-id-0001" targetRef="ReceiveTask-ReceiveDateConfirmations-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToReminderDateConfirmations-id-0007" sourceRef="BoundaryEvent-Timer48H-ReceiveDateConfirmations-id-0001" targetRef="SendTask-SendDateConfirmationReminder-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReminderDateConfirmationsToConfirmationsCheck-id-0008" sourceRef="SendTask-SendDateConfirmationReminder-id-0001" targetRef="ReceiveTask-ReceiveDateConfirmations-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveConfirmationsToConfirmationsCheck-id-0009" sourceRef="ReceiveTask-ReceiveDateConfirmations-id-0001" targetRef="ExclusiveGateway-ConfirmationsCheck-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmationsCheckToPreparationSplit-id-0010" name="confirmations &#62;= 8" sourceRef="ExclusiveGateway-ConfirmationsCheck-id-0001" targetRef="ParallelGateway-PreparationSplit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmationsCheckToNotifyFriends-id-0011" name="confirmations &#60; 8" sourceRef="ExclusiveGateway-ConfirmationsCheck-id-0001" targetRef="UserTask-NotifyFriendsDateChange-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PreparationSplitToCheckGameLibrary-id-0012" sourceRef="ParallelGateway-PreparationSplit-id-0001" targetRef="ServiceTask-CheckGameLibrary-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PreparationSplitToCalculateBeer-id-0013" sourceRef="ParallelGateway-PreparationSplit-id-0001" targetRef="UserTask-CalculateBeerRequirements-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckGameLibraryToGamesCheck-id-0014" sourceRef="ServiceTask-CheckGameLibrary-id-0001" targetRef="ExclusiveGateway-GamesAvailable-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GamesCheckToGamesJoin-id-0015" name="all_games_available" sourceRef="ExclusiveGateway-GamesAvailable-id-0001" targetRef="ParallelGateway-GamesJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GamesCheckToDownloadMissing-id-0016" name="games_missing" sourceRef="ExclusiveGateway-GamesAvailable-id-0001" targetRef="ServiceTask-DownloadMissingGames-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DownloadMissingToGamesJoin-id-0017" sourceRef="ServiceTask-DownloadMissingGames-id-0001" targetRef="ParallelGateway-GamesJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GamesJoinToPreparationJoin-id-0018" sourceRef="ParallelGateway-GamesJoin-id-0001" targetRef="ParallelGateway-PreparationJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CalculateBeerToBeerCheck-id-0019" sourceRef="UserTask-CalculateBeerRequirements-id-0001" targetRef="ExclusiveGateway-BeerCheck-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BeerCheckToBeerJoin-id-0020" name="enough_beer" sourceRef="ExclusiveGateway-BeerCheck-id-0001" targetRef="ParallelGateway-BeerJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BeerCheckToBuyMissing-id-0021" name="need_more_beer" sourceRef="ExclusiveGateway-BeerCheck-id-0001" targetRef="UserTask-BuyMissingBeer-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BuyMissingToBeerJoin-id-0022" sourceRef="UserTask-BuyMissingBeer-id-0001" targetRef="ParallelGateway-BeerJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BeerJoinToPreparationJoin-id-0023" sourceRef="ParallelGateway-BeerJoin-id-0001" targetRef="ParallelGateway-PreparationJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PreparationJoinToEnjoyLANParty-id-0024" sourceRef="ParallelGateway-PreparationJoin-id-0001" targetRef="UserTask-EnjoyLANParty-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EnjoyLANPartyToEnd-id-0025" sourceRef="UserTask-EnjoyLANParty-id-0001" targetRef="EndEvent-LANPartyEnjoyed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotifyFriendsToAppointNewDate-id-0026" sourceRef="UserTask-NotifyFriendsDateChange-id-0001" targetRef="UserTask-AppointNewLANPartyDate-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AppointNewDateToReceiveConfirmations-id-0027" sourceRef="UserTask-AppointNewLANPartyDate-id-0001" targetRef="ReceiveTask-ReceiveDateConfirmations-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process-LANPartyPlanning-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process-LANPartyPlanning-id-0001" bpmnElement="Process-LANPartyPlanning-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-LANPartyPlanningBegins-id-0001_di" bpmnElement="StartEvent-LANPartyPlanningBegins-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendInvitations-id-0001_di" bpmnElement="SendTask-SendInvitations-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveGamePreferences-id-0001_di" bpmnElement="ReceiveTask-ReceiveGamePreferences-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer72H-ReceiveGamePreferences-id-0001_di" bpmnElement="BoundaryEvent-Timer72H-ReceiveGamePreferences-id-0001">
+        <dc:Bounds x="357" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AppointLANPartyDate-id-0001_di" bpmnElement="UserTask-AppointLANPartyDate-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveDateConfirmations-id-0001_di" bpmnElement="ReceiveTask-ReceiveDateConfirmations-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer48H-ReceiveDateConfirmations-id-0001_di" bpmnElement="BoundaryEvent-Timer48H-ReceiveDateConfirmations-id-0001">
+        <dc:Bounds x="807" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ConfirmationsCheck-id-0001_di" bpmnElement="ExclusiveGateway-ConfirmationsCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-PreparationSplit-id-0001_di" bpmnElement="ParallelGateway-PreparationSplit-id-0001">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckGameLibrary-id-0001_di" bpmnElement="ServiceTask-CheckGameLibrary-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-GamesAvailable-id-0001_di" bpmnElement="ExclusiveGateway-GamesAvailable-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DownloadMissingGames-id-0001_di" bpmnElement="ServiceTask-DownloadMissingGames-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-GamesJoin-id-0001_di" bpmnElement="ParallelGateway-GamesJoin-id-0001">
+        <dc:Bounds x="1700" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-PreparationJoin-id-0001_di" bpmnElement="ParallelGateway-PreparationJoin-id-0001">
+        <dc:Bounds x="1850" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnjoyLANParty-id-0001_di" bpmnElement="UserTask-EnjoyLANParty-id-0001">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-LANPartyEnjoyed-id-0001_di" bpmnElement="EndEvent-LANPartyEnjoyed-id-0001">
+        <dc:Bounds x="2157" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendGamePreferencesReminder-id-0001_di" bpmnElement="SendTask-SendGamePreferencesReminder-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendDateConfirmationReminder-id-0001_di" bpmnElement="SendTask-SendDateConfirmationReminder-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-NotifyFriendsDateChange-id-0001_di" bpmnElement="UserTask-NotifyFriendsDateChange-id-0001">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AppointNewLANPartyDate-id-0001_di" bpmnElement="UserTask-AppointNewLANPartyDate-id-0001">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CalculateBeerRequirements-id-0001_di" bpmnElement="UserTask-CalculateBeerRequirements-id-0001">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-BeerCheck-id-0001_di" bpmnElement="ExclusiveGateway-BeerCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1550" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-BuyMissingBeer-id-0001_di" bpmnElement="UserTask-BuyMissingBeer-id-0001">
+        <dc:Bounds x="1675" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-BeerJoin-id-0001_di" bpmnElement="ParallelGateway-BeerJoin-id-0001">
+        <dc:Bounds x="1850" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSendInvitations-id-0001_di" bpmnElement="SequenceFlow-StartToSendInvitations-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendInvitationsToReceiveGamePreferences-id-0002_di" bpmnElement="SequenceFlow-SendInvitationsToReceiveGamePreferences-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveGamePreferencesToAppointDate-id-0005_di" bpmnElement="SequenceFlow-ReceiveGamePreferencesToAppointDate-id-0005">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToReminderGamePreferences-id-0003_di" bpmnElement="SequenceFlow-BoundaryToReminderGamePreferences-id-0003">
+        <di:waypoint x="375" y="128" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AppointDateToReceiveConfirmations-id-0006_di" bpmnElement="SequenceFlow-AppointDateToReceiveConfirmations-id-0006">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveConfirmationsToConfirmationsCheck-id-0009_di" bpmnElement="SequenceFlow-ReceiveConfirmationsToConfirmationsCheck-id-0009">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToReminderDateConfirmations-id-0007_di" bpmnElement="SequenceFlow-BoundaryToReminderDateConfirmations-id-0007">
+        <di:waypoint x="825" y="128" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmationsCheckToPreparationSplit-id-0010_di" bpmnElement="SequenceFlow-ConfirmationsCheckToPreparationSplit-id-0010">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmationsCheckToNotifyFriends-id-0011_di" bpmnElement="SequenceFlow-ConfirmationsCheckToNotifyFriends-id-0011">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1050" y="70" />
+        <di:waypoint x="1050" y="140" />
+        <di:waypoint x="1050" y="140" />
+        <di:waypoint x="1050" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PreparationSplitToCheckGameLibrary-id-0012_di" bpmnElement="SequenceFlow-PreparationSplitToCheckGameLibrary-id-0012">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PreparationSplitToCalculateBeer-id-0013_di" bpmnElement="SequenceFlow-PreparationSplitToCalculateBeer-id-0013">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1200" y="70" />
+        <di:waypoint x="1200" y="140" />
+        <di:waypoint x="1350" y="140" />
+        <di:waypoint x="1350" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckGameLibraryToGamesCheck-id-0014_di" bpmnElement="SequenceFlow-CheckGameLibraryToGamesCheck-id-0014">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GamesCheckToGamesJoin-id-0015_di" bpmnElement="SequenceFlow-GamesCheckToGamesJoin-id-0015">
+        <di:waypoint x="1425" y="95" />
+        <di:waypoint x="1425" y="140" />
+        <di:waypoint x="1725" y="140" />
+        <di:waypoint x="1725" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GamesCheckToDownloadMissing-id-0016_di" bpmnElement="SequenceFlow-GamesCheckToDownloadMissing-id-0016">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DownloadMissingToGamesJoin-id-0017_di" bpmnElement="SequenceFlow-DownloadMissingToGamesJoin-id-0017">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1700" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GamesJoinToPreparationJoin-id-0018_di" bpmnElement="SequenceFlow-GamesJoinToPreparationJoin-id-0018">
+        <di:waypoint x="1750" y="70" />
+        <di:waypoint x="1850" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PreparationJoinToEnjoyLANParty-id-0024_di" bpmnElement="SequenceFlow-PreparationJoinToEnjoyLANParty-id-0024">
+        <di:waypoint x="1900" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EnjoyLANPartyToEnd-id-0025_di" bpmnElement="SequenceFlow-EnjoyLANPartyToEnd-id-0025">
+        <di:waypoint x="2075" y="70" />
+        <di:waypoint x="2157" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReminderGamePreferencesToAppointDate-id-0004_di" bpmnElement="SequenceFlow-ReminderGamePreferencesToAppointDate-id-0004">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="675" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReminderDateConfirmationsToConfirmationsCheck-id-0008_di" bpmnElement="SequenceFlow-ReminderDateConfirmationsToConfirmationsCheck-id-0008">
+        <di:waypoint x="975" y="250" />
+        <di:waypoint x="975" y="280" />
+        <di:waypoint x="825" y="280" />
+        <di:waypoint x="825" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotifyFriendsToAppointNewDate-id-0026_di" bpmnElement="SequenceFlow-NotifyFriendsToAppointNewDate-id-0026">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AppointNewDateToReceiveConfirmations-id-0027_di" bpmnElement="SequenceFlow-AppointNewDateToReceiveConfirmations-id-0027">
+        <di:waypoint x="1275" y="250" />
+        <di:waypoint x="1275" y="280" />
+        <di:waypoint x="825" y="280" />
+        <di:waypoint x="825" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculateBeerToBeerCheck-id-0019_di" bpmnElement="SequenceFlow-CalculateBeerToBeerCheck-id-0019">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1550" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BeerCheckToBeerJoin-id-0020_di" bpmnElement="SequenceFlow-BeerCheckToBeerJoin-id-0020">
+        <di:waypoint x="1575" y="235" />
+        <di:waypoint x="1575" y="280" />
+        <di:waypoint x="1875" y="280" />
+        <di:waypoint x="1875" y="235" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BeerCheckToBuyMissing-id-0021_di" bpmnElement="SequenceFlow-BeerCheckToBuyMissing-id-0021">
+        <di:waypoint x="1600" y="210" />
+        <di:waypoint x="1675" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BuyMissingToBeerJoin-id-0022_di" bpmnElement="SequenceFlow-BuyMissingToBeerJoin-id-0022">
+        <di:waypoint x="1775" y="210" />
+        <di:waypoint x="1850" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BeerJoinToPreparationJoin-id-0023_di" bpmnElement="SequenceFlow-BeerJoinToPreparationJoin-id-0023">
+        <di:waypoint x="1875" y="185" />
+        <di:waypoint x="1875" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

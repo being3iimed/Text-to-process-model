@@ -1,0 +1,333 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "subscription-process-definitions",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler",
+    "exporterVersion": "1.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "SubscriptionProcess-id-0001",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-SubscriptionInitiated-id-0001",
+            "name": "Subscription Process Initiated"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-CustomerSignup-id-0001",
+            "name": "Customer Submits Signup"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-GenerateAccount-id-0001",
+            "name": "Generate Account"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-AssignAccess-id-0001",
+            "name": "Assign Access"
+          },
+          {
+            "$type": "bpmn:ParallelGateway",
+            "id": "ParallelGateway-RecurringTriggers-id-0001",
+            "name": "Recurring Triggers",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:SubProcess",
+            "id": "SubProcess-BillingCycle-id-0001",
+            "name": "Handle Billing Cycle",
+            "flowElements": [
+              {
+                "$type": "bpmn:StartEvent",
+                "id": "StartEvent-BillingCycleStart-id-0001",
+                "name": "Billing Cycle Start",
+                "eventDefinitions": [
+                  {
+                    "$type": "bpmn:TimerEventDefinition",
+                    "timeCycle": "RRULE:FREQ=MONTHLY"
+                  }
+                ]
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-ChargePayment-id-0001",
+                "name": "Charge Payment Method"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-GenerateInvoice-id-0001",
+                "name": "Generate Invoice"
+              },
+              {
+                "$type": "bpmn:SendTask",
+                "id": "SendTask-PaymentReceipt-id-0001",
+                "name": "Send: Payment Receipt"
+              },
+              {
+                "$type": "bpmn:EndEvent",
+                "id": "EndEvent-BillingComplete-id-0001",
+                "name": "Billing Complete"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-BillingStartToCharge-id-0001",
+                "sourceRef": "StartEvent-BillingCycleStart-id-0001",
+                "targetRef": "ServiceTask-ChargePayment-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ChargeToInvoice-id-0002",
+                "sourceRef": "ServiceTask-ChargePayment-id-0001",
+                "targetRef": "ServiceTask-GenerateInvoice-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-InvoiceToReceipt-id-0003",
+                "sourceRef": "ServiceTask-GenerateInvoice-id-0001",
+                "targetRef": "SendTask-PaymentReceipt-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ReceiptToEnd-id-0004",
+                "sourceRef": "SendTask-PaymentReceipt-id-0001",
+                "targetRef": "EndEvent-BillingComplete-id-0001"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:SubProcess",
+            "id": "SubProcess-SendUpdates-id-0001",
+            "name": "Send Updates/Enhancements",
+            "flowElements": [
+              {
+                "$type": "bpmn:StartEvent",
+                "id": "StartEvent-UpdatesStart-id-0001",
+                "name": "Updates Start",
+                "eventDefinitions": [
+                  {
+                    "$type": "bpmn:TimerEventDefinition",
+                    "timeCycle": "RRULE:FREQ=WEEKLY;BYDAY=MO"
+                  }
+                ]
+              },
+              {
+                "$type": "bpmn:ScriptTask",
+                "id": "ScriptTask-PersonalizeContent-id-0001",
+                "name": "Computation: Personalize Update Content"
+              },
+              {
+                "$type": "bpmn:SendTask",
+                "id": "SendTask-ProductEnhancements-id-0001",
+                "name": "Send: Product Enhancements"
+              },
+              {
+                "$type": "bpmn:EndEvent",
+                "id": "EndEvent-UpdatesSent-id-0001",
+                "name": "Updates Sent"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-UpdatesStartToPersonalize-id-0001",
+                "sourceRef": "StartEvent-UpdatesStart-id-0001",
+                "targetRef": "ScriptTask-PersonalizeContent-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-PersonalizeToSend-id-0002",
+                "sourceRef": "ScriptTask-PersonalizeContent-id-0001",
+                "targetRef": "SendTask-ProductEnhancements-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SendToEnd-id-0003",
+                "sourceRef": "SendTask-ProductEnhancements-id-0001",
+                "targetRef": "EndEvent-UpdatesSent-id-0001"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-RenewalNotice-id-0001",
+            "name": "Renewal Notice",
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:TimerEventDefinition",
+                "timeCycle": "RRULE:FREQ=YEARLY;BYMONTHDAY=-7"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-RenewalReminder-id-0001",
+            "name": "Send: Renewal Reminder"
+          },
+          {
+            "$type": "bpmn:ParallelGateway",
+            "id": "ParallelGateway-RecurringTriggersJoin-id-0002",
+            "name": "Recurring Triggers Join",
+            "gatewayDirection": "Converging"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-CancellationCheck-id-0001",
+            "name": "Cancellation Check?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ProcessCancellation-id-0001",
+            "name": "Support Processes Cancellation"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-SettleAccount-id-0001",
+            "name": "Settle Account Balance"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-DeactivateSubscription-id-0001",
+            "name": "Deactivate Subscription"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-SubscriptionDeactivated-id-0001",
+            "name": "Subscription Deactivated"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToSignup-id-0001",
+            "sourceRef": "StartEvent-SubscriptionInitiated-id-0001",
+            "targetRef": "UserTask-CustomerSignup-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SignupToGenerateAccount-id-0002",
+            "sourceRef": "UserTask-CustomerSignup-id-0001",
+            "targetRef": "ServiceTask-GenerateAccount-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GenerateToAssign-id-0003",
+            "sourceRef": "ServiceTask-GenerateAccount-id-0001",
+            "targetRef": "ServiceTask-AssignAccess-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AssignToRecurringTriggers-id-0004",
+            "sourceRef": "ServiceTask-AssignAccess-id-0001",
+            "targetRef": "ParallelGateway-RecurringTriggers-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RecurringToBilling-id-0005",
+            "sourceRef": "ParallelGateway-RecurringTriggers-id-0001",
+            "targetRef": "SubProcess-BillingCycle-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RecurringToUpdates-id-0006",
+            "sourceRef": "ParallelGateway-RecurringTriggers-id-0001",
+            "targetRef": "SubProcess-SendUpdates-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RecurringToRenewal-id-0007",
+            "sourceRef": "ParallelGateway-RecurringTriggers-id-0001",
+            "targetRef": "StartEvent-RenewalNotice-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RenewalToJoin-id-0008",
+            "sourceRef": "SendTask-RenewalReminder-id-0001",
+            "targetRef": "ParallelGateway-RecurringTriggersJoin-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-BillingToJoin-id-0009",
+            "sourceRef": "SubProcess-BillingCycle-id-0001",
+            "targetRef": "ParallelGateway-RecurringTriggersJoin-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-UpdatesToJoin-id-0010",
+            "sourceRef": "SubProcess-SendUpdates-id-0001",
+            "targetRef": "ParallelGateway-RecurringTriggersJoin-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-JoinToCancellationCheck-id-0011",
+            "sourceRef": "ParallelGateway-RecurringTriggersJoin-id-0002",
+            "targetRef": "ExclusiveGateway-CancellationCheck-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CancellationCheckToProcess-id-0012",
+            "sourceRef": "ExclusiveGateway-CancellationCheck-id-0001",
+            "targetRef": "UserTask-ProcessCancellation-id-0001",
+            "name": "customer_cancels == true"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CancellationCheckToLoop-id-0013",
+            "sourceRef": "ExclusiveGateway-CancellationCheck-id-0001",
+            "targetRef": "ParallelGateway-RecurringTriggers-id-0001",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ProcessToSettle-id-0014",
+            "sourceRef": "UserTask-ProcessCancellation-id-0001",
+            "targetRef": "ServiceTask-SettleAccount-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SettleToDeactivate-id-0015",
+            "sourceRef": "ServiceTask-SettleAccount-id-0001",
+            "targetRef": "ServiceTask-DeactivateSubscription-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DeactivateToEnd-id-0016",
+            "sourceRef": "ServiceTask-DeactivateSubscription-id-0001",
+            "targetRef": "EndEvent-SubscriptionDeactivated-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RenewalStartToSend-id-0017",
+            "sourceRef": "StartEvent-RenewalNotice-id-0001",
+            "targetRef": "SendTask-RenewalReminder-id-0001"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-medium-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 13008,
+        "total_tokens": 16148,
+        "completion_tokens": 3140
+      },
+      "model_name": "mistral-medium-latest",
+      "model": "mistral-medium-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 13008,
+      "output_tokens": 3140,
+      "total_tokens": 16148
+    },
+    "id": "lc_run--afc91c18-8cdc-4c60-82f2-50503f66deaa-0"
+  },
+  "status": "success"
+}

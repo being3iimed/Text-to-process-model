@@ -1,0 +1,644 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "internship-process-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Internship-Search-Process-id-0001",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-InternshipSearchStarted-id-0001",
+          "name": "Internship Search Started"
+        },
+
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-EnterInternshipPreferences-id-0001",
+          "name": "Enter Internship Preferences"
+        },
+
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-Timer30Day-WaitForOffers-id-0001",
+          "name": "30 Day Timeout",
+          "attachedToRef": "UserTask-EnterInternshipPreferences-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "id": "TimerEventDefinition-30Day-id-0001",
+              "timeDuration": "P30D"
+            }
+          ]
+        },
+
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-NoOffersNotification-id-0001",
+          "name": "Send: no offers notification"
+        },
+
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-SearchTimedOut-id-0001",
+          "name": "Search Timed Out"
+        },
+
+        {
+          "$type": "bpmn:IntermediateCatchEvent",
+          "id": "IntermediateCatchEvent-OfferArrivalDelay-id-0001",
+          "name": "Offer Arrival Delay",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "id": "TimerEventDefinition-7Day-id-0001",
+              "timeDuration": "P7D"
+            }
+          ]
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateOfferMatching-id-0001",
+          "name": "Generate Offer Matching"
+        },
+
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-OfferNotification-id-0001",
+          "name": "Send: Offer Notification"
+        },
+
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ReviewOffer-id-0001",
+          "name": "Review Offer"
+        },
+
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-OfferDecision-id-0001",
+          "name": "Offer Decision",
+          "gatewayDirection": "Diverging"
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ValidateAcceptance-id-0001",
+          "name": "Validate Acceptance"
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-MarkOffersInvalid-id-0001",
+          "name": "Mark Other Offers Invalid"
+        },
+
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-PostAcceptance-id-0001",
+          "name": "Parallel Paths",
+          "gatewayDirection": "Diverging"
+        },
+
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-StatusUpdateCycle-id-0001",
+          "name": "Status Update Cycle",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-StatusUpdatesBegin-id-0001",
+              "name": "Status Updates Begin"
+            },
+
+            {
+              "$type": "bpmn:IntermediateCatchEvent",
+              "id": "IntermediateCatchEvent-WeeklyTimer-id-0001",
+              "name": "Weekly Status Update Trigger",
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:TimerEventDefinition",
+                  "id": "TimerEventDefinition-Weekly-id-0001",
+                  "timeCycle": "RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU"
+                }
+              ]
+            },
+
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-StatusUpdateSplit-id-0001",
+              "name": "Status Update Split",
+              "gatewayDirection": "Diverging"
+            },
+
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-WriteWeeklyStatusUpdate-id-0001",
+              "name": "Write Weekly Status Update"
+            },
+
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-StatusUpdateToCompany-id-0001",
+              "name": "Send: Status Update to Company"
+            },
+
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-StatusUpdateJoin-id-0001",
+              "name": "Status Update Join",
+              "gatewayDirection": "Converging"
+            },
+
+            {
+              "$type": "bpmn:ScriptTask",
+              "id": "ScriptTask-IncrementUpdateCounter-id-0001",
+              "name": "Computation: increment update counter",
+              "scriptFormat": "JavaScript"
+            },
+
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-CheckUpdateCount-id-0001",
+              "name": "Check Update Count",
+              "gatewayDirection": "Diverging"
+            },
+
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-StatusUpdatesComplete-id-0001",
+              "name": "Status Updates Complete"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StartToTimer-id-0001",
+              "sourceRef": "StartEvent-StatusUpdatesBegin-id-0001",
+              "targetRef": "IntermediateCatchEvent-WeeklyTimer-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-TimerToSplit-id-0001",
+              "sourceRef": "IntermediateCatchEvent-WeeklyTimer-id-0001",
+              "targetRef": "ParallelGateway-StatusUpdateSplit-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToWriteUpdate-id-0001",
+              "sourceRef": "ParallelGateway-StatusUpdateSplit-id-0001",
+              "targetRef": "UserTask-WriteWeeklyStatusUpdate-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToSendUpdate-id-0001",
+              "sourceRef": "ParallelGateway-StatusUpdateSplit-id-0001",
+              "targetRef": "SendTask-StatusUpdateToCompany-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-WriteToJoin-id-0001",
+              "sourceRef": "UserTask-WriteWeeklyStatusUpdate-id-0001",
+              "targetRef": "ParallelGateway-StatusUpdateJoin-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendToJoin-id-0001",
+              "sourceRef": "SendTask-StatusUpdateToCompany-id-0001",
+              "targetRef": "ParallelGateway-StatusUpdateJoin-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-JoinToScript-id-0001",
+              "sourceRef": "ParallelGateway-StatusUpdateJoin-id-0001",
+              "targetRef": "ScriptTask-IncrementUpdateCounter-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ScriptToGateway-id-0001",
+              "sourceRef": "ScriptTask-IncrementUpdateCounter-id-0001",
+              "targetRef": "ExclusiveGateway-CheckUpdateCount-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToTimer-id-0001",
+              "sourceRef": "ExclusiveGateway-CheckUpdateCount-id-0001",
+              "targetRef": "IntermediateCatchEvent-WeeklyTimer-id-0001",
+              "name": "update_counter < 3",
+              "isDefault": false
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToEnd-id-0001",
+              "sourceRef": "ExclusiveGateway-CheckUpdateCount-id-0001",
+              "targetRef": "EndEvent-StatusUpdatesComplete-id-0001",
+              "name": "update_counter >= 3",
+              "isDefault": true
+            }
+          ]
+        },
+
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-CompanyStatusUpdates-id-0001",
+          "name": "Company Status Updates",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-CompanyUpdatesBegin-id-0001",
+              "name": "Company Updates Begin"
+            },
+
+            {
+              "$type": "bpmn:IntermediateCatchEvent",
+              "id": "IntermediateCatchEvent-CompanyWeeklyTimer-id-0001",
+              "name": "Company Weekly Update Trigger",
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:TimerEventDefinition",
+                  "id": "TimerEventDefinition-CompanyWeekly-id-0001",
+                  "timeCycle": "RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU"
+                }
+              ]
+            },
+
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-GenerateCompanyStatusUpdate-id-0001",
+              "name": "Generate Company Status Update"
+            },
+
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-UpdateToIntern-id-0001",
+              "name": "Send: Update to Intern"
+            },
+
+            {
+              "$type": "bpmn:ScriptTask",
+              "id": "ScriptTask-IncrementCompanyUpdateCounter-id-0001",
+              "name": "Computation: increment company update counter",
+              "scriptFormat": "JavaScript"
+            },
+
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-CheckCompanyUpdateCount-id-0001",
+              "name": "Check Company Update Count",
+              "gatewayDirection": "Diverging"
+            },
+
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-CompanyUpdatesComplete-id-0001",
+              "name": "Company Updates Complete"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CompanyStartToTimer-id-0001",
+              "sourceRef": "StartEvent-CompanyUpdatesBegin-id-0001",
+              "targetRef": "IntermediateCatchEvent-CompanyWeeklyTimer-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CompanyTimerToGenerate-id-0001",
+              "sourceRef": "IntermediateCatchEvent-CompanyWeeklyTimer-id-0001",
+              "targetRef": "ServiceTask-GenerateCompanyStatusUpdate-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CompanyGenerateToSend-id-0001",
+              "sourceRef": "ServiceTask-GenerateCompanyStatusUpdate-id-0001",
+              "targetRef": "SendTask-UpdateToIntern-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CompanySendToScript-id-0001",
+              "sourceRef": "SendTask-UpdateToIntern-id-0001",
+              "targetRef": "ScriptTask-IncrementCompanyUpdateCounter-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CompanyScriptToGateway-id-0001",
+              "sourceRef": "ScriptTask-IncrementCompanyUpdateCounter-id-0001",
+              "targetRef": "ExclusiveGateway-CheckCompanyUpdateCount-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CompanyGatewayToTimer-id-0001",
+              "sourceRef": "ExclusiveGateway-CheckCompanyUpdateCount-id-0001",
+              "targetRef": "IntermediateCatchEvent-CompanyWeeklyTimer-id-0001",
+              "name": "company_update_counter < 3",
+              "isDefault": false
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CompanyGatewayToEnd-id-0001",
+              "sourceRef": "ExclusiveGateway-CheckCompanyUpdateCount-id-0001",
+              "targetRef": "EndEvent-CompanyUpdatesComplete-id-0001",
+              "name": "company_update_counter >= 3",
+              "isDefault": true
+            }
+          ]
+        },
+
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-PostAcceptanceJoin-id-0001",
+          "name": "Post Acceptance Join",
+          "gatewayDirection": "Converging"
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateCompletionReport-id-0001",
+          "name": "Generate Completion Report"
+        },
+
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-DecideOnRecommendations-id-0001",
+          "name": "Decide on Recommendations"
+        },
+
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-RecommendationDecision-id-0001",
+          "name": "Recommendation Decision",
+          "gatewayDirection": "Diverging"
+        },
+
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-RecommendationSplit-id-0001",
+          "name": "Recommendation Split",
+          "gatewayDirection": "Diverging"
+        },
+
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-RecommendationTweetFriend1-id-0001",
+          "name": "Send: Recommendation Tweet to Friend 1"
+        },
+
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-RecommendationTweetFriend2-id-0001",
+          "name": "Send: Recommendation Tweet to Friend 2"
+        },
+
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-RecommendationTweetFriend3-id-0001",
+          "name": "Send: Recommendation Tweet to Friend 3"
+        },
+
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-RecommendationJoin-id-0001",
+          "name": "Recommendation Join",
+          "gatewayDirection": "Converging"
+        },
+
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-InternshipCompleted-id-0001",
+          "name": "Internship Completed"
+        },
+
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-RecommendationsSent-id-0001",
+          "name": "Recommendations Sent"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToPreferences-id-0001",
+          "sourceRef": "StartEvent-InternshipSearchStarted-id-0001",
+          "targetRef": "UserTask-EnterInternshipPreferences-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PreferencesToBoundary-id-0001",
+          "sourceRef": "UserTask-EnterInternshipPreferences-id-0001",
+          "targetRef": "IntermediateCatchEvent-OfferArrivalDelay-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryToNotification-id-0001",
+          "sourceRef": "BoundaryEvent-Timer30Day-WaitForOffers-id-0001",
+          "targetRef": "SendTask-NoOffersNotification-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NotificationToTimeoutEnd-id-0001",
+          "sourceRef": "SendTask-NoOffersNotification-id-0001",
+          "targetRef": "EndEvent-SearchTimedOut-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DelayToOfferMatching-id-0001",
+          "sourceRef": "IntermediateCatchEvent-OfferArrivalDelay-id-0001",
+          "targetRef": "ServiceTask-GenerateOfferMatching-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OfferMatchingToNotification-id-0001",
+          "sourceRef": "ServiceTask-GenerateOfferMatching-id-0001",
+          "targetRef": "SendTask-OfferNotification-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NotificationToReview-id-0001",
+          "sourceRef": "SendTask-OfferNotification-id-0001",
+          "targetRef": "UserTask-ReviewOffer-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReviewToDecision-id-0001",
+          "sourceRef": "UserTask-ReviewOffer-id-0001",
+          "targetRef": "ExclusiveGateway-OfferDecision-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DecisionToAccept-id-0001",
+          "sourceRef": "ExclusiveGateway-OfferDecision-id-0001",
+          "targetRef": "ServiceTask-ValidateAcceptance-id-0001",
+          "name": "accept",
+          "isDefault": false
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DecisionToReject-id-0001",
+          "sourceRef": "ExclusiveGateway-OfferDecision-id-0001",
+          "targetRef": "ServiceTask-GenerateOfferMatching-id-0001",
+          "name": "reject",
+          "isDefault": true
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AcceptToInvalidate-id-0001",
+          "sourceRef": "ServiceTask-ValidateAcceptance-id-0001",
+          "targetRef": "ServiceTask-MarkOffersInvalid-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InvalidateToParallel-id-0001",
+          "sourceRef": "ServiceTask-MarkOffersInvalid-id-0001",
+          "targetRef": "ParallelGateway-PostAcceptance-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ParallelToStatusUpdates-id-0001",
+          "sourceRef": "ParallelGateway-PostAcceptance-id-0001",
+          "targetRef": "SubProcess-StatusUpdateCycle-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ParallelToCompanyUpdates-id-0001",
+          "sourceRef": "ParallelGateway-PostAcceptance-id-0001",
+          "targetRef": "SubProcess-CompanyStatusUpdates-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StatusUpdatesToJoin-id-0001",
+          "sourceRef": "SubProcess-StatusUpdateCycle-id-0001",
+          "targetRef": "ParallelGateway-PostAcceptanceJoin-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CompanyUpdatesToJoin-id-0001",
+          "sourceRef": "SubProcess-CompanyStatusUpdates-id-0001",
+          "targetRef": "ParallelGateway-PostAcceptanceJoin-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinToCompletionReport-id-0001",
+          "sourceRef": "ParallelGateway-PostAcceptanceJoin-id-0001",
+          "targetRef": "ServiceTask-GenerateCompletionReport-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CompletionToRecommendation-id-0001",
+          "sourceRef": "ServiceTask-GenerateCompletionReport-id-0001",
+          "targetRef": "UserTask-DecideOnRecommendations-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RecommendationToDecision-id-0001",
+          "sourceRef": "UserTask-DecideOnRecommendations-id-0001",
+          "targetRef": "ExclusiveGateway-RecommendationDecision-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DecisionToRecommendationSplit-id-0001",
+          "sourceRef": "ExclusiveGateway-RecommendationDecision-id-0001",
+          "targetRef": "ParallelGateway-RecommendationSplit-id-0001",
+          "name": "recommend",
+          "isDefault": false
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DecisionToCompletionEnd-id-0001",
+          "sourceRef": "ExclusiveGateway-RecommendationDecision-id-0001",
+          "targetRef": "EndEvent-InternshipCompleted-id-0001",
+          "name": "no recommendation",
+          "isDefault": true
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToTweet1-id-0001",
+          "sourceRef": "ParallelGateway-RecommendationSplit-id-0001",
+          "targetRef": "SendTask-RecommendationTweetFriend1-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToTweet2-id-0001",
+          "sourceRef": "ParallelGateway-RecommendationSplit-id-0001",
+          "targetRef": "SendTask-RecommendationTweetFriend2-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToTweet3-id-0001",
+          "sourceRef": "ParallelGateway-RecommendationSplit-id-0001",
+          "targetRef": "SendTask-RecommendationTweetFriend3-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-Tweet1ToJoin-id-0001",
+          "sourceRef": "SendTask-RecommendationTweetFriend1-id-0001",
+          "targetRef": "ParallelGateway-RecommendationJoin-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-Tweet2ToJoin-id-0001",
+          "sourceRef": "SendTask-RecommendationTweetFriend2-id-0001",
+          "targetRef": "ParallelGateway-RecommendationJoin-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-Tweet3ToJoin-id-0001",
+          "sourceRef": "SendTask-RecommendationTweetFriend3-id-0001",
+          "targetRef": "ParallelGateway-RecommendationJoin-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinToRecommendationEnd-id-0001",
+          "sourceRef": "ParallelGateway-RecommendationJoin-id-0001",
+          "targetRef": "EndEvent-RecommendationsSent-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

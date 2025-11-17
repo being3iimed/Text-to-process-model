@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="order-fulfillment-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0.0">
+  <bpmn:process id="OrderFulfillmentProcess-id-0001" name="Order Fulfillment Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-OrderPlaced-id-0001" name="Order Placed">
+      <bpmn:outgoing>SequenceFlow-StartToGenerateConfirmation-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-GenerateOrderConfirmation-id-0001" name="Generate Order Confirmation">
+      <bpmn:incoming>SequenceFlow-StartToGenerateConfirmation-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GenerateToSendConfirmation-id-0002</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-OrderConfirmation-id-0001" name="Send: Order Confirmation">
+      <bpmn:incoming>SequenceFlow-GenerateToSendConfirmation-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendConfirmationToPickPack-id-0003</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-PickAndPackItems-id-0001" name="Pick and Pack Items">
+      <bpmn:incoming>SequenceFlow-SendConfirmationToPickPack-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PickPackToGenerateLabel-id-0004</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-GenerateShippingLabel-id-0001" name="Generate Shipping Label">
+      <bpmn:incoming>SequenceFlow-PickPackToGenerateLabel-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GenerateLabelToHandover-id-0005</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-HandoverToLogistics-id-0001" name="Handover to Logistics Provider">
+      <bpmn:incoming>SequenceFlow-GenerateLabelToHandover-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-HandoverToSendTracking-id-0006</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-TrackingInformation-id-0001" name="Send: Tracking Information">
+      <bpmn:incoming>SequenceFlow-HandoverToSendTracking-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendTrackingToMonitor-id-0007</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-MonitorShipment-id-0001" name="Monitor Shipment">
+      <bpmn:incoming>SequenceFlow-SendTrackingToMonitor-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MonitorToConfirm-id-0008</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ConfirmDelivery-id-0001" name="Confirm Delivery">
+      <bpmn:incoming>SequenceFlow-MonitorToConfirm-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmToGateway-id-0009</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-DeliveryStatus-id-0001" name="Delivery Status Check" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ConfirmToGateway-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToEndSuccess-id-0010</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToFeedbackStart-id-0011</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0001" name="Process Complete">
+      <bpmn:incoming>SequenceFlow-GatewayToEndSuccess-id-0010</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-FeedbackStartToEnd-id-0012</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:startEvent id="StartEvent-FeedbackReturnInitiated-id-0002" name="Feedback/Return Initiated">
+      <bpmn:incoming>SequenceFlow-GatewayToFeedbackStart-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FeedbackStartToEnd-id-0012</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToGenerateConfirmation-id-0001" sourceRef="StartEvent-OrderPlaced-id-0001" targetRef="ServiceTask-GenerateOrderConfirmation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GenerateToSendConfirmation-id-0002" sourceRef="ServiceTask-GenerateOrderConfirmation-id-0001" targetRef="SendTask-OrderConfirmation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendConfirmationToPickPack-id-0003" sourceRef="SendTask-OrderConfirmation-id-0001" targetRef="ServiceTask-PickAndPackItems-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PickPackToGenerateLabel-id-0004" sourceRef="ServiceTask-PickAndPackItems-id-0001" targetRef="ServiceTask-GenerateShippingLabel-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GenerateLabelToHandover-id-0005" sourceRef="ServiceTask-GenerateShippingLabel-id-0001" targetRef="ServiceTask-HandoverToLogistics-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-HandoverToSendTracking-id-0006" sourceRef="ServiceTask-HandoverToLogistics-id-0001" targetRef="SendTask-TrackingInformation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendTrackingToMonitor-id-0007" sourceRef="SendTask-TrackingInformation-id-0001" targetRef="ServiceTask-MonitorShipment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MonitorToConfirm-id-0008" sourceRef="ServiceTask-MonitorShipment-id-0001" targetRef="ServiceTask-ConfirmDelivery-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmToGateway-id-0009" sourceRef="ServiceTask-ConfirmDelivery-id-0001" targetRef="ExclusiveGateway-DeliveryStatus-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToEndSuccess-id-0010" name="delivery_successful AND no_feedback" sourceRef="ExclusiveGateway-DeliveryStatus-id-0001" targetRef="EndEvent-ProcessComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToFeedbackStart-id-0011" sourceRef="ExclusiveGateway-DeliveryStatus-id-0001" targetRef="StartEvent-FeedbackReturnInitiated-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-FeedbackStartToEnd-id-0012" sourceRef="StartEvent-FeedbackReturnInitiated-id-0002" targetRef="EndEvent-ProcessComplete-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_OrderFulfillmentProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_OrderFulfillmentProcess-id-0001" bpmnElement="OrderFulfillmentProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-OrderPlaced-id-0001_di" bpmnElement="StartEvent-OrderPlaced-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateOrderConfirmation-id-0001_di" bpmnElement="ServiceTask-GenerateOrderConfirmation-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-OrderConfirmation-id-0001_di" bpmnElement="SendTask-OrderConfirmation-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PickAndPackItems-id-0001_di" bpmnElement="ServiceTask-PickAndPackItems-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateShippingLabel-id-0001_di" bpmnElement="ServiceTask-GenerateShippingLabel-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-HandoverToLogistics-id-0001_di" bpmnElement="ServiceTask-HandoverToLogistics-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-TrackingInformation-id-0001_di" bpmnElement="SendTask-TrackingInformation-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MonitorShipment-id-0001_di" bpmnElement="ServiceTask-MonitorShipment-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ConfirmDelivery-id-0001_di" bpmnElement="ServiceTask-ConfirmDelivery-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-DeliveryStatus-id-0001_di" bpmnElement="ExclusiveGateway-DeliveryStatus-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0001_di" bpmnElement="EndEvent-ProcessComplete-id-0001">
+        <dc:Bounds x="1707" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent-FeedbackReturnInitiated-id-0002_di" bpmnElement="StartEvent-FeedbackReturnInitiated-id-0002">
+        <dc:Bounds x="1557" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToGenerateConfirmation-id-0001_di" bpmnElement="SequenceFlow-StartToGenerateConfirmation-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateToSendConfirmation-id-0002_di" bpmnElement="SequenceFlow-GenerateToSendConfirmation-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendConfirmationToPickPack-id-0003_di" bpmnElement="SequenceFlow-SendConfirmationToPickPack-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PickPackToGenerateLabel-id-0004_di" bpmnElement="SequenceFlow-PickPackToGenerateLabel-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateLabelToHandover-id-0005_di" bpmnElement="SequenceFlow-GenerateLabelToHandover-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HandoverToSendTracking-id-0006_di" bpmnElement="SequenceFlow-HandoverToSendTracking-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendTrackingToMonitor-id-0007_di" bpmnElement="SequenceFlow-SendTrackingToMonitor-id-0007">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MonitorToConfirm-id-0008_di" bpmnElement="SequenceFlow-MonitorToConfirm-id-0008">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmToGateway-id-0009_di" bpmnElement="SequenceFlow-ConfirmToGateway-id-0009">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToEndSuccess-id-0010_di" bpmnElement="SequenceFlow-GatewayToEndSuccess-id-0010">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1707" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToFeedbackStart-id-0011_di" bpmnElement="SequenceFlow-GatewayToFeedbackStart-id-0011">
+        <di:waypoint x="1425" y="95" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1557" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FeedbackStartToEnd-id-0012_di" bpmnElement="SequenceFlow-FeedbackStartToEnd-id-0012">
+        <di:waypoint x="1593" y="210" />
+        <di:waypoint x="1725" y="210" />
+        <di:waypoint x="1725" y="88" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

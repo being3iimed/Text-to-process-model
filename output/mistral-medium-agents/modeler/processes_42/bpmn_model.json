@@ -1,0 +1,286 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "FridgeServiceProcess-Definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "FridgeServiceProcess-id-0001",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-ServiceRequestInitiated-id-0001",
+          "name": "Service Request Initiated"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-DescribeFridgeSymptoms-id-0001",
+          "name": "Describe fridge symptoms"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ConfirmFridgeType-id-0002",
+          "name": "Confirm fridge type"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-RouteToLocalFacility-id-0001",
+          "name": "Route to local facility"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-AppointmentDetails-id-0001",
+          "name": "Receive: appointment details"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-Timer24Hour-Appointment-id-0001",
+          "name": "24 Hour Reminder",
+          "attachedToRef": "ReceiveTask-AppointmentDetails-id-0001",
+          "cancelActivity": false,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT24H"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-ReminderNotification-id-0001",
+          "name": "Send: reminder notification"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ConfirmAppointment-id-0001",
+          "name": "Confirm appointment"
+        },
+        {
+          "$type": "bpmn:IntermediateCatchEvent",
+          "id": "IntermediateCatchEvent-TechnicianArrival-id-0001",
+          "name": "Technician arrives"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-RepairStatus-id-0001",
+          "name": "Repair Status?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-EvaluateRepairAttempt-id-0001",
+          "name": "Evaluate repair attempt"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-Timer48Hour-EvaluateRepair-id-0001",
+          "name": "48 Hour Follow-up",
+          "attachedToRef": "UserTask-EvaluateRepairAttempt-id-0001",
+          "cancelActivity": false,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT48H"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-FollowUpRequest-id-0001",
+          "name": "Send: follow-up request"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-RateServiceFacility-id-0001",
+          "name": "Rate service facility"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ServiceComplete-id-0001",
+          "name": "Service Complete"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-PartsOrderNotification-id-0001",
+          "name": "Send: parts order notification"
+        },
+        {
+          "$type": "bpmn:IntermediateCatchEvent",
+          "id": "IntermediateCatchEvent-PartsArrival-id-0001",
+          "name": "Parts arrive"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ScheduleSecondVisit-id-0001",
+          "name": "Schedule second visit"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-EvaluateRepairAttempt2-id-0002",
+          "name": "Evaluate repair attempt"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-Timer48Hour-EvaluateRepair2-id-0002",
+          "name": "48 Hour Follow-up",
+          "attachedToRef": "UserTask-EvaluateRepairAttempt2-id-0002",
+          "cancelActivity": false,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT48H"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-FollowUpRequest2-id-0002",
+          "name": "Send: follow-up request"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-RateServiceFacility2-id-0002",
+          "name": "Rate service facility"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ServiceComplete2-id-0002",
+          "name": "Service Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToDescribe-id-0001",
+          "sourceRef": "StartEvent-ServiceRequestInitiated-id-0001",
+          "targetRef": "UserTask-DescribeFridgeSymptoms-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DescribeToConfirm-id-0002",
+          "sourceRef": "UserTask-DescribeFridgeSymptoms-id-0001",
+          "targetRef": "UserTask-ConfirmFridgeType-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmToRoute-id-0003",
+          "sourceRef": "UserTask-ConfirmFridgeType-id-0002",
+          "targetRef": "ServiceTask-RouteToLocalFacility-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RouteToAppointment-id-0004",
+          "sourceRef": "ServiceTask-RouteToLocalFacility-id-0001",
+          "targetRef": "ReceiveTask-AppointmentDetails-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryToReminder-id-0005",
+          "sourceRef": "BoundaryEvent-Timer24Hour-Appointment-id-0001",
+          "targetRef": "SendTask-ReminderNotification-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AppointmentToConfirm-id-0006",
+          "sourceRef": "ReceiveTask-AppointmentDetails-id-0001",
+          "targetRef": "UserTask-ConfirmAppointment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmToTechnician-id-0007",
+          "sourceRef": "UserTask-ConfirmAppointment-id-0001",
+          "targetRef": "IntermediateCatchEvent-TechnicianArrival-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TechnicianToGateway-id-0008",
+          "sourceRef": "IntermediateCatchEvent-TechnicianArrival-id-0001",
+          "targetRef": "ExclusiveGateway-RepairStatus-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToEvaluate1-id-0009",
+          "sourceRef": "ExclusiveGateway-RepairStatus-id-0001",
+          "targetRef": "UserTask-EvaluateRepairAttempt-id-0001",
+          "name": "fridge_repaired == true",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryToFollowUp1-id-0010",
+          "sourceRef": "BoundaryEvent-Timer48Hour-EvaluateRepair-id-0001",
+          "targetRef": "SendTask-FollowUpRequest-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FollowUpToEvaluate1-id-0011",
+          "sourceRef": "SendTask-FollowUpRequest-id-0001",
+          "targetRef": "UserTask-EvaluateRepairAttempt-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-EvaluateToRate1-id-0012",
+          "sourceRef": "UserTask-EvaluateRepairAttempt-id-0001",
+          "targetRef": "UserTask-RateServiceFacility-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RateToEnd1-id-0013",
+          "sourceRef": "UserTask-RateServiceFacility-id-0001",
+          "targetRef": "EndEvent-ServiceComplete-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToParts-id-0014",
+          "sourceRef": "ExclusiveGateway-RepairStatus-id-0001",
+          "targetRef": "SendTask-PartsOrderNotification-id-0001",
+          "name": "fridge_repaired == false (needs parts)",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PartsToArrival-id-0015",
+          "sourceRef": "SendTask-PartsOrderNotification-id-0001",
+          "targetRef": "IntermediateCatchEvent-PartsArrival-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ArrivalToSchedule-id-0016",
+          "sourceRef": "IntermediateCatchEvent-PartsArrival-id-0001",
+          "targetRef": "ServiceTask-ScheduleSecondVisit-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ScheduleToEvaluate2-id-0017",
+          "sourceRef": "ServiceTask-ScheduleSecondVisit-id-0001",
+          "targetRef": "UserTask-EvaluateRepairAttempt2-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryToFollowUp2-id-0018",
+          "sourceRef": "BoundaryEvent-Timer48Hour-EvaluateRepair2-id-0002",
+          "targetRef": "SendTask-FollowUpRequest2-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FollowUpToEvaluate2-id-0019",
+          "sourceRef": "SendTask-FollowUpRequest2-id-0002",
+          "targetRef": "UserTask-EvaluateRepairAttempt2-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-EvaluateToRate2-id-0020",
+          "sourceRef": "UserTask-EvaluateRepairAttempt2-id-0002",
+          "targetRef": "UserTask-RateServiceFacility2-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RateToEnd2-id-0021",
+          "sourceRef": "UserTask-RateServiceFacility2-id-0002",
+          "targetRef": "EndEvent-ServiceComplete2-id-0002"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="DismissalProcessDefinitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="DismissalProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-DismissalProcessInitiated-id-0001" name="Dismissal Process Initiated">
+      <bpmn:outgoing>SequenceFlow-StartToSendDismissal-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sendTask id="SendTask-SendDismissalToMSPO-id-0001" name="Send: dismissal to MSPO">
+      <bpmn:incoming>SequenceFlow-StartToSendDismissal-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendDismissalToReview-id-0002</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-MSPOReviewsDismissal-id-0001" name="MSPO reviews dismissal">
+      <bpmn:incoming>SequenceFlow-SendDismissalToReview-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToDecision-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-DismissalDecision-id-0001" name="Dismissal Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewToDecision-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DecisionToRejection-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-DecisionToConfirmation-id-0005</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-SendRejectionNotice-id-0001" name="Send: rejection notice">
+      <bpmn:incoming>SequenceFlow-DecisionToRejection-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RejectionToEnd-id-0006</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="SendTask-SendConfirmationNotice-id-0001" name="Send: confirmation notice">
+      <bpmn:incoming>SequenceFlow-DecisionToConfirmation-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmationToEnd-id-0007</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-DismissalProcessComplete-id-0001" name="Dismissal Process Complete">
+      <bpmn:incoming>SequenceFlow-RejectionToEnd-id-0006</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-DismissalProcessComplete-id-0002" name="Dismissal Process Complete">
+      <bpmn:incoming>SequenceFlow-ConfirmationToEnd-id-0007</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSendDismissal-id-0001" sourceRef="StartEvent-DismissalProcessInitiated-id-0001" targetRef="SendTask-SendDismissalToMSPO-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendDismissalToReview-id-0002" sourceRef="SendTask-SendDismissalToMSPO-id-0001" targetRef="UserTask-MSPOReviewsDismissal-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToDecision-id-0003" sourceRef="UserTask-MSPOReviewsDismissal-id-0001" targetRef="ExclusiveGateway-DismissalDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DecisionToRejection-id-0004" name="dismissal_rejected" sourceRef="ExclusiveGateway-DismissalDecision-id-0001" targetRef="SendTask-SendRejectionNotice-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DecisionToConfirmation-id-0005" name="dismissal_confirmed" sourceRef="ExclusiveGateway-DismissalDecision-id-0001" targetRef="SendTask-SendConfirmationNotice-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RejectionToEnd-id-0006" sourceRef="SendTask-SendRejectionNotice-id-0001" targetRef="EndEvent-DismissalProcessComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmationToEnd-id-0007" sourceRef="SendTask-SendConfirmationNotice-id-0001" targetRef="EndEvent-DismissalProcessComplete-id-0002" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_DismissalProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_DismissalProcess" bpmnElement="DismissalProcess">
+      <bpmndi:BPMNShape id="StartEvent-DismissalProcessInitiated-id-0001_di" bpmnElement="StartEvent-DismissalProcessInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendDismissalToMSPO-id-0001_di" bpmnElement="SendTask-SendDismissalToMSPO-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-MSPOReviewsDismissal-id-0001_di" bpmnElement="UserTask-MSPOReviewsDismissal-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-DismissalDecision-id-0001_di" bpmnElement="ExclusiveGateway-DismissalDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendRejectionNotice-id-0001_di" bpmnElement="SendTask-SendRejectionNotice-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-DismissalProcessComplete-id-0001_di" bpmnElement="EndEvent-DismissalProcessComplete-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendConfirmationNotice-id-0001_di" bpmnElement="SendTask-SendConfirmationNotice-id-0001">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-DismissalProcessComplete-id-0002_di" bpmnElement="EndEvent-DismissalProcessComplete-id-0002">
+        <dc:Bounds x="807" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSendDismissal-id-0001_di" bpmnElement="SequenceFlow-StartToSendDismissal-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendDismissalToReview-id-0002_di" bpmnElement="SequenceFlow-SendDismissalToReview-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToDecision-id-0003_di" bpmnElement="SequenceFlow-ReviewToDecision-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DecisionToRejection-id-0004_di" bpmnElement="SequenceFlow-DecisionToRejection-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DecisionToConfirmation-id-0005_di" bpmnElement="SequenceFlow-DecisionToConfirmation-id-0005">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RejectionToEnd-id-0006_di" bpmnElement="SequenceFlow-RejectionToEnd-id-0006">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmationToEnd-id-0007_di" bpmnElement="SequenceFlow-ConfirmationToEnd-id-0007">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="807" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

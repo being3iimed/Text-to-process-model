@@ -1,0 +1,178 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "ComplianceAuditCertification-Definitions-id-0001",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler (https://bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "ComplianceAuditCertification-Process-id-0001",
+      "isExecutable": false,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-ComplianceAuditScheduled-id-0001",
+          "name": "Compliance Audit Scheduled"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-InternalPreparation-id-0001",
+          "name": "Internal Preparation",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-PreparationBegins-id-0001",
+              "name": "Preparation Begins"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-PrepareDocumentation-id-0001",
+              "name": "Prepare Documentation"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-GatherEvidence-id-0002",
+              "name": "Gather Evidence"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ConductSelfAssessment-id-0003",
+              "name": "Conduct Self-Assessment"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-PreparationComplete-id-0001",
+              "name": "Preparation Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PreparationStartToDocs-id-0001",
+              "sourceRef": "StartEvent-PreparationBegins-id-0001",
+              "targetRef": "UserTask-PrepareDocumentation-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-DocsToEvidence-id-0002",
+              "sourceRef": "UserTask-PrepareDocumentation-id-0001",
+              "targetRef": "UserTask-GatherEvidence-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-EvidenceToSelfAssessment-id-0003",
+              "sourceRef": "UserTask-GatherEvidence-id-0002",
+              "targetRef": "UserTask-ConductSelfAssessment-id-0003"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SelfAssessmentToEnd-id-0004",
+              "sourceRef": "UserTask-ConductSelfAssessment-id-0003",
+              "targetRef": "EndEvent-PreparationComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-AuditorsReviewProcesses-id-0001",
+          "name": "Auditors Review Processes and Identify Gaps"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-MakeCorrections-id-0002",
+          "name": "Company Makes Corrections/Improvements"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-FinalAuditConducted-id-0003",
+          "name": "Final Audit Conducted"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-AuditOutcome-id-0001",
+          "name": "Audit Outcome",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-AwardCertification-id-0001",
+          "name": "Award Certification"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendOfficialDocuments-id-0001",
+          "name": "Send: Official Certification Documents"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-CertificationIssued-id-0001",
+          "name": "Certification Issued"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-AuditFailed-id-0002",
+          "name": "Audit Failed (No Certification)"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToInternalPrep-id-0001",
+          "sourceRef": "StartEvent-ComplianceAuditScheduled-id-0001",
+          "targetRef": "SubProcess-InternalPreparation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InternalPrepToAuditors-id-0002",
+          "sourceRef": "SubProcess-InternalPreparation-id-0001",
+          "targetRef": "UserTask-AuditorsReviewProcesses-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AuditorsToCorrections-id-0003",
+          "sourceRef": "UserTask-AuditorsReviewProcesses-id-0001",
+          "targetRef": "UserTask-MakeCorrections-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CorrectionsToFinalAudit-id-0004",
+          "sourceRef": "UserTask-MakeCorrections-id-0002",
+          "targetRef": "UserTask-FinalAuditConducted-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FinalAuditToGateway-id-0005",
+          "sourceRef": "UserTask-FinalAuditConducted-id-0003",
+          "targetRef": "ExclusiveGateway-AuditOutcome-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToCertification-id-0006",
+          "sourceRef": "ExclusiveGateway-AuditOutcome-id-0001",
+          "targetRef": "ServiceTask-AwardCertification-id-0001",
+          "name": "all_criteria_met",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CertificationToSend-id-0007",
+          "sourceRef": "ServiceTask-AwardCertification-id-0001",
+          "targetRef": "SendTask-SendOfficialDocuments-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendToEndSuccess-id-0008",
+          "sourceRef": "SendTask-SendOfficialDocuments-id-0001",
+          "targetRef": "EndEvent-CertificationIssued-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToEndFail-id-0009",
+          "sourceRef": "ExclusiveGateway-AuditOutcome-id-0001",
+          "targetRef": "EndEvent-AuditFailed-id-0002",
+          "name": "!all_criteria_met",
+          "isDefault": false
+        }
+      ]
+    }
+  ]
+}
+```

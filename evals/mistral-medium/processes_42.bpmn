@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="FridgeServiceProcess-Definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="FridgeServiceProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ServiceRequestInitiated-id-0001" name="Service Request Initiated">
+      <bpmn:outgoing>SequenceFlow-StartToDescribe-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-DescribeFridgeSymptoms-id-0001" name="Describe fridge symptoms">
+      <bpmn:incoming>SequenceFlow-StartToDescribe-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DescribeToConfirm-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ConfirmFridgeType-id-0002" name="Confirm fridge type">
+      <bpmn:incoming>SequenceFlow-DescribeToConfirm-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmToRoute-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-RouteToLocalFacility-id-0001" name="Route to local facility">
+      <bpmn:incoming>SequenceFlow-ConfirmToRoute-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RouteToAppointment-id-0004</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:receiveTask id="ReceiveTask-AppointmentDetails-id-0001" name="Receive: appointment details">
+      <bpmn:incoming>SequenceFlow-RouteToAppointment-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AppointmentToConfirm-id-0006</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer24Hour-Appointment-id-0001" name="24 Hour Reminder" cancelActivity="false" attachedToRef="ReceiveTask-AppointmentDetails-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryToReminder-id-0005</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer24Hour-Appointment-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT24H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-ReminderNotification-id-0001" name="Send: reminder notification">
+      <bpmn:incoming>SequenceFlow-BoundaryToReminder-id-0005</bpmn:incoming>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-ConfirmAppointment-id-0001" name="Confirm appointment">
+      <bpmn:incoming>SequenceFlow-AppointmentToConfirm-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmToTechnician-id-0007</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-TechnicianArrival-id-0001" name="Technician arrives">
+      <bpmn:incoming>SequenceFlow-ConfirmToTechnician-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TechnicianToGateway-id-0008</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-RepairStatus-id-0001" name="Repair Status?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-TechnicianToGateway-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToEvaluate1-id-0009</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToParts-id-0014</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-EvaluateRepairAttempt-id-0001" name="Evaluate repair attempt">
+      <bpmn:incoming>SequenceFlow-GatewayToEvaluate1-id-0009</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-FollowUpToEvaluate1-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EvaluateToRate1-id-0012</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer48Hour-EvaluateRepair-id-0001" name="48 Hour Follow-up" cancelActivity="false" attachedToRef="UserTask-EvaluateRepairAttempt-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryToFollowUp1-id-0010</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer48Hour-EvaluateRepair-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT48H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-FollowUpRequest-id-0001" name="Send: follow-up request">
+      <bpmn:incoming>SequenceFlow-BoundaryToFollowUp1-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FollowUpToEvaluate1-id-0011</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-RateServiceFacility-id-0001" name="Rate service facility">
+      <bpmn:incoming>SequenceFlow-EvaluateToRate1-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RateToEnd1-id-0013</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-ServiceComplete-id-0001" name="Service Complete">
+      <bpmn:incoming>SequenceFlow-RateToEnd1-id-0013</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="SendTask-PartsOrderNotification-id-0001" name="Send: parts order notification">
+      <bpmn:incoming>SequenceFlow-GatewayToParts-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PartsToArrival-id-0015</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-PartsArrival-id-0001" name="Parts arrive">
+      <bpmn:incoming>SequenceFlow-PartsToArrival-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ArrivalToSchedule-id-0016</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="ServiceTask-ScheduleSecondVisit-id-0001" name="Schedule second visit">
+      <bpmn:incoming>SequenceFlow-ArrivalToSchedule-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ScheduleToEvaluate2-id-0017</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-EvaluateRepairAttempt2-id-0002" name="Evaluate repair attempt">
+      <bpmn:incoming>SequenceFlow-ScheduleToEvaluate2-id-0017</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-FollowUpToEvaluate2-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EvaluateToRate2-id-0020</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer48Hour-EvaluateRepair2-id-0002" name="48 Hour Follow-up" cancelActivity="false" attachedToRef="UserTask-EvaluateRepairAttempt2-id-0002">
+      <bpmn:outgoing>SequenceFlow-BoundaryToFollowUp2-id-0018</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer48Hour-EvaluateRepair2-id-0002_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT48H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-FollowUpRequest2-id-0002" name="Send: follow-up request">
+      <bpmn:incoming>SequenceFlow-BoundaryToFollowUp2-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FollowUpToEvaluate2-id-0019</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-RateServiceFacility2-id-0002" name="Rate service facility">
+      <bpmn:incoming>SequenceFlow-EvaluateToRate2-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RateToEnd2-id-0021</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-ServiceComplete2-id-0002" name="Service Complete">
+      <bpmn:incoming>SequenceFlow-RateToEnd2-id-0021</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToDescribe-id-0001" sourceRef="StartEvent-ServiceRequestInitiated-id-0001" targetRef="UserTask-DescribeFridgeSymptoms-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DescribeToConfirm-id-0002" sourceRef="UserTask-DescribeFridgeSymptoms-id-0001" targetRef="UserTask-ConfirmFridgeType-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmToRoute-id-0003" sourceRef="UserTask-ConfirmFridgeType-id-0002" targetRef="ServiceTask-RouteToLocalFacility-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RouteToAppointment-id-0004" sourceRef="ServiceTask-RouteToLocalFacility-id-0001" targetRef="ReceiveTask-AppointmentDetails-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToReminder-id-0005" sourceRef="BoundaryEvent-Timer24Hour-Appointment-id-0001" targetRef="SendTask-ReminderNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AppointmentToConfirm-id-0006" sourceRef="ReceiveTask-AppointmentDetails-id-0001" targetRef="UserTask-ConfirmAppointment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmToTechnician-id-0007" sourceRef="UserTask-ConfirmAppointment-id-0001" targetRef="IntermediateCatchEvent-TechnicianArrival-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TechnicianToGateway-id-0008" sourceRef="IntermediateCatchEvent-TechnicianArrival-id-0001" targetRef="ExclusiveGateway-RepairStatus-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToEvaluate1-id-0009" name="fridge_repaired == true" sourceRef="ExclusiveGateway-RepairStatus-id-0001" targetRef="UserTask-EvaluateRepairAttempt-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToFollowUp1-id-0010" sourceRef="BoundaryEvent-Timer48Hour-EvaluateRepair-id-0001" targetRef="SendTask-FollowUpRequest-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FollowUpToEvaluate1-id-0011" sourceRef="SendTask-FollowUpRequest-id-0001" targetRef="UserTask-EvaluateRepairAttempt-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EvaluateToRate1-id-0012" sourceRef="UserTask-EvaluateRepairAttempt-id-0001" targetRef="UserTask-RateServiceFacility-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RateToEnd1-id-0013" sourceRef="UserTask-RateServiceFacility-id-0001" targetRef="EndEvent-ServiceComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToParts-id-0014" name="fridge_repaired == false (needs parts)" sourceRef="ExclusiveGateway-RepairStatus-id-0001" targetRef="SendTask-PartsOrderNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PartsToArrival-id-0015" sourceRef="SendTask-PartsOrderNotification-id-0001" targetRef="IntermediateCatchEvent-PartsArrival-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ArrivalToSchedule-id-0016" sourceRef="IntermediateCatchEvent-PartsArrival-id-0001" targetRef="ServiceTask-ScheduleSecondVisit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ScheduleToEvaluate2-id-0017" sourceRef="ServiceTask-ScheduleSecondVisit-id-0001" targetRef="UserTask-EvaluateRepairAttempt2-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToFollowUp2-id-0018" sourceRef="BoundaryEvent-Timer48Hour-EvaluateRepair2-id-0002" targetRef="SendTask-FollowUpRequest2-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-FollowUpToEvaluate2-id-0019" sourceRef="SendTask-FollowUpRequest2-id-0002" targetRef="UserTask-EvaluateRepairAttempt2-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-EvaluateToRate2-id-0020" sourceRef="UserTask-EvaluateRepairAttempt2-id-0002" targetRef="UserTask-RateServiceFacility2-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-RateToEnd2-id-0021" sourceRef="UserTask-RateServiceFacility2-id-0002" targetRef="EndEvent-ServiceComplete2-id-0002" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_FridgeServiceProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_FridgeServiceProcess-id-0001" bpmnElement="FridgeServiceProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ServiceRequestInitiated-id-0001_di" bpmnElement="StartEvent-ServiceRequestInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-DescribeFridgeSymptoms-id-0001_di" bpmnElement="UserTask-DescribeFridgeSymptoms-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConfirmFridgeType-id-0002_di" bpmnElement="UserTask-ConfirmFridgeType-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RouteToLocalFacility-id-0001_di" bpmnElement="ServiceTask-RouteToLocalFacility-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-AppointmentDetails-id-0001_di" bpmnElement="ReceiveTask-AppointmentDetails-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer24Hour-Appointment-id-0001_di" bpmnElement="BoundaryEvent-Timer24Hour-Appointment-id-0001">
+        <dc:Bounds x="657" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConfirmAppointment-id-0001_di" bpmnElement="UserTask-ConfirmAppointment-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-TechnicianArrival-id-0001_di" bpmnElement="IntermediateCatchEvent-TechnicianArrival-id-0001">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RepairStatus-id-0001_di" bpmnElement="ExclusiveGateway-RepairStatus-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EvaluateRepairAttempt-id-0001_di" bpmnElement="UserTask-EvaluateRepairAttempt-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer48Hour-EvaluateRepair-id-0001_di" bpmnElement="BoundaryEvent-Timer48Hour-EvaluateRepair-id-0001">
+        <dc:Bounds x="1257" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-RateServiceFacility-id-0001_di" bpmnElement="UserTask-RateServiceFacility-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ServiceComplete-id-0001_di" bpmnElement="EndEvent-ServiceComplete-id-0001">
+        <dc:Bounds x="1557" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-FollowUpRequest-id-0001_di" bpmnElement="SendTask-FollowUpRequest-id-0001">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ReminderNotification-id-0001_di" bpmnElement="SendTask-ReminderNotification-id-0001">
+        <dc:Bounds x="775" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-PartsOrderNotification-id-0001_di" bpmnElement="SendTask-PartsOrderNotification-id-0001">
+        <dc:Bounds x="1225" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-PartsArrival-id-0001_di" bpmnElement="IntermediateCatchEvent-PartsArrival-id-0001">
+        <dc:Bounds x="1407" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ScheduleSecondVisit-id-0001_di" bpmnElement="ServiceTask-ScheduleSecondVisit-id-0001">
+        <dc:Bounds x="1525" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EvaluateRepairAttempt2-id-0002_di" bpmnElement="UserTask-EvaluateRepairAttempt2-id-0002">
+        <dc:Bounds x="1675" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer48Hour-EvaluateRepair2-id-0002_di" bpmnElement="BoundaryEvent-Timer48Hour-EvaluateRepair2-id-0002">
+        <dc:Bounds x="1707" y="372" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-RateServiceFacility2-id-0002_di" bpmnElement="UserTask-RateServiceFacility2-id-0002">
+        <dc:Bounds x="1825" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ServiceComplete2-id-0002_di" bpmnElement="EndEvent-ServiceComplete2-id-0002">
+        <dc:Bounds x="2007" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-FollowUpRequest2-id-0002_di" bpmnElement="SendTask-FollowUpRequest2-id-0002">
+        <dc:Bounds x="1825" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToDescribe-id-0001_di" bpmnElement="SequenceFlow-StartToDescribe-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DescribeToConfirm-id-0002_di" bpmnElement="SequenceFlow-DescribeToConfirm-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmToRoute-id-0003_di" bpmnElement="SequenceFlow-ConfirmToRoute-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RouteToAppointment-id-0004_di" bpmnElement="SequenceFlow-RouteToAppointment-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AppointmentToConfirm-id-0006_di" bpmnElement="SequenceFlow-AppointmentToConfirm-id-0006">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToReminder-id-0005_di" bpmnElement="SequenceFlow-BoundaryToReminder-id-0005">
+        <di:waypoint x="675" y="128" />
+        <di:waypoint x="675" y="350" />
+        <di:waypoint x="775" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmToTechnician-id-0007_di" bpmnElement="SequenceFlow-ConfirmToTechnician-id-0007">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TechnicianToGateway-id-0008_di" bpmnElement="SequenceFlow-TechnicianToGateway-id-0008">
+        <di:waypoint x="993" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToEvaluate1-id-0009_di" bpmnElement="SequenceFlow-GatewayToEvaluate1-id-0009">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToParts-id-0014_di" bpmnElement="SequenceFlow-GatewayToParts-id-0014">
+        <di:waypoint x="1125" y="95" />
+        <di:waypoint x="1125" y="350" />
+        <di:waypoint x="1225" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EvaluateToRate1-id-0012_di" bpmnElement="SequenceFlow-EvaluateToRate1-id-0012">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToFollowUp1-id-0010_di" bpmnElement="SequenceFlow-BoundaryToFollowUp1-id-0010">
+        <di:waypoint x="1275" y="128" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RateToEnd1-id-0013_di" bpmnElement="SequenceFlow-RateToEnd1-id-0013">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1557" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FollowUpToEvaluate1-id-0011_di" bpmnElement="SequenceFlow-FollowUpToEvaluate1-id-0011">
+        <di:waypoint x="1425" y="250" />
+        <di:waypoint x="1425" y="280" />
+        <di:waypoint x="1275" y="280" />
+        <di:waypoint x="1275" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PartsToArrival-id-0015_di" bpmnElement="SequenceFlow-PartsToArrival-id-0015">
+        <di:waypoint x="1325" y="350" />
+        <di:waypoint x="1407" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ArrivalToSchedule-id-0016_di" bpmnElement="SequenceFlow-ArrivalToSchedule-id-0016">
+        <di:waypoint x="1443" y="350" />
+        <di:waypoint x="1525" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ScheduleToEvaluate2-id-0017_di" bpmnElement="SequenceFlow-ScheduleToEvaluate2-id-0017">
+        <di:waypoint x="1625" y="350" />
+        <di:waypoint x="1675" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EvaluateToRate2-id-0020_di" bpmnElement="SequenceFlow-EvaluateToRate2-id-0020">
+        <di:waypoint x="1775" y="350" />
+        <di:waypoint x="1825" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToFollowUp2-id-0018_di" bpmnElement="SequenceFlow-BoundaryToFollowUp2-id-0018">
+        <di:waypoint x="1725" y="408" />
+        <di:waypoint x="1725" y="490" />
+        <di:waypoint x="1825" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RateToEnd2-id-0021_di" bpmnElement="SequenceFlow-RateToEnd2-id-0021">
+        <di:waypoint x="1925" y="350" />
+        <di:waypoint x="2007" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FollowUpToEvaluate2-id-0019_di" bpmnElement="SequenceFlow-FollowUpToEvaluate2-id-0019">
+        <di:waypoint x="1875" y="530" />
+        <di:waypoint x="1875" y="560" />
+        <di:waypoint x="1725" y="560" />
+        <di:waypoint x="1725" y="390" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

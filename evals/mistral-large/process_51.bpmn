@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="vacation-request-process-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="VacationRequestProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-VacationRequestSubmitted-id-0001" name="Vacation Request Submitted">
+      <bpmn:outgoing>SequenceFlow-StartToSubmit-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-SubmitVacationRequest-id-0001" name="Submit Vacation Request">
+      <bpmn:incoming>SequenceFlow-StartToSubmit-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SubmitToReview-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-SupervisorReviewsRequest-id-0002" name="Supervisor Reviews Request">
+      <bpmn:incoming>SequenceFlow-SubmitToReview-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToGateway-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ApprovalDecision-id-0001" name="Approval Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewToGateway-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToHRNotification-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToReviewRejection-id-0007</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-HRNotification-id-0001" name="Send: HR Notification">
+      <bpmn:incoming>SequenceFlow-GatewayToHRNotification-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-HRNotificationToHRProcedures-id-0005</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-HRCompletesProcedures-id-0003" name="HR Completes Procedures">
+      <bpmn:incoming>SequenceFlow-HRNotificationToHRProcedures-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-HRProceduresToEnd-id-0006</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ReviewRejectionReasons-id-0004" name="Review Rejection Reasons">
+      <bpmn:incoming>SequenceFlow-GatewayToReviewRejection-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewRejectionToEnd-id-0008</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-RequestProcessed-id-0001" name="Request Processed">
+      <bpmn:incoming>SequenceFlow-HRProceduresToEnd-id-0006</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ReviewRejectionToEnd-id-0008</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSubmit-id-0001" sourceRef="StartEvent-VacationRequestSubmitted-id-0001" targetRef="UserTask-SubmitVacationRequest-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubmitToReview-id-0002" sourceRef="UserTask-SubmitVacationRequest-id-0001" targetRef="UserTask-SupervisorReviewsRequest-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToGateway-id-0003" sourceRef="UserTask-SupervisorReviewsRequest-id-0002" targetRef="ExclusiveGateway-ApprovalDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToHRNotification-id-0004" name="approved == true" sourceRef="ExclusiveGateway-ApprovalDecision-id-0001" targetRef="SendTask-HRNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-HRNotificationToHRProcedures-id-0005" sourceRef="SendTask-HRNotification-id-0001" targetRef="UserTask-HRCompletesProcedures-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-HRProceduresToEnd-id-0006" sourceRef="UserTask-HRCompletesProcedures-id-0003" targetRef="EndEvent-RequestProcessed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToReviewRejection-id-0007" name="approved == false" sourceRef="ExclusiveGateway-ApprovalDecision-id-0001" targetRef="UserTask-ReviewRejectionReasons-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewRejectionToEnd-id-0008" sourceRef="UserTask-ReviewRejectionReasons-id-0004" targetRef="EndEvent-RequestProcessed-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_VacationRequestProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_VacationRequestProcess-id-0001" bpmnElement="VacationRequestProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-VacationRequestSubmitted-id-0001_di" bpmnElement="StartEvent-VacationRequestSubmitted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SubmitVacationRequest-id-0001_di" bpmnElement="UserTask-SubmitVacationRequest-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SupervisorReviewsRequest-id-0002_di" bpmnElement="UserTask-SupervisorReviewsRequest-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ApprovalDecision-id-0001_di" bpmnElement="ExclusiveGateway-ApprovalDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-HRNotification-id-0001_di" bpmnElement="SendTask-HRNotification-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-HRCompletesProcedures-id-0003_di" bpmnElement="UserTask-HRCompletesProcedures-id-0003">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-RequestProcessed-id-0001_di" bpmnElement="EndEvent-RequestProcessed-id-0001">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewRejectionReasons-id-0004_di" bpmnElement="UserTask-ReviewRejectionReasons-id-0004">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSubmit-id-0001_di" bpmnElement="SequenceFlow-StartToSubmit-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubmitToReview-id-0002_di" bpmnElement="SequenceFlow-SubmitToReview-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToGateway-id-0003_di" bpmnElement="SequenceFlow-ReviewToGateway-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToHRNotification-id-0004_di" bpmnElement="SequenceFlow-GatewayToHRNotification-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToReviewRejection-id-0007_di" bpmnElement="SequenceFlow-GatewayToReviewRejection-id-0007">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HRNotificationToHRProcedures-id-0005_di" bpmnElement="SequenceFlow-HRNotificationToHRProcedures-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HRProceduresToEnd-id-0006_di" bpmnElement="SequenceFlow-HRProceduresToEnd-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewRejectionToEnd-id-0008_di" bpmnElement="SequenceFlow-ReviewRejectionToEnd-id-0008">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="975" y="88" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

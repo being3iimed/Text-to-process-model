@@ -1,0 +1,329 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "InternshipProcessDefinitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "InternshipProcess",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-InternshipApplicationStarted-id-0001",
+          "name": "Internship Application Started"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SubmitInternshipPreferences-id-0001",
+          "name": "Submit Internship Preferences"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateInternshipOffers-id-0001",
+          "name": "Generate Internship Offers"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-OfferReceived-id-0001",
+          "name": "Offer Received?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ReviewOffer-id-0001",
+          "name": "Review Offer"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-UserDecision-id-0001",
+          "name": "User Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-AcceptOffer-id-0001",
+          "name": "Accept Offer"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-InvalidateOtherOffers-id-0001",
+          "name": "Invalidate Other Offers"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-PostAcceptanceSplit-id-0001",
+          "name": "Post-Acceptance Split",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-StatusUpdateCycle-id-0001",
+          "name": "Status Update Cycle",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-StatusUpdatesBegin-id-0001",
+              "name": "Status Updates Begin"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-WriteWeeklyStatusUpdate-id-0001",
+              "name": "Write Weekly Status Update"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-GenerateCompanyStatusUpdate-id-0001",
+              "name": "Generate Company Status Update"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-StoreUpdates-id-0001",
+              "name": "Store Updates"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-AllUpdatesComplete-id-0001",
+              "name": "All Updates Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StartToWrite-id-0001",
+              "sourceRef": "StartEvent-StatusUpdatesBegin-id-0001",
+              "targetRef": "UserTask-WriteWeeklyStatusUpdate-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-WriteToGenerate-id-0002",
+              "sourceRef": "UserTask-WriteWeeklyStatusUpdate-id-0001",
+              "targetRef": "ServiceTask-GenerateCompanyStatusUpdate-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GenerateToStore-id-0003",
+              "sourceRef": "ServiceTask-GenerateCompanyStatusUpdate-id-0001",
+              "targetRef": "ServiceTask-StoreUpdates-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StoreToEnd-id-0004",
+              "sourceRef": "ServiceTask-StoreUpdates-id-0001",
+              "targetRef": "EndEvent-AllUpdatesComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:IntermediateCatchEvent",
+          "id": "IntermediateCatchEvent-InternshipTimer-id-0001",
+          "name": "30-Day Internship Timer",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "P30D"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-InternshipAutoCompleted-id-0001",
+          "name": "Internship Auto-Completed"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-PostAcceptanceJoin-id-0001",
+          "name": "Post-Acceptance Join",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SelectFriendsToRecommend-id-0001",
+          "name": "Select Friends to Recommend"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendRecommendationTweets-id-0001",
+          "name": "Send: Recommendation Tweets"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-RecommendationsSent-id-0001",
+          "name": "Recommendations Sent"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-InternshipCompleted-id-0001",
+          "name": "Internship Completed"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-LogRejection-id-0001",
+          "name": "Log Rejection"
+        },
+        {
+          "$type": "bpmn:IntermediateCatchEvent",
+          "id": "IntermediateCatchEvent-WaitForOffers-id-0001",
+          "name": "Wait for Offers",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "P7D"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:IntermediateCatchEvent",
+          "id": "IntermediateCatchEvent-WaitForNextOffer-id-0001",
+          "name": "Wait for Next Offer",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "P7D"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToSubmit-id-0001",
+          "sourceRef": "StartEvent-InternshipApplicationStarted-id-0001",
+          "targetRef": "UserTask-SubmitInternshipPreferences-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SubmitToGenerate-id-0002",
+          "sourceRef": "UserTask-SubmitInternshipPreferences-id-0001",
+          "targetRef": "ServiceTask-GenerateInternshipOffers-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GenerateToOfferReceived-id-0003",
+          "sourceRef": "ServiceTask-GenerateInternshipOffers-id-0001",
+          "targetRef": "ExclusiveGateway-OfferReceived-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OfferReceivedToReview-id-0004",
+          "name": "offer_received == true",
+          "sourceRef": "ExclusiveGateway-OfferReceived-id-0001",
+          "targetRef": "UserTask-ReviewOffer-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OfferReceivedToWait-id-0005",
+          "name": "no_offers_yet",
+          "sourceRef": "ExclusiveGateway-OfferReceived-id-0001",
+          "targetRef": "IntermediateCatchEvent-WaitForOffers-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReviewToUserDecision-id-0006",
+          "sourceRef": "UserTask-ReviewOffer-id-0001",
+          "targetRef": "ExclusiveGateway-UserDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-UserDecisionToAccept-id-0007",
+          "name": "user_accepts",
+          "sourceRef": "ExclusiveGateway-UserDecision-id-0001",
+          "targetRef": "UserTask-AcceptOffer-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-UserDecisionToReject-id-0008",
+          "name": "user_rejects",
+          "sourceRef": "ExclusiveGateway-UserDecision-id-0001",
+          "targetRef": "ServiceTask-LogRejection-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AcceptToInvalidate-id-0009",
+          "sourceRef": "UserTask-AcceptOffer-id-0001",
+          "targetRef": "ServiceTask-InvalidateOtherOffers-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InvalidateToSplit-id-0010",
+          "sourceRef": "ServiceTask-InvalidateOtherOffers-id-0001",
+          "targetRef": "ParallelGateway-PostAcceptanceSplit-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToStatusUpdates-id-0011",
+          "sourceRef": "ParallelGateway-PostAcceptanceSplit-id-0001",
+          "targetRef": "SubProcess-StatusUpdateCycle-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToTimer-id-0012",
+          "sourceRef": "ParallelGateway-PostAcceptanceSplit-id-0001",
+          "targetRef": "IntermediateCatchEvent-InternshipTimer-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StatusUpdatesToJoin-id-0013",
+          "sourceRef": "SubProcess-StatusUpdateCycle-id-0001",
+          "targetRef": "ParallelGateway-PostAcceptanceJoin-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TimerToAutoComplete-id-0014",
+          "sourceRef": "IntermediateCatchEvent-InternshipTimer-id-0001",
+          "targetRef": "EndEvent-InternshipAutoCompleted-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TimerToJoin-id-0015",
+          "sourceRef": "IntermediateCatchEvent-InternshipTimer-id-0001",
+          "targetRef": "ParallelGateway-PostAcceptanceJoin-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinToRecommendations-id-0016",
+          "sourceRef": "ParallelGateway-PostAcceptanceJoin-id-0001",
+          "targetRef": "UserTask-SelectFriendsToRecommend-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RecommendationsToSend-id-0017",
+          "sourceRef": "UserTask-SelectFriendsToRecommend-id-0001",
+          "targetRef": "SendTask-SendRecommendationTweets-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendToRecommendationsEnd-id-0018",
+          "sourceRef": "SendTask-SendRecommendationTweets-id-0001",
+          "targetRef": "EndEvent-RecommendationsSent-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinToInternshipComplete-id-0019",
+          "sourceRef": "ParallelGateway-PostAcceptanceJoin-id-0001",
+          "targetRef": "EndEvent-InternshipCompleted-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LogRejectionToWait-id-0020",
+          "sourceRef": "ServiceTask-LogRejection-id-0001",
+          "targetRef": "IntermediateCatchEvent-WaitForNextOffer-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-WaitForOffersToGenerate-id-0021",
+          "sourceRef": "IntermediateCatchEvent-WaitForOffers-id-0001",
+          "targetRef": "ServiceTask-GenerateInternshipOffers-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-WaitForNextOfferToGenerate-id-0022",
+          "sourceRef": "IntermediateCatchEvent-WaitForNextOffer-id-0001",
+          "targetRef": "ServiceTask-GenerateInternshipOffers-id-0001"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,376 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "USI-Course-Registration-Definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler (https://bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "USI-Course-Registration-Process",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-NewApplicationStarted-id-0001",
+          "name": "New Application Started",
+          "outgoing": [
+            "SequenceFlow-StartToSelectCourse-id-0001"
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SelectDesiredCourse-id-0001",
+          "name": "Select Desired Course",
+          "incoming": [
+            "SequenceFlow-StartToSelectCourse-id-0001"
+          ],
+          "outgoing": [
+            "SequenceFlow-SelectToSlotsCheck-id-0002"
+          ]
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-SlotsAvailable-id-0001",
+          "name": "Slots Available?",
+          "gatewayDirection": "Diverging",
+          "incoming": [
+            "SequenceFlow-SelectToSlotsCheck-id-0002"
+          ],
+          "outgoing": [
+            "SequenceFlow-SlotsYesToShowCourses-id-0003",
+            "SequenceFlow-SlotsNoToEnd-id-0004"
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-SystemShowsCourses-id-0001",
+          "name": "System Shows Available Courses/Dates",
+          "incoming": [
+            "SequenceFlow-SlotsYesToShowCourses-id-0003"
+          ],
+          "outgoing": [
+            "SequenceFlow-ShowToSelectInstance-id-0005"
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SelectCourseInstance-id-0001",
+          "name": "Select Course Instance",
+          "incoming": [
+            "SequenceFlow-ShowToSelectInstance-id-0005"
+          ],
+          "outgoing": [
+            "SequenceFlow-SelectInstanceToAccountCheck-id-0006"
+          ]
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-NoSlotsAvailable-id-0001",
+          "name": "Registration Closed (No Slots)",
+          "incoming": [
+            "SequenceFlow-SlotsNoToEnd-id-0004"
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CheckExistingAccount-id-0001",
+          "name": "Check for Existing Account",
+          "incoming": [
+            "SequenceFlow-SelectInstanceToAccountCheck-id-0006"
+          ],
+          "outgoing": [
+            "SequenceFlow-AccountCheckToGateway-id-0007"
+          ]
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-AccountExists-id-0001",
+          "name": "Account Exists?",
+          "gatewayDirection": "Diverging",
+          "incoming": [
+            "SequenceFlow-AccountCheckToGateway-id-0007"
+          ],
+          "outgoing": [
+            "SequenceFlow-AccountYesToLogin-id-0008",
+            "SequenceFlow-AccountNoToEligibilityCheck-id-0009"
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-LogIntoAccount-id-0001",
+          "name": "Log into Account",
+          "incoming": [
+            "SequenceFlow-AccountYesToLogin-id-0008",
+            "SequenceFlow-ActivationToLogin-id-0015",
+            "SequenceFlow-RegisterToLogin-id-0013"
+          ],
+          "outgoing": [
+            "SequenceFlow-LoginToTweetGateway-id-0016"
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CheckEligibleUniversity-id-0001",
+          "name": "Check Eligible University Registration",
+          "incoming": [
+            "SequenceFlow-AccountNoToEligibilityCheck-id-0009"
+          ],
+          "outgoing": [
+            "SequenceFlow-EligibilityToGateway-id-0010"
+          ]
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-EligibleUniversity-id-0001",
+          "name": "Eligible University?",
+          "gatewayDirection": "Diverging",
+          "incoming": [
+            "SequenceFlow-EligibilityToGateway-id-0010"
+          ],
+          "outgoing": [
+            "SequenceFlow-EligibleYesToRegister-id-0011",
+            "SequenceFlow-EligibleNoToActivation-id-0012"
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-RegisterNewAccount-id-0001",
+          "name": "Register New Account",
+          "incoming": [
+            "SequenceFlow-EligibleYesToRegister-id-0011"
+          ],
+          "outgoing": [
+            "SequenceFlow-RegisterToLogin-id-0013"
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-RequestActivation-id-0001",
+          "name": "Send: Activation Request",
+          "incoming": [
+            "SequenceFlow-EligibleNoToActivation-id-0012"
+          ],
+          "outgoing": [
+            "SequenceFlow-ActivationToReceive-id-0014"
+          ]
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-WaitForActivation-id-0001",
+          "name": "Receive: Activation Response",
+          "incoming": [
+            "SequenceFlow-ActivationToReceive-id-0014"
+          ],
+          "outgoing": [
+            "SequenceFlow-ActivationToLogin-id-0015"
+          ]
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-TweetOption-id-0001",
+          "name": "Share on Twitter?",
+          "gatewayDirection": "Diverging",
+          "incoming": [
+            "SequenceFlow-LoginToTweetGateway-id-0016"
+          ],
+          "outgoing": [
+            "SequenceFlow-TweetYesToSend-id-0017",
+            "SequenceFlow-TweetNoToRegistration-id-0018"
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-TweetToFriends-id-0001",
+          "name": "Send: Tweet to Friends",
+          "incoming": [
+            "SequenceFlow-TweetYesToSend-id-0017"
+          ],
+          "outgoing": [
+            "SequenceFlow-TweetToRegistration-id-0019"
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CompleteRegistration-id-0001",
+          "name": "Complete Course Registration",
+          "incoming": [
+            "SequenceFlow-TweetNoToRegistration-id-0018",
+            "SequenceFlow-TweetToRegistration-id-0019"
+          ],
+          "outgoing": [
+            "SequenceFlow-RegistrationToPayment-id-0020"
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProcessPayment-id-0001",
+          "name": "Process Payment Information",
+          "incoming": [
+            "SequenceFlow-RegistrationToPayment-id-0020"
+          ],
+          "outgoing": [
+            "SequenceFlow-PaymentToEnd-id-0021"
+          ]
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-CourseTicketIssued-id-0001",
+          "name": "Course Ticket Issued",
+          "incoming": [
+            "SequenceFlow-PaymentToEnd-id-0021"
+          ]
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToSelectCourse-id-0001",
+          "sourceRef": "StartEvent-NewApplicationStarted-id-0001",
+          "targetRef": "UserTask-SelectDesiredCourse-id-0001",
+          "name": ""
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SelectToSlotsCheck-id-0002",
+          "sourceRef": "UserTask-SelectDesiredCourse-id-0001",
+          "targetRef": "ExclusiveGateway-SlotsAvailable-id-0001",
+          "name": ""
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SlotsYesToShowCourses-id-0003",
+          "sourceRef": "ExclusiveGateway-SlotsAvailable-id-0001",
+          "targetRef": "ServiceTask-SystemShowsCourses-id-0001",
+          "name": "slots_available = true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SlotsNoToEnd-id-0004",
+          "sourceRef": "ExclusiveGateway-SlotsAvailable-id-0001",
+          "targetRef": "EndEvent-NoSlotsAvailable-id-0001",
+          "name": "slots_available = false",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ShowToSelectInstance-id-0005",
+          "sourceRef": "ServiceTask-SystemShowsCourses-id-0001",
+          "targetRef": "UserTask-SelectCourseInstance-id-0001",
+          "name": ""
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SelectInstanceToAccountCheck-id-0006",
+          "sourceRef": "UserTask-SelectCourseInstance-id-0001",
+          "targetRef": "ServiceTask-CheckExistingAccount-id-0001",
+          "name": ""
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AccountCheckToGateway-id-0007",
+          "sourceRef": "ServiceTask-CheckExistingAccount-id-0001",
+          "targetRef": "ExclusiveGateway-AccountExists-id-0001",
+          "name": ""
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AccountYesToLogin-id-0008",
+          "sourceRef": "ExclusiveGateway-AccountExists-id-0001",
+          "targetRef": "UserTask-LogIntoAccount-id-0001",
+          "name": "account_exists = true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AccountNoToEligibilityCheck-id-0009",
+          "sourceRef": "ExclusiveGateway-AccountExists-id-0001",
+          "targetRef": "ServiceTask-CheckEligibleUniversity-id-0001",
+          "name": "account_exists = false"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-EligibilityToGateway-id-0010",
+          "sourceRef": "ServiceTask-CheckEligibleUniversity-id-0001",
+          "targetRef": "ExclusiveGateway-EligibleUniversity-id-0001",
+          "name": ""
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-EligibleYesToRegister-id-0011",
+          "sourceRef": "ExclusiveGateway-EligibleUniversity-id-0001",
+          "targetRef": "UserTask-RegisterNewAccount-id-0001",
+          "name": "eligible_university = true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-EligibleNoToActivation-id-0012",
+          "sourceRef": "ExclusiveGateway-EligibleUniversity-id-0001",
+          "targetRef": "SendTask-RequestActivation-id-0001",
+          "name": "eligible_university = false"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RegisterToLogin-id-0013",
+          "sourceRef": "UserTask-RegisterNewAccount-id-0001",
+          "targetRef": "UserTask-LogIntoAccount-id-0001",
+          "name": ""
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ActivationToReceive-id-0014",
+          "sourceRef": "SendTask-RequestActivation-id-0001",
+          "targetRef": "ReceiveTask-WaitForActivation-id-0001",
+          "name": ""
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ActivationToLogin-id-0015",
+          "sourceRef": "ReceiveTask-WaitForActivation-id-0001",
+          "targetRef": "UserTask-LogIntoAccount-id-0001",
+          "name": ""
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LoginToTweetGateway-id-0016",
+          "sourceRef": "UserTask-LogIntoAccount-id-0001",
+          "targetRef": "ExclusiveGateway-TweetOption-id-0001",
+          "name": ""
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TweetYesToSend-id-0017",
+          "sourceRef": "ExclusiveGateway-TweetOption-id-0001",
+          "targetRef": "SendTask-TweetToFriends-id-0001",
+          "name": "share_on_twitter = true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TweetNoToRegistration-id-0018",
+          "sourceRef": "ExclusiveGateway-TweetOption-id-0001",
+          "targetRef": "UserTask-CompleteRegistration-id-0001",
+          "name": "share_on_twitter = false",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TweetToRegistration-id-0019",
+          "sourceRef": "SendTask-TweetToFriends-id-0001",
+          "targetRef": "UserTask-CompleteRegistration-id-0001",
+          "name": ""
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RegistrationToPayment-id-0020",
+          "sourceRef": "UserTask-CompleteRegistration-id-0001",
+          "targetRef": "ServiceTask-ProcessPayment-id-0001",
+          "name": ""
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PaymentToEnd-id-0021",
+          "sourceRef": "ServiceTask-ProcessPayment-id-0001",
+          "targetRef": "EndEvent-CourseTicketIssued-id-0001",
+          "name": ""
+        }
+      ]
+    }
+  ]
+}

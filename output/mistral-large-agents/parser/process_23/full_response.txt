@@ -1,0 +1,93 @@
+```
+<summary_of_elements>
+
+TASKS:
+- serviceTask("Send scoring request to agency") - Initiates communication with credit agency
+- receiveTask("Receive: level 1 scoring result") - Waits for immediate response (seconds)
+- receiveTask("Receive: level 2 scoring delay notification") - Handles delayed response case
+- receiveTask("Receive: level 2 scoring result") - Waits for final result (minutes)
+- sendTask("Send: display level 1 result to clerk") - Presents immediate result
+- sendTask("Send: display delay notification to clerk") - Informs clerk to check later
+- sendTask("Send: display level 2 result to clerk") - Presents final result
+
+GATEWAYS:
+- XOR after initial request with 2 conditions:
+  1. Immediate result available (level 1)
+  2. Delayed processing required (level 2)
+
+EVENTS:
+- messageStartEvent("CreditScoringRequested") - Triggered by clerk's frontend action
+- endEvent("ScoringResultDisplayed") - Process completes when result shown
+
+BOUNDARY EVENTS:
+- None (no explicit SLA requirements or error scenarios mentioned)
+
+SUBPROCESSES:
+- None (all tasks are linear/sequential with single decision point)
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+messageStartEvent("CreditScoringRequested")
+    serviceTask("Send scoring request to agency")
+
+    if (immediate_result_available):
+        receiveTask("Receive: level 1 scoring result")
+        sendTask("Send: display level 1 result to clerk")
+        endEvent("ScoringResultDisplayed")
+
+    else:  # delayed_processing_required
+        receiveTask("Receive: level 2 scoring delay notification")
+        sendTask("Send: display delay notification to clerk")
+        receiveTask("Receive: level 2 scoring result")
+        sendTask("Send: display level 2 result to clerk")
+        endEvent("ScoringResultDisplayed")
+
+</bpmn_pseudocode>
+
+<compliance_validation>
+
+1. TIMER EVENTS:
+   - No timer events used (compliant)
+
+2. GATEWAYS:
+   - Single XOR gateway with 2 mutually exclusive conditions
+   - No convergence needed (paths terminate independently)
+   - Conditions exhaustive (covers all cases)
+
+3. SEQUENCE FLOWS:
+   - All conditional flows have descriptive labels
+   - No empty string labels
+   - Default flow not needed (binary decision)
+
+4. BOUNDARY EVENTS:
+   - None added (no SLA/error scenarios mentioned)
+
+5. SUBPROCESSES:
+   - None created (linear flow with single decision)
+
+6. FLOW PATHS:
+   - All paths traceable start-to-end
+   - No orphaned flows
+   - Each receiveTask has corresponding sendTask
+
+7. MESSAGE FLOW:
+   - All receiveTasks have clear senders (agency)
+   - All sendTasks have clear receivers (clerk frontend)
+
+</compliance_validation>
+
+<critical_success_verification>
+
+✅ NO invalid BPMN properties
+✅ NO unreachable elements
+✅ NO missing convergence points (explicit endEvents)
+✅ NO orphaned flows
+✅ NO speculative boundary events
+✅ NO unjustified subprocesses
+✅ All labels present and descriptive
+✅ Balanced design (100% core elements)
+
+</critical_success_verification>
+```

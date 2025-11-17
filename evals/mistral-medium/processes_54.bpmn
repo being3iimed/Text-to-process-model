@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="transaction-data-request-process" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="TransactionDataRequestProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-TransactionRequestReceived-id-0001" name="Transaction Data Request Received">
+      <bpmn:outgoing>SequenceFlow-StartToRequest-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sendTask id="SendTask-RequestToIP-id-0001" name="Send: transaction data request to IP">
+      <bpmn:incoming>SequenceFlow-StartToRequest-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RequestToCheck-id-0002</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-CheckRequest-id-0001" name="Check transaction request">
+      <bpmn:incoming>SequenceFlow-RequestToCheck-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckToGateway-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-RequestValid-id-0001" name="Request Valid?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CheckToGateway-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToData-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToRejection-id-0006</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-DataToINQ-id-0001" name="Send: transaction data to INQ">
+      <bpmn:incoming>SequenceFlow-GatewayToData-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DataToEnd-id-0005</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-DataSent-id-0001" name="Transaction Data Sent">
+      <bpmn:incoming>SequenceFlow-DataToEnd-id-0005</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="SendTask-RejectionToINQ-id-0001" name="Send: rejection notice to INQ">
+      <bpmn:incoming>SequenceFlow-GatewayToRejection-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RejectionToEnd-id-0007</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-RejectionSent-id-0002" name="Rejection Notice Sent">
+      <bpmn:incoming>SequenceFlow-RejectionToEnd-id-0007</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToRequest-id-0001" sourceRef="StartEvent-TransactionRequestReceived-id-0001" targetRef="SendTask-RequestToIP-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RequestToCheck-id-0002" sourceRef="SendTask-RequestToIP-id-0001" targetRef="ServiceTask-CheckRequest-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckToGateway-id-0003" sourceRef="ServiceTask-CheckRequest-id-0001" targetRef="ExclusiveGateway-RequestValid-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToData-id-0004" name="request_valid" sourceRef="ExclusiveGateway-RequestValid-id-0001" targetRef="SendTask-DataToINQ-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DataToEnd-id-0005" sourceRef="SendTask-DataToINQ-id-0001" targetRef="EndEvent-DataSent-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToRejection-id-0006" sourceRef="ExclusiveGateway-RequestValid-id-0001" targetRef="SendTask-RejectionToINQ-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RejectionToEnd-id-0007" sourceRef="SendTask-RejectionToINQ-id-0001" targetRef="EndEvent-RejectionSent-id-0002" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_TransactionDataRequestProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_TransactionDataRequestProcess" bpmnElement="TransactionDataRequestProcess">
+      <bpmndi:BPMNShape id="StartEvent-TransactionRequestReceived-id-0001_di" bpmnElement="StartEvent-TransactionRequestReceived-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RequestToIP-id-0001_di" bpmnElement="SendTask-RequestToIP-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckRequest-id-0001_di" bpmnElement="ServiceTask-CheckRequest-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RequestValid-id-0001_di" bpmnElement="ExclusiveGateway-RequestValid-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-DataToINQ-id-0001_di" bpmnElement="SendTask-DataToINQ-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-DataSent-id-0001_di" bpmnElement="EndEvent-DataSent-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RejectionToINQ-id-0001_di" bpmnElement="SendTask-RejectionToINQ-id-0001">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-RejectionSent-id-0002_di" bpmnElement="EndEvent-RejectionSent-id-0002">
+        <dc:Bounds x="807" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToRequest-id-0001_di" bpmnElement="SequenceFlow-StartToRequest-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RequestToCheck-id-0002_di" bpmnElement="SequenceFlow-RequestToCheck-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckToGateway-id-0003_di" bpmnElement="SequenceFlow-CheckToGateway-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToData-id-0004_di" bpmnElement="SequenceFlow-GatewayToData-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToRejection-id-0006_di" bpmnElement="SequenceFlow-GatewayToRejection-id-0006">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DataToEnd-id-0005_di" bpmnElement="SequenceFlow-DataToEnd-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RejectionToEnd-id-0007_di" bpmnElement="SequenceFlow-RejectionToEnd-id-0007">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="807" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

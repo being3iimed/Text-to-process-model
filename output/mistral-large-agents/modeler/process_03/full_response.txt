@@ -1,0 +1,133 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "Definitions_InventoryMonitoringProcess",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process_InventoryMonitoring",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-InventoryMonitoringInitiated-id-0001",
+          "name": "Inventory Monitoring Initiated"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-MonitorInventoryLevels-id-0001",
+          "name": "Monitor Inventory Levels"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-StockLevelCheck-id-0001",
+          "name": "Stock Level Check",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateReorderAlert-id-0002",
+          "name": "Generate Reorder Alert"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ProcurementTeamPlacesOrder-id-0001",
+          "name": "Procurement Team Places Order"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-UpdateInventorySystemWithExpectedDelivery-id-0003",
+          "name": "Update Inventory System with Expected Delivery"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-InspectReceivedStock-id-0002",
+          "name": "Inspect Received Stock"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-RecordStockInSystem-id-0004",
+          "name": "Record Stock in System"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-PlaceStockOnShelvesStorage-id-0005",
+          "name": "Place Stock on Shelves/Storage"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-InventoryUpdatedAfterRestock-id-0001",
+          "name": "Inventory Updated After Restock"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToMonitor-id-0001",
+          "sourceRef": "StartEvent-InventoryMonitoringInitiated-id-0001",
+          "targetRef": "ServiceTask-MonitorInventoryLevels-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MonitorToGateway-id-0002",
+          "sourceRef": "ServiceTask-MonitorInventoryLevels-id-0001",
+          "targetRef": "ExclusiveGateway-StockLevelCheck-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToReorderAlert-id-0003",
+          "name": "stock <= threshold",
+          "sourceRef": "ExclusiveGateway-StockLevelCheck-id-0001",
+          "targetRef": "ServiceTask-GenerateReorderAlert-id-0002",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReorderAlertToOrder-id-0004",
+          "sourceRef": "ServiceTask-GenerateReorderAlert-id-0002",
+          "targetRef": "UserTask-ProcurementTeamPlacesOrder-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OrderToUpdateSystem-id-0005",
+          "sourceRef": "UserTask-ProcurementTeamPlacesOrder-id-0001",
+          "targetRef": "ServiceTask-UpdateInventorySystemWithExpectedDelivery-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-UpdateSystemToInspect-id-0006",
+          "sourceRef": "ServiceTask-UpdateInventorySystemWithExpectedDelivery-id-0003",
+          "targetRef": "UserTask-InspectReceivedStock-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InspectToRecord-id-0007",
+          "sourceRef": "UserTask-InspectReceivedStock-id-0002",
+          "targetRef": "ServiceTask-RecordStockInSystem-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RecordToPlaceStock-id-0008",
+          "sourceRef": "ServiceTask-RecordStockInSystem-id-0004",
+          "targetRef": "ServiceTask-PlaceStockOnShelvesStorage-id-0005"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PlaceStockToEnd-id-0009",
+          "sourceRef": "ServiceTask-PlaceStockOnShelvesStorage-id-0005",
+          "targetRef": "EndEvent-InventoryUpdatedAfterRestock-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayLoopBack-id-0010",
+          "name": "",
+          "sourceRef": "ExclusiveGateway-StockLevelCheck-id-0001",
+          "targetRef": "ServiceTask-MonitorInventoryLevels-id-0001",
+          "isDefault": true
+        }
+      ]
+    }
+  ]
+}
+```

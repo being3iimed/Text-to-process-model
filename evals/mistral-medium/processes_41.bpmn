@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_EnergyDrinkBottlingInspection" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="2.0.0">
+  <bpmn:process id="Process_EnergyDrinkBottlingInspection" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-InspectionStarted-id-0001" name="Inspection Started">
+      <bpmn:outgoing>SequenceFlow-StartToEnterMachineType-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-EnterMachineType-id-0001" name="Enter Machine Type">
+      <bpmn:incoming>SequenceFlow-StartToEnterMachineType-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EnterMachineTypeToEnterSerialNumber-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-EnterSerialNumber-id-0002" name="Enter Serial Number">
+      <bpmn:incoming>SequenceFlow-EnterMachineTypeToEnterSerialNumber-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EnterSerialNumberToAnswerQuestions-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-AnswerInspectionQuestions-id-0003" name="Answer Inspection Questions">
+      <bpmn:incoming>SequenceFlow-EnterSerialNumberToAnswerQuestions-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AnswerQuestionsToCollectValues-id-0004</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-CollectAutomaticValues-id-0001" name="Collect Automatic Values">
+      <bpmn:incoming>SequenceFlow-AnswerQuestionsToCollectValues-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CollectValuesToCheckValues-id-0005</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-CheckAutomaticValues-id-0001" name="Check Automatic Values" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CollectValuesToCheckValues-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckValuesToCheckAnswers-id-0006</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-CheckValuesToFailed-id-0007</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-CheckQuestionAnswers-id-0001" name="Check Question Answers" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CheckValuesToCheckAnswers-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckAnswersToValidate-id-0008</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-CheckAnswersToAdditionalQuestions-id-0009</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-ValidateAllInputs-id-0001" name="Validate All Inputs">
+      <bpmn:incoming>SequenceFlow-CheckAnswersToValidate-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidateToMerge-id-0011</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-AnswerAdditionalQuestions-id-0001" name="Answer Additional Questions">
+      <bpmn:incoming>SequenceFlow-CheckAnswersToAdditionalQuestions-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AdditionalQuestionsToValidate-id-0010</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ValidateAllInputs-id-0002" name="Validate All Inputs">
+      <bpmn:incoming>SequenceFlow-AdditionalQuestionsToValidate-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidateToMerge-id-0012</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-InspectionComplete-id-0001" name="Inspection Complete">
+      <bpmn:incoming>SequenceFlow-MergeToComplete-id-0013</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-InspectionFailed-id-0002" name="Inspection Failed">
+      <bpmn:incoming>SequenceFlow-CheckValuesToFailed-id-0007</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-MergeQuestionAnswers-id-0001" name="Merge Question Answers" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-ValidateToMerge-id-0011</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ValidateToMerge-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MergeToComplete-id-0013</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToEnterMachineType-id-0001" sourceRef="StartEvent-InspectionStarted-id-0001" targetRef="UserTask-EnterMachineType-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EnterMachineTypeToEnterSerialNumber-id-0002" sourceRef="UserTask-EnterMachineType-id-0001" targetRef="UserTask-EnterSerialNumber-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-EnterSerialNumberToAnswerQuestions-id-0003" sourceRef="UserTask-EnterSerialNumber-id-0002" targetRef="UserTask-AnswerInspectionQuestions-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-AnswerQuestionsToCollectValues-id-0004" sourceRef="UserTask-AnswerInspectionQuestions-id-0003" targetRef="ServiceTask-CollectAutomaticValues-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CollectValuesToCheckValues-id-0005" sourceRef="ServiceTask-CollectAutomaticValues-id-0001" targetRef="ExclusiveGateway-CheckAutomaticValues-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckValuesToCheckAnswers-id-0006" name="values_within_spec" sourceRef="ExclusiveGateway-CheckAutomaticValues-id-0001" targetRef="ExclusiveGateway-CheckQuestionAnswers-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckValuesToFailed-id-0007" name="values_out_of_spec" sourceRef="ExclusiveGateway-CheckAutomaticValues-id-0001" targetRef="EndEvent-InspectionFailed-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckAnswersToValidate-id-0008" name="answers_acceptable" sourceRef="ExclusiveGateway-CheckQuestionAnswers-id-0001" targetRef="ServiceTask-ValidateAllInputs-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckAnswersToAdditionalQuestions-id-0009" name="answers_require_followup" sourceRef="ExclusiveGateway-CheckQuestionAnswers-id-0001" targetRef="UserTask-AnswerAdditionalQuestions-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AdditionalQuestionsToValidate-id-0010" sourceRef="UserTask-AnswerAdditionalQuestions-id-0001" targetRef="ServiceTask-ValidateAllInputs-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidateToMerge-id-0011" sourceRef="ServiceTask-ValidateAllInputs-id-0001" targetRef="ExclusiveGateway-MergeQuestionAnswers-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidateToMerge-id-0012" sourceRef="ServiceTask-ValidateAllInputs-id-0002" targetRef="ExclusiveGateway-MergeQuestionAnswers-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MergeToComplete-id-0013" sourceRef="ExclusiveGateway-MergeQuestionAnswers-id-0001" targetRef="EndEvent-InspectionComplete-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process_EnergyDrinkBottlingInspection">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process_EnergyDrinkBottlingInspection" bpmnElement="Process_EnergyDrinkBottlingInspection">
+      <bpmndi:BPMNShape id="StartEvent-InspectionStarted-id-0001_di" bpmnElement="StartEvent-InspectionStarted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterMachineType-id-0001_di" bpmnElement="UserTask-EnterMachineType-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterSerialNumber-id-0002_di" bpmnElement="UserTask-EnterSerialNumber-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AnswerInspectionQuestions-id-0003_di" bpmnElement="UserTask-AnswerInspectionQuestions-id-0003">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CollectAutomaticValues-id-0001_di" bpmnElement="ServiceTask-CollectAutomaticValues-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CheckAutomaticValues-id-0001_di" bpmnElement="ExclusiveGateway-CheckAutomaticValues-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CheckQuestionAnswers-id-0001_di" bpmnElement="ExclusiveGateway-CheckQuestionAnswers-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ValidateAllInputs-id-0001_di" bpmnElement="ServiceTask-ValidateAllInputs-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-MergeQuestionAnswers-id-0001_di" bpmnElement="ExclusiveGateway-MergeQuestionAnswers-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-InspectionComplete-id-0001_di" bpmnElement="EndEvent-InspectionComplete-id-0001">
+        <dc:Bounds x="1557" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-InspectionFailed-id-0002_di" bpmnElement="EndEvent-InspectionFailed-id-0002">
+        <dc:Bounds x="957" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AnswerAdditionalQuestions-id-0001_di" bpmnElement="UserTask-AnswerAdditionalQuestions-id-0001">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ValidateAllInputs-id-0002_di" bpmnElement="ServiceTask-ValidateAllInputs-id-0002">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToEnterMachineType-id-0001_di" bpmnElement="SequenceFlow-StartToEnterMachineType-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EnterMachineTypeToEnterSerialNumber-id-0002_di" bpmnElement="SequenceFlow-EnterMachineTypeToEnterSerialNumber-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EnterSerialNumberToAnswerQuestions-id-0003_di" bpmnElement="SequenceFlow-EnterSerialNumberToAnswerQuestions-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AnswerQuestionsToCollectValues-id-0004_di" bpmnElement="SequenceFlow-AnswerQuestionsToCollectValues-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CollectValuesToCheckValues-id-0005_di" bpmnElement="SequenceFlow-CollectValuesToCheckValues-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckValuesToCheckAnswers-id-0006_di" bpmnElement="SequenceFlow-CheckValuesToCheckAnswers-id-0006">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckValuesToFailed-id-0007_di" bpmnElement="SequenceFlow-CheckValuesToFailed-id-0007">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="957" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckAnswersToValidate-id-0008_di" bpmnElement="SequenceFlow-CheckAnswersToValidate-id-0008">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckAnswersToAdditionalQuestions-id-0009_di" bpmnElement="SequenceFlow-CheckAnswersToAdditionalQuestions-id-0009">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1050" y="70" />
+        <di:waypoint x="1050" y="140" />
+        <di:waypoint x="1050" y="140" />
+        <di:waypoint x="1050" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidateToMerge-id-0011_di" bpmnElement="SequenceFlow-ValidateToMerge-id-0011">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MergeToComplete-id-0013_di" bpmnElement="SequenceFlow-MergeToComplete-id-0013">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1557" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AdditionalQuestionsToValidate-id-0010_di" bpmnElement="SequenceFlow-AdditionalQuestionsToValidate-id-0010">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidateToMerge-id-0012_di" bpmnElement="SequenceFlow-ValidateToMerge-id-0012">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1425" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

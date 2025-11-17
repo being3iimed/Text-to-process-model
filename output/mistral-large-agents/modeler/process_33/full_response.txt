@@ -1,0 +1,345 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "Definitions_3DModelPrintingProcess",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process_3DModelPrinting",
+      "name": "3D Model Printing Process",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-CravingCustom3DModel-id-0001",
+          "name": "Craving Custom 3D Model"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-IterativeArtistFeedback-id-0001",
+          "name": "Iterative Artist Feedback",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-FeedbackLoopStart-id-0001",
+              "name": "Feedback Loop Start"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-SendInitialSketches-id-0001",
+              "name": "Send initial sketches to artist"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ReviewDraft-id-0002",
+              "name": "Review artist's draft and request changes"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-ChangesNeeded-id-0001",
+              "name": "Changes Needed?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-SendRevisedRequirements-id-0003",
+              "name": "Send revised requirements to artist"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ReviewUpdatedDraft-id-0004",
+              "name": "Review updated draft"
+            },
+            {
+              "$type": "bpmn:ReceiveTask",
+              "id": "ReceiveTask-FinalSTLFile-id-0001",
+              "name": "Receive: final STL file from artist"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-ArtistCollaborationComplete-id-0001",
+              "name": "Artist Collaboration Complete"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-ChangesNeededConverge-id-0001",
+              "name": "Changes Needed Convergence",
+              "gatewayDirection": "Converging"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SubStartToSketches-id-0001",
+              "sourceRef": "StartEvent-FeedbackLoopStart-id-0001",
+              "targetRef": "UserTask-SendInitialSketches-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SketchesToReview-id-0002",
+              "sourceRef": "UserTask-SendInitialSketches-id-0001",
+              "targetRef": "UserTask-ReviewDraft-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReviewToChangesGateway-id-0003",
+              "sourceRef": "UserTask-ReviewDraft-id-0002",
+              "targetRef": "ExclusiveGateway-ChangesNeeded-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ChangesToRevisedReqs-id-0004",
+              "sourceRef": "ExclusiveGateway-ChangesNeeded-id-0001",
+              "targetRef": "UserTask-SendRevisedRequirements-id-0003",
+              "name": "changes_needed",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RevisedReqsToReviewUpdated-id-0005",
+              "sourceRef": "UserTask-SendRevisedRequirements-id-0003",
+              "targetRef": "UserTask-ReviewUpdatedDraft-id-0004"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReviewUpdatedToChangesConverge-id-0006",
+              "sourceRef": "UserTask-ReviewUpdatedDraft-id-0004",
+              "targetRef": "ExclusiveGateway-ChangesNeededConverge-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ChangesConvergeToFinalSTL-id-0007",
+              "sourceRef": "ExclusiveGateway-ChangesNeededConverge-id-0001",
+              "targetRef": "ReceiveTask-FinalSTLFile-id-0001",
+              "name": "no_changes_needed",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-FinalSTLToSubEnd-id-0008",
+              "sourceRef": "ReceiveTask-FinalSTLFile-id-0001",
+              "targetRef": "EndEvent-ArtistCollaborationComplete-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-NoChangesToFinalSTL-id-0009",
+              "sourceRef": "ExclusiveGateway-ChangesNeeded-id-0001",
+              "targetRef": "ReceiveTask-FinalSTLFile-id-0001",
+              "name": "",
+              "isDefault": true
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SelectPlasticColor-id-0001",
+          "name": "Select plastic color for 3D printing"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CheckPlasticStock-id-0001",
+          "name": "Check plastic stock at home"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-PlasticStockCheck-id-0001",
+          "name": "Plastic Stock Check",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-AddPlasticToList-id-0001",
+          "name": "Add plastic to shopping list"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-OrderPlasticOnline-id-0001",
+          "name": "Order plastic online"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProceedWithPlastic-id-0001",
+          "name": "Proceed with available plastic"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-PlasticStockConverge-id-0001",
+          "name": "Plastic Stock Convergence",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-PrinterSetupSplit-id-0001",
+          "name": "Printer Setup Split",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-TurnOnPrinter-id-0001",
+          "name": "Turn on 3D printer"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-HeatPrinterBed-id-0001",
+          "name": "Heat printer bed and extruder"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-PrinterStatusUpdate-id-0001",
+          "name": "Printer Status Update",
+          "attachedToRef": "ServiceTask-HeatPrinterBed-id-0001",
+          "cancelActivity": false,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:MessageEventDefinition",
+              "name": "PrinterStatusMessage"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateGCODE-id-0001",
+          "name": "Generate GCODE from STL file"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-PrinterSetupJoin-id-0001",
+          "name": "Printer Setup Join",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-Print3DModel-id-0001",
+          "name": "Print 3D model"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-3DModelPrinted-id-0001",
+          "name": "3D Model Printed"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToSubProcess-id-0001",
+          "sourceRef": "StartEvent-CravingCustom3DModel-id-0001",
+          "targetRef": "SubProcess-IterativeArtistFeedback-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SubProcessToSelectColor-id-0002",
+          "sourceRef": "SubProcess-IterativeArtistFeedback-id-0001",
+          "targetRef": "UserTask-SelectPlasticColor-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SelectColorToCheckStock-id-0003",
+          "sourceRef": "UserTask-SelectPlasticColor-id-0001",
+          "targetRef": "UserTask-CheckPlasticStock-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CheckStockToPlasticGateway-id-0004",
+          "sourceRef": "UserTask-CheckPlasticStock-id-0001",
+          "targetRef": "ExclusiveGateway-PlasticStockCheck-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PlasticGatewayToAddList-id-0005",
+          "sourceRef": "ExclusiveGateway-PlasticStockCheck-id-0001",
+          "targetRef": "ServiceTask-AddPlasticToList-id-0001",
+          "name": "plastic_stock < 100g",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PlasticGatewayToOrder-id-0006",
+          "sourceRef": "ExclusiveGateway-PlasticStockCheck-id-0001",
+          "targetRef": "ServiceTask-OrderPlasticOnline-id-0001",
+          "name": "plastic_stock == 0",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PlasticGatewayToProceed-id-0007",
+          "sourceRef": "ExclusiveGateway-PlasticStockCheck-id-0001",
+          "targetRef": "ServiceTask-ProceedWithPlastic-id-0001",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AddListToConverge-id-0008",
+          "sourceRef": "ServiceTask-AddPlasticToList-id-0001",
+          "targetRef": "ExclusiveGateway-PlasticStockConverge-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OrderToConverge-id-0009",
+          "sourceRef": "ServiceTask-OrderPlasticOnline-id-0001",
+          "targetRef": "ExclusiveGateway-PlasticStockConverge-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProceedToConverge-id-0010",
+          "sourceRef": "ServiceTask-ProceedWithPlastic-id-0001",
+          "targetRef": "ExclusiveGateway-PlasticStockConverge-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConvergeToPrinterSetup-id-0011",
+          "sourceRef": "ExclusiveGateway-PlasticStockConverge-id-0001",
+          "targetRef": "ParallelGateway-PrinterSetupSplit-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PrinterSetupToTurnOn-id-0012",
+          "sourceRef": "ParallelGateway-PrinterSetupSplit-id-0001",
+          "targetRef": "ServiceTask-TurnOnPrinter-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PrinterSetupToHeatBed-id-0013",
+          "sourceRef": "ParallelGateway-PrinterSetupSplit-id-0001",
+          "targetRef": "ServiceTask-HeatPrinterBed-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PrinterSetupToGenerateGCODE-id-0014",
+          "sourceRef": "ParallelGateway-PrinterSetupSplit-id-0001",
+          "targetRef": "ServiceTask-GenerateGCODE-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TurnOnToJoin-id-0015",
+          "sourceRef": "ServiceTask-TurnOnPrinter-id-0001",
+          "targetRef": "ParallelGateway-PrinterSetupJoin-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HeatBedToJoin-id-0016",
+          "sourceRef": "ServiceTask-HeatPrinterBed-id-0001",
+          "targetRef": "ParallelGateway-PrinterSetupJoin-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GenerateGCODEToJoin-id-0017",
+          "sourceRef": "ServiceTask-GenerateGCODE-id-0001",
+          "targetRef": "ParallelGateway-PrinterSetupJoin-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinToPrint-id-0018",
+          "sourceRef": "ParallelGateway-PrinterSetupJoin-id-0001",
+          "targetRef": "ServiceTask-Print3DModel-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PrintToEnd-id-0019",
+          "sourceRef": "ServiceTask-Print3DModel-id-0001",
+          "targetRef": "EndEvent-3DModelPrinted-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

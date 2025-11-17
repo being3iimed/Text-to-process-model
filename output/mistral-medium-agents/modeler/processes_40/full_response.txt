@@ -1,0 +1,238 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "OEE-Monitoring-Definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "2.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "OEE-Monitoring-Process",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "MessageStartEvent-MachineConnected-id-0001",
+          "name": "Machine Connected",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:MessageEventDefinition",
+              "name": "MachineConnected"
+            }
+          ]
+        },
+
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-OEECalculation-id-0001",
+          "name": "OEE Calculation",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-StartOEEMonitoring-id-0001",
+              "name": "Start OEE Monitoring"
+            },
+
+            {
+              "$type": "bpmn:IntermediateCatchEvent",
+              "id": "IntermediateCatchEvent-Timer5Minutes-id-0001",
+              "name": "Wait 5 Minutes",
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:TimerEventDefinition",
+                  "timeDuration": "PT5M"
+                }
+              ]
+            },
+
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-CollectMachineData-id-0001",
+              "name": "Collect Machine Data"
+            },
+
+            {
+              "$type": "bpmn:ScriptTask",
+              "id": "ScriptTask-CalculateOEE-id-0001",
+              "name": "Calculate OEE",
+              "scriptFormat": "JavaScript",
+              "script": "OEE = Availability * Performance * Quality"
+            },
+
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-OEECheck-id-0001",
+              "name": "OEE < Threshold?",
+              "gatewayDirection": "Diverging"
+            },
+
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-StopMachine-id-0001",
+              "name": "Stop Machine"
+            },
+
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-OEEAlertEmail-id-0001",
+              "name": "Send OEE Alert Email"
+            },
+
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-MachineStatus-id-0001",
+              "name": "Machine Status",
+              "gatewayDirection": "Diverging"
+            },
+
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-RestartMachine-id-0001",
+              "name": "Restart Machine"
+            },
+
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-ProcessTerminated-id-0001",
+              "name": "Process Terminated"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StartToTimer-id-0001",
+              "sourceRef": "StartEvent-StartOEEMonitoring-id-0001",
+              "targetRef": "IntermediateCatchEvent-Timer5Minutes-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-TimerToCollect-id-0002",
+              "sourceRef": "IntermediateCatchEvent-Timer5Minutes-id-0001",
+              "targetRef": "ServiceTask-CollectMachineData-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CollectToCalculate-id-0003",
+              "sourceRef": "ServiceTask-CollectMachineData-id-0001",
+              "targetRef": "ScriptTask-CalculateOEE-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CalculateToOEECheck-id-0004",
+              "sourceRef": "ScriptTask-CalculateOEE-id-0001",
+              "targetRef": "ExclusiveGateway-OEECheck-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-OEECheckToStop-id-0005",
+              "sourceRef": "ExclusiveGateway-OEECheck-id-0001",
+              "targetRef": "ServiceTask-StopMachine-id-0001",
+              "name": "OEE < threshold",
+              "isDefault": false
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-OEECheckToTimer-id-0006",
+              "sourceRef": "ExclusiveGateway-OEECheck-id-0001",
+              "targetRef": "IntermediateCatchEvent-Timer5Minutes-id-0001",
+              "name": "OEE ≥ threshold",
+              "isDefault": true
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StopToAlert-id-0007",
+              "sourceRef": "ServiceTask-StopMachine-id-0001",
+              "targetRef": "SendTask-OEEAlertEmail-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-AlertToStatusCheck-id-0008",
+              "sourceRef": "SendTask-OEEAlertEmail-id-0001",
+              "targetRef": "ExclusiveGateway-MachineStatus-id-0001"
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StatusToRestart-id-0009",
+              "sourceRef": "ExclusiveGateway-MachineStatus-id-0001",
+              "targetRef": "ServiceTask-RestartMachine-id-0001",
+              "name": "machine_restarted",
+              "isDefault": false
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StatusToTerminate-id-0010",
+              "sourceRef": "ExclusiveGateway-MachineStatus-id-0001",
+              "targetRef": "EndEvent-ProcessTerminated-id-0001",
+              "name": "machine_disconnected",
+              "isDefault": true
+            },
+
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RestartToTimer-id-0011",
+              "sourceRef": "ServiceTask-RestartMachine-id-0001",
+              "targetRef": "IntermediateCatchEvent-Timer5Minutes-id-0001"
+            }
+          ]
+        },
+
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CheckMachineConnection-id-0001",
+          "name": "Check Machine Connection"
+        },
+
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-Timer1Hour-id-0001",
+          "name": "1 Hour Timeout",
+          "attachedToRef": "ServiceTask-CheckMachineConnection-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT1H"
+            }
+          ]
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToSubProcess-id-0001",
+          "sourceRef": "MessageStartEvent-MachineConnected-id-0001",
+          "targetRef": "SubProcess-OEECalculation-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToConnectionCheck-id-0002",
+          "sourceRef": "MessageStartEvent-MachineConnected-id-0001",
+          "targetRef": "ServiceTask-CheckMachineConnection-id-0001"
+        },
+
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryToTerminate-id-0003",
+          "sourceRef": "BoundaryEvent-Timer1Hour-id-0001",
+          "targetRef": "EndEvent-ProcessTerminated-id-0001"
+        },
+
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProcessTerminated-id-0002",
+          "name": "Process Terminated"
+        }
+      ]
+    }
+  ]
+}
+```

@@ -1,0 +1,301 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "parts-procurement-definitions",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "bpmn-js (https://demo.bpmn.io)",
+    "exporterVersion": "18.0.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "PartsProcurementProcess",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-PartsProcurementStarted-id-0001",
+            "name": "Parts Procurement Started"
+          },
+          {
+            "$type": "bpmn:SubProcess",
+            "id": "SubProcess-OrderOptimization-id-0001",
+            "name": "Order Optimization",
+            "flowElements": [
+              {
+                "$type": "bpmn:StartEvent",
+                "id": "StartEvent-OptimizationStart-id-0001",
+                "name": "Optimization Start"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-QueryWebshops-id-0001",
+                "name": "Query all webshops for parts availability"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-ComparePrices-id-0002",
+                "name": "Compare prices and delivery times"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-CreateOrderList-id-0003",
+                "name": "Create optimized order list"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-PlaceInitialOrders-id-0004",
+                "name": "Place initial orders"
+              },
+              {
+                "$type": "bpmn:BoundaryEvent",
+                "id": "BoundaryEvent-OrderFailure-id-0001",
+                "name": "Order Failure",
+                "attachedToRef": "ServiceTask-PlaceInitialOrders-id-0004",
+                "cancelActivity": true,
+                "eventDefinitions": [
+                  {
+                    "$type": "bpmn:ErrorEventDefinition",
+                    "errorRef": "ORDER_FAILURE"
+                  }
+                ]
+              },
+              {
+                "$type": "bpmn:UserTask",
+                "id": "UserTask-ManualOrderCorrection-id-0001",
+                "name": "Manual order correction"
+              },
+              {
+                "$type": "bpmn:EndEvent",
+                "id": "EndEvent-OrdersPlaced-id-0001",
+                "name": "Orders Placed"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SubStartToQuery-id-0001",
+                "sourceRef": "StartEvent-OptimizationStart-id-0001",
+                "targetRef": "ServiceTask-QueryWebshops-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-QueryToCompare-id-0002",
+                "sourceRef": "ServiceTask-QueryWebshops-id-0001",
+                "targetRef": "ServiceTask-ComparePrices-id-0002"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-CompareToCreate-id-0003",
+                "sourceRef": "ServiceTask-ComparePrices-id-0002",
+                "targetRef": "ServiceTask-CreateOrderList-id-0003"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-CreateToPlace-id-0004",
+                "sourceRef": "ServiceTask-CreateOrderList-id-0003",
+                "targetRef": "ServiceTask-PlaceInitialOrders-id-0004"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-PlaceToEnd-id-0005",
+                "sourceRef": "ServiceTask-PlaceInitialOrders-id-0004",
+                "targetRef": "EndEvent-OrdersPlaced-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-BoundaryToManual-id-0006",
+                "sourceRef": "BoundaryEvent-OrderFailure-id-0001",
+                "targetRef": "UserTask-ManualOrderCorrection-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ManualToPlace-id-0007",
+                "sourceRef": "UserTask-ManualOrderCorrection-id-0001",
+                "targetRef": "ServiceTask-PlaceInitialOrders-id-0004"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:IntermediateCatchEvent",
+            "id": "IntermediateCatchEvent-DailyCheck-id-0001",
+            "name": "Daily Inventory Check Trigger",
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:TimerEventDefinition",
+                "timeDuration": "P1D"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ReceiveParts-id-0001",
+            "name": "Receive parts batch"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-StartBuilding-id-0002",
+            "name": "Start building with available parts"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-CheckInventory-id-0003",
+            "name": "Check inventory levels"
+          },
+          {
+            "$type": "bpmn:BoundaryEvent",
+            "id": "BoundaryEvent-DailyInventory-id-0002",
+            "name": "Daily Inventory Check",
+            "attachedToRef": "ServiceTask-CheckInventory-id-0003",
+            "cancelActivity": false,
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:TimerEventDefinition",
+                "timeDuration": "P1D"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-StockCheck-id-0001",
+            "name": "Stock Level Check",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-SendComplaint-id-0004",
+            "name": "Send: complaint email to friends"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-EmergencyReorder-id-0005",
+            "name": "Place emergency reorder (fastest)"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-StandardReorder-id-0006",
+            "name": "Place reorder (cheapest)"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ProjectCompleted-id-0001",
+            "name": "Project Completed"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToSubProcess-id-0001",
+            "sourceRef": "StartEvent-PartsProcurementStarted-id-0001",
+            "targetRef": "SubProcess-OrderOptimization-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SubProcessToReceive-id-0002",
+            "sourceRef": "SubProcess-OrderOptimization-id-0001",
+            "targetRef": "ServiceTask-ReceiveParts-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReceiveToStartBuilding-id-0003",
+            "sourceRef": "ServiceTask-ReceiveParts-id-0001",
+            "targetRef": "ServiceTask-StartBuilding-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartBuildingToCheck-id-0004",
+            "sourceRef": "ServiceTask-StartBuilding-id-0002",
+            "targetRef": "ServiceTask-CheckInventory-id-0003"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CheckToGateway-id-0005",
+            "sourceRef": "ServiceTask-CheckInventory-id-0003",
+            "targetRef": "ExclusiveGateway-StockCheck-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-BoundaryToCheck-id-0006",
+            "sourceRef": "BoundaryEvent-DailyInventory-id-0002",
+            "targetRef": "ServiceTask-CheckInventory-id-0003"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToComplaint-id-0007",
+            "sourceRef": "ExclusiveGateway-StockCheck-id-0001",
+            "targetRef": "ServiceTask-SendComplaint-id-0004",
+            "name": "stock = 0",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToEmergency-id-0008",
+            "sourceRef": "ExclusiveGateway-StockCheck-id-0001",
+            "targetRef": "ServiceTask-EmergencyReorder-id-0005",
+            "name": "stock < 3",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToStandard-id-0009",
+            "sourceRef": "ExclusiveGateway-StockCheck-id-0001",
+            "targetRef": "ServiceTask-StandardReorder-id-0006",
+            "name": "stock < 5",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToCheck-id-0010",
+            "sourceRef": "ExclusiveGateway-StockCheck-id-0001",
+            "targetRef": "ServiceTask-CheckInventory-id-0003",
+            "name": "stock >= 5",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ComplaintToEmergency-id-0011",
+            "sourceRef": "ServiceTask-SendComplaint-id-0004",
+            "targetRef": "ServiceTask-EmergencyReorder-id-0005"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-EmergencyToCheck-id-0012",
+            "sourceRef": "ServiceTask-EmergencyReorder-id-0005",
+            "targetRef": "ServiceTask-CheckInventory-id-0003"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StandardToCheck-id-0013",
+            "sourceRef": "ServiceTask-StandardReorder-id-0006",
+            "targetRef": "ServiceTask-CheckInventory-id-0003"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CheckToEnd-id-0014",
+            "sourceRef": "ServiceTask-CheckInventory-id-0003",
+            "targetRef": "EndEvent-ProjectCompleted-id-0001"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-large-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11841,
+        "total_tokens": 14626,
+        "completion_tokens": 2785
+      },
+      "model_name": "mistral-large-latest",
+      "model": "mistral-large-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11841,
+      "output_tokens": 2785,
+      "total_tokens": 14626
+    },
+    "id": "lc_run--32d17357-8a22-459c-a7bd-126a0e16a0c1-0"
+  },
+  "status": "success"
+}

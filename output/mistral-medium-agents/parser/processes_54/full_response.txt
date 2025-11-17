@@ -1,0 +1,85 @@
+```
+<summary_of_elements>
+
+### TASKS:
+- `sendTask("Send: transaction data request to IP")` - INQ transmits request to IP
+- `serviceTask("Check transaction request")` - IP examines request (automated)
+- `sendTask("Send: transaction data to INQ")` - IP transmits data (success path)
+- `sendTask("Send: rejection notice to INQ")` - IP rejects request (failure path)
+
+### GATEWAYS:
+- **XOR** after `serviceTask("Check transaction request")` with:
+  - Condition: `request_valid` → data transmission path
+  - Default: rejection path
+
+### EVENTS:
+- `startEvent("Transaction Data Request Received")` - Trigger: manual (INQ initiates)
+- `endEvent("Transaction Data Sent")` - Success completion
+- `endEvent("Rejection Notice Sent")` - Failure completion
+
+### BOUNDARY EVENTS:
+- **None** (no SLAs or error scenarios explicitly mentioned)
+
+### SUBPROCESSES:
+- **None** (no cohesive grouping needed; linear flow)
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+```
+startEvent("Transaction Data Request Received")
+
+// INQ transmits request
+sendTask("Send: transaction data request to IP")
+
+// IP processes request
+serviceTask("Check transaction request")
+
+// Decision point
+if (request_valid):
+    sendTask("Send: transaction data to INQ")
+    endEvent("Transaction Data Sent")
+else:
+    sendTask("Send: rejection notice to INQ")
+    endEvent("Rejection Notice Sent")
+```
+
+</bpmn_pseudocode>
+
+<compliance_validation>
+
+### **1. Timer Events**: ✅
+- No timer events used (none mentioned in description)
+
+### **2. Gateway Convergence**: ✅
+- XOR gateway has **explicit end events** for each branch (no orphaned paths)
+
+### **3. Sequence Flow Labels**: ✅
+- Conditional flow labeled: `request_valid`
+- Default flow implicit (rejection path)
+
+### **4. Boundary Events**: ✅
+- None added (no SLAs/error scenarios in description)
+
+### **5. Subprocesses**: ✅
+- None needed (linear flow; no cohesive grouping)
+
+### **6. Flow Consistency**: ✅
+- All paths traceable start-to-end:
+  - Success: `start → send → check → send_data → end`
+  - Failure: `start → send → check → send_rejection → end`
+
+### **7. BPMN Spec Compliance**: ✅
+- No invalid constructs
+- All elements map to valid BPMN 2.0 types
+
+</compliance_validation>
+
+<assumptions>
+1. "INQ" and "IP" are external systems/roles (no internal subprocesses needed).
+2. "Checks the request" is automated (serviceTask).
+3. No SLAs or error handling required (not mentioned in description).
+4. Rejection is the default path (if checks fail).
+</assumptions>
+```

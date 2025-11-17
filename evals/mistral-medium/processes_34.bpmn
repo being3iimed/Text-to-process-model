@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="LegoCustomMachineProcess" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="LegoCustomMachineProcess-id-0001" name="Lego Custom Machine Building Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ProcessStart-id-0001" name="Start Building Custom Lego Machine">
+      <bpmn:outgoing>SequenceFlow-StartToDesign-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-DevelopBasicDesign-id-0001" name="Develop Basic Design">
+      <bpmn:incoming>SequenceFlow-StartToDesign-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DesignToOrder-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-OrderLegoBrickSets-id-0001" name="Order Lego Brick Sets">
+      <bpmn:incoming>SequenceFlow-DesignToOrder-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OrderToGiveSets-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-GiveLegoSetsToChildren-id-0001" name="Give Lego Sets to Children">
+      <bpmn:incoming>SequenceFlow-OrderToGiveSets-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GiveSetsToSort-id-0004</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ChildrenSortParts-id-0001" name="Children Sort Parts into Containers">
+      <bpmn:incoming>SequenceFlow-GiveSetsToSort-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SortToSplit-id-0005</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-SplitSubcomponents-id-0001" name="Build Subcomponents in Parallel" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-SortToSplit-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToSub1-id-0006</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToSub2-id-0007</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:subProcess id="SubProcess-BuildTestSubcomponent1-id-0001" name="Build and Test Subcomponent 1">
+      <bpmn:incoming>SequenceFlow-SplitToSub1-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Sub1ToJoin-id-0008</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-Subcomponent1Start-id-0001" name="Start Subcomponent 1">
+        <bpmn:outgoing>SequenceFlow-Sub1StartToBuild-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-BuildSubcomponent1-id-0001" name="Build Subcomponent 1">
+        <bpmn:incoming>SequenceFlow-Sub1StartToBuild-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-RedesignToBuild1-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-BuildToTest1-id-0002</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-Timer1Day-Subcomponent1-id-0001" name="1 Day Testing Timeout">
+        <bpmn:outgoing>SequenceFlow-BoundaryToNotification1-id-0007</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="BoundaryEvent-Timer1Day-Subcomponent1-id-0001_EventDef">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P1D</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:boundaryEvent>
+      <bpmn:userTask id="UserTask-TestSubcomponent1-id-0001" name="Test Subcomponent 1">
+        <bpmn:incoming>SequenceFlow-BuildToTest1-id-0002</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-NotificationToTest1-id-0008</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-TestToGateway1-id-0003</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-TestResult1-id-0001" name="Test Result 1?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-TestToGateway1-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GatewayToSuccess1-id-0004</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToFailure1-id-0005</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="EndEvent-Subcomponent1Ready-id-0001" name="Subcomponent 1 Ready">
+        <bpmn:incoming>SequenceFlow-GatewayToSuccess1-id-0004</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:userTask id="UserTask-RedesignSubcomponent1-id-0001" name="Redesign Subcomponent 1">
+        <bpmn:incoming>SequenceFlow-GatewayToFailure1-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RedesignToBuild1-id-0006</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:sendTask id="SendTask-TestingDelayNotification1-id-0001" name="Send: testing delay notification for Subcomponent 1">
+        <bpmn:incoming>SequenceFlow-BoundaryToNotification1-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-NotificationToTest1-id-0008</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:sequenceFlow id="SequenceFlow-Sub1StartToBuild-id-0001" sourceRef="StartEvent-Subcomponent1Start-id-0001" targetRef="UserTask-BuildSubcomponent1-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BuildToTest1-id-0002" sourceRef="UserTask-BuildSubcomponent1-id-0001" targetRef="UserTask-TestSubcomponent1-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-TestToGateway1-id-0003" sourceRef="UserTask-TestSubcomponent1-id-0001" targetRef="ExclusiveGateway-TestResult1-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToSuccess1-id-0004" name="test_successful" sourceRef="ExclusiveGateway-TestResult1-id-0001" targetRef="EndEvent-Subcomponent1Ready-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToFailure1-id-0005" name="test_failed" sourceRef="ExclusiveGateway-TestResult1-id-0001" targetRef="UserTask-RedesignSubcomponent1-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RedesignToBuild1-id-0006" sourceRef="UserTask-RedesignSubcomponent1-id-0001" targetRef="UserTask-BuildSubcomponent1-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BoundaryToNotification1-id-0007" sourceRef="BoundaryEvent-Timer1Day-Subcomponent1-id-0001" targetRef="SendTask-TestingDelayNotification1-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-NotificationToTest1-id-0008" sourceRef="SendTask-TestingDelayNotification1-id-0001" targetRef="UserTask-TestSubcomponent1-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-BuildTestSubcomponent2-id-0002" name="Build and Test Subcomponent 2">
+      <bpmn:incoming>SequenceFlow-SplitToSub2-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Sub2ToJoin-id-0009</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-Subcomponent2Start-id-0001" name="Start Subcomponent 2">
+        <bpmn:outgoing>SequenceFlow-Sub2StartToBuild-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-BuildSubcomponent2-id-0001" name="Build Subcomponent 2">
+        <bpmn:incoming>SequenceFlow-Sub2StartToBuild-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-RedesignToBuild2-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-BuildToTest2-id-0002</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-Timer1Day-Subcomponent2-id-0001" name="1 Day Testing Timeout">
+        <bpmn:outgoing>SequenceFlow-BoundaryToNotification2-id-0007</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="BoundaryEvent-Timer1Day-Subcomponent2-id-0001_EventDef">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P1D</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:boundaryEvent>
+      <bpmn:userTask id="UserTask-TestSubcomponent2-id-0001" name="Test Subcomponent 2">
+        <bpmn:incoming>SequenceFlow-BuildToTest2-id-0002</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-NotificationToTest2-id-0008</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-TestToGateway2-id-0003</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-TestResult2-id-0001" name="Test Result 2?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-TestToGateway2-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GatewayToSuccess2-id-0004</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToFailure2-id-0005</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="EndEvent-Subcomponent2Ready-id-0001" name="Subcomponent 2 Ready">
+        <bpmn:incoming>SequenceFlow-GatewayToSuccess2-id-0004</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:userTask id="UserTask-RedesignSubcomponent2-id-0001" name="Redesign Subcomponent 2">
+        <bpmn:incoming>SequenceFlow-GatewayToFailure2-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RedesignToBuild2-id-0006</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:sendTask id="SendTask-TestingDelayNotification2-id-0001" name="Send: testing delay notification for Subcomponent 2">
+        <bpmn:incoming>SequenceFlow-BoundaryToNotification2-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-NotificationToTest2-id-0008</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:sequenceFlow id="SequenceFlow-Sub2StartToBuild-id-0001" sourceRef="StartEvent-Subcomponent2Start-id-0001" targetRef="UserTask-BuildSubcomponent2-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BuildToTest2-id-0002" sourceRef="UserTask-BuildSubcomponent2-id-0001" targetRef="UserTask-TestSubcomponent2-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-TestToGateway2-id-0003" sourceRef="UserTask-TestSubcomponent2-id-0001" targetRef="ExclusiveGateway-TestResult2-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToSuccess2-id-0004" name="test_successful" sourceRef="ExclusiveGateway-TestResult2-id-0001" targetRef="EndEvent-Subcomponent2Ready-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToFailure2-id-0005" name="test_failed" sourceRef="ExclusiveGateway-TestResult2-id-0001" targetRef="UserTask-RedesignSubcomponent2-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RedesignToBuild2-id-0006" sourceRef="UserTask-RedesignSubcomponent2-id-0001" targetRef="UserTask-BuildSubcomponent2-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BoundaryToNotification2-id-0007" sourceRef="BoundaryEvent-Timer1Day-Subcomponent2-id-0001" targetRef="SendTask-TestingDelayNotification2-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-NotificationToTest2-id-0008" sourceRef="SendTask-TestingDelayNotification2-id-0001" targetRef="UserTask-TestSubcomponent2-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:parallelGateway id="ParallelGateway-JoinSubcomponents-id-0001" name="Subcomponents Ready" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-Sub1ToJoin-id-0008</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-Sub2ToJoin-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToReorder-id-0010</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-ReorderIndividualParts-id-0001" name="Reorder Individual Parts">
+      <bpmn:incoming>SequenceFlow-JoinToReorder-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReorderToAssemble-id-0011</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-AssembleMachine-id-0001" name="Assemble Machine">
+      <bpmn:incoming>SequenceFlow-ReorderToAssemble-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AssembleToEnd-id-0012</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-MachineAssemblyComplete-id-0001" name="Machine Assembly Complete">
+      <bpmn:incoming>SequenceFlow-AssembleToEnd-id-0012</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToDesign-id-0001" sourceRef="StartEvent-ProcessStart-id-0001" targetRef="UserTask-DevelopBasicDesign-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DesignToOrder-id-0002" sourceRef="UserTask-DevelopBasicDesign-id-0001" targetRef="ServiceTask-OrderLegoBrickSets-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-OrderToGiveSets-id-0003" sourceRef="ServiceTask-OrderLegoBrickSets-id-0001" targetRef="UserTask-GiveLegoSetsToChildren-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GiveSetsToSort-id-0004" sourceRef="UserTask-GiveLegoSetsToChildren-id-0001" targetRef="UserTask-ChildrenSortParts-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SortToSplit-id-0005" sourceRef="UserTask-ChildrenSortParts-id-0001" targetRef="ParallelGateway-SplitSubcomponents-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToSub1-id-0006" sourceRef="ParallelGateway-SplitSubcomponents-id-0001" targetRef="SubProcess-BuildTestSubcomponent1-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToSub2-id-0007" sourceRef="ParallelGateway-SplitSubcomponents-id-0001" targetRef="SubProcess-BuildTestSubcomponent2-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-Sub1ToJoin-id-0008" sourceRef="SubProcess-BuildTestSubcomponent1-id-0001" targetRef="ParallelGateway-JoinSubcomponents-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-Sub2ToJoin-id-0009" sourceRef="SubProcess-BuildTestSubcomponent2-id-0002" targetRef="ParallelGateway-JoinSubcomponents-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToReorder-id-0010" sourceRef="ParallelGateway-JoinSubcomponents-id-0001" targetRef="ServiceTask-ReorderIndividualParts-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReorderToAssemble-id-0011" sourceRef="ServiceTask-ReorderIndividualParts-id-0001" targetRef="UserTask-AssembleMachine-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AssembleToEnd-id-0012" sourceRef="UserTask-AssembleMachine-id-0001" targetRef="EndEvent-MachineAssemblyComplete-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_LegoCustomMachineProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_LegoCustomMachineProcess-id-0001" bpmnElement="LegoCustomMachineProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ProcessStart-id-0001_di" bpmnElement="StartEvent-ProcessStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-DevelopBasicDesign-id-0001_di" bpmnElement="UserTask-DevelopBasicDesign-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-OrderLegoBrickSets-id-0001_di" bpmnElement="ServiceTask-OrderLegoBrickSets-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-GiveLegoSetsToChildren-id-0001_di" bpmnElement="UserTask-GiveLegoSetsToChildren-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ChildrenSortParts-id-0001_di" bpmnElement="UserTask-ChildrenSortParts-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-SplitSubcomponents-id-0001_di" bpmnElement="ParallelGateway-SplitSubcomponents-id-0001">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-BuildTestSubcomponent1-id-0001_di" bpmnElement="SubProcess-BuildTestSubcomponent1-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-JoinSubcomponents-id-0001_di" bpmnElement="ParallelGateway-JoinSubcomponents-id-0001">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ReorderIndividualParts-id-0001_di" bpmnElement="ServiceTask-ReorderIndividualParts-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AssembleMachine-id-0001_di" bpmnElement="UserTask-AssembleMachine-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-MachineAssemblyComplete-id-0001_di" bpmnElement="EndEvent-MachineAssemblyComplete-id-0001">
+        <dc:Bounds x="1557" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-BuildTestSubcomponent2-id-0002_di" bpmnElement="SubProcess-BuildTestSubcomponent2-id-0002">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToDesign-id-0001_di" bpmnElement="SequenceFlow-StartToDesign-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DesignToOrder-id-0002_di" bpmnElement="SequenceFlow-DesignToOrder-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderToGiveSets-id-0003_di" bpmnElement="SequenceFlow-OrderToGiveSets-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GiveSetsToSort-id-0004_di" bpmnElement="SequenceFlow-GiveSetsToSort-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SortToSplit-id-0005_di" bpmnElement="SequenceFlow-SortToSplit-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToSub1-id-0006_di" bpmnElement="SequenceFlow-SplitToSub1-id-0006">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToSub2-id-0007_di" bpmnElement="SequenceFlow-SplitToSub2-id-0007">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Sub1ToJoin-id-0008_di" bpmnElement="SequenceFlow-Sub1ToJoin-id-0008">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToReorder-id-0010_di" bpmnElement="SequenceFlow-JoinToReorder-id-0010">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReorderToAssemble-id-0011_di" bpmnElement="SequenceFlow-ReorderToAssemble-id-0011">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AssembleToEnd-id-0012_di" bpmnElement="SequenceFlow-AssembleToEnd-id-0012">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1557" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Sub2ToJoin-id-0009_di" bpmnElement="SequenceFlow-Sub2ToJoin-id-0009">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-BuildTestSubcomponent2-id-0002">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-BuildTestSubcomponent2-id-0002" bpmnElement="SubProcess-BuildTestSubcomponent2-id-0002">
+      <bpmndi:BPMNShape id="StartEvent-Subcomponent2Start-id-0001_di" bpmnElement="StartEvent-Subcomponent2Start-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-BuildSubcomponent2-id-0001_di" bpmnElement="UserTask-BuildSubcomponent2-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer1Day-Subcomponent2-id-0001_di" bpmnElement="BoundaryEvent-Timer1Day-Subcomponent2-id-0001">
+        <dc:Bounds x="57" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-TestingDelayNotification2-id-0001_di" bpmnElement="SendTask-TestingDelayNotification2-id-0001">
+        <dc:Bounds x="175" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-TestSubcomponent2-id-0001_di" bpmnElement="UserTask-TestSubcomponent2-id-0001">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-TestResult2-id-0001_di" bpmnElement="ExclusiveGateway-TestResult2-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-Subcomponent2Ready-id-0001_di" bpmnElement="EndEvent-Subcomponent2Ready-id-0001">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-RedesignSubcomponent2-id-0001_di" bpmnElement="UserTask-RedesignSubcomponent2-id-0001">
+        <dc:Bounds x="625" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-Sub2StartToBuild-id-0001_di" bpmnElement="SequenceFlow-Sub2StartToBuild-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BuildToTest2-id-0002_di" bpmnElement="SequenceFlow-BuildToTest2-id-0002">
+        <di:waypoint x="825" y="30" />
+        <di:waypoint x="825" y="0" />
+        <di:waypoint x="375" y="0" />
+        <di:waypoint x="375" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToNotification2-id-0007_di" bpmnElement="SequenceFlow-BoundaryToNotification2-id-0007">
+        <di:waypoint x="93" y="210" />
+        <di:waypoint x="175" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotificationToTest2-id-0008_di" bpmnElement="SequenceFlow-NotificationToTest2-id-0008">
+        <di:waypoint x="275" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TestToGateway2-id-0003_di" bpmnElement="SequenceFlow-TestToGateway2-id-0003">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="500" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToSuccess2-id-0004_di" bpmnElement="SequenceFlow-GatewayToSuccess2-id-0004">
+        <di:waypoint x="550" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToFailure2-id-0005_di" bpmnElement="SequenceFlow-GatewayToFailure2-id-0005">
+        <di:waypoint x="525" y="235" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="625" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RedesignToBuild2-id-0006_di" bpmnElement="SequenceFlow-RedesignToBuild2-id-0006">
+        <di:waypoint x="725" y="350" />
+        <di:waypoint x="825" y="350" />
+        <di:waypoint x="825" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-BuildTestSubcomponent1-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-BuildTestSubcomponent1-id-0001" bpmnElement="SubProcess-BuildTestSubcomponent1-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-Subcomponent1Start-id-0001_di" bpmnElement="StartEvent-Subcomponent1Start-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-BuildSubcomponent1-id-0001_di" bpmnElement="UserTask-BuildSubcomponent1-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer1Day-Subcomponent1-id-0001_di" bpmnElement="BoundaryEvent-Timer1Day-Subcomponent1-id-0001">
+        <dc:Bounds x="57" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-TestingDelayNotification1-id-0001_di" bpmnElement="SendTask-TestingDelayNotification1-id-0001">
+        <dc:Bounds x="175" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-TestSubcomponent1-id-0001_di" bpmnElement="UserTask-TestSubcomponent1-id-0001">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-TestResult1-id-0001_di" bpmnElement="ExclusiveGateway-TestResult1-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-Subcomponent1Ready-id-0001_di" bpmnElement="EndEvent-Subcomponent1Ready-id-0001">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-RedesignSubcomponent1-id-0001_di" bpmnElement="UserTask-RedesignSubcomponent1-id-0001">
+        <dc:Bounds x="625" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-Sub1StartToBuild-id-0001_di" bpmnElement="SequenceFlow-Sub1StartToBuild-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BuildToTest1-id-0002_di" bpmnElement="SequenceFlow-BuildToTest1-id-0002">
+        <di:waypoint x="825" y="30" />
+        <di:waypoint x="825" y="0" />
+        <di:waypoint x="375" y="0" />
+        <di:waypoint x="375" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToNotification1-id-0007_di" bpmnElement="SequenceFlow-BoundaryToNotification1-id-0007">
+        <di:waypoint x="93" y="210" />
+        <di:waypoint x="175" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotificationToTest1-id-0008_di" bpmnElement="SequenceFlow-NotificationToTest1-id-0008">
+        <di:waypoint x="275" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TestToGateway1-id-0003_di" bpmnElement="SequenceFlow-TestToGateway1-id-0003">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="500" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToSuccess1-id-0004_di" bpmnElement="SequenceFlow-GatewayToSuccess1-id-0004">
+        <di:waypoint x="550" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToFailure1-id-0005_di" bpmnElement="SequenceFlow-GatewayToFailure1-id-0005">
+        <di:waypoint x="525" y="235" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="625" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RedesignToBuild1-id-0006_di" bpmnElement="SequenceFlow-RedesignToBuild1-id-0006">
+        <di:waypoint x="725" y="350" />
+        <di:waypoint x="825" y="350" />
+        <di:waypoint x="825" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="TravelBookingProcess-Definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="TravelBookingProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-CustomerInitiatesSearch-id-0001" name="Customer Initiates Search">
+      <bpmn:outgoing>SequenceFlow-StartToSearch-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-SearchForTravelOptions-id-0001" name="Search for Travel Options">
+      <bpmn:incoming>SequenceFlow-StartToSearch-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SearchToSelect-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-SelectRouteDateTime-id-0002" name="Select Route, Date, and Time">
+      <bpmn:incoming>SequenceFlow-SearchToSelect-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectToEnterDetails-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-EnterPersonalPaymentDetails-id-0003" name="Enter Personal &#38; Payment Details">
+      <bpmn:incoming>SequenceFlow-SelectToEnterDetails-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EnterDetailsToGenerateTicket-id-0004</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-GenerateTicket-id-0001" name="Generate Ticket">
+      <bpmn:incoming>SequenceFlow-EnterDetailsToGenerateTicket-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GenerateTicketToUpdateInventory-id-0005</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-UpdateSeatInventory-id-0002" name="Update Seat Inventory">
+      <bpmn:incoming>SequenceFlow-GenerateTicketToUpdateInventory-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateInventoryToSendTicket-id-0006</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendTicketViaEmailSMS-id-0001" name="Send: Ticket via Email/SMS">
+      <bpmn:incoming>SequenceFlow-UpdateInventoryToSendTicket-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendTicketToSendReminders-id-0007</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="SendTask-SendPreTravelReminders-id-0002" name="Send: Pre-Travel Reminders">
+      <bpmn:incoming>SequenceFlow-SendTicketToSendReminders-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendRemindersToCompleteJourney-id-0008</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-CompleteJourney-id-0001" name="Complete Journey">
+      <bpmn:incoming>SequenceFlow-SendRemindersToCompleteJourney-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CompleteJourneyToJourneyCompleted-id-0009</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-CompleteJourneyToProvideFeedback-id-0010</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-JourneyCompleted-id-0001" name="Journey Completed">
+      <bpmn:incoming>SequenceFlow-CompleteJourneyToJourneyCompleted-id-0009</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="UserTask-ProvideFeedbackOptional-id-0002" name="Provide Feedback (Optional)">
+      <bpmn:incoming>SequenceFlow-CompleteJourneyToProvideFeedback-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProvideFeedbackToFeedbackReceived-id-0011</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-FeedbackReceivedOptional-id-0002" name="Feedback Received (Optional)">
+      <bpmn:incoming>SequenceFlow-ProvideFeedbackToFeedbackReceived-id-0011</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSearch-id-0001" sourceRef="StartEvent-CustomerInitiatesSearch-id-0001" targetRef="UserTask-SearchForTravelOptions-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SearchToSelect-id-0002" sourceRef="UserTask-SearchForTravelOptions-id-0001" targetRef="UserTask-SelectRouteDateTime-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectToEnterDetails-id-0003" sourceRef="UserTask-SelectRouteDateTime-id-0002" targetRef="UserTask-EnterPersonalPaymentDetails-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-EnterDetailsToGenerateTicket-id-0004" sourceRef="UserTask-EnterPersonalPaymentDetails-id-0003" targetRef="ServiceTask-GenerateTicket-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GenerateTicketToUpdateInventory-id-0005" sourceRef="ServiceTask-GenerateTicket-id-0001" targetRef="ServiceTask-UpdateSeatInventory-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateInventoryToSendTicket-id-0006" sourceRef="ServiceTask-UpdateSeatInventory-id-0002" targetRef="SendTask-SendTicketViaEmailSMS-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendTicketToSendReminders-id-0007" sourceRef="SendTask-SendTicketViaEmailSMS-id-0001" targetRef="SendTask-SendPreTravelReminders-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendRemindersToCompleteJourney-id-0008" sourceRef="SendTask-SendPreTravelReminders-id-0002" targetRef="UserTask-CompleteJourney-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CompleteJourneyToJourneyCompleted-id-0009" sourceRef="UserTask-CompleteJourney-id-0001" targetRef="EndEvent-JourneyCompleted-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CompleteJourneyToProvideFeedback-id-0010" sourceRef="UserTask-CompleteJourney-id-0001" targetRef="UserTask-ProvideFeedbackOptional-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProvideFeedbackToFeedbackReceived-id-0011" sourceRef="UserTask-ProvideFeedbackOptional-id-0002" targetRef="EndEvent-FeedbackReceivedOptional-id-0002" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_TravelBookingProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_TravelBookingProcess-id-0001" bpmnElement="TravelBookingProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-CustomerInitiatesSearch-id-0001_di" bpmnElement="StartEvent-CustomerInitiatesSearch-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SearchForTravelOptions-id-0001_di" bpmnElement="UserTask-SearchForTravelOptions-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectRouteDateTime-id-0002_di" bpmnElement="UserTask-SelectRouteDateTime-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterPersonalPaymentDetails-id-0003_di" bpmnElement="UserTask-EnterPersonalPaymentDetails-id-0003">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateTicket-id-0001_di" bpmnElement="ServiceTask-GenerateTicket-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateSeatInventory-id-0002_di" bpmnElement="ServiceTask-UpdateSeatInventory-id-0002">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendTicketViaEmailSMS-id-0001_di" bpmnElement="SendTask-SendTicketViaEmailSMS-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendPreTravelReminders-id-0002_di" bpmnElement="SendTask-SendPreTravelReminders-id-0002">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CompleteJourney-id-0001_di" bpmnElement="UserTask-CompleteJourney-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-JourneyCompleted-id-0001_di" bpmnElement="EndEvent-JourneyCompleted-id-0001">
+        <dc:Bounds x="1407" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ProvideFeedbackOptional-id-0002_di" bpmnElement="UserTask-ProvideFeedbackOptional-id-0002">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-FeedbackReceivedOptional-id-0002_di" bpmnElement="EndEvent-FeedbackReceivedOptional-id-0002">
+        <dc:Bounds x="1557" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSearch-id-0001_di" bpmnElement="SequenceFlow-StartToSearch-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SearchToSelect-id-0002_di" bpmnElement="SequenceFlow-SearchToSelect-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectToEnterDetails-id-0003_di" bpmnElement="SequenceFlow-SelectToEnterDetails-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EnterDetailsToGenerateTicket-id-0004_di" bpmnElement="SequenceFlow-EnterDetailsToGenerateTicket-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateTicketToUpdateInventory-id-0005_di" bpmnElement="SequenceFlow-GenerateTicketToUpdateInventory-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateInventoryToSendTicket-id-0006_di" bpmnElement="SequenceFlow-UpdateInventoryToSendTicket-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendTicketToSendReminders-id-0007_di" bpmnElement="SequenceFlow-SendTicketToSendReminders-id-0007">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendRemindersToCompleteJourney-id-0008_di" bpmnElement="SequenceFlow-SendRemindersToCompleteJourney-id-0008">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompleteJourneyToJourneyCompleted-id-0009_di" bpmnElement="SequenceFlow-CompleteJourneyToJourneyCompleted-id-0009">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1407" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompleteJourneyToProvideFeedback-id-0010_di" bpmnElement="SequenceFlow-CompleteJourneyToProvideFeedback-id-0010">
+        <di:waypoint x="1275" y="110" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProvideFeedbackToFeedbackReceived-id-0011_di" bpmnElement="SequenceFlow-ProvideFeedbackToFeedbackReceived-id-0011">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1557" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

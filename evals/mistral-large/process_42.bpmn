@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="fridge-repair-process-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="FridgeRepairProcess-id-0001" name="Fridge Repair Service Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-FridgeIssueReported-id-0001" name="Fridge issue reported">
+      <bpmn:outgoing>SequenceFlow-StartToDescribeSymptoms-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-DescribeFridgeSymptoms-id-0001" name="Describe fridge symptoms">
+      <bpmn:incoming>SequenceFlow-StartToDescribeSymptoms-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DescribeToSubmit-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-SubmitSymptoms-id-0001" name="Submit symptoms and fridge type to central service">
+      <bpmn:incoming>SequenceFlow-DescribeToSubmit-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SubmitToSelectFacility-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-SelectLocalFacility-id-0001" name="Select local service facility">
+      <bpmn:incoming>SequenceFlow-SubmitToSelectFacility-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectFacilityToSendRequest-id-0004</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendRequestToFacility-id-0001" name="Send: request to local facility">
+      <bpmn:incoming>SequenceFlow-SelectFacilityToSendRequest-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendRequestToReceiveConfirmation-id-0005</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-AppointmentConfirmation-id-0001" name="Receive: appointment confirmation from facility">
+      <bpmn:incoming>SequenceFlow-SendRequestToReceiveConfirmation-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveConfirmationToConfirmTime-id-0006</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:userTask id="UserTask-ConfirmAppointmentTime-id-0001" name="Confirm appointment time">
+      <bpmn:incoming>SequenceFlow-ReceiveConfirmationToConfirmTime-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmTimeToArrivalWindow-id-0007</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-TechnicianArrivalWindow-id-0001" name="Wait for technician arrival (9 AM - 5 PM window)">
+      <bpmn:incoming>SequenceFlow-ConfirmTimeToArrivalWindow-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ArrivalWindowToRepairAttempt-id-0008</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:userTask id="UserTask-TechnicianAttemptsRepair-id-0001" name="Technician arrives and attempts repair">
+      <bpmn:incoming>SequenceFlow-ArrivalWindowToRepairAttempt-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RepairAttemptToGateway-id-0009</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-RepairOutcome-id-0001" name="Repair Outcome?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-RepairAttemptToGateway-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToConfirmRepair-id-0010</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToServiceIncomplete-id-0011</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-ConfirmRepair-id-0001" name="Confirm fridge is repaired">
+      <bpmn:incoming>SequenceFlow-GatewayToConfirmRepair-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmRepairToRateService-id-0012</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-RateServiceFacility-id-0001" name="Rate service facility">
+      <bpmn:incoming>SequenceFlow-ConfirmRepairToRateService-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RateServiceToEnd-id-0013</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-ServiceCompletedAndRated-id-0001" name="Service completed and rated">
+      <bpmn:incoming>SequenceFlow-RateServiceToEnd-id-0013</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-ServiceIncomplete-id-0002" name="Service incomplete (awaiting parts)">
+      <bpmn:incoming>SequenceFlow-GatewayToServiceIncomplete-id-0011</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToDescribeSymptoms-id-0001" sourceRef="StartEvent-FridgeIssueReported-id-0001" targetRef="UserTask-DescribeFridgeSymptoms-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DescribeToSubmit-id-0002" sourceRef="UserTask-DescribeFridgeSymptoms-id-0001" targetRef="ServiceTask-SubmitSymptoms-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubmitToSelectFacility-id-0003" sourceRef="ServiceTask-SubmitSymptoms-id-0001" targetRef="ServiceTask-SelectLocalFacility-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectFacilityToSendRequest-id-0004" sourceRef="ServiceTask-SelectLocalFacility-id-0001" targetRef="SendTask-SendRequestToFacility-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendRequestToReceiveConfirmation-id-0005" sourceRef="SendTask-SendRequestToFacility-id-0001" targetRef="ReceiveTask-AppointmentConfirmation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveConfirmationToConfirmTime-id-0006" sourceRef="ReceiveTask-AppointmentConfirmation-id-0001" targetRef="UserTask-ConfirmAppointmentTime-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmTimeToArrivalWindow-id-0007" sourceRef="UserTask-ConfirmAppointmentTime-id-0001" targetRef="IntermediateCatchEvent-TechnicianArrivalWindow-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ArrivalWindowToRepairAttempt-id-0008" sourceRef="IntermediateCatchEvent-TechnicianArrivalWindow-id-0001" targetRef="UserTask-TechnicianAttemptsRepair-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RepairAttemptToGateway-id-0009" sourceRef="UserTask-TechnicianAttemptsRepair-id-0001" targetRef="ExclusiveGateway-RepairOutcome-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToConfirmRepair-id-0010" name="repair_successful" sourceRef="ExclusiveGateway-RepairOutcome-id-0001" targetRef="UserTask-ConfirmRepair-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToServiceIncomplete-id-0011" name="needs_additional_parts" sourceRef="ExclusiveGateway-RepairOutcome-id-0001" targetRef="EndEvent-ServiceIncomplete-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmRepairToRateService-id-0012" sourceRef="UserTask-ConfirmRepair-id-0001" targetRef="UserTask-RateServiceFacility-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RateServiceToEnd-id-0013" sourceRef="UserTask-RateServiceFacility-id-0001" targetRef="EndEvent-ServiceCompletedAndRated-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_FridgeRepairProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_FridgeRepairProcess-id-0001" bpmnElement="FridgeRepairProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-FridgeIssueReported-id-0001_di" bpmnElement="StartEvent-FridgeIssueReported-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-DescribeFridgeSymptoms-id-0001_di" bpmnElement="UserTask-DescribeFridgeSymptoms-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SubmitSymptoms-id-0001_di" bpmnElement="ServiceTask-SubmitSymptoms-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SelectLocalFacility-id-0001_di" bpmnElement="ServiceTask-SelectLocalFacility-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendRequestToFacility-id-0001_di" bpmnElement="SendTask-SendRequestToFacility-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-AppointmentConfirmation-id-0001_di" bpmnElement="ReceiveTask-AppointmentConfirmation-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConfirmAppointmentTime-id-0001_di" bpmnElement="UserTask-ConfirmAppointmentTime-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-TechnicianArrivalWindow-id-0001_di" bpmnElement="IntermediateCatchEvent-TechnicianArrivalWindow-id-0001">
+        <dc:Bounds x="1107" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-TechnicianAttemptsRepair-id-0001_di" bpmnElement="UserTask-TechnicianAttemptsRepair-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RepairOutcome-id-0001_di" bpmnElement="ExclusiveGateway-RepairOutcome-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConfirmRepair-id-0001_di" bpmnElement="UserTask-ConfirmRepair-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-RateServiceFacility-id-0001_di" bpmnElement="UserTask-RateServiceFacility-id-0001">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ServiceCompletedAndRated-id-0001_di" bpmnElement="EndEvent-ServiceCompletedAndRated-id-0001">
+        <dc:Bounds x="1857" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ServiceIncomplete-id-0002_di" bpmnElement="EndEvent-ServiceIncomplete-id-0002">
+        <dc:Bounds x="1557" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToDescribeSymptoms-id-0001_di" bpmnElement="SequenceFlow-StartToDescribeSymptoms-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DescribeToSubmit-id-0002_di" bpmnElement="SequenceFlow-DescribeToSubmit-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubmitToSelectFacility-id-0003_di" bpmnElement="SequenceFlow-SubmitToSelectFacility-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectFacilityToSendRequest-id-0004_di" bpmnElement="SequenceFlow-SelectFacilityToSendRequest-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendRequestToReceiveConfirmation-id-0005_di" bpmnElement="SequenceFlow-SendRequestToReceiveConfirmation-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveConfirmationToConfirmTime-id-0006_di" bpmnElement="SequenceFlow-ReceiveConfirmationToConfirmTime-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmTimeToArrivalWindow-id-0007_di" bpmnElement="SequenceFlow-ConfirmTimeToArrivalWindow-id-0007">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1107" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ArrivalWindowToRepairAttempt-id-0008_di" bpmnElement="SequenceFlow-ArrivalWindowToRepairAttempt-id-0008">
+        <di:waypoint x="1143" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RepairAttemptToGateway-id-0009_di" bpmnElement="SequenceFlow-RepairAttemptToGateway-id-0009">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToConfirmRepair-id-0010_di" bpmnElement="SequenceFlow-GatewayToConfirmRepair-id-0010">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToServiceIncomplete-id-0011_di" bpmnElement="SequenceFlow-GatewayToServiceIncomplete-id-0011">
+        <di:waypoint x="1425" y="95" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1557" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmRepairToRateService-id-0012_di" bpmnElement="SequenceFlow-ConfirmRepairToRateService-id-0012">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RateServiceToEnd-id-0013_di" bpmnElement="SequenceFlow-RateServiceToEnd-id-0013">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1857" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

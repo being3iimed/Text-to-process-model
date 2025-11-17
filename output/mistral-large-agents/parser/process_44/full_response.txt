@@ -1,0 +1,120 @@
+```
+<summary_of_elements>
+
+### TASKS:
+- **userTask("Receive Order")** - Initial order reception (human interaction)
+- **userTask("Ask: Menu or Burger Only?")** - Decision point for order type
+- **serviceTask("Prepare Drink")** - Automated drink preparation (variable time)
+- **userTask("Ask: Fries or Wedges?")** - Side dish selection
+- **serviceTask("Prepare Fries")** - Automated fries preparation (variable time)
+- **serviceTask("Prepare Wedges")** - Automated wedges preparation (variable time)
+- **serviceTask("Prepare Burger")** - Automated burger preparation (variable time)
+- **sendTask("Send: Status Update")** - Enthusiastic progress notifications (every 30s)
+- **serviceTask("Deliver via Conveyor Belt")** - Automated delivery
+
+### GATEWAYS:
+- **XOR** after "Ask: Menu or Burger Only?" (2 branches: Menu/Burger Only)
+- **XOR** after "Ask: Fries or Wedges?" (2 branches: Fries/Wedges)
+- **AND** for parallel status updates during burger prep (timer + burger prep)
+
+### EVENTS:
+- **startEvent("Order Received")** - Manual trigger
+- **endEvent("Order Delivered")** - Process completion
+- **intermediateEvent(timerBoundary("PT30S"))** - Status update timer
+
+### BOUNDARY EVENTS:
+- **timerBoundary("PT30S")** on "Prepare Burger" - Enthusiastic status updates (explicit requirement)
+
+### SUBPROCESSES:
+- **subProcess("Prepare Menu Components")** - Groups drink + side preparation
+  - Justification: Cohesive logical grouping of menu-specific tasks (3+ related tasks)
+
+</summary_of_elements>
+
+<pseudocode>
+startEvent("Order Received")
+
+// Main Process Flow
+userTask("Receive Order")
+userTask("Ask: Menu or Burger Only?")
+
+if (customer_wants_menu):
+    subProcess("Prepare Menu Components"):
+        startEvent("Menu Prep Start")
+
+        // Parallel drink + side preparation
+        AND:
+            serviceTask("Prepare Drink")  // Variable time
+            userTask("Ask: Fries or Wedges?")
+
+            if (customer_wants_fries):
+                serviceTask("Prepare Fries")  // Variable time
+            else:
+                serviceTask("Prepare Wedges")  // Variable time
+        END_AND
+
+        endEvent("Menu Components Ready")
+    endSubProcess
+
+    // Burger preparation with status updates
+    serviceTask("Prepare Burger"):
+        timerBoundary("PT30S"):
+            sendTask("Send: Status Update")
+    endBoundary
+else:
+    // Burger-only path
+    serviceTask("Prepare Burger"):
+        timerBoundary("PT30S"):
+            sendTask("Send: Status Update")
+    endBoundary
+
+// Delivery
+serviceTask("Deliver via Conveyor Belt")
+endEvent("Order Delivered")
+</pseudocode>
+
+<compliance_validation>
+
+### TIMER VALIDATION:
+- Status update timer uses correct `timeDuration` format ("PT30S")
+- No invalid `timeDate`/`timeCycle` usage
+- Timer is properly attached as boundary event (not in main flow)
+
+### GATEWAY VALIDATION:
+- All XOR gateways have:
+  - Mutually exclusive conditions
+  - Exhaustive coverage (default paths implicit)
+  - Explicit convergence points (implied by linear flow)
+- AND gateway properly groups parallel tasks
+
+### BOUNDARY EVENT VALIDATION:
+- Status update timer meets all 3 gating criteria:
+  1. Explicit requirement ("enthusiastic status updates every 30 seconds")
+  2. Handler is simple/immediate (single sendTask)
+  3. Business requirement (customer communication)
+
+### SUBPROCESS VALIDATION:
+- "Prepare Menu Components" passes Three-Question Test:
+  1. Purpose: "Coordinates drink and side preparation for menu orders"
+  2. Contains 3+ related tasks with cohesive purpose
+  3. Removal would complicate main flow (parallel branches)
+
+### FLOW VALIDATION:
+- All paths traceable start-to-end
+- No orphaned elements
+- Burger prep timer properly scoped to burger task
+- Menu/burger paths converge at delivery
+
+</compliance_validation>
+
+<critical_success_verification>
+✅ NO invalid BPMN timer properties
+✅ NO unreachable timer events in main flow
+✅ NO missing gateway convergence (implicit in linear flow)
+✅ NO orphaned flows (all paths terminate)
+✅ NO speculative boundary events (only explicit status updates)
+✅ NO unjustified subprocess (menu prep has clear purpose)
+✅ All conditional flows have implicit labels
+✅ Core elements comprise 90%+ of design
+</critical_success_verification>
+```

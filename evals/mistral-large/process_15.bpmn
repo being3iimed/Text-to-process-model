@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="ComplianceAuditCertification-Definitions-id-0001" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="ComplianceAuditCertification-Process-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ComplianceAuditScheduled-id-0001" name="Compliance Audit Scheduled">
+      <bpmn:outgoing>SequenceFlow-StartToInternalPrep-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:subProcess id="SubProcess-InternalPreparation-id-0001" name="Internal Preparation">
+      <bpmn:incoming>SequenceFlow-StartToInternalPrep-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InternalPrepToAuditors-id-0002</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-PreparationBegins-id-0001" name="Preparation Begins">
+        <bpmn:outgoing>SequenceFlow-PreparationStartToDocs-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-PrepareDocumentation-id-0001" name="Prepare Documentation">
+        <bpmn:incoming>SequenceFlow-PreparationStartToDocs-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-DocsToEvidence-id-0002</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-GatherEvidence-id-0002" name="Gather Evidence">
+        <bpmn:incoming>SequenceFlow-DocsToEvidence-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-EvidenceToSelfAssessment-id-0003</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-ConductSelfAssessment-id-0003" name="Conduct Self-Assessment">
+        <bpmn:incoming>SequenceFlow-EvidenceToSelfAssessment-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SelfAssessmentToEnd-id-0004</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:endEvent id="EndEvent-PreparationComplete-id-0001" name="Preparation Complete">
+        <bpmn:incoming>SequenceFlow-SelfAssessmentToEnd-id-0004</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-PreparationStartToDocs-id-0001" sourceRef="StartEvent-PreparationBegins-id-0001" targetRef="UserTask-PrepareDocumentation-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-DocsToEvidence-id-0002" sourceRef="UserTask-PrepareDocumentation-id-0001" targetRef="UserTask-GatherEvidence-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-EvidenceToSelfAssessment-id-0003" sourceRef="UserTask-GatherEvidence-id-0002" targetRef="UserTask-ConductSelfAssessment-id-0003" />
+      <bpmn:sequenceFlow id="SequenceFlow-SelfAssessmentToEnd-id-0004" sourceRef="UserTask-ConductSelfAssessment-id-0003" targetRef="EndEvent-PreparationComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:userTask id="UserTask-AuditorsReviewProcesses-id-0001" name="Auditors Review Processes and Identify Gaps">
+      <bpmn:incoming>SequenceFlow-InternalPrepToAuditors-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AuditorsToCorrections-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-MakeCorrections-id-0002" name="Company Makes Corrections/Improvements">
+      <bpmn:incoming>SequenceFlow-AuditorsToCorrections-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CorrectionsToFinalAudit-id-0004</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-FinalAuditConducted-id-0003" name="Final Audit Conducted">
+      <bpmn:incoming>SequenceFlow-CorrectionsToFinalAudit-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FinalAuditToGateway-id-0005</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-AuditOutcome-id-0001" name="Audit Outcome" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-FinalAuditToGateway-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToCertification-id-0006</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToEndFail-id-0009</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-AwardCertification-id-0001" name="Award Certification">
+      <bpmn:incoming>SequenceFlow-GatewayToCertification-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CertificationToSend-id-0007</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendOfficialDocuments-id-0001" name="Send: Official Certification Documents">
+      <bpmn:incoming>SequenceFlow-CertificationToSend-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendToEndSuccess-id-0008</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-CertificationIssued-id-0001" name="Certification Issued">
+      <bpmn:incoming>SequenceFlow-SendToEndSuccess-id-0008</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-AuditFailed-id-0002" name="Audit Failed (No Certification)">
+      <bpmn:incoming>SequenceFlow-GatewayToEndFail-id-0009</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToInternalPrep-id-0001" sourceRef="StartEvent-ComplianceAuditScheduled-id-0001" targetRef="SubProcess-InternalPreparation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InternalPrepToAuditors-id-0002" sourceRef="SubProcess-InternalPreparation-id-0001" targetRef="UserTask-AuditorsReviewProcesses-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AuditorsToCorrections-id-0003" sourceRef="UserTask-AuditorsReviewProcesses-id-0001" targetRef="UserTask-MakeCorrections-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-CorrectionsToFinalAudit-id-0004" sourceRef="UserTask-MakeCorrections-id-0002" targetRef="UserTask-FinalAuditConducted-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-FinalAuditToGateway-id-0005" sourceRef="UserTask-FinalAuditConducted-id-0003" targetRef="ExclusiveGateway-AuditOutcome-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToCertification-id-0006" name="all_criteria_met" sourceRef="ExclusiveGateway-AuditOutcome-id-0001" targetRef="ServiceTask-AwardCertification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CertificationToSend-id-0007" sourceRef="ServiceTask-AwardCertification-id-0001" targetRef="SendTask-SendOfficialDocuments-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendToEndSuccess-id-0008" sourceRef="SendTask-SendOfficialDocuments-id-0001" targetRef="EndEvent-CertificationIssued-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToEndFail-id-0009" name="!all_criteria_met" sourceRef="ExclusiveGateway-AuditOutcome-id-0001" targetRef="EndEvent-AuditFailed-id-0002" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ComplianceAuditCertification-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_ComplianceAuditCertification-Process-id-0001" bpmnElement="ComplianceAuditCertification-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ComplianceAuditScheduled-id-0001_di" bpmnElement="StartEvent-ComplianceAuditScheduled-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-InternalPreparation-id-0001_di" bpmnElement="SubProcess-InternalPreparation-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AuditorsReviewProcesses-id-0001_di" bpmnElement="UserTask-AuditorsReviewProcesses-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-MakeCorrections-id-0002_di" bpmnElement="UserTask-MakeCorrections-id-0002">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-FinalAuditConducted-id-0003_di" bpmnElement="UserTask-FinalAuditConducted-id-0003">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-AuditOutcome-id-0001_di" bpmnElement="ExclusiveGateway-AuditOutcome-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AwardCertification-id-0001_di" bpmnElement="ServiceTask-AwardCertification-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendOfficialDocuments-id-0001_di" bpmnElement="SendTask-SendOfficialDocuments-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CertificationIssued-id-0001_di" bpmnElement="EndEvent-CertificationIssued-id-0001">
+        <dc:Bounds x="1257" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AuditFailed-id-0002_di" bpmnElement="EndEvent-AuditFailed-id-0002">
+        <dc:Bounds x="957" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToInternalPrep-id-0001_di" bpmnElement="SequenceFlow-StartToInternalPrep-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InternalPrepToAuditors-id-0002_di" bpmnElement="SequenceFlow-InternalPrepToAuditors-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AuditorsToCorrections-id-0003_di" bpmnElement="SequenceFlow-AuditorsToCorrections-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CorrectionsToFinalAudit-id-0004_di" bpmnElement="SequenceFlow-CorrectionsToFinalAudit-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FinalAuditToGateway-id-0005_di" bpmnElement="SequenceFlow-FinalAuditToGateway-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToCertification-id-0006_di" bpmnElement="SequenceFlow-GatewayToCertification-id-0006">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToEndFail-id-0009_di" bpmnElement="SequenceFlow-GatewayToEndFail-id-0009">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="957" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CertificationToSend-id-0007_di" bpmnElement="SequenceFlow-CertificationToSend-id-0007">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToEndSuccess-id-0008_di" bpmnElement="SequenceFlow-SendToEndSuccess-id-0008">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1257" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-InternalPreparation-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-InternalPreparation-id-0001" bpmnElement="SubProcess-InternalPreparation-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-PreparationBegins-id-0001_di" bpmnElement="StartEvent-PreparationBegins-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PrepareDocumentation-id-0001_di" bpmnElement="UserTask-PrepareDocumentation-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-GatherEvidence-id-0002_di" bpmnElement="UserTask-GatherEvidence-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConductSelfAssessment-id-0003_di" bpmnElement="UserTask-ConductSelfAssessment-id-0003">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-PreparationComplete-id-0001_di" bpmnElement="EndEvent-PreparationComplete-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-PreparationStartToDocs-id-0001_di" bpmnElement="SequenceFlow-PreparationStartToDocs-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DocsToEvidence-id-0002_di" bpmnElement="SequenceFlow-DocsToEvidence-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EvidenceToSelfAssessment-id-0003_di" bpmnElement="SequenceFlow-EvidenceToSelfAssessment-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelfAssessmentToEnd-id-0004_di" bpmnElement="SequenceFlow-SelfAssessmentToEnd-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

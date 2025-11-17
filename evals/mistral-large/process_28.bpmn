@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="InternshipProcessDefinitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="InternshipProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-InternshipApplicationStarted-id-0001" name="Internship Application Started">
+      <bpmn:outgoing>SequenceFlow-StartToSubmit-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-SubmitInternshipPreferences-id-0001" name="Submit Internship Preferences">
+      <bpmn:incoming>SequenceFlow-StartToSubmit-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SubmitToGenerate-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-GenerateInternshipOffers-id-0001" name="Generate Internship Offers">
+      <bpmn:incoming>SequenceFlow-SubmitToGenerate-id-0002</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-WaitForOffersToGenerate-id-0021</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-WaitForNextOfferToGenerate-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GenerateToOfferReceived-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-OfferReceived-id-0001" name="Offer Received?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-GenerateToOfferReceived-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OfferReceivedToReview-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-OfferReceivedToWait-id-0005</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-ReviewOffer-id-0001" name="Review Offer">
+      <bpmn:incoming>SequenceFlow-OfferReceivedToReview-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToUserDecision-id-0006</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-UserDecision-id-0001" name="User Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewToUserDecision-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UserDecisionToAccept-id-0007</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-UserDecisionToReject-id-0008</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-AcceptOffer-id-0001" name="Accept Offer">
+      <bpmn:incoming>SequenceFlow-UserDecisionToAccept-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AcceptToInvalidate-id-0009</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-InvalidateOtherOffers-id-0001" name="Invalidate Other Offers">
+      <bpmn:incoming>SequenceFlow-AcceptToInvalidate-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InvalidateToSplit-id-0010</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-PostAcceptanceSplit-id-0001" name="Post-Acceptance Split" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-InvalidateToSplit-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToStatusUpdates-id-0011</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToTimer-id-0012</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:subProcess id="SubProcess-StatusUpdateCycle-id-0001" name="Status Update Cycle">
+      <bpmn:incoming>SequenceFlow-SplitToStatusUpdates-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StatusUpdatesToJoin-id-0013</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-StatusUpdatesBegin-id-0001" name="Status Updates Begin">
+        <bpmn:outgoing>SequenceFlow-StartToWrite-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-WriteWeeklyStatusUpdate-id-0001" name="Write Weekly Status Update">
+        <bpmn:incoming>SequenceFlow-StartToWrite-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-WriteToGenerate-id-0002</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:serviceTask id="ServiceTask-GenerateCompanyStatusUpdate-id-0001" name="Generate Company Status Update">
+        <bpmn:incoming>SequenceFlow-WriteToGenerate-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GenerateToStore-id-0003</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-StoreUpdates-id-0001" name="Store Updates">
+        <bpmn:incoming>SequenceFlow-GenerateToStore-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-StoreToEnd-id-0004</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-AllUpdatesComplete-id-0001" name="All Updates Complete">
+        <bpmn:incoming>SequenceFlow-StoreToEnd-id-0004</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToWrite-id-0001" sourceRef="StartEvent-StatusUpdatesBegin-id-0001" targetRef="UserTask-WriteWeeklyStatusUpdate-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-WriteToGenerate-id-0002" sourceRef="UserTask-WriteWeeklyStatusUpdate-id-0001" targetRef="ServiceTask-GenerateCompanyStatusUpdate-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GenerateToStore-id-0003" sourceRef="ServiceTask-GenerateCompanyStatusUpdate-id-0001" targetRef="ServiceTask-StoreUpdates-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-StoreToEnd-id-0004" sourceRef="ServiceTask-StoreUpdates-id-0001" targetRef="EndEvent-AllUpdatesComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-InternshipTimer-id-0001" name="30-Day Internship Timer">
+      <bpmn:incoming>SequenceFlow-SplitToTimer-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TimerToAutoComplete-id-0014</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-TimerToJoin-id-0015</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="EndEvent-InternshipAutoCompleted-id-0001" name="Internship Auto-Completed">
+      <bpmn:incoming>SequenceFlow-TimerToAutoComplete-id-0014</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:parallelGateway id="ParallelGateway-PostAcceptanceJoin-id-0001" name="Post-Acceptance Join" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-StatusUpdatesToJoin-id-0013</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-TimerToJoin-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToRecommendations-id-0016</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-JoinToInternshipComplete-id-0019</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-SelectFriendsToRecommend-id-0001" name="Select Friends to Recommend">
+      <bpmn:incoming>SequenceFlow-JoinToRecommendations-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RecommendationsToSend-id-0017</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="SendTask-SendRecommendationTweets-id-0001" name="Send: Recommendation Tweets">
+      <bpmn:incoming>SequenceFlow-RecommendationsToSend-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendToRecommendationsEnd-id-0018</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-RecommendationsSent-id-0001" name="Recommendations Sent">
+      <bpmn:incoming>SequenceFlow-SendToRecommendationsEnd-id-0018</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-InternshipCompleted-id-0001" name="Internship Completed">
+      <bpmn:incoming>SequenceFlow-JoinToInternshipComplete-id-0019</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-LogRejection-id-0001" name="Log Rejection">
+      <bpmn:incoming>SequenceFlow-UserDecisionToReject-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogRejectionToWait-id-0020</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-WaitForOffers-id-0001" name="Wait for Offers">
+      <bpmn:incoming>SequenceFlow-OfferReceivedToWait-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-WaitForOffersToGenerate-id-0021</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-WaitForNextOffer-id-0001" name="Wait for Next Offer">
+      <bpmn:incoming>SequenceFlow-LogRejectionToWait-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-WaitForNextOfferToGenerate-id-0022</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSubmit-id-0001" sourceRef="StartEvent-InternshipApplicationStarted-id-0001" targetRef="UserTask-SubmitInternshipPreferences-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubmitToGenerate-id-0002" sourceRef="UserTask-SubmitInternshipPreferences-id-0001" targetRef="ServiceTask-GenerateInternshipOffers-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GenerateToOfferReceived-id-0003" sourceRef="ServiceTask-GenerateInternshipOffers-id-0001" targetRef="ExclusiveGateway-OfferReceived-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-OfferReceivedToReview-id-0004" name="offer_received == true" sourceRef="ExclusiveGateway-OfferReceived-id-0001" targetRef="UserTask-ReviewOffer-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-OfferReceivedToWait-id-0005" name="no_offers_yet" sourceRef="ExclusiveGateway-OfferReceived-id-0001" targetRef="IntermediateCatchEvent-WaitForOffers-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToUserDecision-id-0006" sourceRef="UserTask-ReviewOffer-id-0001" targetRef="ExclusiveGateway-UserDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UserDecisionToAccept-id-0007" name="user_accepts" sourceRef="ExclusiveGateway-UserDecision-id-0001" targetRef="UserTask-AcceptOffer-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UserDecisionToReject-id-0008" name="user_rejects" sourceRef="ExclusiveGateway-UserDecision-id-0001" targetRef="ServiceTask-LogRejection-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AcceptToInvalidate-id-0009" sourceRef="UserTask-AcceptOffer-id-0001" targetRef="ServiceTask-InvalidateOtherOffers-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InvalidateToSplit-id-0010" sourceRef="ServiceTask-InvalidateOtherOffers-id-0001" targetRef="ParallelGateway-PostAcceptanceSplit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToStatusUpdates-id-0011" sourceRef="ParallelGateway-PostAcceptanceSplit-id-0001" targetRef="SubProcess-StatusUpdateCycle-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToTimer-id-0012" sourceRef="ParallelGateway-PostAcceptanceSplit-id-0001" targetRef="IntermediateCatchEvent-InternshipTimer-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-StatusUpdatesToJoin-id-0013" sourceRef="SubProcess-StatusUpdateCycle-id-0001" targetRef="ParallelGateway-PostAcceptanceJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TimerToAutoComplete-id-0014" sourceRef="IntermediateCatchEvent-InternshipTimer-id-0001" targetRef="EndEvent-InternshipAutoCompleted-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TimerToJoin-id-0015" sourceRef="IntermediateCatchEvent-InternshipTimer-id-0001" targetRef="ParallelGateway-PostAcceptanceJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToRecommendations-id-0016" sourceRef="ParallelGateway-PostAcceptanceJoin-id-0001" targetRef="UserTask-SelectFriendsToRecommend-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RecommendationsToSend-id-0017" sourceRef="UserTask-SelectFriendsToRecommend-id-0001" targetRef="SendTask-SendRecommendationTweets-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendToRecommendationsEnd-id-0018" sourceRef="SendTask-SendRecommendationTweets-id-0001" targetRef="EndEvent-RecommendationsSent-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToInternshipComplete-id-0019" sourceRef="ParallelGateway-PostAcceptanceJoin-id-0001" targetRef="EndEvent-InternshipCompleted-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogRejectionToWait-id-0020" sourceRef="ServiceTask-LogRejection-id-0001" targetRef="IntermediateCatchEvent-WaitForNextOffer-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-WaitForOffersToGenerate-id-0021" sourceRef="IntermediateCatchEvent-WaitForOffers-id-0001" targetRef="ServiceTask-GenerateInternshipOffers-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-WaitForNextOfferToGenerate-id-0022" sourceRef="IntermediateCatchEvent-WaitForNextOffer-id-0001" targetRef="ServiceTask-GenerateInternshipOffers-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_InternshipProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_InternshipProcess" bpmnElement="InternshipProcess">
+      <bpmndi:BPMNShape id="StartEvent-InternshipApplicationStarted-id-0001_di" bpmnElement="StartEvent-InternshipApplicationStarted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SubmitInternshipPreferences-id-0001_di" bpmnElement="UserTask-SubmitInternshipPreferences-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateInternshipOffers-id-0001_di" bpmnElement="ServiceTask-GenerateInternshipOffers-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-OfferReceived-id-0001_di" bpmnElement="ExclusiveGateway-OfferReceived-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewOffer-id-0001_di" bpmnElement="UserTask-ReviewOffer-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-UserDecision-id-0001_di" bpmnElement="ExclusiveGateway-UserDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AcceptOffer-id-0001_di" bpmnElement="UserTask-AcceptOffer-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-InvalidateOtherOffers-id-0001_di" bpmnElement="ServiceTask-InvalidateOtherOffers-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-PostAcceptanceSplit-id-0001_di" bpmnElement="ParallelGateway-PostAcceptanceSplit-id-0001">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-StatusUpdateCycle-id-0001_di" bpmnElement="SubProcess-StatusUpdateCycle-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-PostAcceptanceJoin-id-0001_di" bpmnElement="ParallelGateway-PostAcceptanceJoin-id-0001">
+        <dc:Bounds x="1550" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectFriendsToRecommend-id-0001_di" bpmnElement="UserTask-SelectFriendsToRecommend-id-0001">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendRecommendationTweets-id-0001_di" bpmnElement="SendTask-SendRecommendationTweets-id-0001">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-RecommendationsSent-id-0001_di" bpmnElement="EndEvent-RecommendationsSent-id-0001">
+        <dc:Bounds x="2007" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-WaitForOffers-id-0001_di" bpmnElement="IntermediateCatchEvent-WaitForOffers-id-0001">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogRejection-id-0001_di" bpmnElement="ServiceTask-LogRejection-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-WaitForNextOffer-id-0001_di" bpmnElement="IntermediateCatchEvent-WaitForNextOffer-id-0001">
+        <dc:Bounds x="1107" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-InternshipTimer-id-0001_di" bpmnElement="IntermediateCatchEvent-InternshipTimer-id-0001">
+        <dc:Bounds x="1557" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-InternshipAutoCompleted-id-0001_di" bpmnElement="EndEvent-InternshipAutoCompleted-id-0001">
+        <dc:Bounds x="1707" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-InternshipCompleted-id-0001_di" bpmnElement="EndEvent-InternshipCompleted-id-0001">
+        <dc:Bounds x="2007" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSubmit-id-0001_di" bpmnElement="SequenceFlow-StartToSubmit-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubmitToGenerate-id-0002_di" bpmnElement="SequenceFlow-SubmitToGenerate-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateToOfferReceived-id-0003_di" bpmnElement="SequenceFlow-GenerateToOfferReceived-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OfferReceivedToReview-id-0004_di" bpmnElement="SequenceFlow-OfferReceivedToReview-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OfferReceivedToWait-id-0005_di" bpmnElement="SequenceFlow-OfferReceivedToWait-id-0005">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToUserDecision-id-0006_di" bpmnElement="SequenceFlow-ReviewToUserDecision-id-0006">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UserDecisionToAccept-id-0007_di" bpmnElement="SequenceFlow-UserDecisionToAccept-id-0007">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UserDecisionToReject-id-0008_di" bpmnElement="SequenceFlow-UserDecisionToReject-id-0008">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AcceptToInvalidate-id-0009_di" bpmnElement="SequenceFlow-AcceptToInvalidate-id-0009">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvalidateToSplit-id-0010_di" bpmnElement="SequenceFlow-InvalidateToSplit-id-0010">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToStatusUpdates-id-0011_di" bpmnElement="SequenceFlow-SplitToStatusUpdates-id-0011">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToTimer-id-0012_di" bpmnElement="SequenceFlow-SplitToTimer-id-0012">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1557" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StatusUpdatesToJoin-id-0013_di" bpmnElement="SequenceFlow-StatusUpdatesToJoin-id-0013">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1550" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToRecommendations-id-0016_di" bpmnElement="SequenceFlow-JoinToRecommendations-id-0016">
+        <di:waypoint x="1600" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToInternshipComplete-id-0019_di" bpmnElement="SequenceFlow-JoinToInternshipComplete-id-0019">
+        <di:waypoint x="1600" y="70" />
+        <di:waypoint x="1650" y="70" />
+        <di:waypoint x="1650" y="140" />
+        <di:waypoint x="1950" y="140" />
+        <di:waypoint x="1950" y="210" />
+        <di:waypoint x="2007" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RecommendationsToSend-id-0017_di" bpmnElement="SequenceFlow-RecommendationsToSend-id-0017">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToRecommendationsEnd-id-0018_di" bpmnElement="SequenceFlow-SendToRecommendationsEnd-id-0018">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="2007" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WaitForOffersToGenerate-id-0021_di" bpmnElement="SequenceFlow-WaitForOffersToGenerate-id-0021">
+        <di:waypoint x="675" y="228" />
+        <di:waypoint x="675" y="280" />
+        <di:waypoint x="375" y="280" />
+        <di:waypoint x="375" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogRejectionToWait-id-0020_di" bpmnElement="SequenceFlow-LogRejectionToWait-id-0020">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1107" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WaitForNextOfferToGenerate-id-0022_di" bpmnElement="SequenceFlow-WaitForNextOfferToGenerate-id-0022">
+        <di:waypoint x="1125" y="228" />
+        <di:waypoint x="1125" y="280" />
+        <di:waypoint x="375" y="280" />
+        <di:waypoint x="375" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TimerToAutoComplete-id-0014_di" bpmnElement="SequenceFlow-TimerToAutoComplete-id-0014">
+        <di:waypoint x="1593" y="210" />
+        <di:waypoint x="1707" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TimerToJoin-id-0015_di" bpmnElement="SequenceFlow-TimerToJoin-id-0015">
+        <di:waypoint x="1575" y="192" />
+        <di:waypoint x="1575" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-StatusUpdateCycle-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-StatusUpdateCycle-id-0001" bpmnElement="SubProcess-StatusUpdateCycle-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-StatusUpdatesBegin-id-0001_di" bpmnElement="StartEvent-StatusUpdatesBegin-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-WriteWeeklyStatusUpdate-id-0001_di" bpmnElement="UserTask-WriteWeeklyStatusUpdate-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateCompanyStatusUpdate-id-0001_di" bpmnElement="ServiceTask-GenerateCompanyStatusUpdate-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-StoreUpdates-id-0001_di" bpmnElement="ServiceTask-StoreUpdates-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AllUpdatesComplete-id-0001_di" bpmnElement="EndEvent-AllUpdatesComplete-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToWrite-id-0001_di" bpmnElement="SequenceFlow-StartToWrite-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WriteToGenerate-id-0002_di" bpmnElement="SequenceFlow-WriteToGenerate-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateToStore-id-0003_di" bpmnElement="SequenceFlow-GenerateToStore-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StoreToEnd-id-0004_di" bpmnElement="SequenceFlow-StoreToEnd-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

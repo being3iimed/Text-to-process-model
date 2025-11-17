@@ -1,0 +1,293 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "Definitions_OrderProcessing",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler",
+    "exporterVersion": "1.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "Process_OrderProcessing-id-0001",
+        "name": "Order Processing Workflow",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-OrderReceived-id-0001",
+            "name": "Order received from automatic system"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ReadOrder-id-0001",
+            "name": "Read order from automatic order management system"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-CheckStock-id-0002",
+            "name": "Check stock availability for product"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-StockCheck-id-0001",
+            "name": "Stock Check",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-WithdrawProduct-id-0003",
+            "name": "Withdraw product from warehouse"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ReorderProduct-id-0004",
+            "name": "Reorder product from wholesaler"
+          },
+          {
+            "$type": "bpmn:ReceiveTask",
+            "id": "ReceiveTask-ReceiveReorderedProduct-id-0005",
+            "name": "Receive: reordered product"
+          },
+          {
+            "$type": "bpmn:BoundaryEvent",
+            "id": "BoundaryEvent-Timer10Day-ReceiveReorderedProduct-id-0001",
+            "name": "10 Day SLA Timeout",
+            "attachedToRef": "ReceiveTask-ReceiveReorderedProduct-id-0005",
+            "cancelActivity": true,
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:TimerEventDefinition",
+                "timeDuration": "P10D"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-DemandPenalty-id-0006",
+            "name": "Demand delivery delay penalty from wholesaler"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-StockCheckMerge-id-0002",
+            "name": "Stock Check Merge",
+            "gatewayDirection": "Converging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-RegisterProduct-id-0007",
+            "name": "Register product in stock management system"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-CheckOrderReady-id-0008",
+            "name": "Check if entire order is ready for shipment"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-OrderReadyCheck-id-0003",
+            "name": "Order Completion Check",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ParallelGateway",
+            "id": "ParallelGateway-ShipmentPrepSplit-id-0001",
+            "name": "Shipment Preparation Split",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-CourierRequest-id-0001",
+            "name": "Send: courier request"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-PackProducts-id-0009",
+            "name": "Pack products"
+          },
+          {
+            "$type": "bpmn:ParallelGateway",
+            "id": "ParallelGateway-ShipmentPrepJoin-id-0002",
+            "name": "Shipment Preparation Join",
+            "gatewayDirection": "Converging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ShipOrder-id-0010",
+            "name": "Ship order"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-OrderShipped-id-0001",
+            "name": "Order shipped"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-SelectNextProduct-id-0011",
+            "name": "Select next product from order"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToReadOrder-id-0001",
+            "sourceRef": "StartEvent-OrderReceived-id-0001",
+            "targetRef": "ServiceTask-ReadOrder-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReadOrderToCheckStock-id-0002",
+            "sourceRef": "ServiceTask-ReadOrder-id-0001",
+            "targetRef": "ServiceTask-CheckStock-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CheckStockToStockCheckGateway-id-0003",
+            "sourceRef": "ServiceTask-CheckStock-id-0002",
+            "targetRef": "ExclusiveGateway-StockCheck-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StockCheckToWithdraw-id-0004",
+            "sourceRef": "ExclusiveGateway-StockCheck-id-0001",
+            "targetRef": "ServiceTask-WithdrawProduct-id-0003",
+            "name": "in_stock == true"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StockCheckToReorder-id-0005",
+            "sourceRef": "ExclusiveGateway-StockCheck-id-0001",
+            "targetRef": "ServiceTask-ReorderProduct-id-0004",
+            "name": "in_stock == false"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReorderToReceive-id-0006",
+            "sourceRef": "ServiceTask-ReorderProduct-id-0004",
+            "targetRef": "ReceiveTask-ReceiveReorderedProduct-id-0005"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReceiveToStockCheckMerge-id-0007",
+            "sourceRef": "ReceiveTask-ReceiveReorderedProduct-id-0005",
+            "targetRef": "ExclusiveGateway-StockCheckMerge-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-WithdrawToStockCheckMerge-id-0008",
+            "sourceRef": "ServiceTask-WithdrawProduct-id-0003",
+            "targetRef": "ExclusiveGateway-StockCheckMerge-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StockCheckMergeToRegister-id-0009",
+            "sourceRef": "ExclusiveGateway-StockCheckMerge-id-0002",
+            "targetRef": "ServiceTask-RegisterProduct-id-0007"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RegisterToCheckOrderReady-id-0010",
+            "sourceRef": "ServiceTask-RegisterProduct-id-0007",
+            "targetRef": "ServiceTask-CheckOrderReady-id-0008"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CheckOrderReadyToOrderReadyGateway-id-0011",
+            "sourceRef": "ServiceTask-CheckOrderReady-id-0008",
+            "targetRef": "ExclusiveGateway-OrderReadyCheck-id-0003"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-OrderReadyToShipmentPrep-id-0012",
+            "sourceRef": "ExclusiveGateway-OrderReadyCheck-id-0003",
+            "targetRef": "ParallelGateway-ShipmentPrepSplit-id-0001",
+            "name": "order_ready == true"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-OrderNotReadyToNextProduct-id-0013",
+            "sourceRef": "ExclusiveGateway-OrderReadyCheck-id-0003",
+            "targetRef": "ServiceTask-SelectNextProduct-id-0011",
+            "name": "order_ready == false",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ShipmentPrepSplitToCourierRequest-id-0014",
+            "sourceRef": "ParallelGateway-ShipmentPrepSplit-id-0001",
+            "targetRef": "SendTask-CourierRequest-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ShipmentPrepSplitToPackProducts-id-0015",
+            "sourceRef": "ParallelGateway-ShipmentPrepSplit-id-0001",
+            "targetRef": "ServiceTask-PackProducts-id-0009"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CourierRequestToShipmentPrepJoin-id-0016",
+            "sourceRef": "SendTask-CourierRequest-id-0001",
+            "targetRef": "ParallelGateway-ShipmentPrepJoin-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-PackProductsToShipmentPrepJoin-id-0017",
+            "sourceRef": "ServiceTask-PackProducts-id-0009",
+            "targetRef": "ParallelGateway-ShipmentPrepJoin-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ShipmentPrepJoinToShipOrder-id-0018",
+            "sourceRef": "ParallelGateway-ShipmentPrepJoin-id-0002",
+            "targetRef": "ServiceTask-ShipOrder-id-0010"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ShipOrderToEnd-id-0019",
+            "sourceRef": "ServiceTask-ShipOrder-id-0010",
+            "targetRef": "EndEvent-OrderShipped-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SelectNextProductToCheckStock-id-0020",
+            "sourceRef": "ServiceTask-SelectNextProduct-id-0011",
+            "targetRef": "ServiceTask-CheckStock-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-TimerBoundaryToDemandPenalty-id-0021",
+            "sourceRef": "BoundaryEvent-Timer10Day-ReceiveReorderedProduct-id-0001",
+            "targetRef": "ServiceTask-DemandPenalty-id-0006"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DemandPenaltyToStockCheckMerge-id-0022",
+            "sourceRef": "ServiceTask-DemandPenalty-id-0006",
+            "targetRef": "ExclusiveGateway-StockCheckMerge-id-0002"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-medium-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 12448,
+        "total_tokens": 15323,
+        "completion_tokens": 2875
+      },
+      "model_name": "mistral-medium-latest",
+      "model": "mistral-medium-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 12448,
+      "output_tokens": 2875,
+      "total_tokens": 15323
+    },
+    "id": "lc_run--50e06375-e278-4cf2-92c1-4a7a7a8bdbe6-0"
+  },
+  "status": "success"
+}

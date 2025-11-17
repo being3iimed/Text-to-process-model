@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="IT-Solution-Request-Process" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="IT-Solution-Request-Process-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-RequestSubmitted-id-0001" name="IT Solution Request Submitted">
+      <bpmn:outgoing>SequenceFlow-StartToAssess-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-AssessRequest-id-0001" name="IT Assesses Request">
+      <bpmn:incoming>SequenceFlow-StartToAssess-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AssessToApproval-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ApprovalDecision-id-0001" name="Approval Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-AssessToApproval-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ApprovalToReject-id-0003</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ApprovalToDeploy-id-0005</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-RejectionNotice-id-0001" name="Send: Rejection Notice to Requester">
+      <bpmn:incoming>SequenceFlow-ApprovalToReject-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RejectToEnd-id-0004</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-RequestRejected-id-0001" name="Request Rejected">
+      <bpmn:incoming>SequenceFlow-RejectToEnd-id-0004</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:subProcess id="SubProcess-DeploySolution-id-0001" name="Deploy Solution">
+      <bpmn:incoming>SequenceFlow-ApprovalToDeploy-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DeployToRollOut-id-0006</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-DeploymentInitiated-id-0001" name="Deployment Initiated">
+        <bpmn:outgoing>SequenceFlow-StartToProcure-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-ProcureTools-id-0001" name="Procure Tools/Licenses">
+        <bpmn:incoming>SequenceFlow-StartToProcure-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ProcureToInstall-id-0002</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-InstallSolution-id-0001" name="Install Solution">
+        <bpmn:incoming>SequenceFlow-ProcureToInstall-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-InstallToTest-id-0003</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-TestSolution-id-0001" name="Test in Controlled Environment">
+        <bpmn:incoming>SequenceFlow-InstallToTest-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-TestToGateway-id-0004</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-TestResult-id-0001" name="Test Result" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-TestToGateway-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GatewayToSuccess-id-0005</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToTroubleshoot-id-0006</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:userTask id="UserTask-Troubleshoot-id-0001" name="Troubleshoot Installation Issues">
+        <bpmn:incoming>SequenceFlow-GatewayToTroubleshoot-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-TroubleshootToFail-id-0007</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:endEvent id="EndEvent-DeploymentFailed-id-0001" name="Deployment Failed">
+        <bpmn:incoming>SequenceFlow-TroubleshootToFail-id-0007</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:endEvent id="EndEvent-DeploymentComplete-id-0001" name="Deployment Complete">
+        <bpmn:incoming>SequenceFlow-GatewayToSuccess-id-0005</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToProcure-id-0001" sourceRef="StartEvent-DeploymentInitiated-id-0001" targetRef="ServiceTask-ProcureTools-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ProcureToInstall-id-0002" sourceRef="ServiceTask-ProcureTools-id-0001" targetRef="ServiceTask-InstallSolution-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-InstallToTest-id-0003" sourceRef="ServiceTask-InstallSolution-id-0001" targetRef="ServiceTask-TestSolution-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-TestToGateway-id-0004" sourceRef="ServiceTask-TestSolution-id-0001" targetRef="ExclusiveGateway-TestResult-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToSuccess-id-0005" name="test_successful" sourceRef="ExclusiveGateway-TestResult-id-0001" targetRef="EndEvent-DeploymentComplete-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToTroubleshoot-id-0006" sourceRef="ExclusiveGateway-TestResult-id-0001" targetRef="UserTask-Troubleshoot-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-TroubleshootToFail-id-0007" sourceRef="UserTask-Troubleshoot-id-0001" targetRef="EndEvent-DeploymentFailed-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:serviceTask id="ServiceTask-RollOut-id-0001" name="Roll Out to Department">
+      <bpmn:incoming>SequenceFlow-DeployToRollOut-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RollOutToTraining-id-0007</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-TrainingDecision-id-0001" name="Training Required?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-RollOutToTraining-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TrainingToSupport-id-0008</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-NoTrainingToMerge-id-0010</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-ProvideTraining-id-0001" name="Provide Training">
+      <bpmn:incoming>SequenceFlow-TrainingToSupport-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TrainingToMerge-id-0009</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ITSupport-id-0001" name="IT Support Available">
+      <bpmn:incoming>SequenceFlow-MergeToSupport-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SupportToEnd-id-0012</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-RequestFulfilled-id-0001" name="Request Fulfilled">
+      <bpmn:incoming>SequenceFlow-SupportToEnd-id-0012</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-MergePaths-id-0001" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-TrainingToMerge-id-0009</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-NoTrainingToMerge-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MergeToSupport-id-0011</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToAssess-id-0001" sourceRef="StartEvent-RequestSubmitted-id-0001" targetRef="UserTask-AssessRequest-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AssessToApproval-id-0002" sourceRef="UserTask-AssessRequest-id-0001" targetRef="ExclusiveGateway-ApprovalDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApprovalToReject-id-0003" name="rejected" sourceRef="ExclusiveGateway-ApprovalDecision-id-0001" targetRef="SendTask-RejectionNotice-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RejectToEnd-id-0004" sourceRef="SendTask-RejectionNotice-id-0001" targetRef="EndEvent-RequestRejected-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApprovalToDeploy-id-0005" name="approved" sourceRef="ExclusiveGateway-ApprovalDecision-id-0001" targetRef="SubProcess-DeploySolution-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DeployToRollOut-id-0006" sourceRef="SubProcess-DeploySolution-id-0001" targetRef="ServiceTask-RollOut-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RollOutToTraining-id-0007" sourceRef="ServiceTask-RollOut-id-0001" targetRef="ExclusiveGateway-TrainingDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TrainingToSupport-id-0008" name="training_required" sourceRef="ExclusiveGateway-TrainingDecision-id-0001" targetRef="UserTask-ProvideTraining-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TrainingToMerge-id-0009" sourceRef="UserTask-ProvideTraining-id-0001" targetRef="ExclusiveGateway-MergePaths-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NoTrainingToMerge-id-0010" sourceRef="ExclusiveGateway-TrainingDecision-id-0001" targetRef="ExclusiveGateway-MergePaths-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MergeToSupport-id-0011" sourceRef="ExclusiveGateway-MergePaths-id-0001" targetRef="ServiceTask-ITSupport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SupportToEnd-id-0012" sourceRef="ServiceTask-ITSupport-id-0001" targetRef="EndEvent-RequestFulfilled-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_IT-Solution-Request-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_IT-Solution-Request-Process-id-0001" bpmnElement="IT-Solution-Request-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-RequestSubmitted-id-0001_di" bpmnElement="StartEvent-RequestSubmitted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AssessRequest-id-0001_di" bpmnElement="UserTask-AssessRequest-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ApprovalDecision-id-0001_di" bpmnElement="ExclusiveGateway-ApprovalDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RejectionNotice-id-0001_di" bpmnElement="SendTask-RejectionNotice-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-RequestRejected-id-0001_di" bpmnElement="EndEvent-RequestRejected-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-DeploySolution-id-0001_di" bpmnElement="SubProcess-DeploySolution-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RollOut-id-0001_di" bpmnElement="ServiceTask-RollOut-id-0001">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-TrainingDecision-id-0001_di" bpmnElement="ExclusiveGateway-TrainingDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ProvideTraining-id-0001_di" bpmnElement="UserTask-ProvideTraining-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-MergePaths-id-0001_di" bpmnElement="ExclusiveGateway-MergePaths-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ITSupport-id-0001_di" bpmnElement="ServiceTask-ITSupport-id-0001">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-RequestFulfilled-id-0001_di" bpmnElement="EndEvent-RequestFulfilled-id-0001">
+        <dc:Bounds x="1407" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToAssess-id-0001_di" bpmnElement="SequenceFlow-StartToAssess-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AssessToApproval-id-0002_di" bpmnElement="SequenceFlow-AssessToApproval-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalToReject-id-0003_di" bpmnElement="SequenceFlow-ApprovalToReject-id-0003">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalToDeploy-id-0005_di" bpmnElement="SequenceFlow-ApprovalToDeploy-id-0005">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RejectToEnd-id-0004_di" bpmnElement="SequenceFlow-RejectToEnd-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DeployToRollOut-id-0006_di" bpmnElement="SequenceFlow-DeployToRollOut-id-0006">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RollOutToTraining-id-0007_di" bpmnElement="SequenceFlow-RollOutToTraining-id-0007">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="800" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TrainingToSupport-id-0008_di" bpmnElement="SequenceFlow-TrainingToSupport-id-0008">
+        <di:waypoint x="850" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NoTrainingToMerge-id-0010_di" bpmnElement="SequenceFlow-NoTrainingToMerge-id-0010">
+        <di:waypoint x="825" y="235" />
+        <di:waypoint x="825" y="280" />
+        <di:waypoint x="1125" y="280" />
+        <di:waypoint x="1125" y="235" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TrainingToMerge-id-0009_di" bpmnElement="SequenceFlow-TrainingToMerge-id-0009">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1100" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MergeToSupport-id-0011_di" bpmnElement="SequenceFlow-MergeToSupport-id-0011">
+        <di:waypoint x="1150" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SupportToEnd-id-0012_di" bpmnElement="SequenceFlow-SupportToEnd-id-0012">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1407" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-DeploySolution-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-DeploySolution-id-0001" bpmnElement="SubProcess-DeploySolution-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-DeploymentInitiated-id-0001_di" bpmnElement="StartEvent-DeploymentInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcureTools-id-0001_di" bpmnElement="ServiceTask-ProcureTools-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-InstallSolution-id-0001_di" bpmnElement="ServiceTask-InstallSolution-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-TestSolution-id-0001_di" bpmnElement="ServiceTask-TestSolution-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-TestResult-id-0001_di" bpmnElement="ExclusiveGateway-TestResult-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-DeploymentComplete-id-0001_di" bpmnElement="EndEvent-DeploymentComplete-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-Troubleshoot-id-0001_di" bpmnElement="UserTask-Troubleshoot-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-DeploymentFailed-id-0001_di" bpmnElement="EndEvent-DeploymentFailed-id-0001">
+        <dc:Bounds x="957" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToProcure-id-0001_di" bpmnElement="SequenceFlow-StartToProcure-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcureToInstall-id-0002_di" bpmnElement="SequenceFlow-ProcureToInstall-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InstallToTest-id-0003_di" bpmnElement="SequenceFlow-InstallToTest-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TestToGateway-id-0004_di" bpmnElement="SequenceFlow-TestToGateway-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToSuccess-id-0005_di" bpmnElement="SequenceFlow-GatewayToSuccess-id-0005">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToTroubleshoot-id-0006_di" bpmnElement="SequenceFlow-GatewayToTroubleshoot-id-0006">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TroubleshootToFail-id-0007_di" bpmnElement="SequenceFlow-TroubleshootToFail-id-0007">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="957" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

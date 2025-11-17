@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="OrderingProcess-Definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="OrderingProcess-id-0001" isExecutable="false">
+    <bpmn:startEvent id="StartEvent-OrderingProcessStart-id-0002" name="Ordering Process Start">
+      <bpmn:outgoing>SequenceFlow-0002-to-0003-id-0035</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-CustomerLogin-id-0003" name="Customer logs into E-Shop system">
+      <bpmn:incoming>SequenceFlow-0002-to-0003-id-0035</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-0003-to-0004-id-0036</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-CheckCredentials-id-0004" name="System checks credentials">
+      <bpmn:incoming>SequenceFlow-0003-to-0004-id-0036</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-0004-to-0005-id-0037</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-LoginCheck-id-0005" name="Login Check" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-0004-to-0005-id-0037</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-0005-to-0006-id-0038</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-0005-to-0034-id-0039</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:subProcess id="SubProcess-ProductSelection-id-0006" name="Product Selection Subprocess">
+      <bpmn:incoming>SequenceFlow-0005-to-0006-id-0038</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-0006-to-0021-id-0040</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-ProductSelectionStart-id-0007" name="Product Selection Start">
+        <bpmn:incoming>SequenceFlow-0012-to-0007-id-0020</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-0007-to-0008-id-0014</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-SelectProduct-id-0008" name="Customer selects product">
+        <bpmn:incoming>SequenceFlow-0007-to-0008-id-0014</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-0008-to-0009-id-0015</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-AddToCart-id-0009" name="Customer adds product to cart">
+        <bpmn:incoming>SequenceFlow-0008-to-0009-id-0015</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-0009-to-0010-id-0016</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:serviceTask id="ServiceTask-SaveProduct-id-0010" name="System saves product">
+        <bpmn:incoming>SequenceFlow-0009-to-0010-id-0016</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-0010-to-0011-id-0017</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:scriptTask id="ScriptTask-CheckSelection-id-0011" name="Check if all products are selected">
+        <bpmn:incoming>SequenceFlow-0010-to-0011-id-0017</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-0011-to-0012-id-0018</bpmn:outgoing>
+      </bpmn:scriptTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-SelectionCheck-id-0012" name="Selection Check" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-0011-to-0012-id-0018</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-0012-to-0013-id-0019</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-0012-to-0007-id-0020</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="EndEvent-ProductSelectionEnd-id-0013" name="Product Selection End">
+        <bpmn:incoming>SequenceFlow-0012-to-0013-id-0019</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-0007-to-0008-id-0014" sourceRef="StartEvent-ProductSelectionStart-id-0007" targetRef="UserTask-SelectProduct-id-0008" />
+      <bpmn:sequenceFlow id="SequenceFlow-0008-to-0009-id-0015" sourceRef="UserTask-SelectProduct-id-0008" targetRef="UserTask-AddToCart-id-0009" />
+      <bpmn:sequenceFlow id="SequenceFlow-0009-to-0010-id-0016" sourceRef="UserTask-AddToCart-id-0009" targetRef="ServiceTask-SaveProduct-id-0010" />
+      <bpmn:sequenceFlow id="SequenceFlow-0010-to-0011-id-0017" sourceRef="ServiceTask-SaveProduct-id-0010" targetRef="ScriptTask-CheckSelection-id-0011" />
+      <bpmn:sequenceFlow id="SequenceFlow-0011-to-0012-id-0018" sourceRef="ScriptTask-CheckSelection-id-0011" targetRef="ExclusiveGateway-SelectionCheck-id-0012" />
+      <bpmn:sequenceFlow id="SequenceFlow-0012-to-0013-id-0019" name="All products selected" sourceRef="ExclusiveGateway-SelectionCheck-id-0012" targetRef="EndEvent-ProductSelectionEnd-id-0013" />
+      <bpmn:sequenceFlow id="SequenceFlow-0012-to-0007-id-0020" name="Repeat selection" sourceRef="ExclusiveGateway-SelectionCheck-id-0012" targetRef="StartEvent-ProductSelectionStart-id-0007" />
+    </bpmn:subProcess>
+    <bpmn:parallelGateway id="ParallelGateway-PrepareOrder-id-0021" name="Prepare Order" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-0006-to-0021-id-0040</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-0021-to-0022-id-0041</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-0021-to-0023-id-0042</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-PreparePayment-id-0022" name="Prepare payment for order">
+      <bpmn:incoming>SequenceFlow-0021-to-0022-id-0041</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-0022-to-0024-id-0043</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-PrepareShipment-id-0023" name="Prepare shipment for order">
+      <bpmn:incoming>SequenceFlow-0021-to-0023-id-0042</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-0023-to-0024-id-0044</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-OrderPrepared-id-0024" name="Order Prepared" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-0022-to-0024-id-0043</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-0023-to-0024-id-0044</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-0024-to-0025-id-0045</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-EnterPaymentData-id-0025" name="Customer enters payment data">
+      <bpmn:incoming>SequenceFlow-0024-to-0025-id-0045</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-0025-to-0026-id-0046</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:receiveTask id="ReceiveTask-WaitForPaymentConfirmation-id-0026" name="Wait for bank payment confirmation">
+      <bpmn:incoming>SequenceFlow-0025-to-0026-id-0046</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-0026-to-0027-id-0047</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:parallelGateway id="ParallelGateway-AddressEntry-id-0027" name="Address Entry" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-0026-to-0027-id-0047</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-0027-to-0028-id-0048</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-EnterShippingAddress-id-0028" name="Customer enters shipping address">
+      <bpmn:incoming>SequenceFlow-0027-to-0028-id-0048</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-0028-to-0029-id-0049</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-BillingAddressCheck-id-0029" name="Billing Address Check" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-0028-to-0029-id-0049</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-0029-to-0030-id-0050</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-0029-to-0031-id-0051</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-EnterBillingAddress-id-0030" name="Customer enters billing address">
+      <bpmn:incoming>SequenceFlow-0029-to-0030-id-0050</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-0030-to-0031-id-0052</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-AddressEntered-id-0031" name="Address Entered" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-0029-to-0031-id-0051</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-0030-to-0031-id-0052</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-0031-to-0032-id-0053</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-FinishOrder-id-0032" name="System finishes order">
+      <bpmn:incoming>SequenceFlow-0031-to-0032-id-0053</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-0032-to-0033-id-0054</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-OrderingProcessEnd-id-0033" name="Ordering Process End">
+      <bpmn:incoming>SequenceFlow-0032-to-0033-id-0054</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-ShoppingExperienceEnd-id-0034" name="Shopping Experience End">
+      <bpmn:incoming>SequenceFlow-0005-to-0034-id-0039</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-0002-to-0003-id-0035" sourceRef="StartEvent-OrderingProcessStart-id-0002" targetRef="UserTask-CustomerLogin-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-0003-to-0004-id-0036" sourceRef="UserTask-CustomerLogin-id-0003" targetRef="ServiceTask-CheckCredentials-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-0004-to-0005-id-0037" sourceRef="ServiceTask-CheckCredentials-id-0004" targetRef="ExclusiveGateway-LoginCheck-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-0005-to-0006-id-0038" name="Login successful" sourceRef="ExclusiveGateway-LoginCheck-id-0005" targetRef="SubProcess-ProductSelection-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-0005-to-0034-id-0039" name="Login failed" sourceRef="ExclusiveGateway-LoginCheck-id-0005" targetRef="EndEvent-ShoppingExperienceEnd-id-0034" />
+    <bpmn:sequenceFlow id="SequenceFlow-0006-to-0021-id-0040" sourceRef="SubProcess-ProductSelection-id-0006" targetRef="ParallelGateway-PrepareOrder-id-0021" />
+    <bpmn:sequenceFlow id="SequenceFlow-0021-to-0022-id-0041" sourceRef="ParallelGateway-PrepareOrder-id-0021" targetRef="ServiceTask-PreparePayment-id-0022" />
+    <bpmn:sequenceFlow id="SequenceFlow-0021-to-0023-id-0042" sourceRef="ParallelGateway-PrepareOrder-id-0021" targetRef="ServiceTask-PrepareShipment-id-0023" />
+    <bpmn:sequenceFlow id="SequenceFlow-0022-to-0024-id-0043" sourceRef="ServiceTask-PreparePayment-id-0022" targetRef="ParallelGateway-OrderPrepared-id-0024" />
+    <bpmn:sequenceFlow id="SequenceFlow-0023-to-0024-id-0044" sourceRef="ServiceTask-PrepareShipment-id-0023" targetRef="ParallelGateway-OrderPrepared-id-0024" />
+    <bpmn:sequenceFlow id="SequenceFlow-0024-to-0025-id-0045" sourceRef="ParallelGateway-OrderPrepared-id-0024" targetRef="UserTask-EnterPaymentData-id-0025" />
+    <bpmn:sequenceFlow id="SequenceFlow-0025-to-0026-id-0046" sourceRef="UserTask-EnterPaymentData-id-0025" targetRef="ReceiveTask-WaitForPaymentConfirmation-id-0026" />
+    <bpmn:sequenceFlow id="SequenceFlow-0026-to-0027-id-0047" sourceRef="ReceiveTask-WaitForPaymentConfirmation-id-0026" targetRef="ParallelGateway-AddressEntry-id-0027" />
+    <bpmn:sequenceFlow id="SequenceFlow-0027-to-0028-id-0048" sourceRef="ParallelGateway-AddressEntry-id-0027" targetRef="UserTask-EnterShippingAddress-id-0028" />
+    <bpmn:sequenceFlow id="SequenceFlow-0028-to-0029-id-0049" sourceRef="UserTask-EnterShippingAddress-id-0028" targetRef="ExclusiveGateway-BillingAddressCheck-id-0029" />
+    <bpmn:sequenceFlow id="SequenceFlow-0029-to-0030-id-0050" name="Different billing address" sourceRef="ExclusiveGateway-BillingAddressCheck-id-0029" targetRef="UserTask-EnterBillingAddress-id-0030" />
+    <bpmn:sequenceFlow id="SequenceFlow-0029-to-0031-id-0051" name="Same billing address" sourceRef="ExclusiveGateway-BillingAddressCheck-id-0029" targetRef="ParallelGateway-AddressEntered-id-0031" />
+    <bpmn:sequenceFlow id="SequenceFlow-0030-to-0031-id-0052" sourceRef="UserTask-EnterBillingAddress-id-0030" targetRef="ParallelGateway-AddressEntered-id-0031" />
+    <bpmn:sequenceFlow id="SequenceFlow-0031-to-0032-id-0053" sourceRef="ParallelGateway-AddressEntered-id-0031" targetRef="ServiceTask-FinishOrder-id-0032" />
+    <bpmn:sequenceFlow id="SequenceFlow-0032-to-0033-id-0054" sourceRef="ServiceTask-FinishOrder-id-0032" targetRef="EndEvent-OrderingProcessEnd-id-0033" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_OrderingProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_OrderingProcess-id-0001" bpmnElement="OrderingProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-OrderingProcessStart-id-0002_di" bpmnElement="StartEvent-OrderingProcessStart-id-0002">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CustomerLogin-id-0003_di" bpmnElement="UserTask-CustomerLogin-id-0003">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckCredentials-id-0004_di" bpmnElement="ServiceTask-CheckCredentials-id-0004">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-LoginCheck-id-0005_di" bpmnElement="ExclusiveGateway-LoginCheck-id-0005" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-ProductSelection-id-0006_di" bpmnElement="SubProcess-ProductSelection-id-0006">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-PrepareOrder-id-0021_di" bpmnElement="ParallelGateway-PrepareOrder-id-0021">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PreparePayment-id-0022_di" bpmnElement="ServiceTask-PreparePayment-id-0022">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-OrderPrepared-id-0024_di" bpmnElement="ParallelGateway-OrderPrepared-id-0024">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterPaymentData-id-0025_di" bpmnElement="UserTask-EnterPaymentData-id-0025">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-WaitForPaymentConfirmation-id-0026_di" bpmnElement="ReceiveTask-WaitForPaymentConfirmation-id-0026">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-AddressEntry-id-0027_di" bpmnElement="ParallelGateway-AddressEntry-id-0027">
+        <dc:Bounds x="1550" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterShippingAddress-id-0028_di" bpmnElement="UserTask-EnterShippingAddress-id-0028">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-BillingAddressCheck-id-0029_di" bpmnElement="ExclusiveGateway-BillingAddressCheck-id-0029" isMarkerVisible="true">
+        <dc:Bounds x="1850" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterBillingAddress-id-0030_di" bpmnElement="UserTask-EnterBillingAddress-id-0030">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-AddressEntered-id-0031_di" bpmnElement="ParallelGateway-AddressEntered-id-0031">
+        <dc:Bounds x="2150" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-FinishOrder-id-0032_di" bpmnElement="ServiceTask-FinishOrder-id-0032">
+        <dc:Bounds x="2275" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-OrderingProcessEnd-id-0033_di" bpmnElement="EndEvent-OrderingProcessEnd-id-0033">
+        <dc:Bounds x="2457" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ShoppingExperienceEnd-id-0034_di" bpmnElement="EndEvent-ShoppingExperienceEnd-id-0034">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareShipment-id-0023_di" bpmnElement="ServiceTask-PrepareShipment-id-0023">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-0002-to-0003-id-0035_di" bpmnElement="SequenceFlow-0002-to-0003-id-0035">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0003-to-0004-id-0036_di" bpmnElement="SequenceFlow-0003-to-0004-id-0036">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0004-to-0005-id-0037_di" bpmnElement="SequenceFlow-0004-to-0005-id-0037">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0005-to-0006-id-0038_di" bpmnElement="SequenceFlow-0005-to-0006-id-0038">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0005-to-0034-id-0039_di" bpmnElement="SequenceFlow-0005-to-0034-id-0039">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0006-to-0021-id-0040_di" bpmnElement="SequenceFlow-0006-to-0021-id-0040">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0021-to-0022-id-0041_di" bpmnElement="SequenceFlow-0021-to-0022-id-0041">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0021-to-0023-id-0042_di" bpmnElement="SequenceFlow-0021-to-0023-id-0042">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0022-to-0024-id-0043_di" bpmnElement="SequenceFlow-0022-to-0024-id-0043">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0024-to-0025-id-0045_di" bpmnElement="SequenceFlow-0024-to-0025-id-0045">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0025-to-0026-id-0046_di" bpmnElement="SequenceFlow-0025-to-0026-id-0046">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0026-to-0027-id-0047_di" bpmnElement="SequenceFlow-0026-to-0027-id-0047">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1550" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0027-to-0028-id-0048_di" bpmnElement="SequenceFlow-0027-to-0028-id-0048">
+        <di:waypoint x="1600" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0028-to-0029-id-0049_di" bpmnElement="SequenceFlow-0028-to-0029-id-0049">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1850" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0029-to-0030-id-0050_di" bpmnElement="SequenceFlow-0029-to-0030-id-0050">
+        <di:waypoint x="1900" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0029-to-0031-id-0051_di" bpmnElement="SequenceFlow-0029-to-0031-id-0051">
+        <di:waypoint x="1875" y="95" />
+        <di:waypoint x="1875" y="140" />
+        <di:waypoint x="2175" y="140" />
+        <di:waypoint x="2175" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0030-to-0031-id-0052_di" bpmnElement="SequenceFlow-0030-to-0031-id-0052">
+        <di:waypoint x="2075" y="70" />
+        <di:waypoint x="2150" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0031-to-0032-id-0053_di" bpmnElement="SequenceFlow-0031-to-0032-id-0053">
+        <di:waypoint x="2200" y="70" />
+        <di:waypoint x="2275" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0032-to-0033-id-0054_di" bpmnElement="SequenceFlow-0032-to-0033-id-0054">
+        <di:waypoint x="2375" y="70" />
+        <di:waypoint x="2457" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0023-to-0024-id-0044_di" bpmnElement="SequenceFlow-0023-to-0024-id-0044">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-ProductSelection-id-0006">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-ProductSelection-id-0006" bpmnElement="SubProcess-ProductSelection-id-0006">
+      <bpmndi:BPMNShape id="StartEvent-ProductSelectionStart-id-0007_di" bpmnElement="StartEvent-ProductSelectionStart-id-0007">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectProduct-id-0008_di" bpmnElement="UserTask-SelectProduct-id-0008">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AddToCart-id-0009_di" bpmnElement="UserTask-AddToCart-id-0009">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SaveProduct-id-0010_di" bpmnElement="ServiceTask-SaveProduct-id-0010">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-CheckSelection-id-0011_di" bpmnElement="ScriptTask-CheckSelection-id-0011">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SelectionCheck-id-0012_di" bpmnElement="ExclusiveGateway-SelectionCheck-id-0012" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProductSelectionEnd-id-0013_di" bpmnElement="EndEvent-ProductSelectionEnd-id-0013">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-0007-to-0008-id-0014_di" bpmnElement="SequenceFlow-0007-to-0008-id-0014">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0008-to-0009-id-0015_di" bpmnElement="SequenceFlow-0008-to-0009-id-0015">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0009-to-0010-id-0016_di" bpmnElement="SequenceFlow-0009-to-0010-id-0016">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0010-to-0011-id-0017_di" bpmnElement="SequenceFlow-0010-to-0011-id-0017">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0011-to-0012-id-0018_di" bpmnElement="SequenceFlow-0011-to-0012-id-0018">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0012-to-0013-id-0019_di" bpmnElement="SequenceFlow-0012-to-0013-id-0019">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-0012-to-0007-id-0020_di" bpmnElement="SequenceFlow-0012-to-0007-id-0020">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="140" />
+        <di:waypoint x="75" y="140" />
+        <di:waypoint x="75" y="88" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

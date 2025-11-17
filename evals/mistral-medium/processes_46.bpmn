@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_OrderProcessing" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process_OrderProcessing-id-0001" name="Order Processing Workflow" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-OrderReceived-id-0001" name="Order received from automatic system">
+      <bpmn:outgoing>SequenceFlow-StartToReadOrder-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-ReadOrder-id-0001" name="Read order from automatic order management system">
+      <bpmn:incoming>SequenceFlow-StartToReadOrder-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReadOrderToCheckStock-id-0002</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-CheckStock-id-0002" name="Check stock availability for product">
+      <bpmn:incoming>SequenceFlow-ReadOrderToCheckStock-id-0002</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-SelectNextProductToCheckStock-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckStockToStockCheckGateway-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-StockCheck-id-0001" name="Stock Check" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CheckStockToStockCheckGateway-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StockCheckToWithdraw-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-StockCheckToReorder-id-0005</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-WithdrawProduct-id-0003" name="Withdraw product from warehouse">
+      <bpmn:incoming>SequenceFlow-StockCheckToWithdraw-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-WithdrawToStockCheckMerge-id-0008</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ReorderProduct-id-0004" name="Reorder product from wholesaler">
+      <bpmn:incoming>SequenceFlow-StockCheckToReorder-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReorderToReceive-id-0006</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveReorderedProduct-id-0005" name="Receive: reordered product">
+      <bpmn:incoming>SequenceFlow-ReorderToReceive-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveToStockCheckMerge-id-0007</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer10Day-ReceiveReorderedProduct-id-0001" name="10 Day SLA Timeout" attachedToRef="ReceiveTask-ReceiveReorderedProduct-id-0005">
+      <bpmn:outgoing>SequenceFlow-TimerBoundaryToDemandPenalty-id-0021</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer10Day-ReceiveReorderedProduct-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P10D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:serviceTask id="ServiceTask-DemandPenalty-id-0006" name="Demand delivery delay penalty from wholesaler">
+      <bpmn:incoming>SequenceFlow-TimerBoundaryToDemandPenalty-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DemandPenaltyToStockCheckMerge-id-0022</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-StockCheckMerge-id-0002" name="Stock Check Merge" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-ReceiveToStockCheckMerge-id-0007</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-WithdrawToStockCheckMerge-id-0008</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-DemandPenaltyToStockCheckMerge-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StockCheckMergeToRegister-id-0009</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-RegisterProduct-id-0007" name="Register product in stock management system">
+      <bpmn:incoming>SequenceFlow-StockCheckMergeToRegister-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RegisterToCheckOrderReady-id-0010</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-CheckOrderReady-id-0008" name="Check if entire order is ready for shipment">
+      <bpmn:incoming>SequenceFlow-RegisterToCheckOrderReady-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckOrderReadyToOrderReadyGateway-id-0011</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-OrderReadyCheck-id-0003" name="Order Completion Check" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CheckOrderReadyToOrderReadyGateway-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OrderReadyToShipmentPrep-id-0012</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-OrderNotReadyToNextProduct-id-0013</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:parallelGateway id="ParallelGateway-ShipmentPrepSplit-id-0001" name="Shipment Preparation Split" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-OrderReadyToShipmentPrep-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ShipmentPrepSplitToCourierRequest-id-0014</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ShipmentPrepSplitToPackProducts-id-0015</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sendTask id="SendTask-CourierRequest-id-0001" name="Send: courier request">
+      <bpmn:incoming>SequenceFlow-ShipmentPrepSplitToCourierRequest-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CourierRequestToShipmentPrepJoin-id-0016</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-PackProducts-id-0009" name="Pack products">
+      <bpmn:incoming>SequenceFlow-ShipmentPrepSplitToPackProducts-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PackProductsToShipmentPrepJoin-id-0017</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-ShipmentPrepJoin-id-0002" name="Shipment Preparation Join" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-CourierRequestToShipmentPrepJoin-id-0016</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-PackProductsToShipmentPrepJoin-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ShipmentPrepJoinToShipOrder-id-0018</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-ShipOrder-id-0010" name="Ship order">
+      <bpmn:incoming>SequenceFlow-ShipmentPrepJoinToShipOrder-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ShipOrderToEnd-id-0019</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-OrderShipped-id-0001" name="Order shipped">
+      <bpmn:incoming>SequenceFlow-ShipOrderToEnd-id-0019</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-SelectNextProduct-id-0011" name="Select next product from order">
+      <bpmn:incoming>SequenceFlow-OrderNotReadyToNextProduct-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectNextProductToCheckStock-id-0020</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToReadOrder-id-0001" sourceRef="StartEvent-OrderReceived-id-0001" targetRef="ServiceTask-ReadOrder-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReadOrderToCheckStock-id-0002" sourceRef="ServiceTask-ReadOrder-id-0001" targetRef="ServiceTask-CheckStock-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckStockToStockCheckGateway-id-0003" sourceRef="ServiceTask-CheckStock-id-0002" targetRef="ExclusiveGateway-StockCheck-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-StockCheckToWithdraw-id-0004" name="in_stock == true" sourceRef="ExclusiveGateway-StockCheck-id-0001" targetRef="ServiceTask-WithdrawProduct-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-StockCheckToReorder-id-0005" name="in_stock == false" sourceRef="ExclusiveGateway-StockCheck-id-0001" targetRef="ServiceTask-ReorderProduct-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReorderToReceive-id-0006" sourceRef="ServiceTask-ReorderProduct-id-0004" targetRef="ReceiveTask-ReceiveReorderedProduct-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveToStockCheckMerge-id-0007" sourceRef="ReceiveTask-ReceiveReorderedProduct-id-0005" targetRef="ExclusiveGateway-StockCheckMerge-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-WithdrawToStockCheckMerge-id-0008" sourceRef="ServiceTask-WithdrawProduct-id-0003" targetRef="ExclusiveGateway-StockCheckMerge-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-StockCheckMergeToRegister-id-0009" sourceRef="ExclusiveGateway-StockCheckMerge-id-0002" targetRef="ServiceTask-RegisterProduct-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-RegisterToCheckOrderReady-id-0010" sourceRef="ServiceTask-RegisterProduct-id-0007" targetRef="ServiceTask-CheckOrderReady-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckOrderReadyToOrderReadyGateway-id-0011" sourceRef="ServiceTask-CheckOrderReady-id-0008" targetRef="ExclusiveGateway-OrderReadyCheck-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-OrderReadyToShipmentPrep-id-0012" name="order_ready == true" sourceRef="ExclusiveGateway-OrderReadyCheck-id-0003" targetRef="ParallelGateway-ShipmentPrepSplit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-OrderNotReadyToNextProduct-id-0013" name="order_ready == false" sourceRef="ExclusiveGateway-OrderReadyCheck-id-0003" targetRef="ServiceTask-SelectNextProduct-id-0011" />
+    <bpmn:sequenceFlow id="SequenceFlow-ShipmentPrepSplitToCourierRequest-id-0014" sourceRef="ParallelGateway-ShipmentPrepSplit-id-0001" targetRef="SendTask-CourierRequest-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ShipmentPrepSplitToPackProducts-id-0015" sourceRef="ParallelGateway-ShipmentPrepSplit-id-0001" targetRef="ServiceTask-PackProducts-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-CourierRequestToShipmentPrepJoin-id-0016" sourceRef="SendTask-CourierRequest-id-0001" targetRef="ParallelGateway-ShipmentPrepJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-PackProductsToShipmentPrepJoin-id-0017" sourceRef="ServiceTask-PackProducts-id-0009" targetRef="ParallelGateway-ShipmentPrepJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ShipmentPrepJoinToShipOrder-id-0018" sourceRef="ParallelGateway-ShipmentPrepJoin-id-0002" targetRef="ServiceTask-ShipOrder-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-ShipOrderToEnd-id-0019" sourceRef="ServiceTask-ShipOrder-id-0010" targetRef="EndEvent-OrderShipped-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectNextProductToCheckStock-id-0020" sourceRef="ServiceTask-SelectNextProduct-id-0011" targetRef="ServiceTask-CheckStock-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-TimerBoundaryToDemandPenalty-id-0021" sourceRef="BoundaryEvent-Timer10Day-ReceiveReorderedProduct-id-0001" targetRef="ServiceTask-DemandPenalty-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-DemandPenaltyToStockCheckMerge-id-0022" sourceRef="ServiceTask-DemandPenalty-id-0006" targetRef="ExclusiveGateway-StockCheckMerge-id-0002" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process_OrderProcessing-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process_OrderProcessing-id-0001" bpmnElement="Process_OrderProcessing-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-OrderReceived-id-0001_di" bpmnElement="StartEvent-OrderReceived-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ReadOrder-id-0001_di" bpmnElement="ServiceTask-ReadOrder-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckStock-id-0002_di" bpmnElement="ServiceTask-CheckStock-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-StockCheck-id-0001_di" bpmnElement="ExclusiveGateway-StockCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-WithdrawProduct-id-0003_di" bpmnElement="ServiceTask-WithdrawProduct-id-0003">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-StockCheckMerge-id-0002_di" bpmnElement="ExclusiveGateway-StockCheckMerge-id-0002" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RegisterProduct-id-0007_di" bpmnElement="ServiceTask-RegisterProduct-id-0007">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckOrderReady-id-0008_di" bpmnElement="ServiceTask-CheckOrderReady-id-0008">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-OrderReadyCheck-id-0003_di" bpmnElement="ExclusiveGateway-OrderReadyCheck-id-0003" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-ShipmentPrepSplit-id-0001_di" bpmnElement="ParallelGateway-ShipmentPrepSplit-id-0001">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-CourierRequest-id-0001_di" bpmnElement="SendTask-CourierRequest-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-ShipmentPrepJoin-id-0002_di" bpmnElement="ParallelGateway-ShipmentPrepJoin-id-0002">
+        <dc:Bounds x="1700" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ShipOrder-id-0010_di" bpmnElement="ServiceTask-ShipOrder-id-0010">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-OrderShipped-id-0001_di" bpmnElement="EndEvent-OrderShipped-id-0001">
+        <dc:Bounds x="2007" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ReorderProduct-id-0004_di" bpmnElement="ServiceTask-ReorderProduct-id-0004">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveReorderedProduct-id-0005_di" bpmnElement="ReceiveTask-ReceiveReorderedProduct-id-0005">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer10Day-ReceiveReorderedProduct-id-0001_di" bpmnElement="BoundaryEvent-Timer10Day-ReceiveReorderedProduct-id-0001">
+        <dc:Bounds x="807" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SelectNextProduct-id-0011_di" bpmnElement="ServiceTask-SelectNextProduct-id-0011">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PackProducts-id-0009_di" bpmnElement="ServiceTask-PackProducts-id-0009">
+        <dc:Bounds x="1675" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DemandPenalty-id-0006_di" bpmnElement="ServiceTask-DemandPenalty-id-0006">
+        <dc:Bounds x="925" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToReadOrder-id-0001_di" bpmnElement="SequenceFlow-StartToReadOrder-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReadOrderToCheckStock-id-0002_di" bpmnElement="SequenceFlow-ReadOrderToCheckStock-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckStockToStockCheckGateway-id-0003_di" bpmnElement="SequenceFlow-CheckStockToStockCheckGateway-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StockCheckToWithdraw-id-0004_di" bpmnElement="SequenceFlow-StockCheckToWithdraw-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StockCheckToReorder-id-0005_di" bpmnElement="SequenceFlow-StockCheckToReorder-id-0005">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WithdrawToStockCheckMerge-id-0008_di" bpmnElement="SequenceFlow-WithdrawToStockCheckMerge-id-0008">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StockCheckMergeToRegister-id-0009_di" bpmnElement="SequenceFlow-StockCheckMergeToRegister-id-0009">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RegisterToCheckOrderReady-id-0010_di" bpmnElement="SequenceFlow-RegisterToCheckOrderReady-id-0010">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckOrderReadyToOrderReadyGateway-id-0011_di" bpmnElement="SequenceFlow-CheckOrderReadyToOrderReadyGateway-id-0011">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderReadyToShipmentPrep-id-0012_di" bpmnElement="SequenceFlow-OrderReadyToShipmentPrep-id-0012">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderNotReadyToNextProduct-id-0013_di" bpmnElement="SequenceFlow-OrderNotReadyToNextProduct-id-0013">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ShipmentPrepSplitToCourierRequest-id-0014_di" bpmnElement="SequenceFlow-ShipmentPrepSplitToCourierRequest-id-0014">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ShipmentPrepSplitToPackProducts-id-0015_di" bpmnElement="SequenceFlow-ShipmentPrepSplitToPackProducts-id-0015">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1500" y="70" />
+        <di:waypoint x="1500" y="140" />
+        <di:waypoint x="1650" y="140" />
+        <di:waypoint x="1650" y="210" />
+        <di:waypoint x="1675" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CourierRequestToShipmentPrepJoin-id-0016_di" bpmnElement="SequenceFlow-CourierRequestToShipmentPrepJoin-id-0016">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1700" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ShipmentPrepJoinToShipOrder-id-0018_di" bpmnElement="SequenceFlow-ShipmentPrepJoinToShipOrder-id-0018">
+        <di:waypoint x="1750" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ShipOrderToEnd-id-0019_di" bpmnElement="SequenceFlow-ShipOrderToEnd-id-0019">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="2007" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReorderToReceive-id-0006_di" bpmnElement="SequenceFlow-ReorderToReceive-id-0006">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToStockCheckMerge-id-0007_di" bpmnElement="SequenceFlow-ReceiveToStockCheckMerge-id-0007">
+        <di:waypoint x="825" y="170" />
+        <di:waypoint x="825" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TimerBoundaryToDemandPenalty-id-0021_di" bpmnElement="SequenceFlow-TimerBoundaryToDemandPenalty-id-0021">
+        <di:waypoint x="825" y="268" />
+        <di:waypoint x="825" y="350" />
+        <di:waypoint x="925" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectNextProductToCheckStock-id-0020_di" bpmnElement="SequenceFlow-SelectNextProductToCheckStock-id-0020">
+        <di:waypoint x="1575" y="250" />
+        <di:waypoint x="1575" y="280" />
+        <di:waypoint x="375" y="280" />
+        <di:waypoint x="375" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PackProductsToShipmentPrepJoin-id-0017_di" bpmnElement="SequenceFlow-PackProductsToShipmentPrepJoin-id-0017">
+        <di:waypoint x="1725" y="170" />
+        <di:waypoint x="1725" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DemandPenaltyToStockCheckMerge-id-0022_di" bpmnElement="SequenceFlow-DemandPenaltyToStockCheckMerge-id-0022">
+        <di:waypoint x="975" y="390" />
+        <di:waypoint x="975" y="420" />
+        <di:waypoint x="825" y="420" />
+        <di:waypoint x="825" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

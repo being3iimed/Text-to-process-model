@@ -1,0 +1,167 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "Complaint-Handling-Process-Definitions",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler (https://bpmn.io)",
+    "exporterVersion": "18.0.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "Complaint-Handling-Process-id-0001",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-ComplaintFiled-id-0001",
+            "name": "Complaint Filed"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-LogComplaint-id-0001",
+            "name": "Log Complaint"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-AssignToDepartment-id-0001",
+            "name": "Assign to Department"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ReviewComplaint-id-0001",
+            "name": "Review Complaint"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-RefundDecision-id-0001",
+            "name": "Refund Approved?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-SendApprovalNotification-id-0001",
+            "name": "Send: Decision Notification (Approval)"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ProcessRefund-id-0001",
+            "name": "Process Refund"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-SendRejectionNotification-id-0001",
+            "name": "Send: Decision Notification (Rejection)"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-MarkAsResolved-id-0001",
+            "name": "Mark as Resolved"
+          },
+          {
+            "$type": "bpmn:ReceiveTask",
+            "id": "ReceiveTask-CustomerFeedback-id-0001",
+            "name": "Receive: Customer Feedback"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-CaseClosed-id-0001",
+            "name": "Case Closed"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToLogComplaint-id-0001",
+            "sourceRef": "StartEvent-ComplaintFiled-id-0001",
+            "targetRef": "UserTask-LogComplaint-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-LogToAssign-id-0002",
+            "sourceRef": "UserTask-LogComplaint-id-0001",
+            "targetRef": "ServiceTask-AssignToDepartment-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-AssignToReview-id-0003",
+            "sourceRef": "ServiceTask-AssignToDepartment-id-0001",
+            "targetRef": "UserTask-ReviewComplaint-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReviewToGateway-id-0004",
+            "sourceRef": "UserTask-ReviewComplaint-id-0001",
+            "targetRef": "ExclusiveGateway-RefundDecision-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToApprovalNotification-id-0005",
+            "sourceRef": "ExclusiveGateway-RefundDecision-id-0001",
+            "targetRef": "SendTask-SendApprovalNotification-id-0001",
+            "name": "refund_approved == true"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ApprovalToRefund-id-0006",
+            "sourceRef": "SendTask-SendApprovalNotification-id-0001",
+            "targetRef": "ServiceTask-ProcessRefund-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToRejectionNotification-id-0007",
+            "sourceRef": "ExclusiveGateway-RefundDecision-id-0001",
+            "targetRef": "SendTask-SendRejectionNotification-id-0001",
+            "name": "refund_approved == false",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RefundToMarkResolved-id-0008",
+            "sourceRef": "ServiceTask-ProcessRefund-id-0001",
+            "targetRef": "UserTask-MarkAsResolved-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RejectionToMarkResolved-id-0009",
+            "sourceRef": "SendTask-SendRejectionNotification-id-0001",
+            "targetRef": "UserTask-MarkAsResolved-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-MarkToFeedback-id-0010",
+            "sourceRef": "UserTask-MarkAsResolved-id-0001",
+            "targetRef": "ReceiveTask-CustomerFeedback-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-FeedbackToEnd-id-0011",
+            "sourceRef": "ReceiveTask-CustomerFeedback-id-0001",
+            "targetRef": "EndEvent-CaseClosed-id-0001"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-large-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 12018,
+        "total_tokens": 13504,
+        "completion_tokens": 1486
+      },
+      "model_name": "mistral-large-latest",
+      "model": "mistral-large-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 12018,
+      "output_tokens": 1486,
+      "total_tokens": 13504
+    },
+    "id": "lc_run--888e096d-933b-4b9b-a5eb-11a1316d8404-0"
+  },
+  "status": "success"
+}

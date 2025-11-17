@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="ComputerRepairProcess-Definitions-id-0001" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="1.0">
+  <bpmn:process id="ComputerRepairProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-CustomerBringsDefectiveComputer-id-0001" name="Customer Brings Defective Computer">
+      <bpmn:outgoing>SequenceFlow-StartToDefectCheck-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-CheckDefectAndCalculateRepairCost-id-0001" name="Check Defect and Calculate Repair Cost">
+      <bpmn:incoming>SequenceFlow-StartToDefectCheck-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DefectCheckToCustomerDecision-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-CustomerDecidesOnRepair-id-0002" name="Customer Decides on Repair">
+      <bpmn:incoming>SequenceFlow-DefectCheckToCustomerDecision-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CustomerDecisionToGateway-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-CustomerDecision-id-0001" name="Customer Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CustomerDecisionToGateway-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CustomerAcceptsToParallelRepairs-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-CustomerDeclinesToEnd-id-0005</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="EndEvent-CustomerDeclinesRepair-id-0001" name="Customer Declines Repair">
+      <bpmn:incoming>SequenceFlow-CustomerDeclinesToEnd-id-0005</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:parallelGateway id="ParallelGateway-ParallelRepairs-id-0001" name="Parallel Repairs" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CustomerAcceptsToParallelRepairs-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ParallelToHardwareRepair-id-0006</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ParallelToSoftwareRepair-id-0007</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:subProcess id="SubProcess-HardwareRepairCycle-id-0001" name="Hardware Repair and Test Cycle">
+      <bpmn:incoming>SequenceFlow-ParallelToHardwareRepair-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-HardwareCompleteToEnd-id-0008</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-StartHardwareRepair-id-0001" name="Start Hardware Repair">
+        <bpmn:outgoing>SequenceFlow-HardwareStartToRepair-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-CheckAndRepairHardware-id-0001" name="Check and Repair Hardware">
+        <bpmn:incoming>SequenceFlow-HardwareStartToRepair-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-HardwareErrorToRepair-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-HardwareRepairToTest-id-0002</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-TestSystemFunctionalityHardware-id-0001" name="Test System Functionality">
+        <bpmn:incoming>SequenceFlow-HardwareRepairToTest-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-HardwareTestToGateway-id-0003</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-HardwareTestResult-id-0001" name="Hardware Test Result" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-HardwareTestToGateway-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-HardwareErrorToRepair-id-0004</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-HardwareNoErrorToEnd-id-0005</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="EndEvent-HardwareRepairComplete-id-0001" name="Hardware Repair Complete">
+        <bpmn:incoming>SequenceFlow-HardwareNoErrorToEnd-id-0005</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-HardwareStartToRepair-id-0001" sourceRef="StartEvent-StartHardwareRepair-id-0001" targetRef="ServiceTask-CheckAndRepairHardware-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-HardwareRepairToTest-id-0002" sourceRef="ServiceTask-CheckAndRepairHardware-id-0001" targetRef="ServiceTask-TestSystemFunctionalityHardware-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-HardwareTestToGateway-id-0003" sourceRef="ServiceTask-TestSystemFunctionalityHardware-id-0001" targetRef="ExclusiveGateway-HardwareTestResult-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-HardwareErrorToRepair-id-0004" name="error_detected" sourceRef="ExclusiveGateway-HardwareTestResult-id-0001" targetRef="ServiceTask-CheckAndRepairHardware-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-HardwareNoErrorToEnd-id-0005" name="no_error" sourceRef="ExclusiveGateway-HardwareTestResult-id-0001" targetRef="EndEvent-HardwareRepairComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-SoftwareRepairCycle-id-0001" name="Software Repair and Test Cycle">
+      <bpmn:incoming>SequenceFlow-ParallelToSoftwareRepair-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SoftwareCompleteToEnd-id-0009</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-StartSoftwareRepair-id-0001" name="Start Software Repair">
+        <bpmn:outgoing>SequenceFlow-SoftwareStartToConfigure-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-CheckAndConfigureSoftware-id-0001" name="Check and Configure Software">
+        <bpmn:incoming>SequenceFlow-SoftwareStartToConfigure-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-SoftwareErrorToConfigure-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SoftwareConfigureToTest-id-0002</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-TestSystemFunctionalitySoftware-id-0001" name="Test System Functionality">
+        <bpmn:incoming>SequenceFlow-SoftwareConfigureToTest-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SoftwareTestToGateway-id-0003</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-SoftwareTestResult-id-0001" name="Software Test Result" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-SoftwareTestToGateway-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SoftwareErrorToConfigure-id-0004</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SoftwareNoErrorToEnd-id-0005</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="EndEvent-SoftwareRepairComplete-id-0001" name="Software Repair Complete">
+        <bpmn:incoming>SequenceFlow-SoftwareNoErrorToEnd-id-0005</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-SoftwareStartToConfigure-id-0001" sourceRef="StartEvent-StartSoftwareRepair-id-0001" targetRef="ServiceTask-CheckAndConfigureSoftware-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SoftwareConfigureToTest-id-0002" sourceRef="ServiceTask-CheckAndConfigureSoftware-id-0001" targetRef="ServiceTask-TestSystemFunctionalitySoftware-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SoftwareTestToGateway-id-0003" sourceRef="ServiceTask-TestSystemFunctionalitySoftware-id-0001" targetRef="ExclusiveGateway-SoftwareTestResult-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SoftwareErrorToConfigure-id-0004" name="error_detected" sourceRef="ExclusiveGateway-SoftwareTestResult-id-0001" targetRef="ServiceTask-CheckAndConfigureSoftware-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SoftwareNoErrorToEnd-id-0005" name="no_error" sourceRef="ExclusiveGateway-SoftwareTestResult-id-0001" targetRef="EndEvent-SoftwareRepairComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:endEvent id="EndEvent-RepairComplete-id-0001" name="Repair Complete">
+      <bpmn:incoming>SequenceFlow-HardwareCompleteToEnd-id-0008</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-SoftwareCompleteToEnd-id-0009</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToDefectCheck-id-0001" sourceRef="StartEvent-CustomerBringsDefectiveComputer-id-0001" targetRef="UserTask-CheckDefectAndCalculateRepairCost-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DefectCheckToCustomerDecision-id-0002" sourceRef="UserTask-CheckDefectAndCalculateRepairCost-id-0001" targetRef="UserTask-CustomerDecidesOnRepair-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-CustomerDecisionToGateway-id-0003" sourceRef="UserTask-CustomerDecidesOnRepair-id-0002" targetRef="ExclusiveGateway-CustomerDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CustomerAcceptsToParallelRepairs-id-0004" name="costs_acceptable" sourceRef="ExclusiveGateway-CustomerDecision-id-0001" targetRef="ParallelGateway-ParallelRepairs-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CustomerDeclinesToEnd-id-0005" name="costs_not_acceptable" sourceRef="ExclusiveGateway-CustomerDecision-id-0001" targetRef="EndEvent-CustomerDeclinesRepair-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelToHardwareRepair-id-0006" sourceRef="ParallelGateway-ParallelRepairs-id-0001" targetRef="SubProcess-HardwareRepairCycle-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelToSoftwareRepair-id-0007" sourceRef="ParallelGateway-ParallelRepairs-id-0001" targetRef="SubProcess-SoftwareRepairCycle-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-HardwareCompleteToEnd-id-0008" sourceRef="SubProcess-HardwareRepairCycle-id-0001" targetRef="EndEvent-RepairComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SoftwareCompleteToEnd-id-0009" sourceRef="SubProcess-SoftwareRepairCycle-id-0001" targetRef="EndEvent-RepairComplete-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ComputerRepairProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_ComputerRepairProcess-id-0001" bpmnElement="ComputerRepairProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-CustomerBringsDefectiveComputer-id-0001_di" bpmnElement="StartEvent-CustomerBringsDefectiveComputer-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CheckDefectAndCalculateRepairCost-id-0001_di" bpmnElement="UserTask-CheckDefectAndCalculateRepairCost-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CustomerDecidesOnRepair-id-0002_di" bpmnElement="UserTask-CustomerDecidesOnRepair-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CustomerDecision-id-0001_di" bpmnElement="ExclusiveGateway-CustomerDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-ParallelRepairs-id-0001_di" bpmnElement="ParallelGateway-ParallelRepairs-id-0001">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-HardwareRepairCycle-id-0001_di" bpmnElement="SubProcess-HardwareRepairCycle-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-RepairComplete-id-0001_di" bpmnElement="EndEvent-RepairComplete-id-0001">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CustomerDeclinesRepair-id-0001_di" bpmnElement="EndEvent-CustomerDeclinesRepair-id-0001">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-SoftwareRepairCycle-id-0001_di" bpmnElement="SubProcess-SoftwareRepairCycle-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToDefectCheck-id-0001_di" bpmnElement="SequenceFlow-StartToDefectCheck-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DefectCheckToCustomerDecision-id-0002_di" bpmnElement="SequenceFlow-DefectCheckToCustomerDecision-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CustomerDecisionToGateway-id-0003_di" bpmnElement="SequenceFlow-CustomerDecisionToGateway-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CustomerAcceptsToParallelRepairs-id-0004_di" bpmnElement="SequenceFlow-CustomerAcceptsToParallelRepairs-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CustomerDeclinesToEnd-id-0005_di" bpmnElement="SequenceFlow-CustomerDeclinesToEnd-id-0005">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelToHardwareRepair-id-0006_di" bpmnElement="SequenceFlow-ParallelToHardwareRepair-id-0006">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelToSoftwareRepair-id-0007_di" bpmnElement="SequenceFlow-ParallelToSoftwareRepair-id-0007">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="750" y="70" />
+        <di:waypoint x="750" y="140" />
+        <di:waypoint x="750" y="140" />
+        <di:waypoint x="750" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HardwareCompleteToEnd-id-0008_di" bpmnElement="SequenceFlow-HardwareCompleteToEnd-id-0008">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SoftwareCompleteToEnd-id-0009_di" bpmnElement="SequenceFlow-SoftwareCompleteToEnd-id-0009">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="975" y="88" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-SoftwareRepairCycle-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-SoftwareRepairCycle-id-0001" bpmnElement="SubProcess-SoftwareRepairCycle-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-StartSoftwareRepair-id-0001_di" bpmnElement="StartEvent-StartSoftwareRepair-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckAndConfigureSoftware-id-0001_di" bpmnElement="ServiceTask-CheckAndConfigureSoftware-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-TestSystemFunctionalitySoftware-id-0001_di" bpmnElement="ServiceTask-TestSystemFunctionalitySoftware-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SoftwareTestResult-id-0001_di" bpmnElement="ExclusiveGateway-SoftwareTestResult-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-SoftwareRepairComplete-id-0001_di" bpmnElement="EndEvent-SoftwareRepairComplete-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-SoftwareStartToConfigure-id-0001_di" bpmnElement="SequenceFlow-SoftwareStartToConfigure-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SoftwareConfigureToTest-id-0002_di" bpmnElement="SequenceFlow-SoftwareConfigureToTest-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SoftwareTestToGateway-id-0003_di" bpmnElement="SequenceFlow-SoftwareTestToGateway-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SoftwareErrorToConfigure-id-0004_di" bpmnElement="SequenceFlow-SoftwareErrorToConfigure-id-0004">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="140" />
+        <di:waypoint x="225" y="140" />
+        <di:waypoint x="225" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SoftwareNoErrorToEnd-id-0005_di" bpmnElement="SequenceFlow-SoftwareNoErrorToEnd-id-0005">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-HardwareRepairCycle-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-HardwareRepairCycle-id-0001" bpmnElement="SubProcess-HardwareRepairCycle-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-StartHardwareRepair-id-0001_di" bpmnElement="StartEvent-StartHardwareRepair-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckAndRepairHardware-id-0001_di" bpmnElement="ServiceTask-CheckAndRepairHardware-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-TestSystemFunctionalityHardware-id-0001_di" bpmnElement="ServiceTask-TestSystemFunctionalityHardware-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-HardwareTestResult-id-0001_di" bpmnElement="ExclusiveGateway-HardwareTestResult-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-HardwareRepairComplete-id-0001_di" bpmnElement="EndEvent-HardwareRepairComplete-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-HardwareStartToRepair-id-0001_di" bpmnElement="SequenceFlow-HardwareStartToRepair-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HardwareRepairToTest-id-0002_di" bpmnElement="SequenceFlow-HardwareRepairToTest-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HardwareTestToGateway-id-0003_di" bpmnElement="SequenceFlow-HardwareTestToGateway-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HardwareErrorToRepair-id-0004_di" bpmnElement="SequenceFlow-HardwareErrorToRepair-id-0004">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="140" />
+        <di:waypoint x="225" y="140" />
+        <di:waypoint x="225" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HardwareNoErrorToEnd-id-0005_di" bpmnElement="SequenceFlow-HardwareNoErrorToEnd-id-0005">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

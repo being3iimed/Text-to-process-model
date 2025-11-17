@@ -1,0 +1,169 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "Supplier-Selection-Process-Definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler (https://bpmn.io)",
+  "exporterVersion": "1.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Supplier-Selection-Process",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-NeedForSupplier-id-0001",
+          "name": "Need for New Supplier Identified"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-IssueRFP-id-0001",
+          "name": "Issue Request for Proposals (RFP)"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-SupplierProposals-id-0001",
+          "name": "Receive Supplier Proposals"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-EvaluateProposals-id-0001",
+          "name": "Evaluate Proposals"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-SiteVisitRequired-id-0001",
+          "name": "Site Visit Required?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ConductSiteVisits-id-0001",
+          "name": "Conduct Site Visits/Interviews"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-SupplierMeetsCriteria-id-0001",
+          "name": "Supplier Meets Criteria?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SelectSupplier-id-0001",
+          "name": "Select Supplier"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-NegotiateContract-id-0001",
+          "name": "Negotiate Contract Terms"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SignContract-id-0001",
+          "name": "Sign Contract"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-OnboardSupplier-id-0001",
+          "name": "Onboard Supplier"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-SupplierOnboarded-id-0001",
+          "name": "Supplier Onboarded and Contract Executed"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-NoSuitableSupplier-id-0002",
+          "name": "Process Terminated - No Suitable Supplier"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToIssueRFP-id-0001",
+          "sourceRef": "StartEvent-NeedForSupplier-id-0001",
+          "targetRef": "UserTask-IssueRFP-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-IssueRFPToReceiveProposals-id-0002",
+          "sourceRef": "UserTask-IssueRFP-id-0001",
+          "targetRef": "ReceiveTask-SupplierProposals-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReceiveProposalsToEvaluate-id-0003",
+          "sourceRef": "ReceiveTask-SupplierProposals-id-0001",
+          "targetRef": "UserTask-EvaluateProposals-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-EvaluateToSiteVisitGateway-id-0004",
+          "sourceRef": "UserTask-EvaluateProposals-id-0001",
+          "targetRef": "ExclusiveGateway-SiteVisitRequired-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SiteVisitRequiredToConductSiteVisits-id-0005",
+          "sourceRef": "ExclusiveGateway-SiteVisitRequired-id-0001",
+          "targetRef": "UserTask-ConductSiteVisits-id-0001",
+          "name": "site_visit_required",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SiteVisitNotRequiredToSelectSupplier-id-0006",
+          "sourceRef": "ExclusiveGateway-SiteVisitRequired-id-0001",
+          "targetRef": "UserTask-SelectSupplier-id-0001",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConductSiteVisitsToCriteriaGateway-id-0007",
+          "sourceRef": "UserTask-ConductSiteVisits-id-0001",
+          "targetRef": "ExclusiveGateway-SupplierMeetsCriteria-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SupplierMeetsCriteriaToSelectSupplier-id-0008",
+          "sourceRef": "ExclusiveGateway-SupplierMeetsCriteria-id-0001",
+          "targetRef": "UserTask-SelectSupplier-id-0001",
+          "name": "supplier_meets_criteria",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SupplierDoesNotMeetCriteriaToTerminate-id-0009",
+          "sourceRef": "ExclusiveGateway-SupplierMeetsCriteria-id-0001",
+          "targetRef": "EndEvent-NoSuitableSupplier-id-0002",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SelectSupplierToNegotiateContract-id-0010",
+          "sourceRef": "UserTask-SelectSupplier-id-0001",
+          "targetRef": "UserTask-NegotiateContract-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NegotiateContractToSignContract-id-0011",
+          "sourceRef": "UserTask-NegotiateContract-id-0001",
+          "targetRef": "UserTask-SignContract-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SignContractToOnboardSupplier-id-0012",
+          "sourceRef": "UserTask-SignContract-id-0001",
+          "targetRef": "ServiceTask-OnboardSupplier-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OnboardSupplierToEnd-id-0013",
+          "sourceRef": "ServiceTask-OnboardSupplier-id-0001",
+          "targetRef": "EndEvent-SupplierOnboarded-id-0001"
+        }
+      ]
+    }
+  ]
+}

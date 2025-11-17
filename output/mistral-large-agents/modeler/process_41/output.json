@@ -1,0 +1,370 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "Definitions_InspectionProcess",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler",
+    "exporterVersion": "1.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "Process_InspectionProcess",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-InspectionProcessStarted-id-0001",
+            "name": "Inspection Process Started"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-EnterMachineType-id-0001",
+            "name": "Enter machine type"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-EnterSerialNumber-id-0002",
+            "name": "Enter serial number"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-ValidateMachineData-id-0001",
+            "name": "Validate machine type and serial number"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-ValidationResult-id-0001",
+            "name": "Validation Result?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-InspectionAborted-id-0001",
+            "name": "Inspection Aborted"
+          },
+          {
+            "$type": "bpmn:SubProcess",
+            "id": "SubProcess-SensorDataCollection-id-0001",
+            "name": "Sensor Data Collection",
+            "flowElements": [
+              {
+                "$type": "bpmn:StartEvent",
+                "id": "StartEvent-BeginDataCollection-id-0001",
+                "name": "Begin Data Collection"
+              },
+              {
+                "$type": "bpmn:ParallelGateway",
+                "id": "ParallelGateway-Split-id-0001",
+                "name": "Parallel Data Collection",
+                "gatewayDirection": "Diverging"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-CollectTemperature-id-0001",
+                "name": "Collect temperature readings"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-CollectPressure-id-0002",
+                "name": "Collect pressure readings"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-CollectFlowRate-id-0003",
+                "name": "Collect flow rate measurements"
+              },
+              {
+                "$type": "bpmn:ParallelGateway",
+                "id": "ParallelGateway-Join-id-0002",
+                "name": "Synchronize Data Collection",
+                "gatewayDirection": "Converging"
+              },
+              {
+                "$type": "bpmn:UserTask",
+                "id": "UserTask-ReviewSensorValues-id-0001",
+                "name": "Review collected sensor values"
+              },
+              {
+                "$type": "bpmn:ExclusiveGateway",
+                "id": "ExclusiveGateway-SensorReadings-id-0001",
+                "name": "Sensor readings status?",
+                "gatewayDirection": "Diverging"
+              },
+              {
+                "$type": "bpmn:UserTask",
+                "id": "UserTask-ExplainDeviation-id-0001",
+                "name": "Answer: Explain deviation cause"
+              },
+              {
+                "$type": "bpmn:UserTask",
+                "id": "UserTask-CorrectiveAction-id-0002",
+                "name": "Answer: Corrective action taken?"
+              },
+              {
+                "$type": "bpmn:EndEvent",
+                "id": "EndEvent-DataCollectionComplete-id-0001",
+                "name": "Data Collection Complete"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-StartToSplit-id-0001",
+                "sourceRef": "StartEvent-BeginDataCollection-id-0001",
+                "targetRef": "ParallelGateway-Split-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SplitToTemp-id-0002",
+                "sourceRef": "ParallelGateway-Split-id-0001",
+                "targetRef": "ServiceTask-CollectTemperature-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SplitToPressure-id-0003",
+                "sourceRef": "ParallelGateway-Split-id-0001",
+                "targetRef": "ServiceTask-CollectPressure-id-0002"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SplitToFlow-id-0004",
+                "sourceRef": "ParallelGateway-Split-id-0001",
+                "targetRef": "ServiceTask-CollectFlowRate-id-0003"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-TempToJoin-id-0005",
+                "sourceRef": "ServiceTask-CollectTemperature-id-0001",
+                "targetRef": "ParallelGateway-Join-id-0002"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-PressureToJoin-id-0006",
+                "sourceRef": "ServiceTask-CollectPressure-id-0002",
+                "targetRef": "ParallelGateway-Join-id-0002"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-FlowToJoin-id-0007",
+                "sourceRef": "ServiceTask-CollectFlowRate-id-0003",
+                "targetRef": "ParallelGateway-Join-id-0002"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-JoinToReview-id-0008",
+                "sourceRef": "ParallelGateway-Join-id-0002",
+                "targetRef": "UserTask-ReviewSensorValues-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ReviewToSensorCheck-id-0009",
+                "sourceRef": "UserTask-ReviewSensorValues-id-0001",
+                "targetRef": "ExclusiveGateway-SensorReadings-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SensorCheckToEnd-id-0010",
+                "sourceRef": "ExclusiveGateway-SensorReadings-id-0001",
+                "targetRef": "EndEvent-DataCollectionComplete-id-0001",
+                "name": "within spec",
+                "isDefault": false
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SensorCheckToDeviation-id-0011",
+                "sourceRef": "ExclusiveGateway-SensorReadings-id-0001",
+                "targetRef": "UserTask-ExplainDeviation-id-0001",
+                "name": "out of spec",
+                "isDefault": true
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-DeviationToAction-id-0012",
+                "sourceRef": "UserTask-ExplainDeviation-id-0001",
+                "targetRef": "UserTask-CorrectiveAction-id-0002"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ActionToEnd-id-0013",
+                "sourceRef": "UserTask-CorrectiveAction-id-0002",
+                "targetRef": "EndEvent-DataCollectionComplete-id-0001"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-VisualInspection-id-0001",
+            "name": "Answer: Visual inspection of seals"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-SealIssue-id-0001",
+            "name": "Seal issue detected?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-SealIssueSeverity-id-0001",
+            "name": "Answer: Seal issue severity"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ImmediateAction-id-0002",
+            "name": "Answer: Immediate action required?"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-NoiseAssessment-id-0001",
+            "name": "Answer: Noise level assessment"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-VibrationCheck-id-0002",
+            "name": "Answer: Vibration check"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ReviewFindings-id-0001",
+            "name": "Review all inspection findings"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ConfirmCompletion-id-0002",
+            "name": "Confirm inspection completion"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-InspectionComplete-id-0002",
+            "name": "Inspection Complete"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToEnterType-id-0001",
+            "sourceRef": "StartEvent-InspectionProcessStarted-id-0001",
+            "targetRef": "UserTask-EnterMachineType-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-EnterTypeToSerial-id-0002",
+            "sourceRef": "UserTask-EnterMachineType-id-0001",
+            "targetRef": "UserTask-EnterSerialNumber-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SerialToValidate-id-0003",
+            "sourceRef": "UserTask-EnterSerialNumber-id-0002",
+            "targetRef": "ServiceTask-ValidateMachineData-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ValidateToGateway-id-0004",
+            "sourceRef": "ServiceTask-ValidateMachineData-id-0001",
+            "targetRef": "ExclusiveGateway-ValidationResult-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToAbort-id-0005",
+            "sourceRef": "ExclusiveGateway-ValidationResult-id-0001",
+            "targetRef": "EndEvent-InspectionAborted-id-0001",
+            "name": "invalid",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToSubprocess-id-0006",
+            "sourceRef": "ExclusiveGateway-ValidationResult-id-0001",
+            "targetRef": "SubProcess-SensorDataCollection-id-0001",
+            "name": "valid",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SubprocessToVisual-id-0007",
+            "sourceRef": "SubProcess-SensorDataCollection-id-0001",
+            "targetRef": "UserTask-VisualInspection-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-VisualToSealCheck-id-0008",
+            "sourceRef": "UserTask-VisualInspection-id-0001",
+            "targetRef": "ExclusiveGateway-SealIssue-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SealCheckToNoise-id-0009",
+            "sourceRef": "ExclusiveGateway-SealIssue-id-0001",
+            "targetRef": "UserTask-NoiseAssessment-id-0001",
+            "name": "no issue",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SealCheckToSeverity-id-0010",
+            "sourceRef": "ExclusiveGateway-SealIssue-id-0001",
+            "targetRef": "UserTask-SealIssueSeverity-id-0001",
+            "name": "issue detected",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SeverityToAction-id-0011",
+            "sourceRef": "UserTask-SealIssueSeverity-id-0001",
+            "targetRef": "UserTask-ImmediateAction-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ActionToNoise-id-0012",
+            "sourceRef": "UserTask-ImmediateAction-id-0002",
+            "targetRef": "UserTask-NoiseAssessment-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-NoiseToVibration-id-0013",
+            "sourceRef": "UserTask-NoiseAssessment-id-0001",
+            "targetRef": "UserTask-VibrationCheck-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-VibrationToReview-id-0014",
+            "sourceRef": "UserTask-VibrationCheck-id-0002",
+            "targetRef": "UserTask-ReviewFindings-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReviewToConfirm-id-0015",
+            "sourceRef": "UserTask-ReviewFindings-id-0001",
+            "targetRef": "UserTask-ConfirmCompletion-id-0002"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ConfirmToEnd-id-0016",
+            "sourceRef": "UserTask-ConfirmCompletion-id-0002",
+            "targetRef": "EndEvent-InspectionComplete-id-0002"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-large-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11627,
+        "total_tokens": 15175,
+        "completion_tokens": 3548
+      },
+      "model_name": "mistral-large-latest",
+      "model": "mistral-large-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11627,
+      "output_tokens": 3548,
+      "total_tokens": 15175
+    },
+    "id": "lc_run--5489d0e6-168a-4af2-b1ec-71d93159ae29-0"
+  },
+  "status": "success"
+}

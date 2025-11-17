@@ -1,0 +1,439 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "JobApplicationManagementDefinitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "2.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "JobApplicationManagementProcess",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-ReportingReminder-id-0001",
+          "name": "Reporting Reminder",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeCycle": "RRULE:FREQ=WEEKLY;BYDAY=MO;BYHOUR=9;BYMINUTE=0"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ReportJobApplications-id-0001",
+          "name": "Report Job Applications"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-LogApplicationsInSystem-id-0001",
+          "name": "Log Applications in System"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-MatchApplicationsToJobOffers-id-0001",
+          "name": "Match Applications to Job Offers"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-ApplicationEvaluationCycle-id-0001",
+          "name": "Application Evaluation Cycle",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-EvaluationStart-id-0001",
+              "name": "Evaluation Start"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-SendPotentialJobOffers-id-0001",
+              "name": "Send: Potential Job Offers"
+            },
+            {
+              "$type": "bpmn:ReceiveTask",
+              "id": "ReceiveTask-ReceiveApplicationConfirmation-id-0001",
+              "name": "Receive: Application Confirmation"
+            },
+            {
+              "$type": "bpmn:BoundaryEvent",
+              "id": "BoundaryEvent-Timer3Days-ReceiveApplicationConfirmation-id-0001",
+              "name": "3 Business Days Timeout",
+              "attachedToRef": "ReceiveTask-ReceiveApplicationConfirmation-id-0001",
+              "cancelActivity": true,
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:TimerEventDefinition",
+                  "timeDuration": "P3D"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-SendConfirmationReminder-id-0001",
+              "name": "Send: confirmation reminder to company"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-RateApplicationCompany-id-0001",
+              "name": "Rate Application (Company)"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-ApplicationRating-id-0001",
+              "name": "Application Rating Decision",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-NegotiateInterview-id-0001",
+              "name": "Negotiate Interview"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-EvaluationCompleteInterviewScheduled-id-0001",
+              "name": "Evaluation Complete - Interview Scheduled"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-SendImprovementSuggestions-id-0001",
+              "name": "Send: application improvement suggestions"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-EvaluationCompleteNeedsImprovement-id-0001",
+              "name": "Evaluation Complete - Needs Improvement"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-ArchiveApplication-id-0001",
+              "name": "Archive Application"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-EvaluationCompleteArchived-id-0001",
+              "name": "Evaluation Complete - Archived"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-EvaluationStartToSendOffers-id-0001",
+              "sourceRef": "StartEvent-EvaluationStart-id-0001",
+              "targetRef": "SendTask-SendPotentialJobOffers-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendOffersToReceiveConfirmation-id-0001",
+              "sourceRef": "SendTask-SendPotentialJobOffers-id-0001",
+              "targetRef": "ReceiveTask-ReceiveApplicationConfirmation-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReceiveConfirmationToRateApplication-id-0001",
+              "sourceRef": "ReceiveTask-ReceiveApplicationConfirmation-id-0001",
+              "targetRef": "UserTask-RateApplicationCompany-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RateApplicationToGateway-id-0001",
+              "sourceRef": "UserTask-RateApplicationCompany-id-0001",
+              "targetRef": "ExclusiveGateway-ApplicationRating-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToNegotiateInterview-id-0001",
+              "sourceRef": "ExclusiveGateway-ApplicationRating-id-0001",
+              "targetRef": "UserTask-NegotiateInterview-id-0001",
+              "name": "rating >= 4"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-NegotiateInterviewToEnd-id-0001",
+              "sourceRef": "UserTask-NegotiateInterview-id-0001",
+              "targetRef": "EndEvent-EvaluationCompleteInterviewScheduled-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToSendSuggestions-id-0001",
+              "sourceRef": "ExclusiveGateway-ApplicationRating-id-0001",
+              "targetRef": "SendTask-SendImprovementSuggestions-id-0001",
+              "name": "rating == 3"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendSuggestionsToEnd-id-0001",
+              "sourceRef": "SendTask-SendImprovementSuggestions-id-0001",
+              "targetRef": "EndEvent-EvaluationCompleteNeedsImprovement-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToArchive-id-0001",
+              "sourceRef": "ExclusiveGateway-ApplicationRating-id-0001",
+              "targetRef": "ServiceTask-ArchiveApplication-id-0001",
+              "name": "rating <= 2",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ArchiveToEnd-id-0001",
+              "sourceRef": "ServiceTask-ArchiveApplication-id-0001",
+              "targetRef": "EndEvent-EvaluationCompleteArchived-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BoundaryToSendReminder-id-0001",
+              "sourceRef": "BoundaryEvent-Timer3Days-ReceiveApplicationConfirmation-id-0001",
+              "targetRef": "SendTask-SendConfirmationReminder-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendReminderToEnd-id-0001",
+              "sourceRef": "SendTask-SendConfirmationReminder-id-0001",
+              "targetRef": "EndEvent-EvaluationCompleteArchived-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-ProbationAndRatingPhase-id-0001",
+          "name": "Probation & Rating Phase",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-ProbationStart-id-0001",
+              "name": "Probation Start"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-EnterProbationPhase-id-0001",
+              "name": "Enter Probation Phase"
+            },
+            {
+              "$type": "bpmn:IntermediateCatchEvent",
+              "id": "IntermediateCatchEvent-ProbationPeriod-id-0001",
+              "name": "3-Month Probation Period",
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:TimerEventDefinition",
+                  "timeDuration": "P3M"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-RateCompanyApplicant-id-0001",
+              "name": "Rate Company (Applicant)"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-RateApplicantCompany-id-0001",
+              "name": "Rate Applicant (Company)"
+            },
+            {
+              "$type": "bpmn:ScriptTask",
+              "id": "ScriptTask-CalculateReviewVisibilityDate-id-0001",
+              "name": "Computation: Calculate Review Visibility Date"
+            },
+            {
+              "$type": "bpmn:BoundaryEvent",
+              "id": "BoundaryEvent-Timer1Year-CalculateReviewVisibilityDate-id-0001",
+              "name": "1 Year Review Visibility",
+              "attachedToRef": "ScriptTask-CalculateReviewVisibilityDate-id-0001",
+              "cancelActivity": true,
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:TimerEventDefinition",
+                  "timeDuration": "P1Y"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-PublishCompanyReviews-id-0001",
+              "name": "Publish Company Reviews"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-ProbationOutcome-id-0001",
+              "name": "Probation Outcome Decision",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:BusinessRuleTask",
+              "id": "BusinessRuleTask-DetermineProcessContinuation-id-0001",
+              "name": "Rule: Determine Process Continuation"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-ProcessCompletePermanentHire-id-0001",
+              "name": "Process Complete - Permanent Hire"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-UpdateProfileContinueReceivingOffers-id-0001",
+              "name": "Update Profile: Continue Receiving Offers"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-DisableReportingRequirement-id-0001",
+              "name": "Disable Reporting Requirement"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-ProcessCompleteActiveSearchContinues-id-0001",
+              "name": "Process Complete - Active Search Continues"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-ProcessCompleteProbationNotConverted-id-0001",
+              "name": "Process Complete - Probation Not Converted"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ProbationStartToEnterProbation-id-0001",
+              "sourceRef": "StartEvent-ProbationStart-id-0001",
+              "targetRef": "UserTask-EnterProbationPhase-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-EnterProbationToProbationPeriod-id-0001",
+              "sourceRef": "UserTask-EnterProbationPhase-id-0001",
+              "targetRef": "IntermediateCatchEvent-ProbationPeriod-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ProbationPeriodToRateCompany-id-0001",
+              "sourceRef": "IntermediateCatchEvent-ProbationPeriod-id-0001",
+              "targetRef": "UserTask-RateCompanyApplicant-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RateCompanyToRateApplicant-id-0001",
+              "sourceRef": "UserTask-RateCompanyApplicant-id-0001",
+              "targetRef": "UserTask-RateApplicantCompany-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RateApplicantToCalculateVisibility-id-0001",
+              "sourceRef": "UserTask-RateApplicantCompany-id-0001",
+              "targetRef": "ScriptTask-CalculateReviewVisibilityDate-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CalculateVisibilityToGateway-id-0001",
+              "sourceRef": "ScriptTask-CalculateReviewVisibilityDate-id-0001",
+              "targetRef": "ExclusiveGateway-ProbationOutcome-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BoundaryToPublishReviews-id-0001",
+              "sourceRef": "BoundaryEvent-Timer1Year-CalculateReviewVisibilityDate-id-0001",
+              "targetRef": "ServiceTask-PublishCompanyReviews-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PublishReviewsToEnd-id-0001",
+              "sourceRef": "ServiceTask-PublishCompanyReviews-id-0001",
+              "targetRef": "EndEvent-ProcessCompletePermanentHire-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToBusinessRule-id-0001",
+              "sourceRef": "ExclusiveGateway-ProbationOutcome-id-0001",
+              "targetRef": "BusinessRuleTask-DetermineProcessContinuation-id-0001",
+              "name": "offer_permanent == true"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BusinessRuleToEndPermanentHire-id-0001",
+              "sourceRef": "BusinessRuleTask-DetermineProcessContinuation-id-0001",
+              "targetRef": "EndEvent-ProcessCompletePermanentHire-id-0001",
+              "name": "applicant_rating in ['A','B','C']"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BusinessRuleToUpdateProfile-id-0001",
+              "sourceRef": "BusinessRuleTask-DetermineProcessContinuation-id-0001",
+              "targetRef": "ServiceTask-UpdateProfileContinueReceivingOffers-id-0001",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-UpdateProfileToDisableReporting-id-0001",
+              "sourceRef": "ServiceTask-UpdateProfileContinueReceivingOffers-id-0001",
+              "targetRef": "ServiceTask-DisableReportingRequirement-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-DisableReportingToEndActiveSearch-id-0001",
+              "sourceRef": "ServiceTask-DisableReportingRequirement-id-0001",
+              "targetRef": "EndEvent-ProcessCompleteActiveSearchContinues-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToEndProbationNotConverted-id-0001",
+              "sourceRef": "ExclusiveGateway-ProbationOutcome-id-0001",
+              "targetRef": "EndEvent-ProcessCompleteProbationNotConverted-id-0001",
+              "name": "offer_permanent == false",
+              "isDefault": true
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProcessCompleteNoMatch-id-0001",
+          "name": "Process Complete - No Match"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProcessCompleteLowRating-id-0001",
+          "name": "Process Complete - Low Rating"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReportingReminderToReportApplications-id-0001",
+          "sourceRef": "StartEvent-ReportingReminder-id-0001",
+          "targetRef": "UserTask-ReportJobApplications-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReportApplicationsToLogApplications-id-0001",
+          "sourceRef": "UserTask-ReportJobApplications-id-0001",
+          "targetRef": "ServiceTask-LogApplicationsInSystem-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LogApplicationsToMatchApplications-id-0001",
+          "sourceRef": "ServiceTask-LogApplicationsInSystem-id-0001",
+          "targetRef": "ServiceTask-MatchApplicationsToJobOffers-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MatchApplicationsToEvaluationCycle-id-0001",
+          "sourceRef": "ServiceTask-MatchApplicationsToJobOffers-id-0001",
+          "targetRef": "SubProcess-ApplicationEvaluationCycle-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-EvaluationCycleToProbationPhase-id-0001",
+          "sourceRef": "SubProcess-ApplicationEvaluationCycle-id-0001",
+          "targetRef": "SubProcess-ProbationAndRatingPhase-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProbationPhaseToEndNoMatch-id-0001",
+          "sourceRef": "SubProcess-ProbationAndRatingPhase-id-0001",
+          "targetRef": "EndEvent-ProcessCompleteNoMatch-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProbationPhaseToEndLowRating-id-0001",
+          "sourceRef": "SubProcess-ProbationAndRatingPhase-id-0001",
+          "targetRef": "EndEvent-ProcessCompleteLowRating-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

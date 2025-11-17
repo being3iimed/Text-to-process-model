@@ -1,0 +1,329 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "WorkAccidentReportingProcess",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process-WorkAccidentReporting-id-0001",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-WorkAccidentOccurs-id-0001",
+          "name": "Work Accident Occurs"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-WorkRelatedCheck-id-0001",
+          "name": "Work-Related Accident?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ReportAccidentToEmployer-id-0001",
+          "name": "Report Accident to Employer"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-DetourCheck-id-0002",
+          "name": "Detour/Special Circumstance?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ManagerApprovesDoctorVisit-id-0001",
+          "name": "Manager Approves Doctor Visit"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-LogAccidentInSystem-id-0001",
+          "name": "Log Accident in System"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateInsuranceForm-id-0001",
+          "name": "Generate Insurance Form"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-SeverityAssessment-id-0003",
+          "name": "Severity Assessment",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-HandleSevereAccident-id-0001",
+          "name": "Handle Severe Accident",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-SevereAccidentHandled-id-0001",
+              "name": "Severe Accident Handled"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-Split-id-0001",
+              "name": "Parallel Actions",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-NotifyLabourInspectorate-id-0001",
+              "name": "Send: Notification to Labour Inspectorate"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-UrgentReportToInsurance-id-0001",
+              "name": "Send: Urgent Report to Insurance"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-ConfirmToEmployee-id-0001",
+              "name": "Send: Confirmation to Employee"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-Join-id-0001",
+              "name": "Synchronize Actions",
+              "gatewayDirection": "Converging"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-SevereAccidentProcessed-id-0001",
+              "name": "Severe Accident Processed"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SubStartToSplit-id-0001",
+              "sourceRef": "StartEvent-SevereAccidentHandled-id-0001",
+              "targetRef": "ParallelGateway-Split-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToNotifyLabour-id-0002",
+              "sourceRef": "ParallelGateway-Split-id-0001",
+              "targetRef": "SendTask-NotifyLabourInspectorate-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToUrgentReport-id-0003",
+              "sourceRef": "ParallelGateway-Split-id-0001",
+              "targetRef": "SendTask-UrgentReportToInsurance-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToConfirmEmployee-id-0004",
+              "sourceRef": "ParallelGateway-Split-id-0001",
+              "targetRef": "SendTask-ConfirmToEmployee-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-NotifyLabourToJoin-id-0005",
+              "sourceRef": "SendTask-NotifyLabourInspectorate-id-0001",
+              "targetRef": "ParallelGateway-Join-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-UrgentReportToJoin-id-0006",
+              "sourceRef": "SendTask-UrgentReportToInsurance-id-0001",
+              "targetRef": "ParallelGateway-Join-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ConfirmToJoin-id-0007",
+              "sourceRef": "SendTask-ConfirmToEmployee-id-0001",
+              "targetRef": "ParallelGateway-Join-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-JoinToSubEnd-id-0008",
+              "sourceRef": "ParallelGateway-Join-id-0001",
+              "targetRef": "EndEvent-SevereAccidentProcessed-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SubmitAccidentReportToInsurance-id-0001",
+          "name": "Submit Accident Report to Insurance"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-InsuredGroupCheck-id-0004",
+          "name": "Insured Group Check",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SchoolReportsAccident-id-0001",
+          "name": "School/University Reports Accident"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SelfEmployedSubmitsReport-id-0001",
+          "name": "Self-Employed Submits Own Report"
+        },
+        {
+          "$type": "bpmn:IntermediateCatchEvent",
+          "id": "IntermediateCatchEvent-ReportingDeadline-id-0001",
+          "name": "5-Day Reporting Deadline",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "P5D"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-AccidentReportedToInsurance-id-0001",
+          "name": "Accident Reported to Insurance"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-DocumentNonWorkAccident-id-0001",
+          "name": "Document Non-Work Accident"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProcessTerminated-id-0001",
+          "name": "Process Terminated"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToWorkRelatedCheck-id-0001",
+          "sourceRef": "StartEvent-WorkAccidentOccurs-id-0001",
+          "targetRef": "ExclusiveGateway-WorkRelatedCheck-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-WorkRelatedToReport-id-0002",
+          "sourceRef": "ExclusiveGateway-WorkRelatedCheck-id-0001",
+          "targetRef": "UserTask-ReportAccidentToEmployer-id-0001",
+          "name": "work_related = true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReportToDetourCheck-id-0003",
+          "sourceRef": "UserTask-ReportAccidentToEmployer-id-0001",
+          "targetRef": "ExclusiveGateway-DetourCheck-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DetourCheckToApproval-id-0004",
+          "sourceRef": "ExclusiveGateway-DetourCheck-id-0002",
+          "targetRef": "UserTask-ManagerApprovesDoctorVisit-id-0001",
+          "name": "detour OR special_circumstance = true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DetourCheckToLog-id-0005",
+          "sourceRef": "ExclusiveGateway-DetourCheck-id-0002",
+          "targetRef": "ServiceTask-LogAccidentInSystem-id-0001",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ApprovalToLog-id-0006",
+          "sourceRef": "UserTask-ManagerApprovesDoctorVisit-id-0001",
+          "targetRef": "ServiceTask-LogAccidentInSystem-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LogToGenerateForm-id-0007",
+          "sourceRef": "ServiceTask-LogAccidentInSystem-id-0001",
+          "targetRef": "ServiceTask-GenerateInsuranceForm-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GenerateFormToSeverity-id-0008",
+          "sourceRef": "ServiceTask-GenerateInsuranceForm-id-0001",
+          "targetRef": "ExclusiveGateway-SeverityAssessment-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SeverityToSevereSubprocess-id-0009",
+          "sourceRef": "ExclusiveGateway-SeverityAssessment-id-0003",
+          "targetRef": "SubProcess-HandleSevereAccident-id-0001",
+          "name": "fatality OR serious_injury = true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SeverityToSubmitReport-id-0010",
+          "sourceRef": "ExclusiveGateway-SeverityAssessment-id-0003",
+          "targetRef": "UserTask-SubmitAccidentReportToInsurance-id-0001",
+          "name": "minor_injury = true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SubprocessToInsuredCheck-id-0011",
+          "sourceRef": "SubProcess-HandleSevereAccident-id-0001",
+          "targetRef": "ExclusiveGateway-InsuredGroupCheck-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SubmitReportToInsuredCheck-id-0012",
+          "sourceRef": "UserTask-SubmitAccidentReportToInsurance-id-0001",
+          "targetRef": "ExclusiveGateway-InsuredGroupCheck-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InsuredCheckToSchool-id-0013",
+          "sourceRef": "ExclusiveGateway-InsuredGroupCheck-id-0004",
+          "targetRef": "UserTask-SchoolReportsAccident-id-0001",
+          "name": "insured_is_student = true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InsuredCheckToSelfEmployed-id-0014",
+          "sourceRef": "ExclusiveGateway-InsuredGroupCheck-id-0004",
+          "targetRef": "UserTask-SelfEmployedSubmitsReport-id-0001",
+          "name": "insured_is_self_employed = true"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InsuredCheckToDeadline-id-0015",
+          "sourceRef": "ExclusiveGateway-InsuredGroupCheck-id-0004",
+          "targetRef": "IntermediateCatchEvent-ReportingDeadline-id-0001",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SchoolToDeadline-id-0016",
+          "sourceRef": "UserTask-SchoolReportsAccident-id-0001",
+          "targetRef": "IntermediateCatchEvent-ReportingDeadline-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SelfEmployedToDeadline-id-0017",
+          "sourceRef": "UserTask-SelfEmployedSubmitsReport-id-0001",
+          "targetRef": "IntermediateCatchEvent-ReportingDeadline-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DeadlineToEnd-id-0018",
+          "sourceRef": "IntermediateCatchEvent-ReportingDeadline-id-0001",
+          "targetRef": "EndEvent-AccidentReportedToInsurance-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-WorkRelatedFalseToDocument-id-0019",
+          "sourceRef": "ExclusiveGateway-WorkRelatedCheck-id-0001",
+          "targetRef": "UserTask-DocumentNonWorkAccident-id-0001",
+          "name": "work_related = false"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DocumentToTerminate-id-0020",
+          "sourceRef": "UserTask-DocumentNonWorkAccident-id-0001",
+          "targetRef": "EndEvent-ProcessTerminated-id-0001"
+        }
+      ]
+    }
+  ]
+}

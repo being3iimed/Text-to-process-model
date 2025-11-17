@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="OEE-Monitoring-Definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="2.0">
+  <bpmn:process id="Process-OEE-Monitoring-id-0001" name="OEE Monitoring Process" isExecutable="true">
+    <bpmn:startEvent id="MessageStartEvent-MachineConnected-id-0001" name="Machine Connected">
+      <bpmn:outgoing>SequenceFlow-StartToParallelSplit-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:subProcess id="SubProcess-OEECalculationLoop-id-0001" name="OEE Calculation Loop">
+      <bpmn:incoming>SequenceFlow-ParallelSplitToCalculationLoop-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CalculationLoopToJoin-id-0006</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-MeasurementCycleStart-id-0001" name="Measurement Cycle Start">
+        <bpmn:incoming>SequenceFlow-ThresholdMergeToStart-id-0015</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-StartToCollectData-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-CollectMachineData-id-0001" name="Collect Machine Data">
+        <bpmn:incoming>SequenceFlow-StartToCollectData-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CollectToCalculate-id-0002</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-Error-CollectMachineData-id-0001" name="Sensor/API Failure" attachedToRef="ServiceTask-CollectMachineData-id-0001">
+        <bpmn:outgoing>SequenceFlow-ErrorBoundaryToAlert-id-0004</bpmn:outgoing>
+        <bpmn:errorEventDefinition id="BoundaryEvent-Error-CollectMachineData-id-0001_EventDef" errorRef="SENSOR_API_FAILURE" />
+      </bpmn:boundaryEvent>
+      <bpmn:sendTask id="SendTask-SensorFailureAlert-id-0001" name="Send: Sensor Failure Alert">
+        <bpmn:incoming>SequenceFlow-ErrorBoundaryToAlert-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AlertToAbort-id-0005</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:endEvent id="EndEvent-MeasurementAborted-id-0001" name="Measurement Aborted">
+        <bpmn:incoming>SequenceFlow-AlertToAbort-id-0005</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:scriptTask id="ScriptTask-CalculateOEE-id-0001" name="Computation: Calculate OEE">
+        <bpmn:incoming>SequenceFlow-CollectToCalculate-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CalculateToThresholdCheck-id-0003</bpmn:outgoing>
+      </bpmn:scriptTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-OEEThresholdCheck-id-0001" name="OEE Threshold Check?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-CalculateToThresholdCheck-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-BelowThresholdToStop-id-0006</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-AtOrAboveThresholdToTimer-id-0012</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-StopMachine-id-0001" name="Stop Machine">
+        <bpmn:incoming>SequenceFlow-BelowThresholdToStop-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-StopToAlert-id-0007</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-OEEAlertToEngineer-id-0001" name="Send: OEE Alert to Engineer">
+        <bpmn:incoming>SequenceFlow-StopToAlert-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AlertToRestartCheck-id-0008</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-MachineRestartCheck-id-0001" name="Machine Restarted?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-AlertToRestartCheck-id-0008</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-MachineRestartedToTimer-id-0009</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-MachineDisconnectedToEnd-id-0010</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-Timer1Min-id-0001" name="Wait 1 Minute">
+        <bpmn:incoming>SequenceFlow-MachineRestartedToTimer-id-0009</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-TimerToMerge-id-0011</bpmn:outgoing>
+      </bpmn:intermediateCatchEvent>
+      <bpmn:endEvent id="EndEvent-MachineDisconnected-id-0001" name="Machine Disconnected">
+        <bpmn:incoming>SequenceFlow-MachineDisconnectedToEnd-id-0010</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-OEEThresholdMerge-id-0001" name="OEE Threshold Merge" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-TimerToThresholdMerge-id-0013</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-MachineRestartMergeToThresholdMerge-id-0014</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ThresholdMergeToStart-id-0015</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-MachineRestartMerge-id-0001" name="Machine Restart Merge" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-TimerToMerge-id-0011</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-MachineRestartMergeToThresholdMerge-id-0014</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-Timer1Min-id-0002" name="Wait 1 Minute">
+        <bpmn:incoming>SequenceFlow-AtOrAboveThresholdToTimer-id-0012</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-TimerToThresholdMerge-id-0013</bpmn:outgoing>
+      </bpmn:intermediateCatchEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToCollectData-id-0001" sourceRef="StartEvent-MeasurementCycleStart-id-0001" targetRef="ServiceTask-CollectMachineData-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CollectToCalculate-id-0002" sourceRef="ServiceTask-CollectMachineData-id-0001" targetRef="ScriptTask-CalculateOEE-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CalculateToThresholdCheck-id-0003" sourceRef="ScriptTask-CalculateOEE-id-0001" targetRef="ExclusiveGateway-OEEThresholdCheck-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ErrorBoundaryToAlert-id-0004" sourceRef="BoundaryEvent-Error-CollectMachineData-id-0001" targetRef="SendTask-SensorFailureAlert-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-AlertToAbort-id-0005" sourceRef="SendTask-SensorFailureAlert-id-0001" targetRef="EndEvent-MeasurementAborted-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BelowThresholdToStop-id-0006" name="OEE &#60; threshold_percentage" sourceRef="ExclusiveGateway-OEEThresholdCheck-id-0001" targetRef="ServiceTask-StopMachine-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-StopToAlert-id-0007" sourceRef="ServiceTask-StopMachine-id-0001" targetRef="SendTask-OEEAlertToEngineer-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-AlertToRestartCheck-id-0008" sourceRef="SendTask-OEEAlertToEngineer-id-0001" targetRef="ExclusiveGateway-MachineRestartCheck-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-MachineRestartedToTimer-id-0009" name="machine_restarted" sourceRef="ExclusiveGateway-MachineRestartCheck-id-0001" targetRef="IntermediateCatchEvent-Timer1Min-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-MachineDisconnectedToEnd-id-0010" name="machine_disconnected" sourceRef="ExclusiveGateway-MachineRestartCheck-id-0001" targetRef="EndEvent-MachineDisconnected-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-TimerToMerge-id-0011" sourceRef="IntermediateCatchEvent-Timer1Min-id-0001" targetRef="ExclusiveGateway-MachineRestartMerge-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-AtOrAboveThresholdToTimer-id-0012" name="OEE &#62;= threshold_percentage" sourceRef="ExclusiveGateway-OEEThresholdCheck-id-0001" targetRef="IntermediateCatchEvent-Timer1Min-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-TimerToThresholdMerge-id-0013" sourceRef="IntermediateCatchEvent-Timer1Min-id-0002" targetRef="ExclusiveGateway-OEEThresholdMerge-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-MachineRestartMergeToThresholdMerge-id-0014" sourceRef="ExclusiveGateway-MachineRestartMerge-id-0001" targetRef="ExclusiveGateway-OEEThresholdMerge-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ThresholdMergeToStart-id-0015" sourceRef="ExclusiveGateway-OEEThresholdMerge-id-0001" targetRef="StartEvent-MeasurementCycleStart-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:parallelGateway id="ParallelGateway-ParallelSplit-id-0001" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-StartToParallelSplit-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ParallelSplitToCalculationLoop-id-0002</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ParallelSplitToMonitorConnection-id-0003</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-MonitorMachineConnection-id-0001" name="Monitor Machine Connection">
+      <bpmn:incoming>SequenceFlow-ParallelSplitToMonitorConnection-id-0003</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-AlertToMonitor-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MonitorToJoin-id-0007</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer5Min-MonitorConnection-id-0001" name="5 Minute Connection Timeout" attachedToRef="ServiceTask-MonitorMachineConnection-id-0001">
+      <bpmn:outgoing>SequenceFlow-TimerBoundaryToAlert-id-0004</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer5Min-MonitorConnection-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT5M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-ConnectionTimeoutAlert-id-0001" name="Send: Connection Timeout Alert">
+      <bpmn:incoming>SequenceFlow-TimerBoundaryToAlert-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AlertToMonitor-id-0005</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:parallelGateway id="ParallelGateway-ParallelJoin-id-0001" name="Synchronize Parallel Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-CalculationLoopToJoin-id-0006</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-MonitorToJoin-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToEnd-id-0008</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:endEvent id="EndEvent-ProcessTerminated-id-0001" name="Process Terminated">
+      <bpmn:incoming>SequenceFlow-JoinToEnd-id-0008</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToParallelSplit-id-0001" sourceRef="MessageStartEvent-MachineConnected-id-0001" targetRef="ParallelGateway-ParallelSplit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelSplitToCalculationLoop-id-0002" sourceRef="ParallelGateway-ParallelSplit-id-0001" targetRef="SubProcess-OEECalculationLoop-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelSplitToMonitorConnection-id-0003" sourceRef="ParallelGateway-ParallelSplit-id-0001" targetRef="ServiceTask-MonitorMachineConnection-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TimerBoundaryToAlert-id-0004" sourceRef="BoundaryEvent-Timer5Min-MonitorConnection-id-0001" targetRef="SendTask-ConnectionTimeoutAlert-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AlertToMonitor-id-0005" sourceRef="SendTask-ConnectionTimeoutAlert-id-0001" targetRef="ServiceTask-MonitorMachineConnection-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CalculationLoopToJoin-id-0006" sourceRef="SubProcess-OEECalculationLoop-id-0001" targetRef="ParallelGateway-ParallelJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MonitorToJoin-id-0007" sourceRef="ServiceTask-MonitorMachineConnection-id-0001" targetRef="ParallelGateway-ParallelJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToEnd-id-0008" sourceRef="ParallelGateway-ParallelJoin-id-0001" targetRef="EndEvent-ProcessTerminated-id-0001" />
+  </bpmn:process>
+  <bpmn:error id="SENSOR_API_FAILURE" name="SENSOR_API_FAILURE" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process-OEE-Monitoring-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process-OEE-Monitoring-id-0001" bpmnElement="Process-OEE-Monitoring-id-0001">
+      <bpmndi:BPMNShape id="MessageStartEvent-MachineConnected-id-0001_di" bpmnElement="MessageStartEvent-MachineConnected-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-ParallelSplit-id-0001_di" bpmnElement="ParallelGateway-ParallelSplit-id-0001">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-OEECalculationLoop-id-0001_di" bpmnElement="SubProcess-OEECalculationLoop-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-ParallelJoin-id-0001_di" bpmnElement="ParallelGateway-ParallelJoin-id-0001">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessTerminated-id-0001_di" bpmnElement="EndEvent-ProcessTerminated-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MonitorMachineConnection-id-0001_di" bpmnElement="ServiceTask-MonitorMachineConnection-id-0001">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer5Min-MonitorConnection-id-0001_di" bpmnElement="BoundaryEvent-Timer5Min-MonitorConnection-id-0001">
+        <dc:Bounds x="357" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ConnectionTimeoutAlert-id-0001_di" bpmnElement="SendTask-ConnectionTimeoutAlert-id-0001">
+        <dc:Bounds x="475" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToParallelSplit-id-0001_di" bpmnElement="SequenceFlow-StartToParallelSplit-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelSplitToCalculationLoop-id-0002_di" bpmnElement="SequenceFlow-ParallelSplitToCalculationLoop-id-0002">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelSplitToMonitorConnection-id-0003_di" bpmnElement="SequenceFlow-ParallelSplitToMonitorConnection-id-0003">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculationLoopToJoin-id-0006_di" bpmnElement="SequenceFlow-CalculationLoopToJoin-id-0006">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToEnd-id-0008_di" bpmnElement="SequenceFlow-JoinToEnd-id-0008">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MonitorToJoin-id-0007_di" bpmnElement="SequenceFlow-MonitorToJoin-id-0007">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TimerBoundaryToAlert-id-0004_di" bpmnElement="SequenceFlow-TimerBoundaryToAlert-id-0004">
+        <di:waypoint x="375" y="268" />
+        <di:waypoint x="375" y="350" />
+        <di:waypoint x="475" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlertToMonitor-id-0005_di" bpmnElement="SequenceFlow-AlertToMonitor-id-0005">
+        <di:waypoint x="525" y="390" />
+        <di:waypoint x="525" y="420" />
+        <di:waypoint x="375" y="420" />
+        <di:waypoint x="375" y="250" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-OEECalculationLoop-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-OEECalculationLoop-id-0001" bpmnElement="SubProcess-OEECalculationLoop-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-MeasurementCycleStart-id-0001_di" bpmnElement="StartEvent-MeasurementCycleStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CollectMachineData-id-0001_di" bpmnElement="ServiceTask-CollectMachineData-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Error-CollectMachineData-id-0001_di" bpmnElement="BoundaryEvent-Error-CollectMachineData-id-0001">
+        <dc:Bounds x="207" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-CalculateOEE-id-0001_di" bpmnElement="ScriptTask-CalculateOEE-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-OEEThresholdCheck-id-0001_di" bpmnElement="ExclusiveGateway-OEEThresholdCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-StopMachine-id-0001_di" bpmnElement="ServiceTask-StopMachine-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-OEEAlertToEngineer-id-0001_di" bpmnElement="SendTask-OEEAlertToEngineer-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-MachineRestartCheck-id-0001_di" bpmnElement="ExclusiveGateway-MachineRestartCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-Timer1Min-id-0001_di" bpmnElement="IntermediateCatchEvent-Timer1Min-id-0001">
+        <dc:Bounds x="1107" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-MachineRestartMerge-id-0001_di" bpmnElement="ExclusiveGateway-MachineRestartMerge-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-OEEThresholdMerge-id-0001_di" bpmnElement="ExclusiveGateway-OEEThresholdMerge-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SensorFailureAlert-id-0001_di" bpmnElement="SendTask-SensorFailureAlert-id-0001">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-MeasurementAborted-id-0001_di" bpmnElement="EndEvent-MeasurementAborted-id-0001">
+        <dc:Bounds x="507" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-Timer1Min-id-0002_di" bpmnElement="IntermediateCatchEvent-Timer1Min-id-0002">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-MachineDisconnected-id-0001_di" bpmnElement="EndEvent-MachineDisconnected-id-0001">
+        <dc:Bounds x="1107" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToCollectData-id-0001_di" bpmnElement="SequenceFlow-StartToCollectData-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CollectToCalculate-id-0002_di" bpmnElement="SequenceFlow-CollectToCalculate-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ErrorBoundaryToAlert-id-0004_di" bpmnElement="SequenceFlow-ErrorBoundaryToAlert-id-0004">
+        <di:waypoint x="225" y="128" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculateToThresholdCheck-id-0003_di" bpmnElement="SequenceFlow-CalculateToThresholdCheck-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BelowThresholdToStop-id-0006_di" bpmnElement="SequenceFlow-BelowThresholdToStop-id-0006">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AtOrAboveThresholdToTimer-id-0012_di" bpmnElement="SequenceFlow-AtOrAboveThresholdToTimer-id-0012">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="600" y="70" />
+        <di:waypoint x="600" y="140" />
+        <di:waypoint x="600" y="140" />
+        <di:waypoint x="600" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StopToAlert-id-0007_di" bpmnElement="SequenceFlow-StopToAlert-id-0007">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlertToRestartCheck-id-0008_di" bpmnElement="SequenceFlow-AlertToRestartCheck-id-0008">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MachineRestartedToTimer-id-0009_di" bpmnElement="SequenceFlow-MachineRestartedToTimer-id-0009">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1107" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MachineDisconnectedToEnd-id-0010_di" bpmnElement="SequenceFlow-MachineDisconnectedToEnd-id-0010">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1107" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TimerToMerge-id-0011_di" bpmnElement="SequenceFlow-TimerToMerge-id-0011">
+        <di:waypoint x="1143" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MachineRestartMergeToThresholdMerge-id-0014_di" bpmnElement="SequenceFlow-MachineRestartMergeToThresholdMerge-id-0014">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ThresholdMergeToStart-id-0015_di" bpmnElement="SequenceFlow-ThresholdMergeToStart-id-0015">
+        <di:waypoint x="1425" y="95" />
+        <di:waypoint x="1425" y="140" />
+        <di:waypoint x="75" y="140" />
+        <di:waypoint x="75" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlertToAbort-id-0005_di" bpmnElement="SequenceFlow-AlertToAbort-id-0005">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="507" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TimerToThresholdMerge-id-0013_di" bpmnElement="SequenceFlow-TimerToThresholdMerge-id-0013">
+        <di:waypoint x="693" y="210" />
+        <di:waypoint x="750" y="210" />
+        <di:waypoint x="750" y="140" />
+        <di:waypoint x="1350" y="140" />
+        <di:waypoint x="1350" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

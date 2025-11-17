@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_CarServiceReminder" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process_CarServiceReminder" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-AnnualServiceReminder-id-0001" name="Annual Service Reminder">
+      <bpmn:outgoing>SequenceFlow-StartToRegistrationCheck-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-CheckCarRegistration-id-0001" name="Check Car Registration Status">
+      <bpmn:incoming>SequenceFlow-StartToRegistrationCheck-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RegistrationCheckToGateway-id-0002</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-CarRegistered-id-0001" name="Car Registered?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-RegistrationCheckToGateway-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToNotification-id-0003</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToEnd-id-0004</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-ServiceReminderNotification-id-0001" name="Send: Service Reminder Notification">
+      <bpmn:incoming>SequenceFlow-GatewayToNotification-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotificationToConfirmation-id-0005</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-ServiceAttendanceConfirmation-id-0001" name="Receive: Service Attendance Confirmation">
+      <bpmn:incoming>SequenceFlow-NotificationToConfirmation-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmationToRepair-id-0006</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer30Day-id-0001" name="30-Day Fine Timer" attachedToRef="ReceiveTask-ServiceAttendanceConfirmation-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryToFine-id-0007</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer30Day-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P30D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-FineNotification-id-0001" name="Send: Fine Notification">
+      <bpmn:incoming>SequenceFlow-BoundaryToFine-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FineToEnd-id-0008</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-FineIssued-id-0001" name="Fine Issued">
+      <bpmn:incoming>SequenceFlow-FineToEnd-id-0008</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:subProcess id="SubProcess-HandleCarRepair-id-0001" name="Handle Car Repair">
+      <bpmn:incoming>SequenceFlow-ConfirmationToRepair-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RepairToComplete-id-0009</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-RepairProcessStarted-id-0001" name="Repair Process Started">
+        <bpmn:outgoing>SequenceFlow-RepairStartToEnterProblems-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-MechanicEntersProblems-id-0001" name="Mechanic Enters Car Problems">
+        <bpmn:incoming>SequenceFlow-RepairStartToEnterProblems-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-EnterProblemsToDiagnosis-id-0002</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:parallelGateway id="ParallelGateway-Diagnosis-id-0001" name="Diagnosis Complete" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-EnterProblemsToDiagnosis-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-DiagnosisToUpdateStatus-id-0003</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-DiagnosisToSendEmail-id-0004</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:serviceTask id="ServiceTask-UpdateRepairStatus1-id-0001" name="Update Repair Status: Diagnosis Complete">
+        <bpmn:incoming>SequenceFlow-DiagnosisToUpdateStatus-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-UpdateStatusToMerge-id-0005</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-RepairStatusEmail1-id-0001" name="Send: Repair Status Email (Diagnosis)">
+        <bpmn:incoming>SequenceFlow-DiagnosisToSendEmail-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SendEmailToMerge-id-0006</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:parallelGateway id="ParallelGateway-Merge1-id-0001" name="Merge Diagnosis Paths" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-UpdateStatusToMerge-id-0005</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-SendEmailToMerge-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-MergeToParts-id-0007</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:parallelGateway id="ParallelGateway-Parts-id-0001" name="Parts Ordered" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-MergeToParts-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PartsToUpdateStatus-id-0008</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-PartsToSendEmail-id-0009</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:serviceTask id="ServiceTask-UpdateRepairStatus2-id-0001" name="Update Repair Status: Parts Ordered">
+        <bpmn:incoming>SequenceFlow-PartsToUpdateStatus-id-0008</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-UpdateStatusToMerge2-id-0010</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-RepairStatusEmail2-id-0001" name="Send: Repair Status Email (Parts)">
+        <bpmn:incoming>SequenceFlow-PartsToSendEmail-id-0009</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SendEmailToMerge2-id-0011</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:parallelGateway id="ParallelGateway-Merge2-id-0001" name="Merge Parts Paths" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-UpdateStatusToMerge2-id-0010</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-SendEmailToMerge2-id-0011</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-MergeToRepair-id-0012</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:parallelGateway id="ParallelGateway-Repair-id-0001" name="Repair Started" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-MergeToRepair-id-0012</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RepairToUpdateStatus-id-0013</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-RepairToSendEmail-id-0014</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:serviceTask id="ServiceTask-UpdateRepairStatus3-id-0001" name="Update Repair Status: Repair Started">
+        <bpmn:incoming>SequenceFlow-RepairToUpdateStatus-id-0013</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-UpdateStatusToMerge3-id-0015</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-RepairStatusEmail3-id-0001" name="Send: Repair Status Email (In Progress)">
+        <bpmn:incoming>SequenceFlow-RepairToSendEmail-id-0014</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SendEmailToMerge3-id-0016</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:parallelGateway id="ParallelGateway-Merge3-id-0001" name="Merge Repair Paths" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-UpdateStatusToMerge3-id-0015</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-SendEmailToMerge3-id-0016</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-MergeToReady-id-0017</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:serviceTask id="ServiceTask-UpdateRepairStatus4-id-0001" name="Update Repair Status: Ready for Pickup">
+        <bpmn:incoming>SequenceFlow-MergeToReady-id-0017</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReadyToSendEmail-id-0018</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-RepairStatusEmail4-id-0001" name="Send: Repair Status Email (Completion)">
+        <bpmn:incoming>SequenceFlow-ReadyToSendEmail-id-0018</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SendEmailToPayment-id-0019</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:userTask id="UserTask-OwnerPayment-id-0001" name="Owner Pays via App">
+        <bpmn:incoming>SequenceFlow-SendEmailToPayment-id-0019</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PaymentToConfirmation-id-0020</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-MechanicConfirmation-id-0001" name="Mechanic Confirms Repair Success">
+        <bpmn:incoming>SequenceFlow-PaymentToConfirmation-id-0020</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ConfirmationToPickerl-id-0021</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:serviceTask id="ServiceTask-GeneratePickerl-id-0001" name="Generate Pickerl Certificate">
+        <bpmn:incoming>SequenceFlow-ConfirmationToPickerl-id-0021</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PickerlToSchedule-id-0022</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-ScheduleNextService-id-0001" name="Schedule Next Service">
+        <bpmn:incoming>SequenceFlow-PickerlToSchedule-id-0022</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ScheduleToEnd-id-0023</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-RepairComplete-id-0001" name="Repair Process Complete">
+        <bpmn:incoming>SequenceFlow-ScheduleToEnd-id-0023</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-RepairStartToEnterProblems-id-0001" sourceRef="StartEvent-RepairProcessStarted-id-0001" targetRef="UserTask-MechanicEntersProblems-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-EnterProblemsToDiagnosis-id-0002" sourceRef="UserTask-MechanicEntersProblems-id-0001" targetRef="ParallelGateway-Diagnosis-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-DiagnosisToUpdateStatus-id-0003" sourceRef="ParallelGateway-Diagnosis-id-0001" targetRef="ServiceTask-UpdateRepairStatus1-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-DiagnosisToSendEmail-id-0004" sourceRef="ParallelGateway-Diagnosis-id-0001" targetRef="SendTask-RepairStatusEmail1-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-UpdateStatusToMerge-id-0005" sourceRef="ServiceTask-UpdateRepairStatus1-id-0001" targetRef="ParallelGateway-Merge1-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SendEmailToMerge-id-0006" sourceRef="SendTask-RepairStatusEmail1-id-0001" targetRef="ParallelGateway-Merge1-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-MergeToParts-id-0007" sourceRef="ParallelGateway-Merge1-id-0001" targetRef="ParallelGateway-Parts-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-PartsToUpdateStatus-id-0008" sourceRef="ParallelGateway-Parts-id-0001" targetRef="ServiceTask-UpdateRepairStatus2-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-PartsToSendEmail-id-0009" sourceRef="ParallelGateway-Parts-id-0001" targetRef="SendTask-RepairStatusEmail2-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-UpdateStatusToMerge2-id-0010" sourceRef="ServiceTask-UpdateRepairStatus2-id-0001" targetRef="ParallelGateway-Merge2-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SendEmailToMerge2-id-0011" sourceRef="SendTask-RepairStatusEmail2-id-0001" targetRef="ParallelGateway-Merge2-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-MergeToRepair-id-0012" sourceRef="ParallelGateway-Merge2-id-0001" targetRef="ParallelGateway-Repair-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RepairToUpdateStatus-id-0013" sourceRef="ParallelGateway-Repair-id-0001" targetRef="ServiceTask-UpdateRepairStatus3-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RepairToSendEmail-id-0014" sourceRef="ParallelGateway-Repair-id-0001" targetRef="SendTask-RepairStatusEmail3-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-UpdateStatusToMerge3-id-0015" sourceRef="ServiceTask-UpdateRepairStatus3-id-0001" targetRef="ParallelGateway-Merge3-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SendEmailToMerge3-id-0016" sourceRef="SendTask-RepairStatusEmail3-id-0001" targetRef="ParallelGateway-Merge3-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-MergeToReady-id-0017" sourceRef="ParallelGateway-Merge3-id-0001" targetRef="ServiceTask-UpdateRepairStatus4-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReadyToSendEmail-id-0018" sourceRef="ServiceTask-UpdateRepairStatus4-id-0001" targetRef="SendTask-RepairStatusEmail4-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SendEmailToPayment-id-0019" sourceRef="SendTask-RepairStatusEmail4-id-0001" targetRef="UserTask-OwnerPayment-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-PaymentToConfirmation-id-0020" sourceRef="UserTask-OwnerPayment-id-0001" targetRef="UserTask-MechanicConfirmation-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ConfirmationToPickerl-id-0021" sourceRef="UserTask-MechanicConfirmation-id-0001" targetRef="ServiceTask-GeneratePickerl-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-PickerlToSchedule-id-0022" sourceRef="ServiceTask-GeneratePickerl-id-0001" targetRef="ServiceTask-ScheduleNextService-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ScheduleToEnd-id-0023" sourceRef="ServiceTask-ScheduleNextService-id-0001" targetRef="EndEvent-RepairComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0001" name="Service Reminder Process Complete">
+      <bpmn:incoming>SequenceFlow-RepairToComplete-id-0009</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0002" name="Service Reminder Process Complete">
+      <bpmn:incoming>SequenceFlow-GatewayToEnd-id-0004</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToRegistrationCheck-id-0001" sourceRef="StartEvent-AnnualServiceReminder-id-0001" targetRef="ServiceTask-CheckCarRegistration-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RegistrationCheckToGateway-id-0002" sourceRef="ServiceTask-CheckCarRegistration-id-0001" targetRef="ExclusiveGateway-CarRegistered-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToNotification-id-0003" name="car_registered == true" sourceRef="ExclusiveGateway-CarRegistered-id-0001" targetRef="SendTask-ServiceReminderNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToEnd-id-0004" name="car_registered == false" sourceRef="ExclusiveGateway-CarRegistered-id-0001" targetRef="EndEvent-ProcessComplete-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotificationToConfirmation-id-0005" sourceRef="SendTask-ServiceReminderNotification-id-0001" targetRef="ReceiveTask-ServiceAttendanceConfirmation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmationToRepair-id-0006" name="owner_attended == true" sourceRef="ReceiveTask-ServiceAttendanceConfirmation-id-0001" targetRef="SubProcess-HandleCarRepair-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToFine-id-0007" name="owner_attended == false" sourceRef="BoundaryEvent-Timer30Day-id-0001" targetRef="SendTask-FineNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FineToEnd-id-0008" sourceRef="SendTask-FineNotification-id-0001" targetRef="EndEvent-FineIssued-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RepairToComplete-id-0009" sourceRef="SubProcess-HandleCarRepair-id-0001" targetRef="EndEvent-ProcessComplete-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process_CarServiceReminder">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process_CarServiceReminder" bpmnElement="Process_CarServiceReminder">
+      <bpmndi:BPMNShape id="StartEvent-AnnualServiceReminder-id-0001_di" bpmnElement="StartEvent-AnnualServiceReminder-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckCarRegistration-id-0001_di" bpmnElement="ServiceTask-CheckCarRegistration-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CarRegistered-id-0001_di" bpmnElement="ExclusiveGateway-CarRegistered-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ServiceReminderNotification-id-0001_di" bpmnElement="SendTask-ServiceReminderNotification-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ServiceAttendanceConfirmation-id-0001_di" bpmnElement="ReceiveTask-ServiceAttendanceConfirmation-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer30Day-id-0001_di" bpmnElement="BoundaryEvent-Timer30Day-id-0001">
+        <dc:Bounds x="657" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-HandleCarRepair-id-0001_di" bpmnElement="SubProcess-HandleCarRepair-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0001_di" bpmnElement="EndEvent-ProcessComplete-id-0001">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0002_di" bpmnElement="EndEvent-ProcessComplete-id-0002">
+        <dc:Bounds x="507" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-FineNotification-id-0001_di" bpmnElement="SendTask-FineNotification-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-FineIssued-id-0001_di" bpmnElement="EndEvent-FineIssued-id-0001">
+        <dc:Bounds x="957" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToRegistrationCheck-id-0001_di" bpmnElement="SequenceFlow-StartToRegistrationCheck-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RegistrationCheckToGateway-id-0002_di" bpmnElement="SequenceFlow-RegistrationCheckToGateway-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToNotification-id-0003_di" bpmnElement="SequenceFlow-GatewayToNotification-id-0003">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToEnd-id-0004_di" bpmnElement="SequenceFlow-GatewayToEnd-id-0004">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="507" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotificationToConfirmation-id-0005_di" bpmnElement="SequenceFlow-NotificationToConfirmation-id-0005">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmationToRepair-id-0006_di" bpmnElement="SequenceFlow-ConfirmationToRepair-id-0006">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToFine-id-0007_di" bpmnElement="SequenceFlow-BoundaryToFine-id-0007">
+        <di:waypoint x="675" y="128" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RepairToComplete-id-0009_di" bpmnElement="SequenceFlow-RepairToComplete-id-0009">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FineToEnd-id-0008_di" bpmnElement="SequenceFlow-FineToEnd-id-0008">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="957" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-HandleCarRepair-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-HandleCarRepair-id-0001" bpmnElement="SubProcess-HandleCarRepair-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-RepairProcessStarted-id-0001_di" bpmnElement="StartEvent-RepairProcessStarted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-MechanicEntersProblems-id-0001_di" bpmnElement="UserTask-MechanicEntersProblems-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Diagnosis-id-0001_di" bpmnElement="ParallelGateway-Diagnosis-id-0001">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateRepairStatus1-id-0001_di" bpmnElement="ServiceTask-UpdateRepairStatus1-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Merge1-id-0001_di" bpmnElement="ParallelGateway-Merge1-id-0001">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Parts-id-0001_di" bpmnElement="ParallelGateway-Parts-id-0001">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateRepairStatus2-id-0001_di" bpmnElement="ServiceTask-UpdateRepairStatus2-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Merge2-id-0001_di" bpmnElement="ParallelGateway-Merge2-id-0001">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Repair-id-0001_di" bpmnElement="ParallelGateway-Repair-id-0001">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateRepairStatus3-id-0001_di" bpmnElement="ServiceTask-UpdateRepairStatus3-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Merge3-id-0001_di" bpmnElement="ParallelGateway-Merge3-id-0001">
+        <dc:Bounds x="1550" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateRepairStatus4-id-0001_di" bpmnElement="ServiceTask-UpdateRepairStatus4-id-0001">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RepairStatusEmail4-id-0001_di" bpmnElement="SendTask-RepairStatusEmail4-id-0001">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-OwnerPayment-id-0001_di" bpmnElement="UserTask-OwnerPayment-id-0001">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-MechanicConfirmation-id-0001_di" bpmnElement="UserTask-MechanicConfirmation-id-0001">
+        <dc:Bounds x="2125" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GeneratePickerl-id-0001_di" bpmnElement="ServiceTask-GeneratePickerl-id-0001">
+        <dc:Bounds x="2275" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ScheduleNextService-id-0001_di" bpmnElement="ServiceTask-ScheduleNextService-id-0001">
+        <dc:Bounds x="2425" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-RepairComplete-id-0001_di" bpmnElement="EndEvent-RepairComplete-id-0001">
+        <dc:Bounds x="2607" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RepairStatusEmail1-id-0001_di" bpmnElement="SendTask-RepairStatusEmail1-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RepairStatusEmail2-id-0001_di" bpmnElement="SendTask-RepairStatusEmail2-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RepairStatusEmail3-id-0001_di" bpmnElement="SendTask-RepairStatusEmail3-id-0001">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-RepairStartToEnterProblems-id-0001_di" bpmnElement="SequenceFlow-RepairStartToEnterProblems-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EnterProblemsToDiagnosis-id-0002_di" bpmnElement="SequenceFlow-EnterProblemsToDiagnosis-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DiagnosisToUpdateStatus-id-0003_di" bpmnElement="SequenceFlow-DiagnosisToUpdateStatus-id-0003">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DiagnosisToSendEmail-id-0004_di" bpmnElement="SequenceFlow-DiagnosisToSendEmail-id-0004">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateStatusToMerge-id-0005_di" bpmnElement="SequenceFlow-UpdateStatusToMerge-id-0005">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MergeToParts-id-0007_di" bpmnElement="SequenceFlow-MergeToParts-id-0007">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PartsToUpdateStatus-id-0008_di" bpmnElement="SequenceFlow-PartsToUpdateStatus-id-0008">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PartsToSendEmail-id-0009_di" bpmnElement="SequenceFlow-PartsToSendEmail-id-0009">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateStatusToMerge2-id-0010_di" bpmnElement="SequenceFlow-UpdateStatusToMerge2-id-0010">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MergeToRepair-id-0012_di" bpmnElement="SequenceFlow-MergeToRepair-id-0012">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RepairToUpdateStatus-id-0013_di" bpmnElement="SequenceFlow-RepairToUpdateStatus-id-0013">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RepairToSendEmail-id-0014_di" bpmnElement="SequenceFlow-RepairToSendEmail-id-0014">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateStatusToMerge3-id-0015_di" bpmnElement="SequenceFlow-UpdateStatusToMerge3-id-0015">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1550" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MergeToReady-id-0017_di" bpmnElement="SequenceFlow-MergeToReady-id-0017">
+        <di:waypoint x="1600" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReadyToSendEmail-id-0018_di" bpmnElement="SequenceFlow-ReadyToSendEmail-id-0018">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendEmailToPayment-id-0019_di" bpmnElement="SequenceFlow-SendEmailToPayment-id-0019">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentToConfirmation-id-0020_di" bpmnElement="SequenceFlow-PaymentToConfirmation-id-0020">
+        <di:waypoint x="2075" y="70" />
+        <di:waypoint x="2125" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmationToPickerl-id-0021_di" bpmnElement="SequenceFlow-ConfirmationToPickerl-id-0021">
+        <di:waypoint x="2225" y="70" />
+        <di:waypoint x="2275" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PickerlToSchedule-id-0022_di" bpmnElement="SequenceFlow-PickerlToSchedule-id-0022">
+        <di:waypoint x="2375" y="70" />
+        <di:waypoint x="2425" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ScheduleToEnd-id-0023_di" bpmnElement="SequenceFlow-ScheduleToEnd-id-0023">
+        <di:waypoint x="2525" y="70" />
+        <di:waypoint x="2607" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendEmailToMerge-id-0006_di" bpmnElement="SequenceFlow-SendEmailToMerge-id-0006">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendEmailToMerge2-id-0011_di" bpmnElement="SequenceFlow-SendEmailToMerge2-id-0011">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendEmailToMerge3-id-0016_di" bpmnElement="SequenceFlow-SendEmailToMerge3-id-0016">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1575" y="210" />
+        <di:waypoint x="1575" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

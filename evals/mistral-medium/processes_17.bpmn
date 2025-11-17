@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="ecommerce-order-fulfillment-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="1.0.0">
+  <bpmn:process id="ECommerceOrderFulfillmentProcess-id-0001" name="E-Commerce Order Fulfillment" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-OrderPlaced-id-0001" name="Order Placed">
+      <bpmn:outgoing>SequenceFlow-StartToRecordOrder-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-RecordOrderDetails-id-0001" name="Record Order Details">
+      <bpmn:incoming>SequenceFlow-StartToRecordOrder-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RecordToProcessPayment-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ProcessPayment-id-0001" name="Process Payment">
+      <bpmn:incoming>SequenceFlow-RecordToProcessPayment-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProcessPaymentToPaymentStatus-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-PaymentStatus-id-0001" name="Payment Status?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ProcessPaymentToPaymentStatus-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PaymentStatusToFailure-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-PaymentStatusToStockCheck-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-PaymentFailureNotification-id-0001" name="Send: payment failure notification">
+      <bpmn:incoming>SequenceFlow-PaymentStatusToFailure-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FailureNotificationToEnd-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-PaymentFailed-id-0001" name="Payment Failed">
+      <bpmn:incoming>SequenceFlow-FailureNotificationToEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-CheckStockAvailability-id-0001" name="Check Stock Availability">
+      <bpmn:incoming>SequenceFlow-PaymentStatusToStockCheck-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StockCheckToStockStatus-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-StockStatus-id-0001" name="Stock Status?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-StockCheckToStockStatus-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StockStatusToBackOrder-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-StockStatusToPickItems-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-BackOrderNotification-id-0001" name="Send: back-order notification">
+      <bpmn:incoming>SequenceFlow-StockStatusToBackOrder-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BackOrderToReceive-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-BackOrderItems-id-0001" name="Receive: back-order items">
+      <bpmn:incoming>SequenceFlow-BackOrderToReceive-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveToPickItems-id-0001</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:serviceTask id="ServiceTask-PickItemsFromWarehouse-id-0001" name="Pick Items from Warehouse">
+      <bpmn:incoming>SequenceFlow-StockStatusToPickItems-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ReceiveToPickItems-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PickItemsToQC-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-PerformQualityControlChecks-id-0001" name="Perform Quality Control Checks">
+      <bpmn:incoming>SequenceFlow-PickItemsToQC-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-QCToPackage-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-PackageItems-id-0001" name="Package Items">
+      <bpmn:incoming>SequenceFlow-QCToPackage-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PackageToGiftWrapDecision-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-GiftWrapRequest-id-0001" name="Gift Wrap Request?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-PackageToGiftWrapDecision-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GiftWrapDecisionToAddWrap-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GiftWrapDecisionToShippingDocs-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-AddGiftWrapping-id-0001" name="Add Gift Wrapping (if requested)">
+      <bpmn:incoming>SequenceFlow-GiftWrapDecisionToAddWrap-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AddWrapToShippingDocs-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-ShippingDocsSplit-id-0001" name="Shipping Docs Split" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-GiftWrapDecisionToShippingDocs-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-AddWrapToShippingDocs-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ShippingDocsSplitToPrepareDocs-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ShippingDocsSplitToInternationalCheck-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-PrepareShippingDocuments-id-0001" name="Prepare Shipping Documents">
+      <bpmn:incoming>SequenceFlow-ShippingDocsSplitToPrepareDocs-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PrepareDocsToDocsJoin-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-InternationalOrder-id-0001" name="International Order?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ShippingDocsSplitToInternationalCheck-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InternationalCheckToCustoms-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-InternationalCheckToDocsJoin-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-PrepareCustomsDocumentation-id-0001" name="Prepare Customs Documentation">
+      <bpmn:incoming>SequenceFlow-InternationalCheckToCustoms-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CustomsToDocsJoin-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-ShippingDocsJoin-id-0001" name="Shipping Docs Join" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-InternationalCheckToDocsJoin-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-CustomsToDocsJoin-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-PrepareDocsToDocsJoin-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DocsJoinToDispatch-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-DispatchOrder-id-0001" name="Dispatch Order">
+      <bpmn:incoming>SequenceFlow-DocsJoinToDispatch-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DispatchToConfirmation-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-ShippingConfirmation-id-0001" name="Send: shipping confirmation">
+      <bpmn:incoming>SequenceFlow-DispatchToConfirmation-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmationToUpdateInventory-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-UpdateInventoryLevels-id-0001" name="Update Inventory Levels">
+      <bpmn:incoming>SequenceFlow-ConfirmationToUpdateInventory-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateInventoryToFeedback-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-FeedbackRequest-id-0001" name="Send: feedback request">
+      <bpmn:incoming>SequenceFlow-UpdateInventoryToFeedback-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FeedbackToDeliveryConfirmation-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-DeliveryConfirmation-id-0001" name="Receive: delivery confirmation">
+      <bpmn:incoming>SequenceFlow-FeedbackToDeliveryConfirmation-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DeliveryConfirmationToIssuesCheck-id-0001</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-IssuesReported-id-0001" name="Issues Reported?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-DeliveryConfirmationToIssuesCheck-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-IssuesCheckToReturns-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-IssuesCheckToComplete-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="EndEvent-OrderFulfillmentComplete-id-0001" name="Order Fulfillment Complete">
+      <bpmn:incoming>SequenceFlow-IssuesCheckToComplete-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:subProcess id="SubProcess-HandleReturns-id-0001" name="Handle Returns">
+      <bpmn:incoming>SequenceFlow-IssuesCheckToReturns-id-0001</bpmn:incoming>
+      <bpmn:startEvent id="StartEvent-ReturnsProcessInitiated-id-0001" name="Returns Process Initiated">
+        <bpmn:outgoing>SequenceFlow-ReturnsStartToLabel-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:sendTask id="SendTask-ReturnShippingLabel-id-0001" name="Send: return shipping label">
+        <bpmn:incoming>SequenceFlow-ReturnsStartToLabel-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-LabelToReceive-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:receiveTask id="ReceiveTask-ReturnedItems-id-0001" name="Receive: returned items">
+        <bpmn:incoming>SequenceFlow-LabelToReceive-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReceiveToInspect-id-0001</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:userTask id="UserTask-InspectReturnedItems-id-0001" name="Inspect Returned Items">
+        <bpmn:incoming>SequenceFlow-ReceiveToInspect-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-InspectToRefundDecision-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-RefundApproved-id-0001" name="Refund Approved?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-InspectToRefundDecision-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RefundDecisionToRefund-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-RefundDecisionToReplacement-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-ProcessRefund-id-0001" name="Process Refund">
+        <bpmn:incoming>SequenceFlow-RefundDecisionToRefund-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RefundToEnd-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-ProcessReplacement-id-0001" name="Process Replacement">
+        <bpmn:incoming>SequenceFlow-RefundDecisionToReplacement-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReplacementToEnd-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-ReturnsProcessComplete-id-0001" name="Returns Process Complete">
+        <bpmn:incoming>SequenceFlow-RefundToEnd-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ReplacementToEnd-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-ReturnsStartToLabel-id-0001" sourceRef="StartEvent-ReturnsProcessInitiated-id-0001" targetRef="SendTask-ReturnShippingLabel-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-LabelToReceive-id-0001" sourceRef="SendTask-ReturnShippingLabel-id-0001" targetRef="ReceiveTask-ReturnedItems-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReceiveToInspect-id-0001" sourceRef="ReceiveTask-ReturnedItems-id-0001" targetRef="UserTask-InspectReturnedItems-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-InspectToRefundDecision-id-0001" sourceRef="UserTask-InspectReturnedItems-id-0001" targetRef="ExclusiveGateway-RefundApproved-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RefundDecisionToRefund-id-0001" name="refund_approved" sourceRef="ExclusiveGateway-RefundApproved-id-0001" targetRef="ServiceTask-ProcessRefund-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RefundDecisionToReplacement-id-0001" sourceRef="ExclusiveGateway-RefundApproved-id-0001" targetRef="ServiceTask-ProcessReplacement-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RefundToEnd-id-0001" sourceRef="ServiceTask-ProcessRefund-id-0001" targetRef="EndEvent-ReturnsProcessComplete-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReplacementToEnd-id-0001" sourceRef="ServiceTask-ProcessReplacement-id-0001" targetRef="EndEvent-ReturnsProcessComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToRecordOrder-id-0001" sourceRef="StartEvent-OrderPlaced-id-0001" targetRef="UserTask-RecordOrderDetails-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RecordToProcessPayment-id-0001" sourceRef="UserTask-RecordOrderDetails-id-0001" targetRef="ServiceTask-ProcessPayment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProcessPaymentToPaymentStatus-id-0001" sourceRef="ServiceTask-ProcessPayment-id-0001" targetRef="ExclusiveGateway-PaymentStatus-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PaymentStatusToFailure-id-0001" name="payment_failed" sourceRef="ExclusiveGateway-PaymentStatus-id-0001" targetRef="SendTask-PaymentFailureNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PaymentStatusToStockCheck-id-0001" name="payment_successful" sourceRef="ExclusiveGateway-PaymentStatus-id-0001" targetRef="ServiceTask-CheckStockAvailability-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-StockCheckToStockStatus-id-0001" sourceRef="ServiceTask-CheckStockAvailability-id-0001" targetRef="ExclusiveGateway-StockStatus-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-StockStatusToBackOrder-id-0001" name="out_of_stock" sourceRef="ExclusiveGateway-StockStatus-id-0001" targetRef="SendTask-BackOrderNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-StockStatusToPickItems-id-0001" name="in_stock" sourceRef="ExclusiveGateway-StockStatus-id-0001" targetRef="ServiceTask-PickItemsFromWarehouse-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BackOrderToReceive-id-0001" sourceRef="SendTask-BackOrderNotification-id-0001" targetRef="ReceiveTask-BackOrderItems-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveToPickItems-id-0001" sourceRef="ReceiveTask-BackOrderItems-id-0001" targetRef="ServiceTask-PickItemsFromWarehouse-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PickItemsToQC-id-0001" sourceRef="ServiceTask-PickItemsFromWarehouse-id-0001" targetRef="UserTask-PerformQualityControlChecks-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-QCToPackage-id-0001" sourceRef="UserTask-PerformQualityControlChecks-id-0001" targetRef="ServiceTask-PackageItems-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PackageToGiftWrapDecision-id-0001" sourceRef="ServiceTask-PackageItems-id-0001" targetRef="ExclusiveGateway-GiftWrapRequest-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GiftWrapDecisionToAddWrap-id-0001" name="gift_wrapping_requested" sourceRef="ExclusiveGateway-GiftWrapRequest-id-0001" targetRef="ServiceTask-AddGiftWrapping-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GiftWrapDecisionToShippingDocs-id-0001" name="no_gift_wrap" sourceRef="ExclusiveGateway-GiftWrapRequest-id-0001" targetRef="ParallelGateway-ShippingDocsSplit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AddWrapToShippingDocs-id-0001" sourceRef="ServiceTask-AddGiftWrapping-id-0001" targetRef="ParallelGateway-ShippingDocsSplit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ShippingDocsSplitToPrepareDocs-id-0001" sourceRef="ParallelGateway-ShippingDocsSplit-id-0001" targetRef="ServiceTask-PrepareShippingDocuments-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ShippingDocsSplitToInternationalCheck-id-0001" sourceRef="ParallelGateway-ShippingDocsSplit-id-0001" targetRef="ExclusiveGateway-InternationalOrder-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InternationalCheckToCustoms-id-0001" name="international_order" sourceRef="ExclusiveGateway-InternationalOrder-id-0001" targetRef="ServiceTask-PrepareCustomsDocumentation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InternationalCheckToDocsJoin-id-0001" name="domestic_order" sourceRef="ExclusiveGateway-InternationalOrder-id-0001" targetRef="ParallelGateway-ShippingDocsJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CustomsToDocsJoin-id-0001" sourceRef="ServiceTask-PrepareCustomsDocumentation-id-0001" targetRef="ParallelGateway-ShippingDocsJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrepareDocsToDocsJoin-id-0001" sourceRef="ServiceTask-PrepareShippingDocuments-id-0001" targetRef="ParallelGateway-ShippingDocsJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DocsJoinToDispatch-id-0001" sourceRef="ParallelGateway-ShippingDocsJoin-id-0001" targetRef="ServiceTask-DispatchOrder-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DispatchToConfirmation-id-0001" sourceRef="ServiceTask-DispatchOrder-id-0001" targetRef="SendTask-ShippingConfirmation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmationToUpdateInventory-id-0001" sourceRef="SendTask-ShippingConfirmation-id-0001" targetRef="ServiceTask-UpdateInventoryLevels-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateInventoryToFeedback-id-0001" sourceRef="ServiceTask-UpdateInventoryLevels-id-0001" targetRef="SendTask-FeedbackRequest-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FeedbackToDeliveryConfirmation-id-0001" sourceRef="SendTask-FeedbackRequest-id-0001" targetRef="ReceiveTask-DeliveryConfirmation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DeliveryConfirmationToIssuesCheck-id-0001" sourceRef="ReceiveTask-DeliveryConfirmation-id-0001" targetRef="ExclusiveGateway-IssuesReported-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-IssuesCheckToReturns-id-0001" name="issues_reported" sourceRef="ExclusiveGateway-IssuesReported-id-0001" targetRef="SubProcess-HandleReturns-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-IssuesCheckToComplete-id-0001" name="no_issues" sourceRef="ExclusiveGateway-IssuesReported-id-0001" targetRef="EndEvent-OrderFulfillmentComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FailureNotificationToEnd-id-0001" sourceRef="SendTask-PaymentFailureNotification-id-0001" targetRef="EndEvent-PaymentFailed-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ECommerceOrderFulfillmentProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_ECommerceOrderFulfillmentProcess-id-0001" bpmnElement="ECommerceOrderFulfillmentProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-OrderPlaced-id-0001_di" bpmnElement="StartEvent-OrderPlaced-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-RecordOrderDetails-id-0001_di" bpmnElement="UserTask-RecordOrderDetails-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessPayment-id-0001_di" bpmnElement="ServiceTask-ProcessPayment-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PaymentStatus-id-0001_di" bpmnElement="ExclusiveGateway-PaymentStatus-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-PaymentFailureNotification-id-0001_di" bpmnElement="SendTask-PaymentFailureNotification-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-PaymentFailed-id-0001_di" bpmnElement="EndEvent-PaymentFailed-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckStockAvailability-id-0001_di" bpmnElement="ServiceTask-CheckStockAvailability-id-0001">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-StockStatus-id-0001_di" bpmnElement="ExclusiveGateway-StockStatus-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-BackOrderNotification-id-0001_di" bpmnElement="SendTask-BackOrderNotification-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-BackOrderItems-id-0001_di" bpmnElement="ReceiveTask-BackOrderItems-id-0001">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PickItemsFromWarehouse-id-0001_di" bpmnElement="ServiceTask-PickItemsFromWarehouse-id-0001">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PerformQualityControlChecks-id-0001_di" bpmnElement="UserTask-PerformQualityControlChecks-id-0001">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PackageItems-id-0001_di" bpmnElement="ServiceTask-PackageItems-id-0001">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-GiftWrapRequest-id-0001_di" bpmnElement="ExclusiveGateway-GiftWrapRequest-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1700" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AddGiftWrapping-id-0001_di" bpmnElement="ServiceTask-AddGiftWrapping-id-0001">
+        <dc:Bounds x="1825" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-ShippingDocsSplit-id-0001_di" bpmnElement="ParallelGateway-ShippingDocsSplit-id-0001">
+        <dc:Bounds x="2000" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareShippingDocuments-id-0001_di" bpmnElement="ServiceTask-PrepareShippingDocuments-id-0001">
+        <dc:Bounds x="2125" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-ShippingDocsJoin-id-0001_di" bpmnElement="ParallelGateway-ShippingDocsJoin-id-0001">
+        <dc:Bounds x="2450" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DispatchOrder-id-0001_di" bpmnElement="ServiceTask-DispatchOrder-id-0001">
+        <dc:Bounds x="2575" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ShippingConfirmation-id-0001_di" bpmnElement="SendTask-ShippingConfirmation-id-0001">
+        <dc:Bounds x="2725" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateInventoryLevels-id-0001_di" bpmnElement="ServiceTask-UpdateInventoryLevels-id-0001">
+        <dc:Bounds x="2875" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-FeedbackRequest-id-0001_di" bpmnElement="SendTask-FeedbackRequest-id-0001">
+        <dc:Bounds x="3025" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-DeliveryConfirmation-id-0001_di" bpmnElement="ReceiveTask-DeliveryConfirmation-id-0001">
+        <dc:Bounds x="3175" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-IssuesReported-id-0001_di" bpmnElement="ExclusiveGateway-IssuesReported-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="3350" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-HandleReturns-id-0001_di" bpmnElement="SubProcess-HandleReturns-id-0001">
+        <dc:Bounds x="3475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-InternationalOrder-id-0001_di" bpmnElement="ExclusiveGateway-InternationalOrder-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="2150" y="325" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareCustomsDocumentation-id-0001_di" bpmnElement="ServiceTask-PrepareCustomsDocumentation-id-0001">
+        <dc:Bounds x="2275" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-OrderFulfillmentComplete-id-0001_di" bpmnElement="EndEvent-OrderFulfillmentComplete-id-0001">
+        <dc:Bounds x="3507" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToRecordOrder-id-0001_di" bpmnElement="SequenceFlow-StartToRecordOrder-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RecordToProcessPayment-id-0001_di" bpmnElement="SequenceFlow-RecordToProcessPayment-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessPaymentToPaymentStatus-id-0001_di" bpmnElement="SequenceFlow-ProcessPaymentToPaymentStatus-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentStatusToFailure-id-0001_di" bpmnElement="SequenceFlow-PaymentStatusToFailure-id-0001">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentStatusToStockCheck-id-0001_di" bpmnElement="SequenceFlow-PaymentStatusToStockCheck-id-0001">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FailureNotificationToEnd-id-0001_di" bpmnElement="SequenceFlow-FailureNotificationToEnd-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StockCheckToStockStatus-id-0001_di" bpmnElement="SequenceFlow-StockCheckToStockStatus-id-0001">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="800" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StockStatusToBackOrder-id-0001_di" bpmnElement="SequenceFlow-StockStatusToBackOrder-id-0001">
+        <di:waypoint x="850" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StockStatusToPickItems-id-0001_di" bpmnElement="SequenceFlow-StockStatusToPickItems-id-0001">
+        <di:waypoint x="825" y="235" />
+        <di:waypoint x="825" y="280" />
+        <di:waypoint x="1275" y="280" />
+        <di:waypoint x="1275" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BackOrderToReceive-id-0001_di" bpmnElement="SequenceFlow-BackOrderToReceive-id-0001">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToPickItems-id-0001_di" bpmnElement="SequenceFlow-ReceiveToPickItems-id-0001">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PickItemsToQC-id-0001_di" bpmnElement="SequenceFlow-PickItemsToQC-id-0001">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-QCToPackage-id-0001_di" bpmnElement="SequenceFlow-QCToPackage-id-0001">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PackageToGiftWrapDecision-id-0001_di" bpmnElement="SequenceFlow-PackageToGiftWrapDecision-id-0001">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1700" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GiftWrapDecisionToAddWrap-id-0001_di" bpmnElement="SequenceFlow-GiftWrapDecisionToAddWrap-id-0001">
+        <di:waypoint x="1750" y="210" />
+        <di:waypoint x="1825" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GiftWrapDecisionToShippingDocs-id-0001_di" bpmnElement="SequenceFlow-GiftWrapDecisionToShippingDocs-id-0001">
+        <di:waypoint x="1725" y="235" />
+        <di:waypoint x="1725" y="280" />
+        <di:waypoint x="2025" y="280" />
+        <di:waypoint x="2025" y="235" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AddWrapToShippingDocs-id-0001_di" bpmnElement="SequenceFlow-AddWrapToShippingDocs-id-0001">
+        <di:waypoint x="1925" y="210" />
+        <di:waypoint x="2000" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ShippingDocsSplitToPrepareDocs-id-0001_di" bpmnElement="SequenceFlow-ShippingDocsSplitToPrepareDocs-id-0001">
+        <di:waypoint x="2050" y="210" />
+        <di:waypoint x="2125" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ShippingDocsSplitToInternationalCheck-id-0001_di" bpmnElement="SequenceFlow-ShippingDocsSplitToInternationalCheck-id-0001">
+        <di:waypoint x="2025" y="235" />
+        <di:waypoint x="2025" y="350" />
+        <di:waypoint x="2150" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrepareDocsToDocsJoin-id-0001_di" bpmnElement="SequenceFlow-PrepareDocsToDocsJoin-id-0001">
+        <di:waypoint x="2225" y="210" />
+        <di:waypoint x="2450" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DocsJoinToDispatch-id-0001_di" bpmnElement="SequenceFlow-DocsJoinToDispatch-id-0001">
+        <di:waypoint x="2500" y="210" />
+        <di:waypoint x="2575" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DispatchToConfirmation-id-0001_di" bpmnElement="SequenceFlow-DispatchToConfirmation-id-0001">
+        <di:waypoint x="2675" y="210" />
+        <di:waypoint x="2725" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmationToUpdateInventory-id-0001_di" bpmnElement="SequenceFlow-ConfirmationToUpdateInventory-id-0001">
+        <di:waypoint x="2825" y="210" />
+        <di:waypoint x="2875" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateInventoryToFeedback-id-0001_di" bpmnElement="SequenceFlow-UpdateInventoryToFeedback-id-0001">
+        <di:waypoint x="2975" y="210" />
+        <di:waypoint x="3025" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FeedbackToDeliveryConfirmation-id-0001_di" bpmnElement="SequenceFlow-FeedbackToDeliveryConfirmation-id-0001">
+        <di:waypoint x="3125" y="210" />
+        <di:waypoint x="3175" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DeliveryConfirmationToIssuesCheck-id-0001_di" bpmnElement="SequenceFlow-DeliveryConfirmationToIssuesCheck-id-0001">
+        <di:waypoint x="3275" y="210" />
+        <di:waypoint x="3350" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IssuesCheckToReturns-id-0001_di" bpmnElement="SequenceFlow-IssuesCheckToReturns-id-0001">
+        <di:waypoint x="3400" y="210" />
+        <di:waypoint x="3475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IssuesCheckToComplete-id-0001_di" bpmnElement="SequenceFlow-IssuesCheckToComplete-id-0001">
+        <di:waypoint x="3375" y="235" />
+        <di:waypoint x="3375" y="350" />
+        <di:waypoint x="3507" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InternationalCheckToCustoms-id-0001_di" bpmnElement="SequenceFlow-InternationalCheckToCustoms-id-0001">
+        <di:waypoint x="2200" y="350" />
+        <di:waypoint x="2275" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InternationalCheckToDocsJoin-id-0001_di" bpmnElement="SequenceFlow-InternationalCheckToDocsJoin-id-0001">
+        <di:waypoint x="2200" y="350" />
+        <di:waypoint x="2250" y="350" />
+        <di:waypoint x="2250" y="280" />
+        <di:waypoint x="2400" y="280" />
+        <di:waypoint x="2400" y="210" />
+        <di:waypoint x="2450" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CustomsToDocsJoin-id-0001_di" bpmnElement="SequenceFlow-CustomsToDocsJoin-id-0001">
+        <di:waypoint x="2375" y="350" />
+        <di:waypoint x="2475" y="350" />
+        <di:waypoint x="2475" y="235" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-HandleReturns-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-HandleReturns-id-0001" bpmnElement="SubProcess-HandleReturns-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ReturnsProcessInitiated-id-0001_di" bpmnElement="StartEvent-ReturnsProcessInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ReturnShippingLabel-id-0001_di" bpmnElement="SendTask-ReturnShippingLabel-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReturnedItems-id-0001_di" bpmnElement="ReceiveTask-ReturnedItems-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-InspectReturnedItems-id-0001_di" bpmnElement="UserTask-InspectReturnedItems-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RefundApproved-id-0001_di" bpmnElement="ExclusiveGateway-RefundApproved-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessRefund-id-0001_di" bpmnElement="ServiceTask-ProcessRefund-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ReturnsProcessComplete-id-0001_di" bpmnElement="EndEvent-ReturnsProcessComplete-id-0001">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessReplacement-id-0001_di" bpmnElement="ServiceTask-ProcessReplacement-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReturnsStartToLabel-id-0001_di" bpmnElement="SequenceFlow-ReturnsStartToLabel-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LabelToReceive-id-0001_di" bpmnElement="SequenceFlow-LabelToReceive-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToInspect-id-0001_di" bpmnElement="SequenceFlow-ReceiveToInspect-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InspectToRefundDecision-id-0001_di" bpmnElement="SequenceFlow-InspectToRefundDecision-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RefundDecisionToRefund-id-0001_di" bpmnElement="SequenceFlow-RefundDecisionToRefund-id-0001">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RefundDecisionToReplacement-id-0001_di" bpmnElement="SequenceFlow-RefundDecisionToReplacement-id-0001">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RefundToEnd-id-0001_di" bpmnElement="SequenceFlow-RefundToEnd-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReplacementToEnd-id-0001_di" bpmnElement="SequenceFlow-ReplacementToEnd-id-0001">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="975" y="88" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

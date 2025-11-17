@@ -1,0 +1,228 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "Definitions_OrderProcess",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process_OrderProcess",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-OrderProcessStarted-id-0001",
+          "name": "Order Process Started"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-LogInToAccount-id-0001",
+          "name": "Log in to Account"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-Split-id-0001",
+          "name": "Parallel Execution",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SelectItemsToPurchase-id-0001",
+          "name": "Select Items to Purchase"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SetPaymentMethod-id-0001",
+          "name": "Set Payment Method"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-Join-id-0001",
+          "name": "Synchronize Branches",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-PaymentDecision-id-0001",
+          "name": "Payment Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-PayForOrder-id-0001",
+          "name": "Pay for Order"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CompleteInstallmentAgreement-id-0001",
+          "name": "Complete Installment Agreement"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-PaymentMerge-id-0001",
+          "name": "Merge Payment Paths",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ChooseFreeReward-id-0001",
+          "name": "Choose Free Reward"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProcessDelivery-id-0001",
+          "name": "Process Delivery"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ReturnDecision-id-0001",
+          "name": "Return Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-RequestItemExchange-id-0001",
+          "name": "Request Item Exchange"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProcessReturn-id-0001",
+          "name": "Process Return"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ScheduleNewDelivery-id-0001",
+          "name": "Schedule New Delivery"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-OrderFulfilled-id-0001",
+          "name": "Order Fulfilled"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToLogin-id-0001",
+          "sourceRef": "StartEvent-OrderProcessStarted-id-0001",
+          "targetRef": "UserTask-LogInToAccount-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-LoginToSplit-id-0001",
+          "sourceRef": "UserTask-LogInToAccount-id-0001",
+          "targetRef": "ParallelGateway-Split-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToSelectItems-id-0001",
+          "sourceRef": "ParallelGateway-Split-id-0001",
+          "targetRef": "UserTask-SelectItemsToPurchase-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToSetPayment-id-0001",
+          "sourceRef": "ParallelGateway-Split-id-0001",
+          "targetRef": "UserTask-SetPaymentMethod-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SelectItemsToJoin-id-0001",
+          "sourceRef": "UserTask-SelectItemsToPurchase-id-0001",
+          "targetRef": "ParallelGateway-Join-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SetPaymentToJoin-id-0001",
+          "sourceRef": "UserTask-SetPaymentMethod-id-0001",
+          "targetRef": "ParallelGateway-Join-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinToPaymentDecision-id-0001",
+          "sourceRef": "ParallelGateway-Join-id-0001",
+          "targetRef": "ExclusiveGateway-PaymentDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PaymentDecisionToPayNow-id-0001",
+          "sourceRef": "ExclusiveGateway-PaymentDecision-id-0001",
+          "targetRef": "UserTask-PayForOrder-id-0001",
+          "name": "payment_method == \"full_payment\"",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PaymentDecisionToInstallment-id-0001",
+          "sourceRef": "ExclusiveGateway-PaymentDecision-id-0001",
+          "targetRef": "UserTask-CompleteInstallmentAgreement-id-0001",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PayNowToMerge-id-0001",
+          "sourceRef": "UserTask-PayForOrder-id-0001",
+          "targetRef": "ExclusiveGateway-PaymentMerge-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InstallmentToMerge-id-0001",
+          "sourceRef": "UserTask-CompleteInstallmentAgreement-id-0001",
+          "targetRef": "ExclusiveGateway-PaymentMerge-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MergeToReward-id-0001",
+          "sourceRef": "ExclusiveGateway-PaymentMerge-id-0001",
+          "targetRef": "UserTask-ChooseFreeReward-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RewardToDelivery-id-0001",
+          "sourceRef": "UserTask-ChooseFreeReward-id-0001",
+          "targetRef": "ServiceTask-ProcessDelivery-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DeliveryToReturnDecision-id-0001",
+          "sourceRef": "ServiceTask-ProcessDelivery-id-0001",
+          "targetRef": "ExclusiveGateway-ReturnDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReturnDecisionToExchange-id-0001",
+          "sourceRef": "ExclusiveGateway-ReturnDecision-id-0001",
+          "targetRef": "UserTask-RequestItemExchange-id-0001",
+          "name": "user_requests_exchange",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReturnDecisionToEnd-id-0001",
+          "sourceRef": "ExclusiveGateway-ReturnDecision-id-0001",
+          "targetRef": "EndEvent-OrderFulfilled-id-0001",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ExchangeToProcessReturn-id-0001",
+          "sourceRef": "UserTask-RequestItemExchange-id-0001",
+          "targetRef": "ServiceTask-ProcessReturn-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProcessReturnToSchedule-id-0001",
+          "sourceRef": "ServiceTask-ProcessReturn-id-0001",
+          "targetRef": "ServiceTask-ScheduleNewDelivery-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ScheduleToDelivery-id-0001",
+          "sourceRef": "ServiceTask-ScheduleNewDelivery-id-0001",
+          "targetRef": "ServiceTask-ProcessDelivery-id-0001"
+        }
+      ]
+    }
+  ]
+}

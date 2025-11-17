@@ -1,0 +1,443 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "SubscriptionLifecycleDefinitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "SubscriptionLifecycleProcess",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-CustomerInitiatesSignup-id-0001",
+          "name": "Customer Initiates Signup"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-EnterSubscriptionInformation-id-0001",
+          "name": "Enter Subscription Information"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateAccount-id-0001",
+          "name": "Generate Account"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-AssignAccess-id-0001",
+          "name": "Assign Access"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ProcessInitialPayment-id-0001",
+          "name": "Process Initial Payment"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-WelcomeEmail-id-0001",
+          "name": "Send: Welcome Email and Access Instructions"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-SubscriptionActive-id-0001",
+          "name": "Subscription Active"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-MonthlyBillingCycle-id-0001",
+          "name": "Monthly Billing Cycle",
+          "triggeredByEvent": true,
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-MonthlyBillingTrigger-id-0001",
+              "name": "Monthly Billing Trigger",
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:TimerEventDefinition",
+                  "id": "TimerEventDefinition-Monthly-id-0001",
+                  "timeCycle": "RRULE:FREQ=MONTHLY;BYMONTHDAY=1;BYHOUR=0;BYMINUTE=0"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-RenewalNotification-id-0001",
+              "name": "Send: Renewal Notification (7 days prior)"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-GenerateInvoice-id-0001",
+              "name": "Generate Invoice"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-ProcessBillingPayment-id-0001",
+              "name": "Process Billing Payment"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-PaymentSuccess-id-0001",
+              "name": "Payment Successful?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-PaymentReceipt-id-0001",
+              "name": "Send: Payment Receipt"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-SendProductUpdates-id-0001",
+              "name": "Send Product Updates"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-SendEnhancementNotifications-id-0001",
+              "name": "Send Enhancement Notifications"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-BillingCycleComplete-id-0001",
+              "name": "Billing Cycle Complete"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-PaymentFailedNotification-id-0001",
+              "name": "Send: Payment Failed Notification"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-UpdatePaymentMethod-id-0001",
+              "name": "Customer Updates Payment Method"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-RetryBillingPayment-id-0001",
+              "name": "Retry Billing Payment"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-PaymentSuccess-id-0002",
+              "name": "Payment Successful?",
+              "gatewayDirection": "Converging"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BillingTriggerToNotification-id-0001",
+              "sourceRef": "StartEvent-MonthlyBillingTrigger-id-0001",
+              "targetRef": "SendTask-RenewalNotification-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-NotificationToGenerateInvoice-id-0001",
+              "sourceRef": "SendTask-RenewalNotification-id-0001",
+              "targetRef": "ServiceTask-GenerateInvoice-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GenerateInvoiceToProcessPayment-id-0001",
+              "sourceRef": "ServiceTask-GenerateInvoice-id-0001",
+              "targetRef": "ServiceTask-ProcessBillingPayment-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ProcessPaymentToGateway-id-0001",
+              "sourceRef": "ServiceTask-ProcessBillingPayment-id-0001",
+              "targetRef": "ExclusiveGateway-PaymentSuccess-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToPaymentReceipt-id-0001",
+              "sourceRef": "ExclusiveGateway-PaymentSuccess-id-0001",
+              "targetRef": "SendTask-PaymentReceipt-id-0001",
+              "name": "payment_successful",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PaymentReceiptToProductUpdates-id-0001",
+              "sourceRef": "SendTask-PaymentReceipt-id-0001",
+              "targetRef": "ServiceTask-SendProductUpdates-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ProductUpdatesToEnhancements-id-0001",
+              "sourceRef": "ServiceTask-SendProductUpdates-id-0001",
+              "targetRef": "ServiceTask-SendEnhancementNotifications-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-EnhancementsToEnd-id-0001",
+              "sourceRef": "ServiceTask-SendEnhancementNotifications-id-0001",
+              "targetRef": "EndEvent-BillingCycleComplete-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToPaymentFailed-id-0001",
+              "sourceRef": "ExclusiveGateway-PaymentSuccess-id-0001",
+              "targetRef": "SendTask-PaymentFailedNotification-id-0001",
+              "name": "!payment_successful",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PaymentFailedToUpdateMethod-id-0001",
+              "sourceRef": "SendTask-PaymentFailedNotification-id-0001",
+              "targetRef": "UserTask-UpdatePaymentMethod-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-UpdateMethodToRetryPayment-id-0001",
+              "sourceRef": "UserTask-UpdatePaymentMethod-id-0001",
+              "targetRef": "ServiceTask-RetryBillingPayment-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RetryPaymentToGateway-id-0001",
+              "sourceRef": "ServiceTask-RetryBillingPayment-id-0001",
+              "targetRef": "ExclusiveGateway-PaymentSuccess-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToEnd-id-0001",
+              "sourceRef": "ExclusiveGateway-PaymentSuccess-id-0002",
+              "targetRef": "EndEvent-BillingCycleComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-CancellationProcessing-id-0001",
+          "name": "Cancellation Processing",
+          "triggeredByEvent": true,
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-CancellationRequestReceived-id-0001",
+              "name": "Cancellation Request Received",
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:MessageEventDefinition",
+                  "id": "MessageEventDefinition-Cancellation-id-0001"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-SupportTeamReviewsCancellation-id-0001",
+              "name": "Support Team Reviews Cancellation"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-CancellationApproved-id-0001",
+              "name": "Cancellation Approved?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-CalculateFinalBalance-id-0001",
+              "name": "Calculate Final Balance"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-RefundDue-id-0001",
+              "name": "Refund Due?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-ProcessRefund-id-0001",
+              "name": "Process Refund"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-RefundConfirmation-id-0001",
+              "name": "Send: Refund Confirmation"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-ApplyFinalCharges-id-0001",
+              "name": "Apply Final Charges"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-FinalInvoice-id-0001",
+              "name": "Send: Final Invoice"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-RefundDue-id-0002",
+              "name": "Refund Due?",
+              "gatewayDirection": "Converging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-DeactivateSubscription-id-0001",
+              "name": "Deactivate Subscription"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-CancellationConfirmation-id-0001",
+              "name": "Send: Cancellation Confirmation"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-SubscriptionCancelled-id-0001",
+              "name": "Subscription Cancelled"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-CancellationRejectionNotice-id-0001",
+              "name": "Send: Cancellation Rejection Notice"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-CancellationDenied-id-0001",
+              "name": "Cancellation Denied"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CancellationRequestToReview-id-0001",
+              "sourceRef": "StartEvent-CancellationRequestReceived-id-0001",
+              "targetRef": "UserTask-SupportTeamReviewsCancellation-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReviewToCancellationGateway-id-0001",
+              "sourceRef": "UserTask-SupportTeamReviewsCancellation-id-0001",
+              "targetRef": "ExclusiveGateway-CancellationApproved-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CancellationApprovedToCalculateBalance-id-0001",
+              "sourceRef": "ExclusiveGateway-CancellationApproved-id-0001",
+              "targetRef": "ServiceTask-CalculateFinalBalance-id-0001",
+              "name": "cancellation_approved",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CalculateBalanceToRefundGateway-id-0001",
+              "sourceRef": "ServiceTask-CalculateFinalBalance-id-0001",
+              "targetRef": "ExclusiveGateway-RefundDue-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RefundGatewayToProcessRefund-id-0001",
+              "sourceRef": "ExclusiveGateway-RefundDue-id-0001",
+              "targetRef": "ServiceTask-ProcessRefund-id-0001",
+              "name": "refund_due > 0",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ProcessRefundToConfirmation-id-0001",
+              "sourceRef": "ServiceTask-ProcessRefund-id-0001",
+              "targetRef": "SendTask-RefundConfirmation-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RefundConfirmationToRefundGateway-id-0001",
+              "sourceRef": "SendTask-RefundConfirmation-id-0001",
+              "targetRef": "ExclusiveGateway-RefundDue-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RefundGatewayToApplyCharges-id-0001",
+              "sourceRef": "ExclusiveGateway-RefundDue-id-0001",
+              "targetRef": "ServiceTask-ApplyFinalCharges-id-0001",
+              "name": "refund_due <= 0",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ApplyChargesToFinalInvoice-id-0001",
+              "sourceRef": "ServiceTask-ApplyFinalCharges-id-0001",
+              "targetRef": "SendTask-FinalInvoice-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-FinalInvoiceToRefundGateway-id-0001",
+              "sourceRef": "SendTask-FinalInvoice-id-0001",
+              "targetRef": "ExclusiveGateway-RefundDue-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RefundGatewayToDeactivate-id-0001",
+              "sourceRef": "ExclusiveGateway-RefundDue-id-0002",
+              "targetRef": "ServiceTask-DeactivateSubscription-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-DeactivateToConfirmation-id-0001",
+              "sourceRef": "ServiceTask-DeactivateSubscription-id-0001",
+              "targetRef": "SendTask-CancellationConfirmation-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ConfirmationToCancelled-id-0001",
+              "sourceRef": "SendTask-CancellationConfirmation-id-0001",
+              "targetRef": "EndEvent-SubscriptionCancelled-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CancellationDeniedToRejection-id-0001",
+              "sourceRef": "ExclusiveGateway-CancellationApproved-id-0001",
+              "targetRef": "SendTask-CancellationRejectionNotice-id-0001",
+              "name": "!cancellation_approved",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RejectionToDenied-id-0001",
+              "sourceRef": "SendTask-CancellationRejectionNotice-id-0001",
+              "targetRef": "EndEvent-CancellationDenied-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SignupToEnterInfo-id-0001",
+          "sourceRef": "StartEvent-CustomerInitiatesSignup-id-0001",
+          "targetRef": "UserTask-EnterSubscriptionInformation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-EnterInfoToGenerateAccount-id-0001",
+          "sourceRef": "UserTask-EnterSubscriptionInformation-id-0001",
+          "targetRef": "ServiceTask-GenerateAccount-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GenerateAccountToAssignAccess-id-0001",
+          "sourceRef": "ServiceTask-GenerateAccount-id-0001",
+          "targetRef": "ServiceTask-AssignAccess-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AssignAccessToProcessPayment-id-0001",
+          "sourceRef": "ServiceTask-AssignAccess-id-0001",
+          "targetRef": "ServiceTask-ProcessInitialPayment-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProcessPaymentToWelcomeEmail-id-0001",
+          "sourceRef": "ServiceTask-ProcessInitialPayment-id-0001",
+          "targetRef": "SendTask-WelcomeEmail-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-WelcomeEmailToActive-id-0001",
+          "sourceRef": "SendTask-WelcomeEmail-id-0001",
+          "targetRef": "EndEvent-SubscriptionActive-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

@@ -1,0 +1,142 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "credit-scoring-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "CreditScoringProcess",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-CreditScoringRequested-id-0001",
+          "name": "Credit Scoring Requested",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:MessageEventDefinition",
+              "name": "CreditScoringRequested"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-SendScoringRequest-id-0001",
+          "name": "Send scoring request to agency"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ResponsePath-id-0001",
+          "name": "Agency Response Path",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-Level1Result-id-0001",
+          "name": "Receive level 1 scoring result"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-DisplayImmediateResult-id-0001",
+          "name": "Send display immediate result to clerk"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ScoringComplete-id-0001",
+          "name": "Scoring Complete"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-Level2Delay-id-0001",
+          "name": "Receive level 2 delay notification"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-DisplayDelayMessage-id-0001",
+          "name": "Send display delay message to clerk"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-Level2Result-id-0001",
+          "name": "Receive level 2 scoring result"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-DisplayFinalResult-id-0001",
+          "name": "Send display final result to clerk"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ScoringComplete-id-0002",
+          "name": "Scoring Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToRequest-id-0001",
+          "sourceRef": "StartEvent-CreditScoringRequested-id-0001",
+          "targetRef": "ServiceTask-SendScoringRequest-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RequestToGateway-id-0001",
+          "sourceRef": "ServiceTask-SendScoringRequest-id-0001",
+          "targetRef": "ExclusiveGateway-ResponsePath-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToLevel1-id-0001",
+          "name": "immediate response",
+          "sourceRef": "ExclusiveGateway-ResponsePath-id-0001",
+          "targetRef": "ReceiveTask-Level1Result-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-Level1ToDisplay-id-0001",
+          "sourceRef": "ReceiveTask-Level1Result-id-0001",
+          "targetRef": "SendTask-DisplayImmediateResult-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DisplayToEnd1-id-0001",
+          "sourceRef": "SendTask-DisplayImmediateResult-id-0001",
+          "targetRef": "EndEvent-ScoringComplete-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToLevel2Delay-id-0001",
+          "name": "delayed response",
+          "sourceRef": "ExclusiveGateway-ResponsePath-id-0001",
+          "targetRef": "ReceiveTask-Level2Delay-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-Level2DelayToDisplay-id-0001",
+          "sourceRef": "ReceiveTask-Level2Delay-id-0001",
+          "targetRef": "SendTask-DisplayDelayMessage-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DisplayDelayToLevel2Result-id-0001",
+          "sourceRef": "SendTask-DisplayDelayMessage-id-0001",
+          "targetRef": "ReceiveTask-Level2Result-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-Level2ResultToDisplay-id-0001",
+          "sourceRef": "ReceiveTask-Level2Result-id-0001",
+          "targetRef": "SendTask-DisplayFinalResult-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DisplayFinalToEnd2-id-0001",
+          "sourceRef": "SendTask-DisplayFinalResult-id-0001",
+          "targetRef": "EndEvent-ScoringComplete-id-0002"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="ShippingProcessDefinitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="ShippingProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ShippingProcessInitiated-id-0001" name="Shipping Process Initiated">
+      <bpmn:outgoing>SequenceFlow-StartToClarify-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-ClarifyShippingResponsibility-id-0001" name="Clarify Shipping Responsibility">
+      <bpmn:incoming>SequenceFlow-StartToClarify-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ClarifyToAmountDecision-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ShippingAmount-id-0001" name="Shipping Amount Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ClarifyToAmountDecision-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LargeAmountToInvite-id-0003</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SmallAmountToSplitSmall-id-0015</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-InviteLogisticCompanies-id-0002" name="Invite Logistic Companies for Offers">
+      <bpmn:incoming>SequenceFlow-LargeAmountToInvite-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InviteToSelect-id-0004</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-SelectLogisticCompany-id-0003" name="Select Logistic Company">
+      <bpmn:incoming>SequenceFlow-InviteToSelect-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectToSplitLarge-id-0005</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-SplitLargeShipment-id-0001" name="Parallel Preparation (Large)" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-SelectToSplitLarge-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitLargeToPackage-id-0006</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitLargeToLabel-id-0007</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-PackageGoodsLarge-id-0001" name="Package Goods (Large Shipment)">
+      <bpmn:incoming>SequenceFlow-SplitLargeToPackage-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PackageLargeToJoin-id-0008</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-WritePackageLabelLarge-id-0001" name="Write Package Label (Large Shipment)">
+      <bpmn:incoming>SequenceFlow-SplitLargeToLabel-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LabelLargeToJoin-id-0009</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-JoinLargeShipment-id-0002" name="Synchronize Large Shipment" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-PackageLargeToJoin-id-0008</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-LabelLargeToJoin-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinLargeToInsurance-id-0010</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-DecideOnParcelInsurance-id-0001" name="Decide on Parcel Insurance">
+      <bpmn:incoming>SequenceFlow-JoinLargeToInsurance-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InsuranceToDecision-id-0011</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-InsuranceDecision-id-0001" name="Insurance Needed?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-InsuranceToDecision-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InsuranceYesToTake-id-0012</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-InsuranceNoToPrepare-id-0013</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-TakeParcelInsurance-id-0001" name="Take Parcel Insurance">
+      <bpmn:incoming>SequenceFlow-InsuranceYesToTake-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TakeInsuranceToPrepare-id-0014</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-SplitSmallShipment-id-0003" name="Parallel Preparation (Small)" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-SmallAmountToSplitSmall-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitSmallToPackage-id-0016</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitSmallToLabel-id-0017</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-PackageGoodsSmall-id-0002" name="Package Goods (Small Shipment)">
+      <bpmn:incoming>SequenceFlow-SplitSmallToPackage-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PackageSmallToJoin-id-0018</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-WritePackageLabelSmall-id-0002" name="Write Package Label (Small Shipment)">
+      <bpmn:incoming>SequenceFlow-SplitSmallToLabel-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LabelSmallToJoin-id-0019</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-JoinSmallShipment-id-0004" name="Synchronize Small Shipment" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-PackageSmallToJoin-id-0018</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-LabelSmallToJoin-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinSmallToPrepare-id-0020</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-PrepareForPickup-id-0001" name="Prepare for Pickup">
+      <bpmn:incoming>SequenceFlow-InsuranceNoToPrepare-id-0013</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-TakeInsuranceToPrepare-id-0014</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-JoinSmallToPrepare-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PrepareToEnd-id-0021</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-GoodsReadyForPickup-id-0001" name="Goods Ready for Pickup">
+      <bpmn:incoming>SequenceFlow-PrepareToEnd-id-0021</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToClarify-id-0001" sourceRef="StartEvent-ShippingProcessInitiated-id-0001" targetRef="UserTask-ClarifyShippingResponsibility-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ClarifyToAmountDecision-id-0002" sourceRef="UserTask-ClarifyShippingResponsibility-id-0001" targetRef="ExclusiveGateway-ShippingAmount-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-LargeAmountToInvite-id-0003" name="amount == &#34;large&#34;" sourceRef="ExclusiveGateway-ShippingAmount-id-0001" targetRef="UserTask-InviteLogisticCompanies-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-InviteToSelect-id-0004" sourceRef="UserTask-InviteLogisticCompanies-id-0002" targetRef="UserTask-SelectLogisticCompany-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectToSplitLarge-id-0005" sourceRef="UserTask-SelectLogisticCompany-id-0003" targetRef="ParallelGateway-SplitLargeShipment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitLargeToPackage-id-0006" sourceRef="ParallelGateway-SplitLargeShipment-id-0001" targetRef="ServiceTask-PackageGoodsLarge-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitLargeToLabel-id-0007" sourceRef="ParallelGateway-SplitLargeShipment-id-0001" targetRef="UserTask-WritePackageLabelLarge-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PackageLargeToJoin-id-0008" sourceRef="ServiceTask-PackageGoodsLarge-id-0001" targetRef="ParallelGateway-JoinLargeShipment-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-LabelLargeToJoin-id-0009" sourceRef="UserTask-WritePackageLabelLarge-id-0001" targetRef="ParallelGateway-JoinLargeShipment-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinLargeToInsurance-id-0010" sourceRef="ParallelGateway-JoinLargeShipment-id-0002" targetRef="UserTask-DecideOnParcelInsurance-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InsuranceToDecision-id-0011" sourceRef="UserTask-DecideOnParcelInsurance-id-0001" targetRef="ExclusiveGateway-InsuranceDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InsuranceYesToTake-id-0012" name="insurance_needed == true" sourceRef="ExclusiveGateway-InsuranceDecision-id-0001" targetRef="UserTask-TakeParcelInsurance-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InsuranceNoToPrepare-id-0013" sourceRef="ExclusiveGateway-InsuranceDecision-id-0001" targetRef="ServiceTask-PrepareForPickup-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TakeInsuranceToPrepare-id-0014" sourceRef="UserTask-TakeParcelInsurance-id-0001" targetRef="ServiceTask-PrepareForPickup-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SmallAmountToSplitSmall-id-0015" name="amount == &#34;small&#34;" sourceRef="ExclusiveGateway-ShippingAmount-id-0001" targetRef="ParallelGateway-SplitSmallShipment-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitSmallToPackage-id-0016" sourceRef="ParallelGateway-SplitSmallShipment-id-0003" targetRef="ServiceTask-PackageGoodsSmall-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitSmallToLabel-id-0017" sourceRef="ParallelGateway-SplitSmallShipment-id-0003" targetRef="UserTask-WritePackageLabelSmall-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-PackageSmallToJoin-id-0018" sourceRef="ServiceTask-PackageGoodsSmall-id-0002" targetRef="ParallelGateway-JoinSmallShipment-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-LabelSmallToJoin-id-0019" sourceRef="UserTask-WritePackageLabelSmall-id-0002" targetRef="ParallelGateway-JoinSmallShipment-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinSmallToPrepare-id-0020" sourceRef="ParallelGateway-JoinSmallShipment-id-0004" targetRef="ServiceTask-PrepareForPickup-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrepareToEnd-id-0021" sourceRef="ServiceTask-PrepareForPickup-id-0001" targetRef="EndEvent-GoodsReadyForPickup-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ShippingProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_ShippingProcess" bpmnElement="ShippingProcess">
+      <bpmndi:BPMNShape id="StartEvent-ShippingProcessInitiated-id-0001_di" bpmnElement="StartEvent-ShippingProcessInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ClarifyShippingResponsibility-id-0001_di" bpmnElement="UserTask-ClarifyShippingResponsibility-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ShippingAmount-id-0001_di" bpmnElement="ExclusiveGateway-ShippingAmount-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-InviteLogisticCompanies-id-0002_di" bpmnElement="UserTask-InviteLogisticCompanies-id-0002">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectLogisticCompany-id-0003_di" bpmnElement="UserTask-SelectLogisticCompany-id-0003">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-SplitLargeShipment-id-0001_di" bpmnElement="ParallelGateway-SplitLargeShipment-id-0001">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PackageGoodsLarge-id-0001_di" bpmnElement="ServiceTask-PackageGoodsLarge-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-JoinLargeShipment-id-0002_di" bpmnElement="ParallelGateway-JoinLargeShipment-id-0002">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-DecideOnParcelInsurance-id-0001_di" bpmnElement="UserTask-DecideOnParcelInsurance-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-InsuranceDecision-id-0001_di" bpmnElement="ExclusiveGateway-InsuranceDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-TakeParcelInsurance-id-0001_di" bpmnElement="UserTask-TakeParcelInsurance-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareForPickup-id-0001_di" bpmnElement="ServiceTask-PrepareForPickup-id-0001">
+        <dc:Bounds x="2125" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-GoodsReadyForPickup-id-0001_di" bpmnElement="EndEvent-GoodsReadyForPickup-id-0001">
+        <dc:Bounds x="2307" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-WritePackageLabelLarge-id-0001_di" bpmnElement="UserTask-WritePackageLabelLarge-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-SplitSmallShipment-id-0003_di" bpmnElement="ParallelGateway-SplitSmallShipment-id-0003">
+        <dc:Bounds x="1700" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PackageGoodsSmall-id-0002_di" bpmnElement="ServiceTask-PackageGoodsSmall-id-0002">
+        <dc:Bounds x="1825" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-JoinSmallShipment-id-0004_di" bpmnElement="ParallelGateway-JoinSmallShipment-id-0004">
+        <dc:Bounds x="2000" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-WritePackageLabelSmall-id-0002_di" bpmnElement="UserTask-WritePackageLabelSmall-id-0002">
+        <dc:Bounds x="1825" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToClarify-id-0001_di" bpmnElement="SequenceFlow-StartToClarify-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ClarifyToAmountDecision-id-0002_di" bpmnElement="SequenceFlow-ClarifyToAmountDecision-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LargeAmountToInvite-id-0003_di" bpmnElement="SequenceFlow-LargeAmountToInvite-id-0003">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SmallAmountToSplitSmall-id-0015_di" bpmnElement="SequenceFlow-SmallAmountToSplitSmall-id-0015">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="450" y="70" />
+        <di:waypoint x="450" y="140" />
+        <di:waypoint x="1650" y="140" />
+        <di:waypoint x="1650" y="210" />
+        <di:waypoint x="1700" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InviteToSelect-id-0004_di" bpmnElement="SequenceFlow-InviteToSelect-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectToSplitLarge-id-0005_di" bpmnElement="SequenceFlow-SelectToSplitLarge-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitLargeToPackage-id-0006_di" bpmnElement="SequenceFlow-SplitLargeToPackage-id-0006">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitLargeToLabel-id-0007_di" bpmnElement="SequenceFlow-SplitLargeToLabel-id-0007">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PackageLargeToJoin-id-0008_di" bpmnElement="SequenceFlow-PackageLargeToJoin-id-0008">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinLargeToInsurance-id-0010_di" bpmnElement="SequenceFlow-JoinLargeToInsurance-id-0010">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InsuranceToDecision-id-0011_di" bpmnElement="SequenceFlow-InsuranceToDecision-id-0011">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InsuranceYesToTake-id-0012_di" bpmnElement="SequenceFlow-InsuranceYesToTake-id-0012">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InsuranceNoToPrepare-id-0013_di" bpmnElement="SequenceFlow-InsuranceNoToPrepare-id-0013">
+        <di:waypoint x="1425" y="95" />
+        <di:waypoint x="1425" y="140" />
+        <di:waypoint x="2175" y="140" />
+        <di:waypoint x="2175" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TakeInsuranceToPrepare-id-0014_di" bpmnElement="SequenceFlow-TakeInsuranceToPrepare-id-0014">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="2125" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrepareToEnd-id-0021_di" bpmnElement="SequenceFlow-PrepareToEnd-id-0021">
+        <di:waypoint x="2225" y="70" />
+        <di:waypoint x="2307" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LabelLargeToJoin-id-0009_di" bpmnElement="SequenceFlow-LabelLargeToJoin-id-0009">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitSmallToPackage-id-0016_di" bpmnElement="SequenceFlow-SplitSmallToPackage-id-0016">
+        <di:waypoint x="1750" y="210" />
+        <di:waypoint x="1825" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitSmallToLabel-id-0017_di" bpmnElement="SequenceFlow-SplitSmallToLabel-id-0017">
+        <di:waypoint x="1725" y="235" />
+        <di:waypoint x="1725" y="350" />
+        <di:waypoint x="1825" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PackageSmallToJoin-id-0018_di" bpmnElement="SequenceFlow-PackageSmallToJoin-id-0018">
+        <di:waypoint x="1925" y="210" />
+        <di:waypoint x="2000" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinSmallToPrepare-id-0020_di" bpmnElement="SequenceFlow-JoinSmallToPrepare-id-0020">
+        <di:waypoint x="2050" y="210" />
+        <di:waypoint x="2175" y="210" />
+        <di:waypoint x="2175" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LabelSmallToJoin-id-0019_di" bpmnElement="SequenceFlow-LabelSmallToJoin-id-0019">
+        <di:waypoint x="1925" y="350" />
+        <di:waypoint x="2025" y="350" />
+        <di:waypoint x="2025" y="235" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

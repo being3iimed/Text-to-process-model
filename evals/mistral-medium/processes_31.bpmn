@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_BlizzardCharacterGenerator" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process_CharacterCreation" name="Blizzard Online Character Generator" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-StartCharacterCreation-id-0001" name="Start Character Creation">
+      <bpmn:outgoing>SequenceFlow-StartToSplit-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:parallelGateway id="ParallelGateway-Split-id-0001" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-StartToSplit-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToCheckAccount-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToBrainstormNames-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-CheckBattleNetAccount-id-0001" name="Check Battle.net Account">
+      <bpmn:incoming>SequenceFlow-SplitToCheckAccount-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckAccountToAccountExists-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-AccountExists-id-0001" name="Account Exists?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CheckAccountToAccountExists-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AccountExistsToAccountSetupComplete-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-AccountExistsToEnterAccountInfo-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="EndEvent-AccountSetupComplete-id-0001" name="Account Setup Complete">
+      <bpmn:incoming>SequenceFlow-AccountExistsToAccountSetupComplete-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ClickLinkToAccountSetupComplete-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AccountSetupCompleteToJoin-id-0001</bpmn:outgoing>
+    </bpmn:endEvent>
+    <bpmn:userTask id="UserTask-EnterAccountInformation-id-0001" name="Enter Account Information">
+      <bpmn:incoming>SequenceFlow-AccountExistsToEnterAccountInfo-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EnterAccountInfoToSendEmail-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="SendTask-SendConfirmationEmail-id-0001" name="Send: confirmation email">
+      <bpmn:incoming>SequenceFlow-EnterAccountInfoToSendEmail-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendEmailToReceiveEmail-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveConfirmationEmail-id-0001" name="Receive: confirmation email">
+      <bpmn:incoming>SequenceFlow-SendEmailToReceiveEmail-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveEmailToClickLink-id-0001</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:userTask id="UserTask-ClickConfirmationLink-id-0001" name="Click Confirmation Link">
+      <bpmn:incoming>SequenceFlow-ReceiveEmailToClickLink-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ClickLinkToAccountSetupComplete-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-BrainstormCharacterNames-id-0001" name="Brainstorm Character Names">
+      <bpmn:incoming>SequenceFlow-SplitToBrainstormNames-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BrainstormNamesToJoin-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join-id-0001" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-BrainstormNamesToJoin-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-AccountSetupCompleteToJoin-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToCheckSubscription-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-CheckWoWSubscription-id-0001" name="Check WoW Subscription">
+      <bpmn:incoming>SequenceFlow-JoinToCheckSubscription-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckSubscriptionToSubscriptionActive-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-SubscriptionActive-id-0001" name="Subscription Active?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CheckSubscriptionToSubscriptionActive-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SubscriptionActiveToLogIntoGame-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SubscriptionActiveToSelectPayment-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-SelectPaymentMethod-id-0001" name="Select Payment Method">
+      <bpmn:incoming>SequenceFlow-SubscriptionActiveToSelectPayment-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectPaymentToPaymentMethod-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-PaymentMethod-id-0001" name="Payment Method?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-SelectPaymentToPaymentMethod-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PaymentMethodToCreditCard-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-PaymentMethodToBankAccount-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-EnterCreditCardInfo-id-0001" name="Enter Credit Card Info">
+      <bpmn:incoming>SequenceFlow-PaymentMethodToCreditCard-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CreditCardToLogIntoGame-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-EnterIBANBIC-id-0001" name="Enter IBAN/BIC">
+      <bpmn:incoming>SequenceFlow-PaymentMethodToBankAccount-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BankAccountToLogIntoGame-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-LogIntoGame-id-0001" name="Log into Game">
+      <bpmn:incoming>SequenceFlow-SubscriptionActiveToLogIntoGame-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-CreditCardToLogIntoGame-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-BankAccountToLogIntoGame-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogIntoGameToSelectRealm-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-SelectRealmRaceClass-id-0001" name="Select Realm/Race/Class">
+      <bpmn:incoming>SequenceFlow-LogIntoGameToSelectRealm-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectRealmToEnterName-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-EnterCharacterName-id-0001" name="Enter Character Name">
+      <bpmn:incoming>SequenceFlow-SelectRealmToEnterName-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-NameAvailableToEnterName-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EnterNameToCheckAvailability-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-CheckNameAvailability-id-0001" name="Check Name Availability">
+      <bpmn:incoming>SequenceFlow-EnterNameToCheckAvailability-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckAvailabilityToNameAvailable-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-NameAvailable-id-0001" name="Name Available?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CheckAvailabilityToNameAvailable-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NameAvailableToEnterName-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-NameAvailableToGenerateSelfies-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-GenerateCharacterSelfies-id-0001" name="Generate Character Selfies">
+      <bpmn:incoming>SequenceFlow-NameAvailableToGenerateSelfies-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GenerateSelfiesToCharacterCreated-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-CharacterCreated-id-0001" name="Character Created">
+      <bpmn:incoming>SequenceFlow-GenerateSelfiesToCharacterCreated-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:startEvent id="StartEvent-ExpansionRelease-id-0001" name="Expansion Release">
+      <bpmn:outgoing>SequenceFlow-ExpansionReleaseToSendNotification-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sendTask id="SendTask-SendExpansionNotification-id-0001" name="Send: expansion release notification">
+      <bpmn:incoming>SequenceFlow-ExpansionReleaseToSendNotification-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendNotificationToNotificationSent-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-NotificationSent-id-0001" name="Notification Sent">
+      <bpmn:incoming>SequenceFlow-SendNotificationToNotificationSent-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSplit-id-0001" sourceRef="StartEvent-StartCharacterCreation-id-0001" targetRef="ParallelGateway-Split-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToCheckAccount-id-0001" sourceRef="ParallelGateway-Split-id-0001" targetRef="UserTask-CheckBattleNetAccount-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckAccountToAccountExists-id-0001" sourceRef="UserTask-CheckBattleNetAccount-id-0001" targetRef="ExclusiveGateway-AccountExists-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AccountExistsToAccountSetupComplete-id-0001" name="account exists" sourceRef="ExclusiveGateway-AccountExists-id-0001" targetRef="EndEvent-AccountSetupComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AccountExistsToEnterAccountInfo-id-0001" name="no account" sourceRef="ExclusiveGateway-AccountExists-id-0001" targetRef="UserTask-EnterAccountInformation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EnterAccountInfoToSendEmail-id-0001" sourceRef="UserTask-EnterAccountInformation-id-0001" targetRef="SendTask-SendConfirmationEmail-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendEmailToReceiveEmail-id-0001" sourceRef="SendTask-SendConfirmationEmail-id-0001" targetRef="ReceiveTask-ReceiveConfirmationEmail-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveEmailToClickLink-id-0001" sourceRef="ReceiveTask-ReceiveConfirmationEmail-id-0001" targetRef="UserTask-ClickConfirmationLink-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ClickLinkToAccountSetupComplete-id-0001" sourceRef="UserTask-ClickConfirmationLink-id-0001" targetRef="EndEvent-AccountSetupComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToBrainstormNames-id-0001" sourceRef="ParallelGateway-Split-id-0001" targetRef="UserTask-BrainstormCharacterNames-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BrainstormNamesToJoin-id-0001" sourceRef="UserTask-BrainstormCharacterNames-id-0001" targetRef="ParallelGateway-Join-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AccountSetupCompleteToJoin-id-0001" sourceRef="EndEvent-AccountSetupComplete-id-0001" targetRef="ParallelGateway-Join-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToCheckSubscription-id-0001" sourceRef="ParallelGateway-Join-id-0001" targetRef="UserTask-CheckWoWSubscription-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckSubscriptionToSubscriptionActive-id-0001" sourceRef="UserTask-CheckWoWSubscription-id-0001" targetRef="ExclusiveGateway-SubscriptionActive-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubscriptionActiveToLogIntoGame-id-0001" name="subscription active" sourceRef="ExclusiveGateway-SubscriptionActive-id-0001" targetRef="UserTask-LogIntoGame-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubscriptionActiveToSelectPayment-id-0001" name="subscription inactive" sourceRef="ExclusiveGateway-SubscriptionActive-id-0001" targetRef="UserTask-SelectPaymentMethod-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectPaymentToPaymentMethod-id-0001" sourceRef="UserTask-SelectPaymentMethod-id-0001" targetRef="ExclusiveGateway-PaymentMethod-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PaymentMethodToCreditCard-id-0001" name="credit card" sourceRef="ExclusiveGateway-PaymentMethod-id-0001" targetRef="UserTask-EnterCreditCardInfo-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PaymentMethodToBankAccount-id-0001" name="bank account" sourceRef="ExclusiveGateway-PaymentMethod-id-0001" targetRef="UserTask-EnterIBANBIC-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CreditCardToLogIntoGame-id-0001" sourceRef="UserTask-EnterCreditCardInfo-id-0001" targetRef="UserTask-LogIntoGame-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BankAccountToLogIntoGame-id-0001" sourceRef="UserTask-EnterIBANBIC-id-0001" targetRef="UserTask-LogIntoGame-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogIntoGameToSelectRealm-id-0001" sourceRef="UserTask-LogIntoGame-id-0001" targetRef="UserTask-SelectRealmRaceClass-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectRealmToEnterName-id-0001" sourceRef="UserTask-SelectRealmRaceClass-id-0001" targetRef="UserTask-EnterCharacterName-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EnterNameToCheckAvailability-id-0001" sourceRef="UserTask-EnterCharacterName-id-0001" targetRef="ServiceTask-CheckNameAvailability-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckAvailabilityToNameAvailable-id-0001" sourceRef="ServiceTask-CheckNameAvailability-id-0001" targetRef="ExclusiveGateway-NameAvailable-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NameAvailableToEnterName-id-0001" name="name unavailable" sourceRef="ExclusiveGateway-NameAvailable-id-0001" targetRef="UserTask-EnterCharacterName-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NameAvailableToGenerateSelfies-id-0001" name="name available" sourceRef="ExclusiveGateway-NameAvailable-id-0001" targetRef="ServiceTask-GenerateCharacterSelfies-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GenerateSelfiesToCharacterCreated-id-0001" sourceRef="ServiceTask-GenerateCharacterSelfies-id-0001" targetRef="EndEvent-CharacterCreated-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ExpansionReleaseToSendNotification-id-0001" sourceRef="StartEvent-ExpansionRelease-id-0001" targetRef="SendTask-SendExpansionNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendNotificationToNotificationSent-id-0001" sourceRef="SendTask-SendExpansionNotification-id-0001" targetRef="EndEvent-NotificationSent-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process_CharacterCreation">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process_CharacterCreation" bpmnElement="Process_CharacterCreation">
+      <bpmndi:BPMNShape id="StartEvent-StartCharacterCreation-id-0001_di" bpmnElement="StartEvent-StartCharacterCreation-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0001_di" bpmnElement="ParallelGateway-Split-id-0001">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CheckBattleNetAccount-id-0001_di" bpmnElement="UserTask-CheckBattleNetAccount-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-AccountExists-id-0001_di" bpmnElement="ExclusiveGateway-AccountExists-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterAccountInformation-id-0001_di" bpmnElement="UserTask-EnterAccountInformation-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendConfirmationEmail-id-0001_di" bpmnElement="SendTask-SendConfirmationEmail-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveConfirmationEmail-id-0001_di" bpmnElement="ReceiveTask-ReceiveConfirmationEmail-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ClickConfirmationLink-id-0001_di" bpmnElement="UserTask-ClickConfirmationLink-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AccountSetupComplete-id-0001_di" bpmnElement="EndEvent-AccountSetupComplete-id-0001">
+        <dc:Bounds x="1557" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0001_di" bpmnElement="ParallelGateway-Join-id-0001">
+        <dc:Bounds x="1700" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CheckWoWSubscription-id-0001_di" bpmnElement="UserTask-CheckWoWSubscription-id-0001">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SubscriptionActive-id-0001_di" bpmnElement="ExclusiveGateway-SubscriptionActive-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="2000" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectPaymentMethod-id-0001_di" bpmnElement="UserTask-SelectPaymentMethod-id-0001">
+        <dc:Bounds x="2125" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PaymentMethod-id-0001_di" bpmnElement="ExclusiveGateway-PaymentMethod-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="2300" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterCreditCardInfo-id-0001_di" bpmnElement="UserTask-EnterCreditCardInfo-id-0001">
+        <dc:Bounds x="2425" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-LogIntoGame-id-0001_di" bpmnElement="UserTask-LogIntoGame-id-0001">
+        <dc:Bounds x="2575" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectRealmRaceClass-id-0001_di" bpmnElement="UserTask-SelectRealmRaceClass-id-0001">
+        <dc:Bounds x="2725" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterCharacterName-id-0001_di" bpmnElement="UserTask-EnterCharacterName-id-0001">
+        <dc:Bounds x="2875" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckNameAvailability-id-0001_di" bpmnElement="ServiceTask-CheckNameAvailability-id-0001">
+        <dc:Bounds x="3025" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-NameAvailable-id-0001_di" bpmnElement="ExclusiveGateway-NameAvailable-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="3200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateCharacterSelfies-id-0001_di" bpmnElement="ServiceTask-GenerateCharacterSelfies-id-0001">
+        <dc:Bounds x="3325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CharacterCreated-id-0001_di" bpmnElement="EndEvent-CharacterCreated-id-0001">
+        <dc:Bounds x="3507" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent-ExpansionRelease-id-0001_di" bpmnElement="StartEvent-ExpansionRelease-id-0001">
+        <dc:Bounds x="57" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendExpansionNotification-id-0001_di" bpmnElement="SendTask-SendExpansionNotification-id-0001">
+        <dc:Bounds x="175" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-NotificationSent-id-0001_di" bpmnElement="EndEvent-NotificationSent-id-0001">
+        <dc:Bounds x="357" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-BrainstormCharacterNames-id-0001_di" bpmnElement="UserTask-BrainstormCharacterNames-id-0001">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterIBANBIC-id-0001_di" bpmnElement="UserTask-EnterIBANBIC-id-0001">
+        <dc:Bounds x="2425" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSplit-id-0001_di" bpmnElement="SequenceFlow-StartToSplit-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToCheckAccount-id-0001_di" bpmnElement="SequenceFlow-SplitToCheckAccount-id-0001">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToBrainstormNames-id-0001_di" bpmnElement="SequenceFlow-SplitToBrainstormNames-id-0001">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckAccountToAccountExists-id-0001_di" bpmnElement="SequenceFlow-CheckAccountToAccountExists-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AccountExistsToAccountSetupComplete-id-0001_di" bpmnElement="SequenceFlow-AccountExistsToAccountSetupComplete-id-0001">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="140" />
+        <di:waypoint x="1575" y="140" />
+        <di:waypoint x="1575" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AccountExistsToEnterAccountInfo-id-0001_di" bpmnElement="SequenceFlow-AccountExistsToEnterAccountInfo-id-0001">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EnterAccountInfoToSendEmail-id-0001_di" bpmnElement="SequenceFlow-EnterAccountInfoToSendEmail-id-0001">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendEmailToReceiveEmail-id-0001_di" bpmnElement="SequenceFlow-SendEmailToReceiveEmail-id-0001">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveEmailToClickLink-id-0001_di" bpmnElement="SequenceFlow-ReceiveEmailToClickLink-id-0001">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ClickLinkToAccountSetupComplete-id-0001_di" bpmnElement="SequenceFlow-ClickLinkToAccountSetupComplete-id-0001">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1557" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AccountSetupCompleteToJoin-id-0001_di" bpmnElement="SequenceFlow-AccountSetupCompleteToJoin-id-0001">
+        <di:waypoint x="1593" y="70" />
+        <di:waypoint x="1700" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToCheckSubscription-id-0001_di" bpmnElement="SequenceFlow-JoinToCheckSubscription-id-0001">
+        <di:waypoint x="1750" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckSubscriptionToSubscriptionActive-id-0001_di" bpmnElement="SequenceFlow-CheckSubscriptionToSubscriptionActive-id-0001">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="2000" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubscriptionActiveToLogIntoGame-id-0001_di" bpmnElement="SequenceFlow-SubscriptionActiveToLogIntoGame-id-0001">
+        <di:waypoint x="2025" y="95" />
+        <di:waypoint x="2025" y="140" />
+        <di:waypoint x="2625" y="140" />
+        <di:waypoint x="2625" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubscriptionActiveToSelectPayment-id-0001_di" bpmnElement="SequenceFlow-SubscriptionActiveToSelectPayment-id-0001">
+        <di:waypoint x="2050" y="70" />
+        <di:waypoint x="2125" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectPaymentToPaymentMethod-id-0001_di" bpmnElement="SequenceFlow-SelectPaymentToPaymentMethod-id-0001">
+        <di:waypoint x="2225" y="70" />
+        <di:waypoint x="2300" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentMethodToCreditCard-id-0001_di" bpmnElement="SequenceFlow-PaymentMethodToCreditCard-id-0001">
+        <di:waypoint x="2350" y="70" />
+        <di:waypoint x="2425" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentMethodToBankAccount-id-0001_di" bpmnElement="SequenceFlow-PaymentMethodToBankAccount-id-0001">
+        <di:waypoint x="2325" y="95" />
+        <di:waypoint x="2325" y="210" />
+        <di:waypoint x="2425" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CreditCardToLogIntoGame-id-0001_di" bpmnElement="SequenceFlow-CreditCardToLogIntoGame-id-0001">
+        <di:waypoint x="2525" y="70" />
+        <di:waypoint x="2575" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogIntoGameToSelectRealm-id-0001_di" bpmnElement="SequenceFlow-LogIntoGameToSelectRealm-id-0001">
+        <di:waypoint x="2675" y="70" />
+        <di:waypoint x="2725" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectRealmToEnterName-id-0001_di" bpmnElement="SequenceFlow-SelectRealmToEnterName-id-0001">
+        <di:waypoint x="2825" y="70" />
+        <di:waypoint x="2875" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EnterNameToCheckAvailability-id-0001_di" bpmnElement="SequenceFlow-EnterNameToCheckAvailability-id-0001">
+        <di:waypoint x="2975" y="70" />
+        <di:waypoint x="3025" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckAvailabilityToNameAvailable-id-0001_di" bpmnElement="SequenceFlow-CheckAvailabilityToNameAvailable-id-0001">
+        <di:waypoint x="3125" y="70" />
+        <di:waypoint x="3200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NameAvailableToEnterName-id-0001_di" bpmnElement="SequenceFlow-NameAvailableToEnterName-id-0001">
+        <di:waypoint x="3225" y="95" />
+        <di:waypoint x="3225" y="140" />
+        <di:waypoint x="2925" y="140" />
+        <di:waypoint x="2925" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NameAvailableToGenerateSelfies-id-0001_di" bpmnElement="SequenceFlow-NameAvailableToGenerateSelfies-id-0001">
+        <di:waypoint x="3250" y="70" />
+        <di:waypoint x="3325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateSelfiesToCharacterCreated-id-0001_di" bpmnElement="SequenceFlow-GenerateSelfiesToCharacterCreated-id-0001">
+        <di:waypoint x="3425" y="70" />
+        <di:waypoint x="3507" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExpansionReleaseToSendNotification-id-0001_di" bpmnElement="SequenceFlow-ExpansionReleaseToSendNotification-id-0001">
+        <di:waypoint x="93" y="210" />
+        <di:waypoint x="175" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendNotificationToNotificationSent-id-0001_di" bpmnElement="SequenceFlow-SendNotificationToNotificationSent-id-0001">
+        <di:waypoint x="275" y="210" />
+        <di:waypoint x="357" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BrainstormNamesToJoin-id-0001_di" bpmnElement="SequenceFlow-BrainstormNamesToJoin-id-0001">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="1725" y="210" />
+        <di:waypoint x="1725" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BankAccountToLogIntoGame-id-0001_di" bpmnElement="SequenceFlow-BankAccountToLogIntoGame-id-0001">
+        <di:waypoint x="2525" y="210" />
+        <di:waypoint x="2625" y="210" />
+        <di:waypoint x="2625" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

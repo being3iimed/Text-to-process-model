@@ -1,0 +1,294 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "FastFoodOrderProcess",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "FastFoodOrderProcess-id-0001",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-OrderReceived-id-0001",
+          "name": "Order Received"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ReceiveOrder-id-0001",
+          "name": "Receive Order"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-AskMenuOrBurger-id-0002",
+          "name": "Ask: Menu or Burger Only?"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-MenuOrBurger-id-0001",
+          "name": "Menu or Burger?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-PrepareMenuComponents-id-0001",
+          "name": "Prepare Menu Components",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-MenuPrepStart-id-0001",
+              "name": "Menu Prep Start"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-SplitMenuPrep-id-0001",
+              "name": "Split Menu Preparation",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-PrepareDrink-id-0001",
+              "name": "Prepare Drink"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-AskFriesOrWedges-id-0001",
+              "name": "Ask: Fries or Wedges?"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-FriesOrWedges-id-0001",
+              "name": "Fries or Wedges?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-PrepareFries-id-0001",
+              "name": "Prepare Fries"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-PrepareWedges-id-0001",
+              "name": "Prepare Wedges"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-JoinMenuPrep-id-0001",
+              "name": "Join Menu Preparation",
+              "gatewayDirection": "Converging"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-MenuComponentsReady-id-0001",
+              "name": "Menu Components Ready"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MenuPrepStartToSplit-id-0001",
+              "sourceRef": "StartEvent-MenuPrepStart-id-0001",
+              "targetRef": "ParallelGateway-SplitMenuPrep-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToPrepareDrink-id-0002",
+              "sourceRef": "ParallelGateway-SplitMenuPrep-id-0001",
+              "targetRef": "ServiceTask-PrepareDrink-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToAskFriesOrWedges-id-0003",
+              "sourceRef": "ParallelGateway-SplitMenuPrep-id-0001",
+              "targetRef": "UserTask-AskFriesOrWedges-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-AskToFriesOrWedgesGateway-id-0004",
+              "sourceRef": "UserTask-AskFriesOrWedges-id-0001",
+              "targetRef": "ExclusiveGateway-FriesOrWedges-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-FriesOrWedgesToFries-id-0005",
+              "name": "customer_wants_fries",
+              "sourceRef": "ExclusiveGateway-FriesOrWedges-id-0001",
+              "targetRef": "ServiceTask-PrepareFries-id-0001",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-FriesOrWedgesToWedges-id-0006",
+              "name": "!customer_wants_fries",
+              "sourceRef": "ExclusiveGateway-FriesOrWedges-id-0001",
+              "targetRef": "ServiceTask-PrepareWedges-id-0001",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PrepareDrinkToJoin-id-0007",
+              "sourceRef": "ServiceTask-PrepareDrink-id-0001",
+              "targetRef": "ParallelGateway-JoinMenuPrep-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PrepareFriesToJoin-id-0008",
+              "sourceRef": "ServiceTask-PrepareFries-id-0001",
+              "targetRef": "ParallelGateway-JoinMenuPrep-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PrepareWedgesToJoin-id-0009",
+              "sourceRef": "ServiceTask-PrepareWedges-id-0001",
+              "targetRef": "ParallelGateway-JoinMenuPrep-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-JoinToMenuReady-id-0010",
+              "sourceRef": "ParallelGateway-JoinMenuPrep-id-0001",
+              "targetRef": "EndEvent-MenuComponentsReady-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-PrepareBurger-MenuPath-id-0001",
+          "name": "Prepare Burger"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-PrepareBurger-BurgerPath-id-0001",
+          "name": "Prepare Burger"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-StatusUpdateTimer-MenuPath-id-0001",
+          "name": "30 Second Status Update",
+          "attachedToRef": "ServiceTask-PrepareBurger-MenuPath-id-0001",
+          "cancelActivity": false,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT30S"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-StatusUpdateTimer-BurgerPath-id-0001",
+          "name": "30 Second Status Update",
+          "attachedToRef": "ServiceTask-PrepareBurger-BurgerPath-id-0001",
+          "cancelActivity": false,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT30S"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-StatusUpdate-MenuPath-id-0001",
+          "name": "Send: Status Update"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-StatusUpdate-BurgerPath-id-0001",
+          "name": "Send: Status Update"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-DeliverViaConveyorBelt-id-0001",
+          "name": "Deliver via Conveyor Belt"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-OrderDelivered-id-0001",
+          "name": "Order Delivered"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-OrderReceivedToReceiveOrder-id-0001",
+          "sourceRef": "StartEvent-OrderReceived-id-0001",
+          "targetRef": "UserTask-ReceiveOrder-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReceiveOrderToAskMenuOrBurger-id-0002",
+          "sourceRef": "UserTask-ReceiveOrder-id-0001",
+          "targetRef": "UserTask-AskMenuOrBurger-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AskMenuOrBurgerToGateway-id-0003",
+          "sourceRef": "UserTask-AskMenuOrBurger-id-0002",
+          "targetRef": "ExclusiveGateway-MenuOrBurger-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MenuPathToSubProcess-id-0004",
+          "name": "customer_wants_menu",
+          "sourceRef": "ExclusiveGateway-MenuOrBurger-id-0001",
+          "targetRef": "SubProcess-PrepareMenuComponents-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BurgerPathToPrepareBurger-id-0005",
+          "name": "!customer_wants_menu",
+          "sourceRef": "ExclusiveGateway-MenuOrBurger-id-0001",
+          "targetRef": "ServiceTask-PrepareBurger-BurgerPath-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SubProcessToPrepareBurger-id-0006",
+          "sourceRef": "SubProcess-PrepareMenuComponents-id-0001",
+          "targetRef": "ServiceTask-PrepareBurger-MenuPath-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryToStatusUpdate-MenuPath-id-0001",
+          "sourceRef": "BoundaryEvent-StatusUpdateTimer-MenuPath-id-0001",
+          "targetRef": "SendTask-StatusUpdate-MenuPath-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StatusUpdateToPrepareBurger-MenuPath-id-0002",
+          "sourceRef": "SendTask-StatusUpdate-MenuPath-id-0001",
+          "targetRef": "ServiceTask-PrepareBurger-MenuPath-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryToStatusUpdate-BurgerPath-id-0001",
+          "sourceRef": "BoundaryEvent-StatusUpdateTimer-BurgerPath-id-0001",
+          "targetRef": "SendTask-StatusUpdate-BurgerPath-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StatusUpdateToPrepareBurger-BurgerPath-id-0002",
+          "sourceRef": "SendTask-StatusUpdate-BurgerPath-id-0001",
+          "targetRef": "ServiceTask-PrepareBurger-BurgerPath-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PrepareBurgerToDelivery-MenuPath-id-0001",
+          "sourceRef": "ServiceTask-PrepareBurger-MenuPath-id-0001",
+          "targetRef": "ServiceTask-DeliverViaConveyorBelt-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PrepareBurgerToDelivery-BurgerPath-id-0001",
+          "sourceRef": "ServiceTask-PrepareBurger-BurgerPath-id-0001",
+          "targetRef": "ServiceTask-DeliverViaConveyorBelt-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DeliveryToOrderDelivered-id-0001",
+          "sourceRef": "ServiceTask-DeliverViaConveyorBelt-id-0001",
+          "targetRef": "EndEvent-OrderDelivered-id-0001"
+        }
+      ]
+    }
+  ]
+}

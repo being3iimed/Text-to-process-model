@@ -1,0 +1,233 @@
+<summary_of_elements>
+
+## Summary of Elements
+
+### TASKS:
+- **serviceTask("Read order from automatic order management system")** - Automated system action to fetch order details
+- **serviceTask("Check stock for product")** - Automated inventory check
+- **serviceTask("Withdraw product from warehouse")** - Automated warehouse operation
+- **serviceTask("Reorder product from wholesaler")** - Automated procurement action
+- **serviceTask("Register product in stock management system")** - Automated inventory update
+- **serviceTask("Request courier")** - Automated logistics action
+- **serviceTask("Pack products")** - Automated warehouse operation
+- **serviceTask("Ship order")** - Automated logistics action
+- **serviceTask("Demand delivery delay penalty from wholesaler")** - Automated financial action
+
+### GATEWAYS:
+- **XOR at "Check stock for product"** with conditions:
+  - `in_stock`
+  - `not_in_stock` (default)
+- **XOR at "Check if whole order is ready for shipment"** with conditions:
+  - `order_ready`
+  - `order_not_ready` (default)
+
+### EVENTS:
+- **startEvent("Storage Management Process Initiated")** - Manual trigger
+- **endEvent("Order Shipped")** - Normal completion
+- **intermediateEvent(timerBoundary("10 days"))** - SLA timeout for wholesaler delivery
+
+### BOUNDARY EVENTS:
+- **timerBoundary("10 days")** on `serviceTask("Reorder product from wholesaler")`
+  - **SLA**: Explicit requirement to penalize wholesaler if delivery exceeds 10 days
+  - **Handler**: `serviceTask("Demand delivery delay penalty from wholesaler")`
+
+### SUBPROCESSES:
+- **Subprocess "Process Single Product"** - Purpose: Cohesive handling of individual product fulfillment
+  - **Justification**: Logical grouping of 4+ related tasks with clear purpose and potential for reuse
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+```pseudocode
+startEvent("Storage Management Process Initiated")
+
+// Main process flow
+serviceTask("Read order from automatic order management system")
+
+// Subprocess for handling each product in the order
+subProcess("Process Single Product"):
+    startEvent("Product Processing Start")
+
+    // Check stock availability
+    if (in_stock):
+        serviceTask("Withdraw product from warehouse")
+    else:
+        serviceTask("Reorder product from wholesaler"):
+            timerBoundary("P10D"):  // ISO 8601 duration for 10 days
+                serviceTask("Demand delivery delay penalty from wholesaler")
+
+        serviceTask("Register product in stock management system")
+    end_if
+
+    endEvent("Product Processed")
+endSubProcess
+
+// Loop through all products in order
+while (more_products_in_order):
+    subProcess("Process Single Product")
+end_while
+
+// Final shipment check
+if (order_ready):
+    AND:
+        serviceTask("Request courier")
+        serviceTask("Pack products")
+    END_AND
+
+    serviceTask("Ship order")
+    endEvent("Order Shipped")
+else:
+    // Loop back to process next product
+    // (Implemented via while loop above)
+end_if
+```
+
+</bpmn_pseudocode>
+
+<compliance_verification>
+
+## BPMN Compliance Verification
+
+### 1. Timer Event Validation
+- **timerBoundary("P10D")**:
+  - ✅ Uses ISO 8601 duration format
+  - ✅ Attached to appropriate task (`Reorder product from wholesaler`)
+  - ✅ Handler is single immediate action
+  - ✅ Explicit SLA requirement mentioned in description
+
+### 2. Gateway Validation
+- **XOR Gateways**:
+  - ✅ Mutually exclusive conditions (`in_stock`/`not_in_stock`)
+  - ✅ Exhaustive coverage (default path for `not_in_stock`)
+  - ✅ Proper convergence (implicit in subprocess structure)
+- **AND Gateway**:
+  - ✅ Truly parallel tasks (`Request courier` and `Pack products`)
+  - ✅ Proper convergence before `Ship order`
+
+### 3. Subprocess Validation
+- **"Process Single Product"**:
+  - ✅ Passes Three-Question Test:
+    1. Clear purpose: "Handle individual product fulfillment"
+    2. 4+ related tasks with cohesive logic
+    3. Removing would complicate main flow (loop structure)
+  - ✅ Single start event
+  - ✅ Single end event
+  - ✅ All paths terminate
+
+### 4. Flow Validation
+- ✅ All paths traceable from start to end
+- ✅ No orphaned flows
+- ✅ While loop properly handles product iteration
+- ✅ Final shipment check covers all cases
+
+### 5. Boundary Event Validation
+- **Delivery Delay Penalty**:
+  - ✅ Meets all gating criteria:
+    1. Explicit SLA mentioned ("wait more than 10 days")
+    2. Handler is simple/immediate (single service task)
+    3. Business requirement (not speculative)
+  - ✅ Properly attached to procurement task
+  - ✅ Uses valid ISO 8601 duration
+
+### 6. Label Validation
+- ✅ All conditional flows have descriptive labels
+- ✅ No empty string labels
+- ✅ Default paths properly marked
+
+</compliance_verification>
+
+<design_rationale>
+
+## Design Rationale
+
+### 1. Subprocess Justification
+The "Process Single Product" subprocess was created because:
+- It encapsulates 4 distinct but related tasks
+- The logic is reused for each product in the order
+- It cleanly separates product-level operations from order-level operations
+- The boundary event for delivery delays naturally scopes to individual products
+
+### 2. Parallel Gateway Usage
+The AND gateway before shipment was used because:
+- Courier request and product packing are truly independent operations
+- Both must complete before shipping can occur
+- This accurately models real-world parallelism
+
+### 3. Timer Boundary Placement
+The 10-day timer was attached to the reorder task because:
+- The SLA specifically relates to wholesaler delivery time
+- This is the exact point where the "waiting period" begins
+- The penalty action is directly related to this procurement activity
+
+### 4. Loop Structure
+The while loop was implemented rather than recursive calls because:
+- It clearly expresses the "process each product" requirement
+- Maintains clean process state between iterations
+- More readable than nested subprocess calls
+- Naturally handles the "next product" transition
+
+</design_rationale>
+
+<alternatives_considered>
+
+## Alternatives Considered and Rejected
+
+### 1. Event Subprocess for Penalty Handling
+**Rejected because**:
+- Would complicate the main flow unnecessarily
+- The penalty is directly tied to a specific task's execution
+- Boundary event provides clearer visual connection to the reorder activity
+
+### 2. Separate Process for Each Product
+**Rejected because**:
+- Would create unnecessary process proliferation
+- The subprocess approach maintains all logic in one diagram
+- Easier to trace the complete order fulfillment path
+
+### 3. Using OR Gateway for Stock Check
+**Rejected because**:
+- The stock check is strictly binary (in stock/not in stock)
+- XOR gateway is more semantically correct
+- Simpler to understand and maintain
+
+### 4. Adding More Boundary Events
+**Considered but rejected**:
+- Error boundary on warehouse withdrawal (no explicit error case mentioned)
+- Timer boundary on stock registration (no SLA requirement)
+- These would add defensive complexity without business value
+
+</alternatives_considered>
+
+<implementation_notes>
+
+## Implementation Notes
+
+1. **ISO 8601 Duration**:
+   - "10 days" implemented as `P10D` (ISO 8601 duration format)
+   - This ensures BPMN engine compatibility
+
+2. **Loop Implementation**:
+   - The while loop should be implemented using:
+     - A loop marker on the subprocess
+     - Collection-based iteration over order products
+     - Clear loop completion condition
+
+3. **Parallel Tasks**:
+   - The courier request and packing tasks:
+     - Should be configured to run in parallel
+     - Must both complete before shipping
+     - Consider adding compensation handlers if either fails
+
+4. **Penalty Handling**:
+   - The delivery delay penalty:
+     - Should integrate with financial systems
+     - May require approval workflow in real implementation
+     - Consider adding notification to procurement team
+
+5. **Stock Registration**:
+   - The "Register product in stock management system" task:
+     - Should update both quantity and product metadata
+     - May need to trigger inventory alerts if stock is low
+
+</implementation_notes>

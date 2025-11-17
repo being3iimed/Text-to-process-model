@@ -1,0 +1,278 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "RunningEventParticipationProcess",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "2.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "RunningEventParticipationProcess-id-0001",
+      "isExecutable": false,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-StartParticipationProcess-id-0001",
+          "name": "Start Participation Process"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SelectStartingBlock-id-0001",
+          "name": "Select Starting Block"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-EnterWorkSchedule-id-0002",
+          "name": "Enter Work Schedule"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-TrainingCycle-id-0001",
+          "name": "Training Cycle",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-BeginTraining-id-0001",
+              "name": "Begin Training"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-Measure5kmTime-id-0001",
+              "name": "Measure 5km Time"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-CheckTimeGoal-id-0002",
+              "name": "Check Time Goal"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-Qualified-id-0001",
+              "name": "Qualified"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-CollectTrainingData-id-0003",
+              "name": "Collect Training Data"
+            },
+            {
+              "$type": "bpmn:IntermediateCatchEvent",
+              "id": "IntermediateCatchEvent-ContinueTraining-id-0001",
+              "name": "Continue Training"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-TimeCheck-id-0001",
+              "name": "Time Check",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-TrainingStartToMeasure-id-0001",
+              "sourceRef": "StartEvent-BeginTraining-id-0001",
+              "targetRef": "ServiceTask-Measure5kmTime-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MeasureToCheck-id-0002",
+              "sourceRef": "ServiceTask-Measure5kmTime-id-0001",
+              "targetRef": "ServiceTask-CheckTimeGoal-id-0002"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CheckToGateway-id-0003",
+              "sourceRef": "ServiceTask-CheckTimeGoal-id-0002",
+              "targetRef": "ExclusiveGateway-TimeCheck-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToQualified-id-0004",
+              "sourceRef": "ExclusiveGateway-TimeCheck-id-0001",
+              "targetRef": "EndEvent-Qualified-id-0001",
+              "name": "time < 25 minutes"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToCollect-id-0005",
+              "sourceRef": "ExclusiveGateway-TimeCheck-id-0001",
+              "targetRef": "ServiceTask-CollectTrainingData-id-0003",
+              "name": "time ≥ 25 minutes",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CollectToContinue-id-0006",
+              "sourceRef": "ServiceTask-CollectTrainingData-id-0003",
+              "targetRef": "IntermediateCatchEvent-ContinueTraining-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ContinueToMeasure-id-0007",
+              "sourceRef": "IntermediateCatchEvent-ContinueTraining-id-0001",
+              "targetRef": "ServiceTask-Measure5kmTime-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateStartingNumber-id-0001",
+          "name": "Generate Starting Number"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CalculateTravelTime-id-0002",
+          "name": "Calculate Travel Time"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-TravelTimeCheck-id-0002",
+          "name": "Travel Time Check",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-TravelFromHome-id-0003",
+          "name": "Travel from Home"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-TravelFromWork-id-0004",
+          "name": "Travel from Work"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-RunDrinkSplit-id-0001",
+          "name": "Parallel Execution",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-RunDrinkJoin-id-0002",
+          "name": "Synchronize Activities",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-Run5kmRoute-id-0005",
+          "name": "Run 5km Route"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-DrinkDuringRun-id-0006",
+          "name": "Drink During Run"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-RecordFinalTime-id-0003",
+          "name": "Record Final Time"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-FinalTimeRecorded-id-0001",
+          "name": "Final Time Recorded"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToSelectBlock-id-0001",
+          "sourceRef": "StartEvent-StartParticipationProcess-id-0001",
+          "targetRef": "UserTask-SelectStartingBlock-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SelectToEnterSchedule-id-0002",
+          "sourceRef": "UserTask-SelectStartingBlock-id-0001",
+          "targetRef": "UserTask-EnterWorkSchedule-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-EnterToTraining-id-0003",
+          "sourceRef": "UserTask-EnterWorkSchedule-id-0002",
+          "targetRef": "SubProcess-TrainingCycle-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TrainingToGenerate-id-0004",
+          "sourceRef": "SubProcess-TrainingCycle-id-0001",
+          "targetRef": "ServiceTask-GenerateStartingNumber-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GenerateToCalculate-id-0005",
+          "sourceRef": "ServiceTask-GenerateStartingNumber-id-0001",
+          "targetRef": "ServiceTask-CalculateTravelTime-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CalculateToTravelGateway-id-0006",
+          "sourceRef": "ServiceTask-CalculateTravelTime-id-0002",
+          "targetRef": "ExclusiveGateway-TravelTimeCheck-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TravelGatewayToHome-id-0007",
+          "sourceRef": "ExclusiveGateway-TravelTimeCheck-id-0002",
+          "targetRef": "UserTask-TravelFromHome-id-0003",
+          "name": "time_difference > 1 hour"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TravelGatewayToWork-id-0008",
+          "sourceRef": "ExclusiveGateway-TravelTimeCheck-id-0002",
+          "targetRef": "UserTask-TravelFromWork-id-0004",
+          "name": "time_difference ≤ 1 hour",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-HomeToParallelSplit-id-0009",
+          "sourceRef": "UserTask-TravelFromHome-id-0003",
+          "targetRef": "ParallelGateway-RunDrinkSplit-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-WorkToParallelSplit-id-0010",
+          "sourceRef": "UserTask-TravelFromWork-id-0004",
+          "targetRef": "ParallelGateway-RunDrinkSplit-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToRun-id-0011",
+          "sourceRef": "ParallelGateway-RunDrinkSplit-id-0001",
+          "targetRef": "UserTask-Run5kmRoute-id-0005"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToDrink-id-0012",
+          "sourceRef": "ParallelGateway-RunDrinkSplit-id-0001",
+          "targetRef": "UserTask-DrinkDuringRun-id-0006"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RunToJoin-id-0013",
+          "sourceRef": "UserTask-Run5kmRoute-id-0005",
+          "targetRef": "ParallelGateway-RunDrinkJoin-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DrinkToJoin-id-0014",
+          "sourceRef": "UserTask-DrinkDuringRun-id-0006",
+          "targetRef": "ParallelGateway-RunDrinkJoin-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinToRecord-id-0015",
+          "sourceRef": "ParallelGateway-RunDrinkJoin-id-0002",
+          "targetRef": "ServiceTask-RecordFinalTime-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RecordToEnd-id-0016",
+          "sourceRef": "ServiceTask-RecordFinalTime-id-0003",
+          "targetRef": "EndEvent-FinalTimeRecorded-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

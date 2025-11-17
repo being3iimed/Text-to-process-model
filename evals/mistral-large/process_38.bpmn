@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="TreeHouseProject-Definitions-id-0001" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="TreeHouseProjectProcess-id-0001" name="Build Tree House and Host Party" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-TreeHouseProjectInitiated-id-0001" name="Tree House Project Initiated">
+      <bpmn:outgoing>SequenceFlow-StartToCollectRequirements-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-CollectTreeHouseRequirements-id-0001" name="Collect Tree House Requirements">
+      <bpmn:incoming>SequenceFlow-StartToCollectRequirements-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CollectToSendRequirements-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="SendTask-SendRequirementsToArchitect-id-0001" name="Send: requirements to architect">
+      <bpmn:incoming>SequenceFlow-CollectToSendRequirements-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendToReceiveDraft-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveDraftFromArchitect-id-0001" name="Receive: draft from architect">
+      <bpmn:incoming>SequenceFlow-SendToReceiveDraft-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveDraftToGateway-id-0001</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-DraftRefinement-id-0001" name="Draft Needs Refinement?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReceiveDraftToGateway-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ReceiveUpdatedToGateway-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToRefine-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToGenerateMaterials-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-RefineDraftWithRequirements-id-0001" name="Refine draft with additional requirements">
+      <bpmn:incoming>SequenceFlow-GatewayToRefine-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RefineToSendRefined-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="SendTask-SendRefinedRequirements-id-0001" name="Send: refined requirements to architect">
+      <bpmn:incoming>SequenceFlow-RefineToSendRefined-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendRefinedToReceiveUpdated-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveUpdatedDraft-id-0001" name="Receive: updated draft from architect">
+      <bpmn:incoming>SequenceFlow-SendRefinedToReceiveUpdated-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveUpdatedToGateway-id-0001</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:serviceTask id="ServiceTask-GenerateMaterialsList-id-0001" name="Generate materials list from plan">
+      <bpmn:incoming>SequenceFlow-GatewayToGenerateMaterials-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GenerateMaterialsToOrdering-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:subProcess id="SubProcess-MaterialOrdering-id-0001" name="Material Ordering">
+      <bpmn:incoming>SequenceFlow-GenerateMaterialsToOrdering-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OrderingToBuildSplit-id-0001</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-OrderingStart-id-0001" name="Ordering Start">
+        <bpmn:outgoing>SequenceFlow-OrderingStartToCategorize-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-CategorizeMaterials-id-0001" name="Categorize materials">
+        <bpmn:incoming>SequenceFlow-OrderingStartToCategorize-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CategorizeToSplit-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:parallelGateway id="ParallelGateway-SplitOrdering-id-0001" name="Parallel Ordering" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-CategorizeToSplit-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SplitToStoreA-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToStoreB-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToStoreC-id-0001</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:serviceTask id="ServiceTask-OrderFromStoreA-id-0001" name="Order materials from Store A">
+        <bpmn:incoming>SequenceFlow-SplitToStoreA-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-StoreAToJoin-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-OrderFromStoreB-id-0001" name="Order materials from Store B">
+        <bpmn:incoming>SequenceFlow-SplitToStoreB-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-StoreBToJoin-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-OrderFromStoreC-id-0001" name="Order materials from Store C">
+        <bpmn:incoming>SequenceFlow-SplitToStoreC-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-StoreCToJoin-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:parallelGateway id="ParallelGateway-JoinOrdering-id-0001" name="Ordering Complete" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-StoreAToJoin-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-StoreBToJoin-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-StoreCToJoin-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-JoinToEnd-id-0001</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:endEvent id="EndEvent-OrderingComplete-id-0001" name="Ordering Complete">
+        <bpmn:incoming>SequenceFlow-JoinToEnd-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-OrderingStartToCategorize-id-0001" sourceRef="StartEvent-OrderingStart-id-0001" targetRef="ServiceTask-CategorizeMaterials-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CategorizeToSplit-id-0001" sourceRef="ServiceTask-CategorizeMaterials-id-0001" targetRef="ParallelGateway-SplitOrdering-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToStoreA-id-0001" sourceRef="ParallelGateway-SplitOrdering-id-0001" targetRef="ServiceTask-OrderFromStoreA-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToStoreB-id-0001" sourceRef="ParallelGateway-SplitOrdering-id-0001" targetRef="ServiceTask-OrderFromStoreB-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToStoreC-id-0001" sourceRef="ParallelGateway-SplitOrdering-id-0001" targetRef="ServiceTask-OrderFromStoreC-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-StoreAToJoin-id-0001" sourceRef="ServiceTask-OrderFromStoreA-id-0001" targetRef="ParallelGateway-JoinOrdering-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-StoreBToJoin-id-0001" sourceRef="ServiceTask-OrderFromStoreB-id-0001" targetRef="ParallelGateway-JoinOrdering-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-StoreCToJoin-id-0001" sourceRef="ServiceTask-OrderFromStoreC-id-0001" targetRef="ParallelGateway-JoinOrdering-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-JoinToEnd-id-0001" sourceRef="ParallelGateway-JoinOrdering-id-0001" targetRef="EndEvent-OrderingComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:parallelGateway id="ParallelGateway-SplitBuildPhase-id-0001" name="Build Phase" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-OrderingToBuildSplit-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BuildSplitToSendRequests-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-BuildSplitToReceiveCompletion-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sendTask id="SendTask-SendBuildRequests-id-0001" name="Send: build requests to friends">
+      <bpmn:incoming>SequenceFlow-BuildSplitToSendRequests-id-0001</bpmn:incoming>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveBuildCompletion-id-0001" name="Receive: build completion confirmation">
+      <bpmn:incoming>SequenceFlow-BuildSplitToReceiveCompletion-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveCompletionToJoin-id-0001</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-BuildTimeout-id-0001" name="7 Day Build Timeout" attachedToRef="ReceiveTask-ReceiveBuildCompletion-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryToReminder-id-0001</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-BuildTimeout-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P7D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-SendReminderToFriends-id-0001" name="Send: reminder to friends">
+      <bpmn:incoming>SequenceFlow-BoundaryToReminder-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReminderToJoin-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:parallelGateway id="ParallelGateway-JoinBuildPhase-id-0001" name="Build Phase Complete" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-ReminderToJoin-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ReceiveCompletionToJoin-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BuildJoinToInvitations-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sendTask id="SendTask-SendPartyInvitations-id-0001" name="Send: party invitations to friends">
+      <bpmn:incoming>SequenceFlow-BuildJoinToInvitations-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InvitationsToRSVP-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveRSVP-id-0001" name="Receive: RSVP responses">
+      <bpmn:incoming>SequenceFlow-InvitationsToRSVP-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RSVPToSnacks-id-0001</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:serviceTask id="ServiceTask-GenerateSnacksList-id-0001" name="Generate snacks list based on attendees">
+      <bpmn:incoming>SequenceFlow-RSVPToSnacks-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SnacksToEnd-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-TreeHousePartyComplete-id-0001" name="Tree House Party Complete">
+      <bpmn:incoming>SequenceFlow-SnacksToEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToCollectRequirements-id-0001" sourceRef="StartEvent-TreeHouseProjectInitiated-id-0001" targetRef="UserTask-CollectTreeHouseRequirements-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CollectToSendRequirements-id-0001" sourceRef="UserTask-CollectTreeHouseRequirements-id-0001" targetRef="SendTask-SendRequirementsToArchitect-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendToReceiveDraft-id-0001" sourceRef="SendTask-SendRequirementsToArchitect-id-0001" targetRef="ReceiveTask-ReceiveDraftFromArchitect-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveDraftToGateway-id-0001" sourceRef="ReceiveTask-ReceiveDraftFromArchitect-id-0001" targetRef="ExclusiveGateway-DraftRefinement-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToRefine-id-0001" name="needs_refinement == true" sourceRef="ExclusiveGateway-DraftRefinement-id-0001" targetRef="UserTask-RefineDraftWithRequirements-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToGenerateMaterials-id-0001" sourceRef="ExclusiveGateway-DraftRefinement-id-0001" targetRef="ServiceTask-GenerateMaterialsList-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RefineToSendRefined-id-0001" sourceRef="UserTask-RefineDraftWithRequirements-id-0001" targetRef="SendTask-SendRefinedRequirements-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendRefinedToReceiveUpdated-id-0001" sourceRef="SendTask-SendRefinedRequirements-id-0001" targetRef="ReceiveTask-ReceiveUpdatedDraft-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveUpdatedToGateway-id-0001" sourceRef="ReceiveTask-ReceiveUpdatedDraft-id-0001" targetRef="ExclusiveGateway-DraftRefinement-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GenerateMaterialsToOrdering-id-0001" sourceRef="ServiceTask-GenerateMaterialsList-id-0001" targetRef="SubProcess-MaterialOrdering-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-OrderingToBuildSplit-id-0001" sourceRef="SubProcess-MaterialOrdering-id-0001" targetRef="ParallelGateway-SplitBuildPhase-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BuildSplitToSendRequests-id-0001" sourceRef="ParallelGateway-SplitBuildPhase-id-0001" targetRef="SendTask-SendBuildRequests-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BuildSplitToReceiveCompletion-id-0001" sourceRef="ParallelGateway-SplitBuildPhase-id-0001" targetRef="ReceiveTask-ReceiveBuildCompletion-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToReminder-id-0001" sourceRef="BoundaryEvent-BuildTimeout-id-0001" targetRef="SendTask-SendReminderToFriends-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReminderToJoin-id-0001" sourceRef="SendTask-SendReminderToFriends-id-0001" targetRef="ParallelGateway-JoinBuildPhase-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveCompletionToJoin-id-0001" sourceRef="ReceiveTask-ReceiveBuildCompletion-id-0001" targetRef="ParallelGateway-JoinBuildPhase-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BuildJoinToInvitations-id-0001" sourceRef="ParallelGateway-JoinBuildPhase-id-0001" targetRef="SendTask-SendPartyInvitations-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InvitationsToRSVP-id-0001" sourceRef="SendTask-SendPartyInvitations-id-0001" targetRef="ReceiveTask-ReceiveRSVP-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RSVPToSnacks-id-0001" sourceRef="ReceiveTask-ReceiveRSVP-id-0001" targetRef="ServiceTask-GenerateSnacksList-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SnacksToEnd-id-0001" sourceRef="ServiceTask-GenerateSnacksList-id-0001" targetRef="EndEvent-TreeHousePartyComplete-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_TreeHouseProjectProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_TreeHouseProjectProcess-id-0001" bpmnElement="TreeHouseProjectProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-TreeHouseProjectInitiated-id-0001_di" bpmnElement="StartEvent-TreeHouseProjectInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CollectTreeHouseRequirements-id-0001_di" bpmnElement="UserTask-CollectTreeHouseRequirements-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendRequirementsToArchitect-id-0001_di" bpmnElement="SendTask-SendRequirementsToArchitect-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveDraftFromArchitect-id-0001_di" bpmnElement="ReceiveTask-ReceiveDraftFromArchitect-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-DraftRefinement-id-0001_di" bpmnElement="ExclusiveGateway-DraftRefinement-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-RefineDraftWithRequirements-id-0001_di" bpmnElement="UserTask-RefineDraftWithRequirements-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendRefinedRequirements-id-0001_di" bpmnElement="SendTask-SendRefinedRequirements-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveUpdatedDraft-id-0001_di" bpmnElement="ReceiveTask-ReceiveUpdatedDraft-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateMaterialsList-id-0001_di" bpmnElement="ServiceTask-GenerateMaterialsList-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-MaterialOrdering-id-0001_di" bpmnElement="SubProcess-MaterialOrdering-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-SplitBuildPhase-id-0001_di" bpmnElement="ParallelGateway-SplitBuildPhase-id-0001">
+        <dc:Bounds x="1100" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendBuildRequests-id-0001_di" bpmnElement="SendTask-SendBuildRequests-id-0001">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveBuildCompletion-id-0001_di" bpmnElement="ReceiveTask-ReceiveBuildCompletion-id-0001">
+        <dc:Bounds x="1225" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-BuildTimeout-id-0001_di" bpmnElement="BoundaryEvent-BuildTimeout-id-0001">
+        <dc:Bounds x="1257" y="372" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-JoinBuildPhase-id-0001_di" bpmnElement="ParallelGateway-JoinBuildPhase-id-0001">
+        <dc:Bounds x="1550" y="325" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendPartyInvitations-id-0001_di" bpmnElement="SendTask-SendPartyInvitations-id-0001">
+        <dc:Bounds x="1675" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveRSVP-id-0001_di" bpmnElement="ReceiveTask-ReceiveRSVP-id-0001">
+        <dc:Bounds x="1825" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateSnacksList-id-0001_di" bpmnElement="ServiceTask-GenerateSnacksList-id-0001">
+        <dc:Bounds x="1975" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-TreeHousePartyComplete-id-0001_di" bpmnElement="EndEvent-TreeHousePartyComplete-id-0001">
+        <dc:Bounds x="2157" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendReminderToFriends-id-0001_di" bpmnElement="SendTask-SendReminderToFriends-id-0001">
+        <dc:Bounds x="1375" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToCollectRequirements-id-0001_di" bpmnElement="SequenceFlow-StartToCollectRequirements-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CollectToSendRequirements-id-0001_di" bpmnElement="SequenceFlow-CollectToSendRequirements-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToReceiveDraft-id-0001_di" bpmnElement="SequenceFlow-SendToReceiveDraft-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveDraftToGateway-id-0001_di" bpmnElement="SequenceFlow-ReceiveDraftToGateway-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToRefine-id-0001_di" bpmnElement="SequenceFlow-GatewayToRefine-id-0001">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToGenerateMaterials-id-0001_di" bpmnElement="SequenceFlow-GatewayToGenerateMaterials-id-0001">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RefineToSendRefined-id-0001_di" bpmnElement="SequenceFlow-RefineToSendRefined-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendRefinedToReceiveUpdated-id-0001_di" bpmnElement="SequenceFlow-SendRefinedToReceiveUpdated-id-0001">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveUpdatedToGateway-id-0001_di" bpmnElement="SequenceFlow-ReceiveUpdatedToGateway-id-0001">
+        <di:waypoint x="1125" y="110" />
+        <di:waypoint x="1125" y="140" />
+        <di:waypoint x="675" y="140" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateMaterialsToOrdering-id-0001_di" bpmnElement="SequenceFlow-GenerateMaterialsToOrdering-id-0001">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderingToBuildSplit-id-0001_di" bpmnElement="SequenceFlow-OrderingToBuildSplit-id-0001">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1100" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BuildSplitToSendRequests-id-0001_di" bpmnElement="SequenceFlow-BuildSplitToSendRequests-id-0001">
+        <di:waypoint x="1150" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BuildSplitToReceiveCompletion-id-0001_di" bpmnElement="SequenceFlow-BuildSplitToReceiveCompletion-id-0001">
+        <di:waypoint x="1125" y="235" />
+        <di:waypoint x="1125" y="350" />
+        <di:waypoint x="1225" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveCompletionToJoin-id-0001_di" bpmnElement="SequenceFlow-ReceiveCompletionToJoin-id-0001">
+        <di:waypoint x="1325" y="350" />
+        <di:waypoint x="1550" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToReminder-id-0001_di" bpmnElement="SequenceFlow-BoundaryToReminder-id-0001">
+        <di:waypoint x="1275" y="408" />
+        <di:waypoint x="1275" y="490" />
+        <di:waypoint x="1375" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BuildJoinToInvitations-id-0001_di" bpmnElement="SequenceFlow-BuildJoinToInvitations-id-0001">
+        <di:waypoint x="1600" y="350" />
+        <di:waypoint x="1675" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvitationsToRSVP-id-0001_di" bpmnElement="SequenceFlow-InvitationsToRSVP-id-0001">
+        <di:waypoint x="1775" y="350" />
+        <di:waypoint x="1825" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RSVPToSnacks-id-0001_di" bpmnElement="SequenceFlow-RSVPToSnacks-id-0001">
+        <di:waypoint x="1925" y="350" />
+        <di:waypoint x="1975" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SnacksToEnd-id-0001_di" bpmnElement="SequenceFlow-SnacksToEnd-id-0001">
+        <di:waypoint x="2075" y="350" />
+        <di:waypoint x="2157" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReminderToJoin-id-0001_di" bpmnElement="SequenceFlow-ReminderToJoin-id-0001">
+        <di:waypoint x="1475" y="490" />
+        <di:waypoint x="1575" y="490" />
+        <di:waypoint x="1575" y="375" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-MaterialOrdering-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-MaterialOrdering-id-0001" bpmnElement="SubProcess-MaterialOrdering-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-OrderingStart-id-0001_di" bpmnElement="StartEvent-OrderingStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CategorizeMaterials-id-0001_di" bpmnElement="ServiceTask-CategorizeMaterials-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-SplitOrdering-id-0001_di" bpmnElement="ParallelGateway-SplitOrdering-id-0001">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-OrderFromStoreA-id-0001_di" bpmnElement="ServiceTask-OrderFromStoreA-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-JoinOrdering-id-0001_di" bpmnElement="ParallelGateway-JoinOrdering-id-0001">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-OrderingComplete-id-0001_di" bpmnElement="EndEvent-OrderingComplete-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-OrderFromStoreB-id-0001_di" bpmnElement="ServiceTask-OrderFromStoreB-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-OrderFromStoreC-id-0001_di" bpmnElement="ServiceTask-OrderFromStoreC-id-0001">
+        <dc:Bounds x="475" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderingStartToCategorize-id-0001_di" bpmnElement="SequenceFlow-OrderingStartToCategorize-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CategorizeToSplit-id-0001_di" bpmnElement="SequenceFlow-CategorizeToSplit-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToStoreA-id-0001_di" bpmnElement="SequenceFlow-SplitToStoreA-id-0001">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToStoreB-id-0001_di" bpmnElement="SequenceFlow-SplitToStoreB-id-0001">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToStoreC-id-0001_di" bpmnElement="SequenceFlow-SplitToStoreC-id-0001">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="350" />
+        <di:waypoint x="475" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StoreAToJoin-id-0001_di" bpmnElement="SequenceFlow-StoreAToJoin-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToEnd-id-0001_di" bpmnElement="SequenceFlow-JoinToEnd-id-0001">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StoreBToJoin-id-0001_di" bpmnElement="SequenceFlow-StoreBToJoin-id-0001">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StoreCToJoin-id-0001_di" bpmnElement="SequenceFlow-StoreCToJoin-id-0001">
+        <di:waypoint x="575" y="350" />
+        <di:waypoint x="675" y="350" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

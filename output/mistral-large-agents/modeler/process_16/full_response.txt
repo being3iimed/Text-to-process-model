@@ -1,0 +1,460 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "Definitions_AnnualAuditWorkflow",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process_AnnualAuditWorkflow",
+      "isExecutable": false,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-InitiateAnnualAudit-id-0001",
+          "name": "Initiate Annual Audit"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendAuditInitiationNotification-id-0001",
+          "name": "Send: audit initiation notification"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-ParallelPreparation-id-0001",
+          "name": "Parallel Preparation",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-PrepareFinancialStatements-id-0001",
+          "name": "Prepare financial statements"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-GatherSupportingDocuments-id-0001",
+          "name": "Gather supporting documents"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendDocumentSubmission-id-0001",
+          "name": "Send: document submission"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CheckRegulatoryUpdates-id-0001",
+          "name": "Check regulatory updates"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-ConvergePreparation-id-0001",
+          "name": "Converge Preparation",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ReviewSubmission-id-0001",
+          "name": "Review submission"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-DiscrepanciesFound-id-0001",
+          "name": "Discrepancies Found?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendClarificationRequest-id-0001",
+          "name": "Send: clarification request"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ProvideClarifications-id-0001",
+          "name": "Provide clarifications"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToNotification-id-0001",
+          "sourceRef": "StartEvent-InitiateAnnualAudit-id-0001",
+          "targetRef": "SendTask-SendAuditInitiationNotification-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NotificationToParallel-id-0001",
+          "sourceRef": "SendTask-SendAuditInitiationNotification-id-0001",
+          "targetRef": "ParallelGateway-ParallelPreparation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ParallelToFinancials-id-0001",
+          "sourceRef": "ParallelGateway-ParallelPreparation-id-0001",
+          "targetRef": "UserTask-PrepareFinancialStatements-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FinancialsToDocuments-id-0001",
+          "sourceRef": "UserTask-PrepareFinancialStatements-id-0001",
+          "targetRef": "UserTask-GatherSupportingDocuments-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DocumentsToSubmission-id-0001",
+          "sourceRef": "UserTask-GatherSupportingDocuments-id-0001",
+          "targetRef": "SendTask-SendDocumentSubmission-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ParallelToRegulatory-id-0001",
+          "sourceRef": "ParallelGateway-ParallelPreparation-id-0001",
+          "targetRef": "ServiceTask-CheckRegulatoryUpdates-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RegulatoryToConverge-id-0001",
+          "sourceRef": "ServiceTask-CheckRegulatoryUpdates-id-0001",
+          "targetRef": "ParallelGateway-ConvergePreparation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SubmissionToConverge-id-0001",
+          "sourceRef": "SendTask-SendDocumentSubmission-id-0001",
+          "targetRef": "ParallelGateway-ConvergePreparation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConvergeToReview-id-0001",
+          "sourceRef": "ParallelGateway-ConvergePreparation-id-0001",
+          "targetRef": "UserTask-ReviewSubmission-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReviewToDiscrepancies-id-0001",
+          "sourceRef": "UserTask-ReviewSubmission-id-0001",
+          "targetRef": "ExclusiveGateway-DiscrepanciesFound-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DiscrepanciesToClarification-id-0001",
+          "sourceRef": "ExclusiveGateway-DiscrepanciesFound-id-0001",
+          "targetRef": "SendTask-SendClarificationRequest-id-0001",
+          "name": "discrepancies_found",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ClarificationToProvide-id-0001",
+          "sourceRef": "SendTask-SendClarificationRequest-id-0001",
+          "targetRef": "UserTask-ProvideClarifications-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProvideToReview-id-0001",
+          "sourceRef": "UserTask-ProvideClarifications-id-0001",
+          "targetRef": "UserTask-ReviewSubmission-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DiscrepanciesToRiskAssessment-id-0001",
+          "sourceRef": "ExclusiveGateway-DiscrepanciesFound-id-0001",
+          "targetRef": "SubProcess-RiskAssessment-id-0001",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-RiskAssessment-id-0001",
+          "name": "Risk Assessment",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-RiskAssessmentStart-id-0001",
+              "name": "Risk Assessment Start"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-RiskEvaluationSplit-id-0001",
+              "name": "Risk Evaluation Split",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-EvaluateFinancialRisks-id-0001",
+              "name": "Evaluate financial risks"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-EvaluateOperationalRisks-id-0001",
+              "name": "Evaluate operational risks"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-EvaluateComplianceRisks-id-0001",
+              "name": "Evaluate compliance risks"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-RiskEvaluationJoin-id-0001",
+              "name": "Risk Evaluation Join",
+              "gatewayDirection": "Converging"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-HighRiskIdentified-id-0001",
+              "name": "High Risk Identified?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-LaunchDetailedInvestigation-id-0001",
+              "name": "Launch detailed investigation"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-PerformDataAnalysis-id-0001",
+              "name": "Perform data analysis"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ConductInterviews-id-0001",
+              "name": "Conduct interviews"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-SiteVisitRequired-id-0001",
+              "name": "Site Visit Required?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-PerformSiteVisit-id-0001",
+              "name": "Perform site visit"
+            },
+            {
+              "$type": "bpmn:ParallelGateway",
+              "id": "ParallelGateway-InvestigationJoin-id-0001",
+              "name": "Investigation Join",
+              "gatewayDirection": "Converging"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-RiskAssessmentComplete-id-0001",
+              "name": "Risk Assessment Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RiskStartToSplit-id-0001",
+              "sourceRef": "StartEvent-RiskAssessmentStart-id-0001",
+              "targetRef": "ParallelGateway-RiskEvaluationSplit-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToFinancial-id-0001",
+              "sourceRef": "ParallelGateway-RiskEvaluationSplit-id-0001",
+              "targetRef": "UserTask-EvaluateFinancialRisks-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToOperational-id-0001",
+              "sourceRef": "ParallelGateway-RiskEvaluationSplit-id-0001",
+              "targetRef": "UserTask-EvaluateOperationalRisks-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SplitToCompliance-id-0001",
+              "sourceRef": "ParallelGateway-RiskEvaluationSplit-id-0001",
+              "targetRef": "UserTask-EvaluateComplianceRisks-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-FinancialToJoin-id-0001",
+              "sourceRef": "UserTask-EvaluateFinancialRisks-id-0001",
+              "targetRef": "ParallelGateway-RiskEvaluationJoin-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-OperationalToJoin-id-0001",
+              "sourceRef": "UserTask-EvaluateOperationalRisks-id-0001",
+              "targetRef": "ParallelGateway-RiskEvaluationJoin-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ComplianceToJoin-id-0001",
+              "sourceRef": "UserTask-EvaluateComplianceRisks-id-0001",
+              "targetRef": "ParallelGateway-RiskEvaluationJoin-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-JoinToHighRisk-id-0001",
+              "sourceRef": "ParallelGateway-RiskEvaluationJoin-id-0001",
+              "targetRef": "ExclusiveGateway-HighRiskIdentified-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-HighRiskToInvestigation-id-0001",
+              "sourceRef": "ExclusiveGateway-HighRiskIdentified-id-0001",
+              "targetRef": "UserTask-LaunchDetailedInvestigation-id-0001",
+              "name": "high_risk_identified",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-InvestigationToData-id-0001",
+              "sourceRef": "UserTask-LaunchDetailedInvestigation-id-0001",
+              "targetRef": "ServiceTask-PerformDataAnalysis-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-DataToInterviews-id-0001",
+              "sourceRef": "ServiceTask-PerformDataAnalysis-id-0001",
+              "targetRef": "UserTask-ConductInterviews-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-InterviewsToSiteVisit-id-0001",
+              "sourceRef": "UserTask-ConductInterviews-id-0001",
+              "targetRef": "ExclusiveGateway-SiteVisitRequired-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SiteVisitToVisit-id-0001",
+              "sourceRef": "ExclusiveGateway-SiteVisitRequired-id-0001",
+              "targetRef": "UserTask-PerformSiteVisit-id-0001",
+              "name": "site_visit_required",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SiteVisitToJoin-id-0001",
+              "sourceRef": "UserTask-PerformSiteVisit-id-0001",
+              "targetRef": "ParallelGateway-InvestigationJoin-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-InterviewsToJoin-id-0001",
+              "sourceRef": "ExclusiveGateway-SiteVisitRequired-id-0001",
+              "targetRef": "ParallelGateway-InvestigationJoin-id-0001",
+              "name": "",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-InvestigationJoinToComplete-id-0001",
+              "sourceRef": "ParallelGateway-InvestigationJoin-id-0001",
+              "targetRef": "EndEvent-RiskAssessmentComplete-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-HighRiskToComplete-id-0001",
+              "sourceRef": "ExclusiveGateway-HighRiskIdentified-id-0001",
+              "targetRef": "EndEvent-RiskAssessmentComplete-id-0001",
+              "name": "",
+              "isDefault": true
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CompileAuditReport-id-0001",
+          "name": "Compile audit report"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ReviewAuditReport-id-0001",
+          "name": "Review audit report"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ReportApproved-id-0001",
+          "name": "Report Approved?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendFinalReportToExecutiveBoard-id-0001",
+          "name": "Send: final report to executive board"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ArchiveAuditRecords-id-0001",
+          "name": "Archive audit records"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-AuditProcessClosed-id-0001",
+          "name": "Audit Process Closed"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendRevisionRequest-id-0001",
+          "name": "Send: revision request"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-UpdateAuditReport-id-0001",
+          "name": "Update audit report"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RiskAssessmentToCompile-id-0001",
+          "sourceRef": "SubProcess-RiskAssessment-id-0001",
+          "targetRef": "UserTask-CompileAuditReport-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CompileToReview-id-0001",
+          "sourceRef": "UserTask-CompileAuditReport-id-0001",
+          "targetRef": "UserTask-ReviewAuditReport-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReviewToApproval-id-0001",
+          "sourceRef": "UserTask-ReviewAuditReport-id-0001",
+          "targetRef": "ExclusiveGateway-ReportApproved-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ApprovalToFinalReport-id-0001",
+          "sourceRef": "ExclusiveGateway-ReportApproved-id-0001",
+          "targetRef": "SendTask-SendFinalReportToExecutiveBoard-id-0001",
+          "name": "report_approved",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FinalReportToArchive-id-0001",
+          "sourceRef": "SendTask-SendFinalReportToExecutiveBoard-id-0001",
+          "targetRef": "ServiceTask-ArchiveAuditRecords-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ArchiveToEnd-id-0001",
+          "sourceRef": "ServiceTask-ArchiveAuditRecords-id-0001",
+          "targetRef": "EndEvent-AuditProcessClosed-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ApprovalToRevision-id-0001",
+          "sourceRef": "ExclusiveGateway-ReportApproved-id-0001",
+          "targetRef": "SendTask-SendRevisionRequest-id-0001",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RevisionToUpdate-id-0001",
+          "sourceRef": "SendTask-SendRevisionRequest-id-0001",
+          "targetRef": "UserTask-UpdateAuditReport-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-UpdateToReview-id-0001",
+          "sourceRef": "UserTask-UpdateAuditReport-id-0001",
+          "targetRef": "UserTask-ReviewAuditReport-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

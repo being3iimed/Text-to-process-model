@@ -1,0 +1,250 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "DIY-Repair-Process-Definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "DIYRepairProcess-id-0001",
+      "isExecutable": false,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-DIYRepairStarted-id-0001",
+          "name": "DIY Repair Started"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-EnterModelAndIssue-id-0001",
+          "name": "Enter smartphone model and issue"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-GenerateMaterialsList-id-0001",
+          "name": "Generate list of required materials and tools"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-ResolveMissingItems-id-0001",
+          "name": "Resolve Missing Items",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-InventoryCheckStart-id-0001",
+              "name": "Inventory Check Start"
+            },
+            {
+              "$type": "bpmn:ScriptTask",
+              "id": "ScriptTask-CheckInventory-id-0001",
+              "name": "Computation: compare needed vs. owned items"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-MissingItems-id-0001",
+              "name": "Missing Items?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ContactFriends-id-0001",
+              "name": "Contact friends to borrow/buy missing items"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-FriendsCanHelp-id-0001",
+              "name": "Friends Can Help?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ScriptTask",
+              "id": "ScriptTask-UpdateInventory-id-0001",
+              "name": "Computation: update inventory with borrowed items"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-OrderMissingItems-id-0001",
+              "name": "Order missing items from suppliers"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-InventoryResolved-id-0001",
+              "name": "Inventory Resolved"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SubStartToCheck-id-0001",
+              "sourceRef": "StartEvent-InventoryCheckStart-id-0001",
+              "targetRef": "ScriptTask-CheckInventory-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CheckToMissingItems-id-0002",
+              "sourceRef": "ScriptTask-CheckInventory-id-0001",
+              "targetRef": "ExclusiveGateway-MissingItems-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MissingItemsToContact-id-0003",
+              "sourceRef": "ExclusiveGateway-MissingItems-id-0001",
+              "targetRef": "UserTask-ContactFriends-id-0001",
+              "name": "missing_items",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-NoMissingItemsToEnd-id-0004",
+              "sourceRef": "ExclusiveGateway-MissingItems-id-0001",
+              "targetRef": "EndEvent-InventoryResolved-id-0001",
+              "name": "",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ContactToFriendsHelp-id-0005",
+              "sourceRef": "UserTask-ContactFriends-id-0001",
+              "targetRef": "ExclusiveGateway-FriendsCanHelp-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-FriendsHelpToUpdate-id-0006",
+              "sourceRef": "ExclusiveGateway-FriendsCanHelp-id-0001",
+              "targetRef": "ScriptTask-UpdateInventory-id-0001",
+              "name": "friends_can_help",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-FriendsNoHelpToOrder-id-0007",
+              "sourceRef": "ExclusiveGateway-FriendsCanHelp-id-0001",
+              "targetRef": "ServiceTask-OrderMissingItems-id-0001",
+              "name": "",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-UpdateToEnd-id-0008",
+              "sourceRef": "ScriptTask-UpdateInventory-id-0001",
+              "targetRef": "EndEvent-InventoryResolved-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-OrderToEnd-id-0009",
+              "sourceRef": "ServiceTask-OrderMissingItems-id-0001",
+              "targetRef": "EndEvent-InventoryResolved-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-RepairInstructions-id-0001",
+          "name": "Receive step-by-step repair instructions"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-AttemptRepair-id-0001",
+          "name": "Attempt repair following instructions"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-TestRepair-id-0001",
+          "name": "Test repaired smartphone"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-RepairSuccess-id-0001",
+          "name": "Repair Successful?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendReview-id-0001",
+          "name": "Send: review and/or repair video"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendToExpert-id-0001",
+          "name": "Send: smartphone to expert for professional repair"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProcessComplete-id-0001",
+          "name": "DIY Repair Process Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToEnterModel-id-0001",
+          "sourceRef": "StartEvent-DIYRepairStarted-id-0001",
+          "targetRef": "UserTask-EnterModelAndIssue-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-EnterToGenerate-id-0002",
+          "sourceRef": "UserTask-EnterModelAndIssue-id-0001",
+          "targetRef": "ServiceTask-GenerateMaterialsList-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GenerateToResolve-id-0003",
+          "sourceRef": "ServiceTask-GenerateMaterialsList-id-0001",
+          "targetRef": "SubProcess-ResolveMissingItems-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ResolveToInstructions-id-0004",
+          "sourceRef": "SubProcess-ResolveMissingItems-id-0001",
+          "targetRef": "ReceiveTask-RepairInstructions-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-InstructionsToRepair-id-0005",
+          "sourceRef": "ReceiveTask-RepairInstructions-id-0001",
+          "targetRef": "UserTask-AttemptRepair-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RepairToTest-id-0006",
+          "sourceRef": "UserTask-AttemptRepair-id-0001",
+          "targetRef": "UserTask-TestRepair-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TestToSuccess-id-0007",
+          "sourceRef": "UserTask-TestRepair-id-0001",
+          "targetRef": "ExclusiveGateway-RepairSuccess-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SuccessToReview-id-0008",
+          "sourceRef": "ExclusiveGateway-RepairSuccess-id-0001",
+          "targetRef": "SendTask-SendReview-id-0001",
+          "name": "repair_successful",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SuccessToExpert-id-0009",
+          "sourceRef": "ExclusiveGateway-RepairSuccess-id-0001",
+          "targetRef": "SendTask-SendToExpert-id-0001",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReviewToEnd-id-0010",
+          "sourceRef": "SendTask-SendReview-id-0001",
+          "targetRef": "EndEvent-ProcessComplete-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ExpertToEnd-id-0011",
+          "sourceRef": "SendTask-SendToExpert-id-0001",
+          "targetRef": "EndEvent-ProcessComplete-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

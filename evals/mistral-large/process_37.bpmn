@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="parts-procurement-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="PartsProcurementProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-PartsProcurementStarted-id-0001" name="Parts Procurement Started">
+      <bpmn:outgoing>SequenceFlow-StartToSubProcess-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:subProcess id="SubProcess-OrderOptimization-id-0001" name="Order Optimization">
+      <bpmn:incoming>SequenceFlow-StartToSubProcess-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SubProcessToReceive-id-0002</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-OptimizationStart-id-0001" name="Optimization Start">
+        <bpmn:outgoing>SequenceFlow-SubStartToQuery-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-QueryWebshops-id-0001" name="Query all webshops for parts availability">
+        <bpmn:incoming>SequenceFlow-SubStartToQuery-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-QueryToCompare-id-0002</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-ComparePrices-id-0002" name="Compare prices and delivery times">
+        <bpmn:incoming>SequenceFlow-QueryToCompare-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CompareToCreate-id-0003</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-CreateOrderList-id-0003" name="Create optimized order list">
+        <bpmn:incoming>SequenceFlow-CompareToCreate-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CreateToPlace-id-0004</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-PlaceInitialOrders-id-0004" name="Place initial orders">
+        <bpmn:incoming>SequenceFlow-CreateToPlace-id-0004</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ManualToPlace-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PlaceToEnd-id-0005</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-OrderFailure-id-0001" name="Order Failure" attachedToRef="ServiceTask-PlaceInitialOrders-id-0004">
+        <bpmn:outgoing>SequenceFlow-BoundaryToManual-id-0006</bpmn:outgoing>
+        <bpmn:errorEventDefinition id="BoundaryEvent-OrderFailure-id-0001_EventDef" errorRef="ORDER_FAILURE" />
+      </bpmn:boundaryEvent>
+      <bpmn:userTask id="UserTask-ManualOrderCorrection-id-0001" name="Manual order correction">
+        <bpmn:incoming>SequenceFlow-BoundaryToManual-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ManualToPlace-id-0007</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:endEvent id="EndEvent-OrdersPlaced-id-0001" name="Orders Placed">
+        <bpmn:incoming>SequenceFlow-PlaceToEnd-id-0005</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-SubStartToQuery-id-0001" sourceRef="StartEvent-OptimizationStart-id-0001" targetRef="ServiceTask-QueryWebshops-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-QueryToCompare-id-0002" sourceRef="ServiceTask-QueryWebshops-id-0001" targetRef="ServiceTask-ComparePrices-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-CompareToCreate-id-0003" sourceRef="ServiceTask-ComparePrices-id-0002" targetRef="ServiceTask-CreateOrderList-id-0003" />
+      <bpmn:sequenceFlow id="SequenceFlow-CreateToPlace-id-0004" sourceRef="ServiceTask-CreateOrderList-id-0003" targetRef="ServiceTask-PlaceInitialOrders-id-0004" />
+      <bpmn:sequenceFlow id="SequenceFlow-PlaceToEnd-id-0005" sourceRef="ServiceTask-PlaceInitialOrders-id-0004" targetRef="EndEvent-OrdersPlaced-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BoundaryToManual-id-0006" sourceRef="BoundaryEvent-OrderFailure-id-0001" targetRef="UserTask-ManualOrderCorrection-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ManualToPlace-id-0007" sourceRef="UserTask-ManualOrderCorrection-id-0001" targetRef="ServiceTask-PlaceInitialOrders-id-0004" />
+    </bpmn:subProcess>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-DailyCheck-id-0001" name="Daily Inventory Check Trigger" />
+    <bpmn:serviceTask id="ServiceTask-ReceiveParts-id-0001" name="Receive parts batch">
+      <bpmn:incoming>SequenceFlow-SubProcessToReceive-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveToStartBuilding-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-StartBuilding-id-0002" name="Start building with available parts">
+      <bpmn:incoming>SequenceFlow-ReceiveToStartBuilding-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StartBuildingToCheck-id-0004</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-CheckInventory-id-0003" name="Check inventory levels">
+      <bpmn:incoming>SequenceFlow-StartBuildingToCheck-id-0004</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-BoundaryToCheck-id-0006</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-GatewayToCheck-id-0010</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-EmergencyToCheck-id-0012</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-StandardToCheck-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckToGateway-id-0005</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-CheckToEnd-id-0014</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-DailyInventory-id-0002" name="Daily Inventory Check" cancelActivity="false" attachedToRef="ServiceTask-CheckInventory-id-0003">
+      <bpmn:outgoing>SequenceFlow-BoundaryToCheck-id-0006</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-DailyInventory-id-0002_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P1D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-StockCheck-id-0001" name="Stock Level Check" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CheckToGateway-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToComplaint-id-0007</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToEmergency-id-0008</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToStandard-id-0009</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToCheck-id-0010</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-SendComplaint-id-0004" name="Send: complaint email to friends">
+      <bpmn:incoming>SequenceFlow-GatewayToComplaint-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ComplaintToEmergency-id-0011</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-EmergencyReorder-id-0005" name="Place emergency reorder (fastest)">
+      <bpmn:incoming>SequenceFlow-GatewayToEmergency-id-0008</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ComplaintToEmergency-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EmergencyToCheck-id-0012</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-StandardReorder-id-0006" name="Place reorder (cheapest)">
+      <bpmn:incoming>SequenceFlow-GatewayToStandard-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StandardToCheck-id-0013</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-ProjectCompleted-id-0001" name="Project Completed">
+      <bpmn:incoming>SequenceFlow-CheckToEnd-id-0014</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSubProcess-id-0001" sourceRef="StartEvent-PartsProcurementStarted-id-0001" targetRef="SubProcess-OrderOptimization-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubProcessToReceive-id-0002" sourceRef="SubProcess-OrderOptimization-id-0001" targetRef="ServiceTask-ReceiveParts-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveToStartBuilding-id-0003" sourceRef="ServiceTask-ReceiveParts-id-0001" targetRef="ServiceTask-StartBuilding-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-StartBuildingToCheck-id-0004" sourceRef="ServiceTask-StartBuilding-id-0002" targetRef="ServiceTask-CheckInventory-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckToGateway-id-0005" sourceRef="ServiceTask-CheckInventory-id-0003" targetRef="ExclusiveGateway-StockCheck-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToCheck-id-0006" sourceRef="BoundaryEvent-DailyInventory-id-0002" targetRef="ServiceTask-CheckInventory-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToComplaint-id-0007" name="stock = 0" sourceRef="ExclusiveGateway-StockCheck-id-0001" targetRef="ServiceTask-SendComplaint-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToEmergency-id-0008" name="stock &#60; 3" sourceRef="ExclusiveGateway-StockCheck-id-0001" targetRef="ServiceTask-EmergencyReorder-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToStandard-id-0009" name="stock &#60; 5" sourceRef="ExclusiveGateway-StockCheck-id-0001" targetRef="ServiceTask-StandardReorder-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToCheck-id-0010" name="stock &#62;= 5" sourceRef="ExclusiveGateway-StockCheck-id-0001" targetRef="ServiceTask-CheckInventory-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-ComplaintToEmergency-id-0011" sourceRef="ServiceTask-SendComplaint-id-0004" targetRef="ServiceTask-EmergencyReorder-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-EmergencyToCheck-id-0012" sourceRef="ServiceTask-EmergencyReorder-id-0005" targetRef="ServiceTask-CheckInventory-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-StandardToCheck-id-0013" sourceRef="ServiceTask-StandardReorder-id-0006" targetRef="ServiceTask-CheckInventory-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckToEnd-id-0014" sourceRef="ServiceTask-CheckInventory-id-0003" targetRef="EndEvent-ProjectCompleted-id-0001" />
+  </bpmn:process>
+  <bpmn:error id="ORDER_FAILURE" name="ORDER_FAILURE" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_PartsProcurementProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_PartsProcurementProcess" bpmnElement="PartsProcurementProcess">
+      <bpmndi:BPMNShape id="StartEvent-PartsProcurementStarted-id-0001_di" bpmnElement="StartEvent-PartsProcurementStarted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-OrderOptimization-id-0001_di" bpmnElement="SubProcess-OrderOptimization-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ReceiveParts-id-0001_di" bpmnElement="ServiceTask-ReceiveParts-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-StartBuilding-id-0002_di" bpmnElement="ServiceTask-StartBuilding-id-0002">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckInventory-id-0003_di" bpmnElement="ServiceTask-CheckInventory-id-0003">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-DailyInventory-id-0002_di" bpmnElement="BoundaryEvent-DailyInventory-id-0002">
+        <dc:Bounds x="657" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-StockCheck-id-0001_di" bpmnElement="ExclusiveGateway-StockCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SendComplaint-id-0004_di" bpmnElement="ServiceTask-SendComplaint-id-0004">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-EmergencyReorder-id-0005_di" bpmnElement="ServiceTask-EmergencyReorder-id-0005">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-DailyCheck-id-0001_di" bpmnElement="IntermediateCatchEvent-DailyCheck-id-0001">
+        <dc:Bounds x="57" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProjectCompleted-id-0001_di" bpmnElement="EndEvent-ProjectCompleted-id-0001">
+        <dc:Bounds x="807" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-StandardReorder-id-0006_di" bpmnElement="ServiceTask-StandardReorder-id-0006">
+        <dc:Bounds x="925" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSubProcess-id-0001_di" bpmnElement="SequenceFlow-StartToSubProcess-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubProcessToReceive-id-0002_di" bpmnElement="SequenceFlow-SubProcessToReceive-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToStartBuilding-id-0003_di" bpmnElement="SequenceFlow-ReceiveToStartBuilding-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartBuildingToCheck-id-0004_di" bpmnElement="SequenceFlow-StartBuildingToCheck-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckToGateway-id-0005_di" bpmnElement="SequenceFlow-CheckToGateway-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckToEnd-id-0014_di" bpmnElement="SequenceFlow-CheckToEnd-id-0014">
+        <di:waypoint x="675" y="110" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="807" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToCheck-id-0006_di" bpmnElement="SequenceFlow-BoundaryToCheck-id-0006">
+        <di:waypoint x="675" y="128" />
+        <di:waypoint x="675" y="140" />
+        <di:waypoint x="750" y="140" />
+        <di:waypoint x="750" y="110" />
+        <di:waypoint x="750" y="0" />
+        <di:waypoint x="675" y="0" />
+        <di:waypoint x="675" y="30" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToComplaint-id-0007_di" bpmnElement="SequenceFlow-GatewayToComplaint-id-0007">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToEmergency-id-0008_di" bpmnElement="SequenceFlow-GatewayToEmergency-id-0008">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="140" />
+        <di:waypoint x="1125" y="140" />
+        <di:waypoint x="1125" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToStandard-id-0009_di" bpmnElement="SequenceFlow-GatewayToStandard-id-0009">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="900" y="70" />
+        <di:waypoint x="900" y="280" />
+        <di:waypoint x="900" y="280" />
+        <di:waypoint x="900" y="350" />
+        <di:waypoint x="925" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToCheck-id-0010_di" bpmnElement="SequenceFlow-GatewayToCheck-id-0010">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="140" />
+        <di:waypoint x="675" y="140" />
+        <di:waypoint x="675" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ComplaintToEmergency-id-0011_di" bpmnElement="SequenceFlow-ComplaintToEmergency-id-0011">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EmergencyToCheck-id-0012_di" bpmnElement="SequenceFlow-EmergencyToCheck-id-0012">
+        <di:waypoint x="1125" y="110" />
+        <di:waypoint x="1125" y="140" />
+        <di:waypoint x="675" y="140" />
+        <di:waypoint x="675" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StandardToCheck-id-0013_di" bpmnElement="SequenceFlow-StandardToCheck-id-0013">
+        <di:waypoint x="975" y="390" />
+        <di:waypoint x="975" y="420" />
+        <di:waypoint x="675" y="420" />
+        <di:waypoint x="675" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-OrderOptimization-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-OrderOptimization-id-0001" bpmnElement="SubProcess-OrderOptimization-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-OptimizationStart-id-0001_di" bpmnElement="StartEvent-OptimizationStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-QueryWebshops-id-0001_di" bpmnElement="ServiceTask-QueryWebshops-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ComparePrices-id-0002_di" bpmnElement="ServiceTask-ComparePrices-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CreateOrderList-id-0003_di" bpmnElement="ServiceTask-CreateOrderList-id-0003">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PlaceInitialOrders-id-0004_di" bpmnElement="ServiceTask-PlaceInitialOrders-id-0004">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-OrderFailure-id-0001_di" bpmnElement="BoundaryEvent-OrderFailure-id-0001">
+        <dc:Bounds x="657" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-OrdersPlaced-id-0001_di" bpmnElement="EndEvent-OrdersPlaced-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ManualOrderCorrection-id-0001_di" bpmnElement="UserTask-ManualOrderCorrection-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubStartToQuery-id-0001_di" bpmnElement="SequenceFlow-SubStartToQuery-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-QueryToCompare-id-0002_di" bpmnElement="SequenceFlow-QueryToCompare-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompareToCreate-id-0003_di" bpmnElement="SequenceFlow-CompareToCreate-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CreateToPlace-id-0004_di" bpmnElement="SequenceFlow-CreateToPlace-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PlaceToEnd-id-0005_di" bpmnElement="SequenceFlow-PlaceToEnd-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToManual-id-0006_di" bpmnElement="SequenceFlow-BoundaryToManual-id-0006">
+        <di:waypoint x="675" y="128" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ManualToPlace-id-0007_di" bpmnElement="SequenceFlow-ManualToPlace-id-0007">
+        <di:waypoint x="825" y="250" />
+        <di:waypoint x="825" y="280" />
+        <di:waypoint x="675" y="280" />
+        <di:waypoint x="675" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

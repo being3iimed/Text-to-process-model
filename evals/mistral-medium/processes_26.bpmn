@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions-MaternityLeaveProcess-id-0001" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="1.0.0">
+  <bpmn:process id="Process-MaternityLeave-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-MaternityLeaveInitiated-id-0001" name="Maternity Leave Planning Initiated">
+      <bpmn:outgoing>SequenceFlow-StartToFetch-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-FetchModels-id-0001" name="Fetch maternity leave models">
+      <bpmn:incoming>SequenceFlow-StartToFetch-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FetchToSelect-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-SelectModel-id-0002" name="Select maternity leave model">
+      <bpmn:incoming>SequenceFlow-FetchToSelect-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectToGateway-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ModelValid-id-0001" name="Model Valid?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-SelectToGateway-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToCollect-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToAbort-id-0005</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-CollectDocuments-id-0003" name="Collect required documents">
+      <bpmn:incoming>SequenceFlow-GatewayToCollect-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CollectToValidate-id-0006</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ValidateDocuments-id-0004" name="Validate documents">
+      <bpmn:incoming>SequenceFlow-CollectToValidate-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidateToNotifySplit-id-0007</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-NotifySplit-id-0001" name="Parallel Notification" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ValidateToNotifySplit-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotifySplitToSocialSecurity-id-0008</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-NotifySplitToCompany-id-0009</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sendTask id="SendTask-NotifySocialSecurity-id-0001" name="Send: notification to Social Security">
+      <bpmn:incoming>SequenceFlow-NotifySplitToSocialSecurity-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SocialSecurityToNotifyJoin-id-0010</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="SendTask-NotifyCompany-id-0002" name="Send: notification to Company">
+      <bpmn:incoming>SequenceFlow-NotifySplitToCompany-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CompanyToNotifyJoin-id-0011</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:parallelGateway id="ParallelGateway-NotifyJoin-id-0002" name="Synchronize Notifications" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-SocialSecurityToNotifyJoin-id-0010</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-CompanyToNotifyJoin-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotifyJoinToConfirmSplit-id-0012</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:parallelGateway id="ParallelGateway-ConfirmSplit-id-0003" name="Parallel Confirmation" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-NotifyJoinToConfirmSplit-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmSplitToSocialSecurityConfirm-id-0013</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ConfirmSplitToCompanyConfirm-id-0014</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:receiveTask id="ReceiveTask-SocialSecurityConfirm-id-0001" name="Receive: confirmation from Social Security">
+      <bpmn:incoming>SequenceFlow-ConfirmSplitToSocialSecurityConfirm-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SocialSecurityConfirmToConfirmJoin-id-0015</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:receiveTask id="ReceiveTask-CompanyConfirm-id-0002" name="Receive: confirmation from Company">
+      <bpmn:incoming>SequenceFlow-ConfirmSplitToCompanyConfirm-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CompanyConfirmToConfirmJoin-id-0016</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:parallelGateway id="ParallelGateway-ConfirmJoin-id-0004" name="Synchronize Confirmations" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-SocialSecurityConfirmToConfirmJoin-id-0015</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-CompanyConfirmToConfirmJoin-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmJoinToReviewExtension-id-0017</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-ReviewExtension-id-0004" name="Review extension options">
+      <bpmn:incoming>SequenceFlow-ConfirmJoinToReviewExtension-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewExtensionToExtensionGateway-id-0018</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ExtensionNeeded-id-0002" name="Extension Needed?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewExtensionToExtensionGateway-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ExtensionGatewayToExtensionRequest-id-0019</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ExtensionGatewayToLeaveComplete-id-0020</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-ExtensionRequest-id-0003" name="Send: extension request (if applicable)">
+      <bpmn:incoming>SequenceFlow-ExtensionGatewayToExtensionRequest-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ExtensionRequestToExtensionEnd-id-0021</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ExtensionRequested-id-0001" name="Extension Requested">
+      <bpmn:incoming>SequenceFlow-ExtensionRequestToExtensionEnd-id-0021</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-LeaveComplete-id-0002" name="Leave Process Complete">
+      <bpmn:incoming>SequenceFlow-ExtensionGatewayToLeaveComplete-id-0020</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-ProcessAborted-id-0003" name="Process Aborted - Invalid Model">
+      <bpmn:incoming>SequenceFlow-GatewayToAbort-id-0005</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToFetch-id-0001" sourceRef="StartEvent-MaternityLeaveInitiated-id-0001" targetRef="UserTask-FetchModels-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FetchToSelect-id-0002" sourceRef="UserTask-FetchModels-id-0001" targetRef="UserTask-SelectModel-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectToGateway-id-0003" sourceRef="UserTask-SelectModel-id-0002" targetRef="ExclusiveGateway-ModelValid-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToCollect-id-0004" name="model_selected == &#34;valid&#34;" sourceRef="ExclusiveGateway-ModelValid-id-0001" targetRef="UserTask-CollectDocuments-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToAbort-id-0005" sourceRef="ExclusiveGateway-ModelValid-id-0001" targetRef="EndEvent-ProcessAborted-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-CollectToValidate-id-0006" sourceRef="UserTask-CollectDocuments-id-0003" targetRef="ServiceTask-ValidateDocuments-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidateToNotifySplit-id-0007" sourceRef="ServiceTask-ValidateDocuments-id-0004" targetRef="ParallelGateway-NotifySplit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotifySplitToSocialSecurity-id-0008" sourceRef="ParallelGateway-NotifySplit-id-0001" targetRef="SendTask-NotifySocialSecurity-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotifySplitToCompany-id-0009" sourceRef="ParallelGateway-NotifySplit-id-0001" targetRef="SendTask-NotifyCompany-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SocialSecurityToNotifyJoin-id-0010" sourceRef="SendTask-NotifySocialSecurity-id-0001" targetRef="ParallelGateway-NotifyJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-CompanyToNotifyJoin-id-0011" sourceRef="SendTask-NotifyCompany-id-0002" targetRef="ParallelGateway-NotifyJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotifyJoinToConfirmSplit-id-0012" sourceRef="ParallelGateway-NotifyJoin-id-0002" targetRef="ParallelGateway-ConfirmSplit-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmSplitToSocialSecurityConfirm-id-0013" sourceRef="ParallelGateway-ConfirmSplit-id-0003" targetRef="ReceiveTask-SocialSecurityConfirm-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmSplitToCompanyConfirm-id-0014" sourceRef="ParallelGateway-ConfirmSplit-id-0003" targetRef="ReceiveTask-CompanyConfirm-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SocialSecurityConfirmToConfirmJoin-id-0015" sourceRef="ReceiveTask-SocialSecurityConfirm-id-0001" targetRef="ParallelGateway-ConfirmJoin-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-CompanyConfirmToConfirmJoin-id-0016" sourceRef="ReceiveTask-CompanyConfirm-id-0002" targetRef="ParallelGateway-ConfirmJoin-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmJoinToReviewExtension-id-0017" sourceRef="ParallelGateway-ConfirmJoin-id-0004" targetRef="UserTask-ReviewExtension-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewExtensionToExtensionGateway-id-0018" sourceRef="UserTask-ReviewExtension-id-0004" targetRef="ExclusiveGateway-ExtensionNeeded-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ExtensionGatewayToExtensionRequest-id-0019" name="extension_needed == &#34;yes&#34;" sourceRef="ExclusiveGateway-ExtensionNeeded-id-0002" targetRef="SendTask-ExtensionRequest-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-ExtensionGatewayToLeaveComplete-id-0020" sourceRef="ExclusiveGateway-ExtensionNeeded-id-0002" targetRef="EndEvent-LeaveComplete-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ExtensionRequestToExtensionEnd-id-0021" sourceRef="SendTask-ExtensionRequest-id-0003" targetRef="EndEvent-ExtensionRequested-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process-MaternityLeave-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process-MaternityLeave-id-0001" bpmnElement="Process-MaternityLeave-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-MaternityLeaveInitiated-id-0001_di" bpmnElement="StartEvent-MaternityLeaveInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-FetchModels-id-0001_di" bpmnElement="UserTask-FetchModels-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectModel-id-0002_di" bpmnElement="UserTask-SelectModel-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ModelValid-id-0001_di" bpmnElement="ExclusiveGateway-ModelValid-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CollectDocuments-id-0003_di" bpmnElement="UserTask-CollectDocuments-id-0003">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ValidateDocuments-id-0004_di" bpmnElement="ServiceTask-ValidateDocuments-id-0004">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-NotifySplit-id-0001_di" bpmnElement="ParallelGateway-NotifySplit-id-0001">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-NotifySocialSecurity-id-0001_di" bpmnElement="SendTask-NotifySocialSecurity-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-NotifyJoin-id-0002_di" bpmnElement="ParallelGateway-NotifyJoin-id-0002">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-ConfirmSplit-id-0003_di" bpmnElement="ParallelGateway-ConfirmSplit-id-0003">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-SocialSecurityConfirm-id-0001_di" bpmnElement="ReceiveTask-SocialSecurityConfirm-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-ConfirmJoin-id-0004_di" bpmnElement="ParallelGateway-ConfirmJoin-id-0004">
+        <dc:Bounds x="1700" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewExtension-id-0004_di" bpmnElement="UserTask-ReviewExtension-id-0004">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ExtensionNeeded-id-0002_di" bpmnElement="ExclusiveGateway-ExtensionNeeded-id-0002" isMarkerVisible="true">
+        <dc:Bounds x="2000" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ExtensionRequest-id-0003_di" bpmnElement="SendTask-ExtensionRequest-id-0003">
+        <dc:Bounds x="2125" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ExtensionRequested-id-0001_di" bpmnElement="EndEvent-ExtensionRequested-id-0001">
+        <dc:Bounds x="2307" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessAborted-id-0003_di" bpmnElement="EndEvent-ProcessAborted-id-0003">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-NotifyCompany-id-0002_di" bpmnElement="SendTask-NotifyCompany-id-0002">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-CompanyConfirm-id-0002_di" bpmnElement="ReceiveTask-CompanyConfirm-id-0002">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-LeaveComplete-id-0002_di" bpmnElement="EndEvent-LeaveComplete-id-0002">
+        <dc:Bounds x="2157" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToFetch-id-0001_di" bpmnElement="SequenceFlow-StartToFetch-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FetchToSelect-id-0002_di" bpmnElement="SequenceFlow-FetchToSelect-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectToGateway-id-0003_di" bpmnElement="SequenceFlow-SelectToGateway-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToCollect-id-0004_di" bpmnElement="SequenceFlow-GatewayToCollect-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToAbort-id-0005_di" bpmnElement="SequenceFlow-GatewayToAbort-id-0005">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CollectToValidate-id-0006_di" bpmnElement="SequenceFlow-CollectToValidate-id-0006">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidateToNotifySplit-id-0007_di" bpmnElement="SequenceFlow-ValidateToNotifySplit-id-0007">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotifySplitToSocialSecurity-id-0008_di" bpmnElement="SequenceFlow-NotifySplitToSocialSecurity-id-0008">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotifySplitToCompany-id-0009_di" bpmnElement="SequenceFlow-NotifySplitToCompany-id-0009">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SocialSecurityToNotifyJoin-id-0010_di" bpmnElement="SequenceFlow-SocialSecurityToNotifyJoin-id-0010">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotifyJoinToConfirmSplit-id-0012_di" bpmnElement="SequenceFlow-NotifyJoinToConfirmSplit-id-0012">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmSplitToSocialSecurityConfirm-id-0013_di" bpmnElement="SequenceFlow-ConfirmSplitToSocialSecurityConfirm-id-0013">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmSplitToCompanyConfirm-id-0014_di" bpmnElement="SequenceFlow-ConfirmSplitToCompanyConfirm-id-0014">
+        <di:waypoint x="1425" y="95" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SocialSecurityConfirmToConfirmJoin-id-0015_di" bpmnElement="SequenceFlow-SocialSecurityConfirmToConfirmJoin-id-0015">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1700" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmJoinToReviewExtension-id-0017_di" bpmnElement="SequenceFlow-ConfirmJoinToReviewExtension-id-0017">
+        <di:waypoint x="1750" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewExtensionToExtensionGateway-id-0018_di" bpmnElement="SequenceFlow-ReviewExtensionToExtensionGateway-id-0018">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="2000" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExtensionGatewayToExtensionRequest-id-0019_di" bpmnElement="SequenceFlow-ExtensionGatewayToExtensionRequest-id-0019">
+        <di:waypoint x="2050" y="70" />
+        <di:waypoint x="2125" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExtensionGatewayToLeaveComplete-id-0020_di" bpmnElement="SequenceFlow-ExtensionGatewayToLeaveComplete-id-0020">
+        <di:waypoint x="2025" y="95" />
+        <di:waypoint x="2025" y="210" />
+        <di:waypoint x="2157" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExtensionRequestToExtensionEnd-id-0021_di" bpmnElement="SequenceFlow-ExtensionRequestToExtensionEnd-id-0021">
+        <di:waypoint x="2225" y="70" />
+        <di:waypoint x="2307" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompanyToNotifyJoin-id-0011_di" bpmnElement="SequenceFlow-CompanyToNotifyJoin-id-0011">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1275" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompanyConfirmToConfirmJoin-id-0016_di" bpmnElement="SequenceFlow-CompanyConfirmToConfirmJoin-id-0016">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1725" y="210" />
+        <di:waypoint x="1725" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

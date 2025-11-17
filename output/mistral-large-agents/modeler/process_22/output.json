@@ -1,0 +1,216 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "Definitions-SubrogationProcess-id-0001",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler (https://bpmn.io)",
+    "exporterVersion": "1.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "Process-Subrogation-id-0001",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-SubrogationCaseInitiated-id-0001",
+            "name": "Subrogation Case Initiated"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-CheckSubrogationPossibility-id-0001",
+            "name": "Check Subrogation Possibility"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-SubrogationPossible-id-0001",
+            "name": "Subrogation Possible?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-SendPaymentRequest-id-0001",
+            "name": "Send Payment Request"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-CreateReminder-id-0001",
+            "name": "Create Reminder"
+          },
+          {
+            "$type": "bpmn:ReceiveTask",
+            "id": "ReceiveTask-ReceiveMoneyOrDisagreement-id-0001",
+            "name": "Receive: Money or Disagreement"
+          },
+          {
+            "$type": "bpmn:BoundaryEvent",
+            "id": "BoundaryEvent-Timer14Day-ReceiveMoneyOrDisagreement-id-0001",
+            "name": "14 Day Deadline Reached",
+            "attachedToRef": "ReceiveTask-ReceiveMoneyOrDisagreement-id-0001",
+            "cancelActivity": true,
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:TimerEventDefinition",
+                "timeDuration": "P14D"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-ForwardToCollectionAgency-id-0001",
+            "name": "Send: Forward to Collection Agency"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-CaseClosed-id-0001",
+            "name": "Case Closed"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-MoneyOrDisagreement-id-0001",
+            "name": "Money or Disagreement?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-MakeBooking-id-0001",
+            "name": "Make Booking"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ReviewInsurantDisagreement-id-0001",
+            "name": "Review Insurant's Disagreement"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-DisagreementValid-id-0001",
+            "name": "Disagreement Valid?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToCheckSubrogation-id-0001",
+            "sourceRef": "StartEvent-SubrogationCaseInitiated-id-0001",
+            "targetRef": "UserTask-CheckSubrogationPossibility-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CheckToSubrogationPossible-id-0001",
+            "sourceRef": "UserTask-CheckSubrogationPossibility-id-0001",
+            "targetRef": "ExclusiveGateway-SubrogationPossible-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SubrogationPossibleToSendRequest-id-0001",
+            "sourceRef": "ExclusiveGateway-SubrogationPossible-id-0001",
+            "targetRef": "ServiceTask-SendPaymentRequest-id-0001",
+            "name": "subrogation_possible"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SubrogationNotPossibleToEnd-id-0001",
+            "sourceRef": "ExclusiveGateway-SubrogationPossible-id-0001",
+            "targetRef": "EndEvent-CaseClosed-id-0001",
+            "name": "",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SendRequestToCreateReminder-id-0001",
+            "sourceRef": "ServiceTask-SendPaymentRequest-id-0001",
+            "targetRef": "ServiceTask-CreateReminder-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-CreateReminderToReceiveMoney-id-0001",
+            "sourceRef": "ServiceTask-CreateReminder-id-0001",
+            "targetRef": "ReceiveTask-ReceiveMoneyOrDisagreement-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReceiveMoneyToMoneyOrDisagreement-id-0001",
+            "sourceRef": "ReceiveTask-ReceiveMoneyOrDisagreement-id-0001",
+            "targetRef": "ExclusiveGateway-MoneyOrDisagreement-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-BoundaryToForwardToAgency-id-0001",
+            "sourceRef": "BoundaryEvent-Timer14Day-ReceiveMoneyOrDisagreement-id-0001",
+            "targetRef": "SendTask-ForwardToCollectionAgency-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ForwardToAgencyToEnd-id-0001",
+            "sourceRef": "SendTask-ForwardToCollectionAgency-id-0001",
+            "targetRef": "EndEvent-CaseClosed-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-MoneyReceivedToMakeBooking-id-0001",
+            "sourceRef": "ExclusiveGateway-MoneyOrDisagreement-id-0001",
+            "targetRef": "ServiceTask-MakeBooking-id-0001",
+            "name": "money_received"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DisagreementReceivedToReview-id-0001",
+            "sourceRef": "ExclusiveGateway-MoneyOrDisagreement-id-0001",
+            "targetRef": "UserTask-ReviewInsurantDisagreement-id-0001",
+            "name": "disagreement_received"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-MakeBookingToEnd-id-0001",
+            "sourceRef": "ServiceTask-MakeBooking-id-0001",
+            "targetRef": "EndEvent-CaseClosed-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReviewToDisagreementValid-id-0001",
+            "sourceRef": "UserTask-ReviewInsurantDisagreement-id-0001",
+            "targetRef": "ExclusiveGateway-DisagreementValid-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DisagreementValidToEnd-id-0001",
+            "sourceRef": "ExclusiveGateway-DisagreementValid-id-0001",
+            "targetRef": "EndEvent-CaseClosed-id-0001",
+            "name": "disagreement_valid"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DisagreementInvalidToForward-id-0001",
+            "sourceRef": "ExclusiveGateway-DisagreementValid-id-0001",
+            "targetRef": "SendTask-ForwardToCollectionAgency-id-0001",
+            "name": "",
+            "isDefault": true
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-large-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11935,
+        "total_tokens": 14029,
+        "completion_tokens": 2094
+      },
+      "model_name": "mistral-large-latest",
+      "model": "mistral-large-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11935,
+      "output_tokens": 2094,
+      "total_tokens": 14029
+    },
+    "id": "lc_run--af10e8eb-bb6b-41b0-8138-c19a7eb84ff9-0"
+  },
+  "status": "success"
+}

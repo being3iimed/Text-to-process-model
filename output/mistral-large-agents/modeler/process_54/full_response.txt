@@ -1,0 +1,100 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "transaction-request-process-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "bpmn-js (https://demo.bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "TransactionRequestProcess-id-0001",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-TransactionRequestReceived-id-0001",
+          "name": "Transaction Request Received"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-TransactionDataRequest-id-0001",
+          "name": "Send: transaction data request"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CheckRequestValidity-id-0002",
+          "name": "Check request validity"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-RequestValidityCheck-id-0001",
+          "name": "Request Valid?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-DataTransmission-id-0003",
+          "name": "Send: data transmission"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-RejectionNotice-id-0004",
+          "name": "Send: rejection notice"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-TransactionProcessed-id-0001",
+          "name": "Transaction Processed"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToSendRequest-id-0001",
+          "sourceRef": "StartEvent-TransactionRequestReceived-id-0001",
+          "targetRef": "SendTask-TransactionDataRequest-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendRequestToCheckValidity-id-0002",
+          "sourceRef": "SendTask-TransactionDataRequest-id-0001",
+          "targetRef": "ServiceTask-CheckRequestValidity-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CheckValidityToGateway-id-0003",
+          "sourceRef": "ServiceTask-CheckRequestValidity-id-0002",
+          "targetRef": "ExclusiveGateway-RequestValidityCheck-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToDataTransmission-id-0004",
+          "name": "request_valid == true",
+          "sourceRef": "ExclusiveGateway-RequestValidityCheck-id-0001",
+          "targetRef": "SendTask-DataTransmission-id-0003",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToRejectionNotice-id-0005",
+          "name": "request_valid == false",
+          "sourceRef": "ExclusiveGateway-RequestValidityCheck-id-0001",
+          "targetRef": "SendTask-RejectionNotice-id-0004",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DataTransmissionToEnd-id-0006",
+          "sourceRef": "SendTask-DataTransmission-id-0003",
+          "targetRef": "EndEvent-TransactionProcessed-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RejectionNoticeToEnd-id-0007",
+          "sourceRef": "SendTask-RejectionNotice-id-0004",
+          "targetRef": "EndEvent-TransactionProcessed-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

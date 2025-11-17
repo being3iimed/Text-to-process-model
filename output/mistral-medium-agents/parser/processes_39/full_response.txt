@@ -1,0 +1,154 @@
+```
+<validation_phase>
+**Clarifications Requested**:
+1. **Error Scenarios**: Are there expected failure points (e.g., "wrong part received", "tool breaks during repair")? If so, which are explicitly mentioned?
+   → *Assumption*: No explicit error scenarios mentioned. Only "if it hasn't worked out" (post-repair failure).
+
+2. **Hard SLA Requirements**: Are there time constraints (e.g., "must complete repair within 2 days")?
+   → *Assumption*: None mentioned.
+
+3. **Scheduled Triggers**: Are there timed reminders (e.g., "check progress after 1 hour")?
+   → *Assumption*: None mentioned.
+
+4. **Parallel Tasks**: Are steps like "contact friends" and "order parts" truly independent (can happen simultaneously)?
+   → *Assumption*: Yes, but "contact friends" may block ordering if successful.
+
+5. **Decision Branches**: Are there >3 branches in any decision (e.g., "borrow/buy/skip")?
+   → *Assumption*: Only 2-3 branches (e.g., "have tool"/"borrow"/"buy").
+
+---
+**Element Classification**:
+| **Element**               | **Type**                     | **Reason**                                                                 |
+|---------------------------|------------------------------|----------------------------------------------------------------------------|
+| Enter model/issue         | `userTask`                   | Human input required.                                                     |
+| Generate materials/tools  | `serviceTask`                | Automated list generation.                                                |
+| Check existing inventory  | `scriptTask`                 | Computation: compare needed vs. owned items.                              |
+| Contact friends           | `userTask`                   | Human communication (borrow/buy).                                         |
+| Order missing items       | `serviceTask`                | Automated purchase (API call to suppliers).                                |
+| Receive instructions      | `receiveTask`                | Wait for system-generated guide.                                          |
+| Attempt repair            | `userTask`                   | Hands-on work.                                                             |
+| Test repair success       | `userTask`                   | Human verification.                                                        |
+| Send review/video         | `sendTask`                   | One-way communication (upload to platform).                              |
+| Send to expert            | `sendTask`                   | One-way handoff (no response expected in this process).                   |
+
+---
+**Gateway Analysis**:
+1. **Inventory Check**:
+   - `XOR` (mutually exclusive):
+     - "Have all tools/parts" → Proceed.
+     - "Missing items" → Contact friends **OR** order.
+
+2. **Friend Response**:
+   - `XOR` (mutually exclusive):
+     - "Friend can help" → Update inventory.
+     - "Friend cannot help" → Order missing items.
+
+3. **Repair Outcome**:
+   - `XOR` (mutually exclusive):
+     - "Success" → Send review.
+     - "Failure" → Send to expert.
+
+---
+**Boundary Events**:
+- **None justified**:
+  - No hard SLAs (e.g., "must contact friends within 1 hour").
+  - No expected errors (e.g., "API fails when ordering").
+  - *Rationale*: All steps are user-paced; no time-critical paths.
+
+---
+**Subprocess Candidates**:
+1. **"Resolve Missing Items"** (Contact Friends + Order):
+   - **Purpose**: Cohesive logic for acquiring missing tools/parts.
+   - **Justification**:
+     - Passes Three-Question Test:
+       1. *One sentence*: "Acquire missing items via friends or purchase."
+       2. *3+ tasks*: Check inventory → Contact friends → Order.
+       3. *Improves clarity*: Isolates complex branching from main flow.
+   - **Tasks**:
+     - `scriptTask` (check inventory),
+     - `userTask` (contact friends),
+     - `serviceTask` (order items).
+
+2. **"Post-Repair Actions"** (Review/Expert):
+   - **Rejected**:
+     - Only 2 simple tasks (`sendTask`); not worth abstraction.
+
+---
+**Timer Validation**:
+- **No timers needed**:
+  - No scheduled triggers (e.g., "remind user after 1 day").
+  - No SLAs (e.g., "friends must respond within 2 hours").
+
+---
+**Flow Consistency**:
+- All paths traceable start-to-end:
+  1. Enter issue → Generate list → Resolve missing items → Receive instructions → Repair → Test → (Success/Failure).
+- No orphaned flows.
+
+---
+**Data Flow**:
+- **Dependencies**:
+  - "Generate materials/tools" → Input for "check inventory".
+  - "Contact friends" → Output updates inventory for "order items".
+- **Satisfied**: All tasks have required inputs.
+
+---
+</validation_phase>
+
+<bpnm_pseudocode>
+```
+startEvent("DIY Repair Started")
+
+// --- MAIN FLOW ---
+userTask("Enter smartphone model and issue")
+serviceTask("Generate list of required materials and tools")
+subProcess("Resolve Missing Items"):
+    startEvent("Inventory Check Start")
+    scriptTask("Computation: compare needed vs. owned items")
+    if (missing_items):
+        userTask("Contact friends to borrow/buy missing items")
+        if (friends_can_help):
+            scriptTask("Computation: update inventory with borrowed items")
+        else:
+            serviceTask("Order missing items from suppliers")
+    else:
+        // Skip to end if no missing items
+    endEvent("Inventory Resolved")
+endSubProcess
+
+receiveTask("Receive step-by-step repair instructions")
+userTask("Attempt repair following instructions")
+userTask("Test repaired smartphone")
+
+// --- OUTCOME BRANCHING ---
+if (repair_successful):
+    sendTask("Send: review and/or repair video")
+else:
+    sendTask("Send: smartphone to expert for professional repair")
+endEvent("DIY Repair Process Complete")
+```
+</bpnm_pseudocode>
+
+<compliance_checklist>
+| **Criteria**               | **Status** | **Notes**                                                                 |
+|----------------------------|------------|---------------------------------------------------------------------------|
+| Timer properties           | ✅ PASS    | No timers used.                                                          |
+| Gateway convergence        | ✅ PASS    | All XOR branches converge implicitly (no parallel paths).                |
+| Sequence flow labels       | ✅ PASS    | All conditionals labeled (e.g., `missing_items`, `friends_can_help`).   |
+| Boundary events            | ✅ PASS    | None added (no justified SLAs/errors).                                   |
+| Subprocesses               | ✅ PASS    | 1 subprocess ("Resolve Missing Items") passes necessity test.              |
+| Flow consistency           | ✅ PASS    | All paths traceable; no orphans.                                          |
+| Core element dominance     | ✅ PASS    | 8/9 elements are core tasks/gateways (89%).                              |
+| Label completeness          | ✅ PASS    | No empty strings; all conditionals descriptive.                          |
+| Parallelism validation      | ✅ PASS    | "Contact friends" and "order items" are mutually exclusive (XOR).         |
+| Error handling             | ✅ PASS    | Post-repair failure handled via `sendTask` (no speculative boundaries).   |
+</compliance_checklist>
+
+<assumptions>
+1. **No Hard SLAs**: All steps are user-paced (e.g., no "must order within 1 hour").
+2. **No Expected Errors**: Only explicit failure is post-repair (handled via `sendTask`).
+3. **Friend Contact**: Assumed to be synchronous (user waits for response before ordering).
+4. **Single Repair Attempt**: Process ends after first test (no retries modeled).
+5. **Exclusive Branching**: "Contact friends" and "order items" are mutually exclusive (XOR).
+</assumptions>
+```

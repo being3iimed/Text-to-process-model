@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="internship-process-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Internship-Search-Process-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-InternshipSearchStarted-id-0001" name="Internship Search Started">
+      <bpmn:outgoing>SequenceFlow-StartToPreferences-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-EnterInternshipPreferences-id-0001" name="Enter Internship Preferences">
+      <bpmn:incoming>SequenceFlow-StartToPreferences-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PreferencesToBoundary-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer30Day-WaitForOffers-id-0001" name="30 Day Timeout" attachedToRef="UserTask-EnterInternshipPreferences-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryToNotification-id-0001</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer30Day-WaitForOffers-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P30D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-NoOffersNotification-id-0001" name="Send: no offers notification">
+      <bpmn:incoming>SequenceFlow-BoundaryToNotification-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotificationToTimeoutEnd-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-SearchTimedOut-id-0001" name="Search Timed Out">
+      <bpmn:incoming>SequenceFlow-NotificationToTimeoutEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-OfferArrivalDelay-id-0001" name="Offer Arrival Delay">
+      <bpmn:incoming>SequenceFlow-PreferencesToBoundary-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DelayToOfferMatching-id-0001</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="ServiceTask-GenerateOfferMatching-id-0001" name="Generate Offer Matching">
+      <bpmn:incoming>SequenceFlow-DelayToOfferMatching-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-DecisionToReject-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OfferMatchingToNotification-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-OfferNotification-id-0001" name="Send: Offer Notification">
+      <bpmn:incoming>SequenceFlow-OfferMatchingToNotification-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotificationToReview-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-ReviewOffer-id-0001" name="Review Offer">
+      <bpmn:incoming>SequenceFlow-NotificationToReview-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToDecision-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-OfferDecision-id-0001" name="Offer Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewToDecision-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DecisionToAccept-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-DecisionToReject-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-ValidateAcceptance-id-0001" name="Validate Acceptance">
+      <bpmn:incoming>SequenceFlow-DecisionToAccept-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AcceptToInvalidate-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-MarkOffersInvalid-id-0001" name="Mark Other Offers Invalid">
+      <bpmn:incoming>SequenceFlow-AcceptToInvalidate-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InvalidateToParallel-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-PostAcceptance-id-0001" name="Parallel Paths" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-InvalidateToParallel-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ParallelToStatusUpdates-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ParallelToCompanyUpdates-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:subProcess id="SubProcess-StatusUpdateCycle-id-0001" name="Status Update Cycle">
+      <bpmn:incoming>SequenceFlow-ParallelToStatusUpdates-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StatusUpdatesToJoin-id-0001</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-StatusUpdatesBegin-id-0001" name="Status Updates Begin">
+        <bpmn:outgoing>SequenceFlow-StartToTimer-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-WeeklyTimer-id-0001" name="Weekly Status Update Trigger">
+        <bpmn:incoming>SequenceFlow-StartToTimer-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-GatewayToTimer-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-TimerToSplit-id-0001</bpmn:outgoing>
+      </bpmn:intermediateCatchEvent>
+      <bpmn:parallelGateway id="ParallelGateway-StatusUpdateSplit-id-0001" name="Status Update Split" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-TimerToSplit-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SplitToWriteUpdate-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToSendUpdate-id-0001</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:userTask id="UserTask-WriteWeeklyStatusUpdate-id-0001" name="Write Weekly Status Update">
+        <bpmn:incoming>SequenceFlow-SplitToWriteUpdate-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-WriteToJoin-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:sendTask id="SendTask-StatusUpdateToCompany-id-0001" name="Send: Status Update to Company">
+        <bpmn:incoming>SequenceFlow-SplitToSendUpdate-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SendToJoin-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:parallelGateway id="ParallelGateway-StatusUpdateJoin-id-0001" name="Status Update Join" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-WriteToJoin-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-SendToJoin-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-JoinToScript-id-0001</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:scriptTask id="ScriptTask-IncrementUpdateCounter-id-0001" name="Computation: increment update counter">
+        <bpmn:incoming>SequenceFlow-JoinToScript-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ScriptToGateway-id-0001</bpmn:outgoing>
+      </bpmn:scriptTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-CheckUpdateCount-id-0001" name="Check Update Count" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-ScriptToGateway-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GatewayToTimer-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToEnd-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="EndEvent-StatusUpdatesComplete-id-0001" name="Status Updates Complete">
+        <bpmn:incoming>SequenceFlow-GatewayToEnd-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToTimer-id-0001" sourceRef="StartEvent-StatusUpdatesBegin-id-0001" targetRef="IntermediateCatchEvent-WeeklyTimer-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-TimerToSplit-id-0001" sourceRef="IntermediateCatchEvent-WeeklyTimer-id-0001" targetRef="ParallelGateway-StatusUpdateSplit-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToWriteUpdate-id-0001" sourceRef="ParallelGateway-StatusUpdateSplit-id-0001" targetRef="UserTask-WriteWeeklyStatusUpdate-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToSendUpdate-id-0001" sourceRef="ParallelGateway-StatusUpdateSplit-id-0001" targetRef="SendTask-StatusUpdateToCompany-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-WriteToJoin-id-0001" sourceRef="UserTask-WriteWeeklyStatusUpdate-id-0001" targetRef="ParallelGateway-StatusUpdateJoin-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SendToJoin-id-0001" sourceRef="SendTask-StatusUpdateToCompany-id-0001" targetRef="ParallelGateway-StatusUpdateJoin-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-JoinToScript-id-0001" sourceRef="ParallelGateway-StatusUpdateJoin-id-0001" targetRef="ScriptTask-IncrementUpdateCounter-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ScriptToGateway-id-0001" sourceRef="ScriptTask-IncrementUpdateCounter-id-0001" targetRef="ExclusiveGateway-CheckUpdateCount-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToTimer-id-0001" name="update_counter &#60; 3" sourceRef="ExclusiveGateway-CheckUpdateCount-id-0001" targetRef="IntermediateCatchEvent-WeeklyTimer-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToEnd-id-0001" name="update_counter &#62;= 3" sourceRef="ExclusiveGateway-CheckUpdateCount-id-0001" targetRef="EndEvent-StatusUpdatesComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-CompanyStatusUpdates-id-0001" name="Company Status Updates">
+      <bpmn:incoming>SequenceFlow-ParallelToCompanyUpdates-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CompanyUpdatesToJoin-id-0001</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-CompanyUpdatesBegin-id-0001" name="Company Updates Begin">
+        <bpmn:outgoing>SequenceFlow-CompanyStartToTimer-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-CompanyWeeklyTimer-id-0001" name="Company Weekly Update Trigger">
+        <bpmn:incoming>SequenceFlow-CompanyStartToTimer-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-CompanyGatewayToTimer-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CompanyTimerToGenerate-id-0001</bpmn:outgoing>
+      </bpmn:intermediateCatchEvent>
+      <bpmn:serviceTask id="ServiceTask-GenerateCompanyStatusUpdate-id-0001" name="Generate Company Status Update">
+        <bpmn:incoming>SequenceFlow-CompanyTimerToGenerate-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CompanyGenerateToSend-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-UpdateToIntern-id-0001" name="Send: Update to Intern">
+        <bpmn:incoming>SequenceFlow-CompanyGenerateToSend-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CompanySendToScript-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:scriptTask id="ScriptTask-IncrementCompanyUpdateCounter-id-0001" name="Computation: increment company update counter">
+        <bpmn:incoming>SequenceFlow-CompanySendToScript-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CompanyScriptToGateway-id-0001</bpmn:outgoing>
+      </bpmn:scriptTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-CheckCompanyUpdateCount-id-0001" name="Check Company Update Count" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-CompanyScriptToGateway-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CompanyGatewayToTimer-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-CompanyGatewayToEnd-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="EndEvent-CompanyUpdatesComplete-id-0001" name="Company Updates Complete">
+        <bpmn:incoming>SequenceFlow-CompanyGatewayToEnd-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-CompanyStartToTimer-id-0001" sourceRef="StartEvent-CompanyUpdatesBegin-id-0001" targetRef="IntermediateCatchEvent-CompanyWeeklyTimer-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CompanyTimerToGenerate-id-0001" sourceRef="IntermediateCatchEvent-CompanyWeeklyTimer-id-0001" targetRef="ServiceTask-GenerateCompanyStatusUpdate-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CompanyGenerateToSend-id-0001" sourceRef="ServiceTask-GenerateCompanyStatusUpdate-id-0001" targetRef="SendTask-UpdateToIntern-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CompanySendToScript-id-0001" sourceRef="SendTask-UpdateToIntern-id-0001" targetRef="ScriptTask-IncrementCompanyUpdateCounter-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CompanyScriptToGateway-id-0001" sourceRef="ScriptTask-IncrementCompanyUpdateCounter-id-0001" targetRef="ExclusiveGateway-CheckCompanyUpdateCount-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CompanyGatewayToTimer-id-0001" name="company_update_counter &#60; 3" sourceRef="ExclusiveGateway-CheckCompanyUpdateCount-id-0001" targetRef="IntermediateCatchEvent-CompanyWeeklyTimer-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CompanyGatewayToEnd-id-0001" name="company_update_counter &#62;= 3" sourceRef="ExclusiveGateway-CheckCompanyUpdateCount-id-0001" targetRef="EndEvent-CompanyUpdatesComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:parallelGateway id="ParallelGateway-PostAcceptanceJoin-id-0001" name="Post Acceptance Join" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-StatusUpdatesToJoin-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-CompanyUpdatesToJoin-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToCompletionReport-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-GenerateCompletionReport-id-0001" name="Generate Completion Report">
+      <bpmn:incoming>SequenceFlow-JoinToCompletionReport-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CompletionToRecommendation-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-DecideOnRecommendations-id-0001" name="Decide on Recommendations">
+      <bpmn:incoming>SequenceFlow-CompletionToRecommendation-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RecommendationToDecision-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-RecommendationDecision-id-0001" name="Recommendation Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-RecommendationToDecision-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DecisionToRecommendationSplit-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-DecisionToCompletionEnd-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:parallelGateway id="ParallelGateway-RecommendationSplit-id-0001" name="Recommendation Split" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-DecisionToRecommendationSplit-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToTweet1-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToTweet2-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToTweet3-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sendTask id="SendTask-RecommendationTweetFriend1-id-0001" name="Send: Recommendation Tweet to Friend 1">
+      <bpmn:incoming>SequenceFlow-SplitToTweet1-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Tweet1ToJoin-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="SendTask-RecommendationTweetFriend2-id-0001" name="Send: Recommendation Tweet to Friend 2">
+      <bpmn:incoming>SequenceFlow-SplitToTweet2-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Tweet2ToJoin-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="SendTask-RecommendationTweetFriend3-id-0001" name="Send: Recommendation Tweet to Friend 3">
+      <bpmn:incoming>SequenceFlow-SplitToTweet3-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Tweet3ToJoin-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:parallelGateway id="ParallelGateway-RecommendationJoin-id-0001" name="Recommendation Join" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-Tweet1ToJoin-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-Tweet2ToJoin-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-Tweet3ToJoin-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToRecommendationEnd-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:endEvent id="EndEvent-InternshipCompleted-id-0001" name="Internship Completed">
+      <bpmn:incoming>SequenceFlow-DecisionToCompletionEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-RecommendationsSent-id-0001" name="Recommendations Sent">
+      <bpmn:incoming>SequenceFlow-JoinToRecommendationEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToPreferences-id-0001" sourceRef="StartEvent-InternshipSearchStarted-id-0001" targetRef="UserTask-EnterInternshipPreferences-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PreferencesToBoundary-id-0001" sourceRef="UserTask-EnterInternshipPreferences-id-0001" targetRef="IntermediateCatchEvent-OfferArrivalDelay-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToNotification-id-0001" sourceRef="BoundaryEvent-Timer30Day-WaitForOffers-id-0001" targetRef="SendTask-NoOffersNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotificationToTimeoutEnd-id-0001" sourceRef="SendTask-NoOffersNotification-id-0001" targetRef="EndEvent-SearchTimedOut-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DelayToOfferMatching-id-0001" sourceRef="IntermediateCatchEvent-OfferArrivalDelay-id-0001" targetRef="ServiceTask-GenerateOfferMatching-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-OfferMatchingToNotification-id-0001" sourceRef="ServiceTask-GenerateOfferMatching-id-0001" targetRef="SendTask-OfferNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotificationToReview-id-0001" sourceRef="SendTask-OfferNotification-id-0001" targetRef="UserTask-ReviewOffer-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToDecision-id-0001" sourceRef="UserTask-ReviewOffer-id-0001" targetRef="ExclusiveGateway-OfferDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DecisionToAccept-id-0001" name="accept" sourceRef="ExclusiveGateway-OfferDecision-id-0001" targetRef="ServiceTask-ValidateAcceptance-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DecisionToReject-id-0001" name="reject" sourceRef="ExclusiveGateway-OfferDecision-id-0001" targetRef="ServiceTask-GenerateOfferMatching-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AcceptToInvalidate-id-0001" sourceRef="ServiceTask-ValidateAcceptance-id-0001" targetRef="ServiceTask-MarkOffersInvalid-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InvalidateToParallel-id-0001" sourceRef="ServiceTask-MarkOffersInvalid-id-0001" targetRef="ParallelGateway-PostAcceptance-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelToStatusUpdates-id-0001" sourceRef="ParallelGateway-PostAcceptance-id-0001" targetRef="SubProcess-StatusUpdateCycle-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelToCompanyUpdates-id-0001" sourceRef="ParallelGateway-PostAcceptance-id-0001" targetRef="SubProcess-CompanyStatusUpdates-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-StatusUpdatesToJoin-id-0001" sourceRef="SubProcess-StatusUpdateCycle-id-0001" targetRef="ParallelGateway-PostAcceptanceJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CompanyUpdatesToJoin-id-0001" sourceRef="SubProcess-CompanyStatusUpdates-id-0001" targetRef="ParallelGateway-PostAcceptanceJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToCompletionReport-id-0001" sourceRef="ParallelGateway-PostAcceptanceJoin-id-0001" targetRef="ServiceTask-GenerateCompletionReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CompletionToRecommendation-id-0001" sourceRef="ServiceTask-GenerateCompletionReport-id-0001" targetRef="UserTask-DecideOnRecommendations-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RecommendationToDecision-id-0001" sourceRef="UserTask-DecideOnRecommendations-id-0001" targetRef="ExclusiveGateway-RecommendationDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DecisionToRecommendationSplit-id-0001" name="recommend" sourceRef="ExclusiveGateway-RecommendationDecision-id-0001" targetRef="ParallelGateway-RecommendationSplit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DecisionToCompletionEnd-id-0001" name="no recommendation" sourceRef="ExclusiveGateway-RecommendationDecision-id-0001" targetRef="EndEvent-InternshipCompleted-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToTweet1-id-0001" sourceRef="ParallelGateway-RecommendationSplit-id-0001" targetRef="SendTask-RecommendationTweetFriend1-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToTweet2-id-0001" sourceRef="ParallelGateway-RecommendationSplit-id-0001" targetRef="SendTask-RecommendationTweetFriend2-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToTweet3-id-0001" sourceRef="ParallelGateway-RecommendationSplit-id-0001" targetRef="SendTask-RecommendationTweetFriend3-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-Tweet1ToJoin-id-0001" sourceRef="SendTask-RecommendationTweetFriend1-id-0001" targetRef="ParallelGateway-RecommendationJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-Tweet2ToJoin-id-0001" sourceRef="SendTask-RecommendationTweetFriend2-id-0001" targetRef="ParallelGateway-RecommendationJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-Tweet3ToJoin-id-0001" sourceRef="SendTask-RecommendationTweetFriend3-id-0001" targetRef="ParallelGateway-RecommendationJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToRecommendationEnd-id-0001" sourceRef="ParallelGateway-RecommendationJoin-id-0001" targetRef="EndEvent-RecommendationsSent-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Internship-Search-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Internship-Search-Process-id-0001" bpmnElement="Internship-Search-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-InternshipSearchStarted-id-0001_di" bpmnElement="StartEvent-InternshipSearchStarted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterInternshipPreferences-id-0001_di" bpmnElement="UserTask-EnterInternshipPreferences-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer30Day-WaitForOffers-id-0001_di" bpmnElement="BoundaryEvent-Timer30Day-WaitForOffers-id-0001">
+        <dc:Bounds x="207" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-OfferArrivalDelay-id-0001_di" bpmnElement="IntermediateCatchEvent-OfferArrivalDelay-id-0001">
+        <dc:Bounds x="357" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateOfferMatching-id-0001_di" bpmnElement="ServiceTask-GenerateOfferMatching-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-OfferNotification-id-0001_di" bpmnElement="SendTask-OfferNotification-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewOffer-id-0001_di" bpmnElement="UserTask-ReviewOffer-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-OfferDecision-id-0001_di" bpmnElement="ExclusiveGateway-OfferDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ValidateAcceptance-id-0001_di" bpmnElement="ServiceTask-ValidateAcceptance-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MarkOffersInvalid-id-0001_di" bpmnElement="ServiceTask-MarkOffersInvalid-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-PostAcceptance-id-0001_di" bpmnElement="ParallelGateway-PostAcceptance-id-0001">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-StatusUpdateCycle-id-0001_di" bpmnElement="SubProcess-StatusUpdateCycle-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-PostAcceptanceJoin-id-0001_di" bpmnElement="ParallelGateway-PostAcceptanceJoin-id-0001">
+        <dc:Bounds x="1700" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateCompletionReport-id-0001_di" bpmnElement="ServiceTask-GenerateCompletionReport-id-0001">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-DecideOnRecommendations-id-0001_di" bpmnElement="UserTask-DecideOnRecommendations-id-0001">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RecommendationDecision-id-0001_di" bpmnElement="ExclusiveGateway-RecommendationDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="2150" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-RecommendationSplit-id-0001_di" bpmnElement="ParallelGateway-RecommendationSplit-id-0001">
+        <dc:Bounds x="2300" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RecommendationTweetFriend1-id-0001_di" bpmnElement="SendTask-RecommendationTweetFriend1-id-0001">
+        <dc:Bounds x="2425" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-RecommendationJoin-id-0001_di" bpmnElement="ParallelGateway-RecommendationJoin-id-0001">
+        <dc:Bounds x="2600" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-RecommendationsSent-id-0001_di" bpmnElement="EndEvent-RecommendationsSent-id-0001">
+        <dc:Bounds x="2757" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-NoOffersNotification-id-0001_di" bpmnElement="SendTask-NoOffersNotification-id-0001">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-SearchTimedOut-id-0001_di" bpmnElement="EndEvent-SearchTimedOut-id-0001">
+        <dc:Bounds x="507" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-CompanyStatusUpdates-id-0001_di" bpmnElement="SubProcess-CompanyStatusUpdates-id-0001">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-InternshipCompleted-id-0001_di" bpmnElement="EndEvent-InternshipCompleted-id-0001">
+        <dc:Bounds x="2307" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RecommendationTweetFriend2-id-0001_di" bpmnElement="SendTask-RecommendationTweetFriend2-id-0001">
+        <dc:Bounds x="2425" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RecommendationTweetFriend3-id-0001_di" bpmnElement="SendTask-RecommendationTweetFriend3-id-0001">
+        <dc:Bounds x="2425" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToPreferences-id-0001_di" bpmnElement="SequenceFlow-StartToPreferences-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PreferencesToBoundary-id-0001_di" bpmnElement="SequenceFlow-PreferencesToBoundary-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="357" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToNotification-id-0001_di" bpmnElement="SequenceFlow-BoundaryToNotification-id-0001">
+        <di:waypoint x="225" y="128" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DelayToOfferMatching-id-0001_di" bpmnElement="SequenceFlow-DelayToOfferMatching-id-0001">
+        <di:waypoint x="393" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OfferMatchingToNotification-id-0001_di" bpmnElement="SequenceFlow-OfferMatchingToNotification-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotificationToReview-id-0001_di" bpmnElement="SequenceFlow-NotificationToReview-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToDecision-id-0001_di" bpmnElement="SequenceFlow-ReviewToDecision-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DecisionToAccept-id-0001_di" bpmnElement="SequenceFlow-DecisionToAccept-id-0001">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DecisionToReject-id-0001_di" bpmnElement="SequenceFlow-DecisionToReject-id-0001">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="140" />
+        <di:waypoint x="525" y="140" />
+        <di:waypoint x="525" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AcceptToInvalidate-id-0001_di" bpmnElement="SequenceFlow-AcceptToInvalidate-id-0001">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InvalidateToParallel-id-0001_di" bpmnElement="SequenceFlow-InvalidateToParallel-id-0001">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelToStatusUpdates-id-0001_di" bpmnElement="SequenceFlow-ParallelToStatusUpdates-id-0001">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelToCompanyUpdates-id-0001_di" bpmnElement="SequenceFlow-ParallelToCompanyUpdates-id-0001">
+        <di:waypoint x="1425" y="95" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StatusUpdatesToJoin-id-0001_di" bpmnElement="SequenceFlow-StatusUpdatesToJoin-id-0001">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1700" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToCompletionReport-id-0001_di" bpmnElement="SequenceFlow-JoinToCompletionReport-id-0001">
+        <di:waypoint x="1750" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompletionToRecommendation-id-0001_di" bpmnElement="SequenceFlow-CompletionToRecommendation-id-0001">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RecommendationToDecision-id-0001_di" bpmnElement="SequenceFlow-RecommendationToDecision-id-0001">
+        <di:waypoint x="2075" y="70" />
+        <di:waypoint x="2150" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DecisionToRecommendationSplit-id-0001_di" bpmnElement="SequenceFlow-DecisionToRecommendationSplit-id-0001">
+        <di:waypoint x="2200" y="70" />
+        <di:waypoint x="2300" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DecisionToCompletionEnd-id-0001_di" bpmnElement="SequenceFlow-DecisionToCompletionEnd-id-0001">
+        <di:waypoint x="2175" y="95" />
+        <di:waypoint x="2175" y="210" />
+        <di:waypoint x="2307" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToTweet1-id-0001_di" bpmnElement="SequenceFlow-SplitToTweet1-id-0001">
+        <di:waypoint x="2350" y="70" />
+        <di:waypoint x="2425" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToTweet2-id-0001_di" bpmnElement="SequenceFlow-SplitToTweet2-id-0001">
+        <di:waypoint x="2350" y="70" />
+        <di:waypoint x="2400" y="70" />
+        <di:waypoint x="2400" y="140" />
+        <di:waypoint x="2400" y="140" />
+        <di:waypoint x="2400" y="210" />
+        <di:waypoint x="2425" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToTweet3-id-0001_di" bpmnElement="SequenceFlow-SplitToTweet3-id-0001">
+        <di:waypoint x="2350" y="70" />
+        <di:waypoint x="2400" y="70" />
+        <di:waypoint x="2400" y="280" />
+        <di:waypoint x="2400" y="280" />
+        <di:waypoint x="2400" y="350" />
+        <di:waypoint x="2425" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Tweet1ToJoin-id-0001_di" bpmnElement="SequenceFlow-Tweet1ToJoin-id-0001">
+        <di:waypoint x="2525" y="70" />
+        <di:waypoint x="2600" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToRecommendationEnd-id-0001_di" bpmnElement="SequenceFlow-JoinToRecommendationEnd-id-0001">
+        <di:waypoint x="2650" y="70" />
+        <di:waypoint x="2757" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotificationToTimeoutEnd-id-0001_di" bpmnElement="SequenceFlow-NotificationToTimeoutEnd-id-0001">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="507" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompanyUpdatesToJoin-id-0001_di" bpmnElement="SequenceFlow-CompanyUpdatesToJoin-id-0001">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1725" y="210" />
+        <di:waypoint x="1725" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Tweet2ToJoin-id-0001_di" bpmnElement="SequenceFlow-Tweet2ToJoin-id-0001">
+        <di:waypoint x="2525" y="210" />
+        <di:waypoint x="2625" y="210" />
+        <di:waypoint x="2625" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-Tweet3ToJoin-id-0001_di" bpmnElement="SequenceFlow-Tweet3ToJoin-id-0001">
+        <di:waypoint x="2525" y="350" />
+        <di:waypoint x="2625" y="350" />
+        <di:waypoint x="2625" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-CompanyStatusUpdates-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-CompanyStatusUpdates-id-0001" bpmnElement="SubProcess-CompanyStatusUpdates-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-CompanyUpdatesBegin-id-0001_di" bpmnElement="StartEvent-CompanyUpdatesBegin-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-CompanyWeeklyTimer-id-0001_di" bpmnElement="IntermediateCatchEvent-CompanyWeeklyTimer-id-0001">
+        <dc:Bounds x="207" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateCompanyStatusUpdate-id-0001_di" bpmnElement="ServiceTask-GenerateCompanyStatusUpdate-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-UpdateToIntern-id-0001_di" bpmnElement="SendTask-UpdateToIntern-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-IncrementCompanyUpdateCounter-id-0001_di" bpmnElement="ScriptTask-IncrementCompanyUpdateCounter-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CheckCompanyUpdateCount-id-0001_di" bpmnElement="ExclusiveGateway-CheckCompanyUpdateCount-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CompanyUpdatesComplete-id-0001_di" bpmnElement="EndEvent-CompanyUpdatesComplete-id-0001">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompanyStartToTimer-id-0001_di" bpmnElement="SequenceFlow-CompanyStartToTimer-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="207" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompanyTimerToGenerate-id-0001_di" bpmnElement="SequenceFlow-CompanyTimerToGenerate-id-0001">
+        <di:waypoint x="243" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompanyGenerateToSend-id-0001_di" bpmnElement="SequenceFlow-CompanyGenerateToSend-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompanySendToScript-id-0001_di" bpmnElement="SequenceFlow-CompanySendToScript-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompanyScriptToGateway-id-0001_di" bpmnElement="SequenceFlow-CompanyScriptToGateway-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompanyGatewayToTimer-id-0001_di" bpmnElement="SequenceFlow-CompanyGatewayToTimer-id-0001">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="140" />
+        <di:waypoint x="225" y="140" />
+        <di:waypoint x="225" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompanyGatewayToEnd-id-0001_di" bpmnElement="SequenceFlow-CompanyGatewayToEnd-id-0001">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-StatusUpdateCycle-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-StatusUpdateCycle-id-0001" bpmnElement="SubProcess-StatusUpdateCycle-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-StatusUpdatesBegin-id-0001_di" bpmnElement="StartEvent-StatusUpdatesBegin-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-WeeklyTimer-id-0001_di" bpmnElement="IntermediateCatchEvent-WeeklyTimer-id-0001">
+        <dc:Bounds x="207" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-StatusUpdateSplit-id-0001_di" bpmnElement="ParallelGateway-StatusUpdateSplit-id-0001">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-WriteWeeklyStatusUpdate-id-0001_di" bpmnElement="UserTask-WriteWeeklyStatusUpdate-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-StatusUpdateJoin-id-0001_di" bpmnElement="ParallelGateway-StatusUpdateJoin-id-0001">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-IncrementUpdateCounter-id-0001_di" bpmnElement="ScriptTask-IncrementUpdateCounter-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CheckUpdateCount-id-0001_di" bpmnElement="ExclusiveGateway-CheckUpdateCount-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-StatusUpdatesComplete-id-0001_di" bpmnElement="EndEvent-StatusUpdatesComplete-id-0001">
+        <dc:Bounds x="1107" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-StatusUpdateToCompany-id-0001_di" bpmnElement="SendTask-StatusUpdateToCompany-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToTimer-id-0001_di" bpmnElement="SequenceFlow-StartToTimer-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="207" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TimerToSplit-id-0001_di" bpmnElement="SequenceFlow-TimerToSplit-id-0001">
+        <di:waypoint x="243" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToWriteUpdate-id-0001_di" bpmnElement="SequenceFlow-SplitToWriteUpdate-id-0001">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToSendUpdate-id-0001_di" bpmnElement="SequenceFlow-SplitToSendUpdate-id-0001">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WriteToJoin-id-0001_di" bpmnElement="SequenceFlow-WriteToJoin-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToScript-id-0001_di" bpmnElement="SequenceFlow-JoinToScript-id-0001">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ScriptToGateway-id-0001_di" bpmnElement="SequenceFlow-ScriptToGateway-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToTimer-id-0001_di" bpmnElement="SequenceFlow-GatewayToTimer-id-0001">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="140" />
+        <di:waypoint x="225" y="140" />
+        <di:waypoint x="225" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToEnd-id-0001_di" bpmnElement="SequenceFlow-GatewayToEnd-id-0001">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1107" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToJoin-id-0001_di" bpmnElement="SequenceFlow-SendToJoin-id-0001">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

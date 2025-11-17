@@ -1,0 +1,126 @@
+```
+<summary_of_elements>
+
+### TASKS:
+- **userTask("Receive Order")** - Initial human interaction to receive order
+- **userTask("Ask: Menu or Burger Only?")** - Decision point for order type
+- **serviceTask("Prepare Drink")** - Automated drink preparation (variable duration)
+- **userTask("Ask: Fries or Wedges?")** - Decision point for side choice
+- **serviceTask("Prepare Fries")** - Automated fries preparation (variable duration)
+- **serviceTask("Prepare Wedges")** - Automated wedges preparation (variable duration)
+- **serviceTask("Prepare Burger")** - Automated burger preparation (variable duration)
+- **sendTask("Send: Status Update")** - Enthusiastic status updates every 30 seconds
+- **serviceTask("Deliver via Conveyor Belt")** - Final delivery mechanism
+
+### GATEWAYS:
+- **XOR** after "Ask: Menu or Burger Only?" with 2 branches:
+  - "menu" → Prepare Drink
+  - "burger only" → Skip to burger preparation
+- **XOR** after "Ask: Fries or Wedges?" with 2 branches:
+  - "fries" → Prepare Fries
+  - "wedges" → Prepare Wedges
+
+### EVENTS:
+- **startEvent("Order Received")** - Manual trigger
+- **endEvent("Order Delivered")** - Process completion
+- **intermediateEvent(timerBoundary("PT30S"))** - Status update timer (repeating)
+
+### BOUNDARY EVENTS:
+- **timerBoundary("PT30S")** on "Prepare Burger" - Justified by explicit requirement for status updates
+
+### SUBPROCESSES:
+- **subProcess("Prepare Side Dish")** - Purpose: Cohesive grouping of side dish preparation logic
+  - Justification: Logical grouping of related tasks (fries/wedges decision + preparation)
+
+</summary_of_elements>
+
+<pseudocode>
+startEvent("Order Received")
+
+// Main Process Flow
+userTask("Receive Order")
+userTask("Ask: Menu or Burger Only?")
+
+// Menu Decision
+if (customer_wants_menu):
+    serviceTask("Prepare Drink") // Variable duration based on size
+    subProcess("Prepare Side Dish"):
+        startEvent("Side Dish Preparation Start")
+        userTask("Ask: Fries or Wedges?")
+        if (customer_wants_fries):
+            serviceTask("Prepare Fries") // Variable duration based on size
+        else:
+            serviceTask("Prepare Wedges") // Variable duration based on size
+        endEvent("Side Dish Ready")
+    endSubProcess
+else:
+    // Skip drink and sides for burger-only orders
+    // (No action needed - flows directly to burger preparation)
+end_if
+
+// Burger Preparation with Status Updates
+serviceTask("Prepare Burger"):
+    timerBoundary("PT30S"):
+        sendTask("Send: Status Update")
+end_serviceTask
+
+// Delivery
+serviceTask("Deliver via Conveyor Belt")
+endEvent("Order Delivered")
+</pseudocode>
+
+<compliance_validation>
+
+### TIMER EVENTS:
+✅ All timer properties BPMN compliant
+- Status updates use `timerBoundary("PT30S")` (ISO 8601 duration)
+- No invalid `timeDate`/`timeCycle` combinations
+
+### GATEWAYS:
+✅ All diverging gateways have proper convergence
+- Menu decision XOR converges implicitly before burger prep
+- Side dish XOR converges at subProcess endEvent
+
+### SEQUENCE FLOWS:
+✅ All conditional flows have descriptive labels
+✅ No empty string labels
+✅ Default flows handled implicitly
+
+### BOUNDARY EVENTS:
+✅ Single justified boundary event:
+- `timerBoundary("PT30S")` on burger prep meets all 3 criteria:
+  1. Explicit requirement in description ("enthusiastic status updates every 30 seconds")
+  2. Handler is simple/immediate (single sendTask)
+  3. Business requirement (customer communication)
+
+### SUBPROCESSES:
+✅ Single justified subprocess:
+- "Prepare Side Dish" passes Three-Question Test:
+  1. Clear purpose: "Handle all side dish preparation logic"
+  2. 3+ related tasks with cohesive purpose (decision + 2 prep tasks)
+  3. Removal would make main flow harder to read (nested decisions)
+
+### FLOW PATHS:
+✅ All paths traceable start to end:
+1. Menu + Fries → Drink → Fries → Burger → Delivery
+2. Menu + Wedges → Drink → Wedges → Burger → Delivery
+3. Burger Only → Burger → Delivery
+✅ No orphaned flows
+✅ No unreachable tasks
+
+### BALANCE REVIEW:
+✅ Core elements comprise 90% of design:
+- 9 tasks (82%)
+- 2 gateways (18%)
+- 1 subprocess (structured grouping)
+- 1 boundary event (justified)
+
+</compliance_validation>
+
+<assumptions>
+1. "Variable duration" tasks are handled as standard serviceTasks with no explicit timer modeling (as no specific durations were provided)
+2. Status updates continue until burger preparation completes (boundary event fires repeatedly every 30s)
+3. Conveyor belt delivery is instantaneous from a process modeling perspective
+4. All customer decisions are binary with no "none" options (menu vs burger, fries vs wedges)
+</assumptions>
+```

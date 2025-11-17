@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions-OrderFulfillment-id-0001" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0.0">
+  <bpmn:process id="Process-OrderFulfillment-id-0001" name="Order Fulfillment Process" isExecutable="true">
+    <bpmn:startEvent id="MessageStartEvent-OrderPlaced-id-0001" name="Order Placed">
+      <bpmn:outgoing>SequenceFlow-StartToGenerateConfirmation-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-GenerateOrderConfirmation-id-0001" name="Generate Order Confirmation">
+      <bpmn:incoming>SequenceFlow-StartToGenerateConfirmation-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GenerateToSendConfirmation-id-0002</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendOrderConfirmation-id-0001" name="Send: order confirmation to customer">
+      <bpmn:incoming>SequenceFlow-GenerateToSendConfirmation-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendToWarehouse-id-0003</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-WarehousePickPack-id-0001" name="Warehouse: pick and pack items">
+      <bpmn:incoming>SequenceFlow-SendToWarehouse-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-WarehouseToLabel-id-0004</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-GenerateShippingLabel-id-0001" name="Generate Shipping Label">
+      <bpmn:incoming>SequenceFlow-WarehouseToLabel-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LabelToHandover-id-0005</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-HandoverToLogistics-id-0001" name="Handover Order to Logistics Provider">
+      <bpmn:incoming>SequenceFlow-LabelToHandover-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-HandoverToTracking-id-0006</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendTrackingInfo-id-0001" name="Send: tracking information to customer">
+      <bpmn:incoming>SequenceFlow-HandoverToTracking-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TrackingToMonitor-id-0007</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-MonitorShipment-id-0001" name="Monitor Shipment Status">
+      <bpmn:incoming>SequenceFlow-TrackingToMonitor-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MonitorToEnd-id-0008</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-OrderDelivered-id-0001" name="Order Delivered">
+      <bpmn:incoming>SequenceFlow-MonitorToEnd-id-0008</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:subProcess id="SubProcess-HandleFeedbackReturns-id-0001" name="Handle Feedback/Returns">
+      <bpmn:startEvent id="StartEvent-FeedbackReturnReceived-id-0001" name="Feedback/Return Request Received">
+        <bpmn:outgoing>SequenceFlow-SubStartToReceive-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:receiveTask id="ReceiveTask-ReceiveFeedbackReturn-id-0001" name="Receive: customer feedback or return request">
+        <bpmn:incoming>SequenceFlow-SubStartToReceive-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReceiveToAssess-id-0002</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:userTask id="UserTask-AssessReturnEligibility-id-0001" name="Assess Return Eligibility">
+        <bpmn:incoming>SequenceFlow-ReceiveToAssess-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AssessToProcess-id-0003</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:serviceTask id="ServiceTask-ProcessRefundReplacement-id-0001" name="Process Refund or Replacement">
+        <bpmn:incoming>SequenceFlow-AssessToProcess-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ProcessToSend-id-0004</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-SendResolutionConfirmation-id-0001" name="Send: resolution confirmation to customer">
+        <bpmn:incoming>SequenceFlow-ProcessToSend-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SendToSubEnd-id-0005</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:endEvent id="EndEvent-FeedbackReturnResolved-id-0001" name="Feedback/Return Resolved">
+        <bpmn:incoming>SequenceFlow-SendToSubEnd-id-0005</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-SubStartToReceive-id-0001" sourceRef="StartEvent-FeedbackReturnReceived-id-0001" targetRef="ReceiveTask-ReceiveFeedbackReturn-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReceiveToAssess-id-0002" sourceRef="ReceiveTask-ReceiveFeedbackReturn-id-0001" targetRef="UserTask-AssessReturnEligibility-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-AssessToProcess-id-0003" sourceRef="UserTask-AssessReturnEligibility-id-0001" targetRef="ServiceTask-ProcessRefundReplacement-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ProcessToSend-id-0004" sourceRef="ServiceTask-ProcessRefundReplacement-id-0001" targetRef="SendTask-SendResolutionConfirmation-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SendToSubEnd-id-0005" sourceRef="SendTask-SendResolutionConfirmation-id-0001" targetRef="EndEvent-FeedbackReturnResolved-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToGenerateConfirmation-id-0001" sourceRef="MessageStartEvent-OrderPlaced-id-0001" targetRef="ServiceTask-GenerateOrderConfirmation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GenerateToSendConfirmation-id-0002" sourceRef="ServiceTask-GenerateOrderConfirmation-id-0001" targetRef="SendTask-SendOrderConfirmation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendToWarehouse-id-0003" sourceRef="SendTask-SendOrderConfirmation-id-0001" targetRef="UserTask-WarehousePickPack-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-WarehouseToLabel-id-0004" sourceRef="UserTask-WarehousePickPack-id-0001" targetRef="ServiceTask-GenerateShippingLabel-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-LabelToHandover-id-0005" sourceRef="ServiceTask-GenerateShippingLabel-id-0001" targetRef="ServiceTask-HandoverToLogistics-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-HandoverToTracking-id-0006" sourceRef="ServiceTask-HandoverToLogistics-id-0001" targetRef="SendTask-SendTrackingInfo-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TrackingToMonitor-id-0007" sourceRef="SendTask-SendTrackingInfo-id-0001" targetRef="ServiceTask-MonitorShipment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MonitorToEnd-id-0008" sourceRef="ServiceTask-MonitorShipment-id-0001" targetRef="EndEvent-OrderDelivered-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process-OrderFulfillment-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process-OrderFulfillment-id-0001" bpmnElement="Process-OrderFulfillment-id-0001">
+      <bpmndi:BPMNShape id="MessageStartEvent-OrderPlaced-id-0001_di" bpmnElement="MessageStartEvent-OrderPlaced-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateOrderConfirmation-id-0001_di" bpmnElement="ServiceTask-GenerateOrderConfirmation-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendOrderConfirmation-id-0001_di" bpmnElement="SendTask-SendOrderConfirmation-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-WarehousePickPack-id-0001_di" bpmnElement="UserTask-WarehousePickPack-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateShippingLabel-id-0001_di" bpmnElement="ServiceTask-GenerateShippingLabel-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-HandoverToLogistics-id-0001_di" bpmnElement="ServiceTask-HandoverToLogistics-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendTrackingInfo-id-0001_di" bpmnElement="SendTask-SendTrackingInfo-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MonitorShipment-id-0001_di" bpmnElement="ServiceTask-MonitorShipment-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-OrderDelivered-id-0001_di" bpmnElement="EndEvent-OrderDelivered-id-0001">
+        <dc:Bounds x="1257" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-HandleFeedbackReturns-id-0001_di" bpmnElement="SubProcess-HandleFeedbackReturns-id-0001">
+        <dc:Bounds x="25" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToGenerateConfirmation-id-0001_di" bpmnElement="SequenceFlow-StartToGenerateConfirmation-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateToSendConfirmation-id-0002_di" bpmnElement="SequenceFlow-GenerateToSendConfirmation-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToWarehouse-id-0003_di" bpmnElement="SequenceFlow-SendToWarehouse-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WarehouseToLabel-id-0004_di" bpmnElement="SequenceFlow-WarehouseToLabel-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LabelToHandover-id-0005_di" bpmnElement="SequenceFlow-LabelToHandover-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HandoverToTracking-id-0006_di" bpmnElement="SequenceFlow-HandoverToTracking-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TrackingToMonitor-id-0007_di" bpmnElement="SequenceFlow-TrackingToMonitor-id-0007">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MonitorToEnd-id-0008_di" bpmnElement="SequenceFlow-MonitorToEnd-id-0008">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1257" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-HandleFeedbackReturns-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-HandleFeedbackReturns-id-0001" bpmnElement="SubProcess-HandleFeedbackReturns-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-FeedbackReturnReceived-id-0001_di" bpmnElement="StartEvent-FeedbackReturnReceived-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveFeedbackReturn-id-0001_di" bpmnElement="ReceiveTask-ReceiveFeedbackReturn-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AssessReturnEligibility-id-0001_di" bpmnElement="UserTask-AssessReturnEligibility-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessRefundReplacement-id-0001_di" bpmnElement="ServiceTask-ProcessRefundReplacement-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendResolutionConfirmation-id-0001_di" bpmnElement="SendTask-SendResolutionConfirmation-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-FeedbackReturnResolved-id-0001_di" bpmnElement="EndEvent-FeedbackReturnResolved-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubStartToReceive-id-0001_di" bpmnElement="SequenceFlow-SubStartToReceive-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToAssess-id-0002_di" bpmnElement="SequenceFlow-ReceiveToAssess-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AssessToProcess-id-0003_di" bpmnElement="SequenceFlow-AssessToProcess-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessToSend-id-0004_di" bpmnElement="SequenceFlow-ProcessToSend-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToSubEnd-id-0005_di" bpmnElement="SequenceFlow-SendToSubEnd-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

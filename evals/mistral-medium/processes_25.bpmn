@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="JobApplicationManagementDefinitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="2.0">
+  <bpmn:process id="JobApplicationManagementProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ReportingReminder-id-0001" name="Reporting Reminder">
+      <bpmn:outgoing>SequenceFlow-ReportingReminderToReportApplications-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-ReportJobApplications-id-0001" name="Report Job Applications">
+      <bpmn:incoming>SequenceFlow-ReportingReminderToReportApplications-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReportApplicationsToLogApplications-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-LogApplicationsInSystem-id-0001" name="Log Applications in System">
+      <bpmn:incoming>SequenceFlow-ReportApplicationsToLogApplications-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogApplicationsToMatchApplications-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-MatchApplicationsToJobOffers-id-0001" name="Match Applications to Job Offers">
+      <bpmn:incoming>SequenceFlow-LogApplicationsToMatchApplications-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MatchApplicationsToEvaluationCycle-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:subProcess id="SubProcess-ApplicationEvaluationCycle-id-0001" name="Application Evaluation Cycle">
+      <bpmn:incoming>SequenceFlow-MatchApplicationsToEvaluationCycle-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EvaluationCycleToProbationPhase-id-0001</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-EvaluationStart-id-0001" name="Evaluation Start">
+        <bpmn:outgoing>SequenceFlow-EvaluationStartToSendOffers-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:sendTask id="SendTask-SendPotentialJobOffers-id-0001" name="Send: Potential Job Offers">
+        <bpmn:incoming>SequenceFlow-EvaluationStartToSendOffers-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SendOffersToReceiveConfirmation-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:receiveTask id="ReceiveTask-ReceiveApplicationConfirmation-id-0001" name="Receive: Application Confirmation">
+        <bpmn:incoming>SequenceFlow-SendOffersToReceiveConfirmation-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReceiveConfirmationToRateApplication-id-0001</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-Timer3Days-ReceiveApplicationConfirmation-id-0001" name="3 Business Days Timeout" attachedToRef="ReceiveTask-ReceiveApplicationConfirmation-id-0001">
+        <bpmn:outgoing>SequenceFlow-BoundaryToSendReminder-id-0001</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="BoundaryEvent-Timer3Days-ReceiveApplicationConfirmation-id-0001_EventDef">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P3D</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:boundaryEvent>
+      <bpmn:sendTask id="SendTask-SendConfirmationReminder-id-0001" name="Send: confirmation reminder to company">
+        <bpmn:incoming>SequenceFlow-BoundaryToSendReminder-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SendReminderToEnd-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:userTask id="UserTask-RateApplicationCompany-id-0001" name="Rate Application (Company)">
+        <bpmn:incoming>SequenceFlow-ReceiveConfirmationToRateApplication-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RateApplicationToGateway-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-ApplicationRating-id-0001" name="Application Rating Decision" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-RateApplicationToGateway-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GatewayToNegotiateInterview-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToSendSuggestions-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToArchive-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:userTask id="UserTask-NegotiateInterview-id-0001" name="Negotiate Interview">
+        <bpmn:incoming>SequenceFlow-GatewayToNegotiateInterview-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-NegotiateInterviewToEnd-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:endEvent id="EndEvent-EvaluationCompleteInterviewScheduled-id-0001" name="Evaluation Complete - Interview Scheduled">
+        <bpmn:incoming>SequenceFlow-NegotiateInterviewToEnd-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sendTask id="SendTask-SendImprovementSuggestions-id-0001" name="Send: application improvement suggestions">
+        <bpmn:incoming>SequenceFlow-GatewayToSendSuggestions-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SendSuggestionsToEnd-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:endEvent id="EndEvent-EvaluationCompleteNeedsImprovement-id-0001" name="Evaluation Complete - Needs Improvement">
+        <bpmn:incoming>SequenceFlow-SendSuggestionsToEnd-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:serviceTask id="ServiceTask-ArchiveApplication-id-0001" name="Archive Application">
+        <bpmn:incoming>SequenceFlow-GatewayToArchive-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ArchiveToEnd-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-EvaluationCompleteArchived-id-0001" name="Evaluation Complete - Archived">
+        <bpmn:incoming>SequenceFlow-ArchiveToEnd-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-SendReminderToEnd-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-EvaluationStartToSendOffers-id-0001" sourceRef="StartEvent-EvaluationStart-id-0001" targetRef="SendTask-SendPotentialJobOffers-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SendOffersToReceiveConfirmation-id-0001" sourceRef="SendTask-SendPotentialJobOffers-id-0001" targetRef="ReceiveTask-ReceiveApplicationConfirmation-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReceiveConfirmationToRateApplication-id-0001" sourceRef="ReceiveTask-ReceiveApplicationConfirmation-id-0001" targetRef="UserTask-RateApplicationCompany-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RateApplicationToGateway-id-0001" sourceRef="UserTask-RateApplicationCompany-id-0001" targetRef="ExclusiveGateway-ApplicationRating-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToNegotiateInterview-id-0001" name="rating &#62;= 4" sourceRef="ExclusiveGateway-ApplicationRating-id-0001" targetRef="UserTask-NegotiateInterview-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-NegotiateInterviewToEnd-id-0001" sourceRef="UserTask-NegotiateInterview-id-0001" targetRef="EndEvent-EvaluationCompleteInterviewScheduled-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToSendSuggestions-id-0001" name="rating == 3" sourceRef="ExclusiveGateway-ApplicationRating-id-0001" targetRef="SendTask-SendImprovementSuggestions-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SendSuggestionsToEnd-id-0001" sourceRef="SendTask-SendImprovementSuggestions-id-0001" targetRef="EndEvent-EvaluationCompleteNeedsImprovement-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToArchive-id-0001" name="rating &#60;= 2" sourceRef="ExclusiveGateway-ApplicationRating-id-0001" targetRef="ServiceTask-ArchiveApplication-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ArchiveToEnd-id-0001" sourceRef="ServiceTask-ArchiveApplication-id-0001" targetRef="EndEvent-EvaluationCompleteArchived-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BoundaryToSendReminder-id-0001" sourceRef="BoundaryEvent-Timer3Days-ReceiveApplicationConfirmation-id-0001" targetRef="SendTask-SendConfirmationReminder-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SendReminderToEnd-id-0001" sourceRef="SendTask-SendConfirmationReminder-id-0001" targetRef="EndEvent-EvaluationCompleteArchived-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-ProbationAndRatingPhase-id-0001" name="Probation &#38; Rating Phase">
+      <bpmn:incoming>SequenceFlow-EvaluationCycleToProbationPhase-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProbationPhaseToEndNoMatch-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ProbationPhaseToEndLowRating-id-0001</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-ProbationStart-id-0001" name="Probation Start">
+        <bpmn:outgoing>SequenceFlow-ProbationStartToEnterProbation-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-EnterProbationPhase-id-0001" name="Enter Probation Phase">
+        <bpmn:incoming>SequenceFlow-ProbationStartToEnterProbation-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-EnterProbationToProbationPeriod-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-ProbationPeriod-id-0001" name="3-Month Probation Period">
+        <bpmn:incoming>SequenceFlow-EnterProbationToProbationPeriod-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ProbationPeriodToRateCompany-id-0001</bpmn:outgoing>
+      </bpmn:intermediateCatchEvent>
+      <bpmn:userTask id="UserTask-RateCompanyApplicant-id-0001" name="Rate Company (Applicant)">
+        <bpmn:incoming>SequenceFlow-ProbationPeriodToRateCompany-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RateCompanyToRateApplicant-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-RateApplicantCompany-id-0001" name="Rate Applicant (Company)">
+        <bpmn:incoming>SequenceFlow-RateCompanyToRateApplicant-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RateApplicantToCalculateVisibility-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:scriptTask id="ScriptTask-CalculateReviewVisibilityDate-id-0001" name="Computation: Calculate Review Visibility Date">
+        <bpmn:incoming>SequenceFlow-RateApplicantToCalculateVisibility-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CalculateVisibilityToGateway-id-0001</bpmn:outgoing>
+      </bpmn:scriptTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-Timer1Year-CalculateReviewVisibilityDate-id-0001" name="1 Year Review Visibility" attachedToRef="ScriptTask-CalculateReviewVisibilityDate-id-0001">
+        <bpmn:outgoing>SequenceFlow-BoundaryToPublishReviews-id-0001</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="BoundaryEvent-Timer1Year-CalculateReviewVisibilityDate-id-0001_EventDef">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P1Y</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:boundaryEvent>
+      <bpmn:serviceTask id="ServiceTask-PublishCompanyReviews-id-0001" name="Publish Company Reviews">
+        <bpmn:incoming>SequenceFlow-BoundaryToPublishReviews-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PublishReviewsToEnd-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-ProbationOutcome-id-0001" name="Probation Outcome Decision" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-CalculateVisibilityToGateway-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GatewayToBusinessRule-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToEndProbationNotConverted-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:businessRuleTask id="BusinessRuleTask-DetermineProcessContinuation-id-0001" name="Rule: Determine Process Continuation">
+        <bpmn:incoming>SequenceFlow-GatewayToBusinessRule-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-BusinessRuleToEndPermanentHire-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-BusinessRuleToUpdateProfile-id-0001</bpmn:outgoing>
+      </bpmn:businessRuleTask>
+      <bpmn:endEvent id="EndEvent-ProcessCompletePermanentHire-id-0001" name="Process Complete - Permanent Hire">
+        <bpmn:incoming>SequenceFlow-PublishReviewsToEnd-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-BusinessRuleToEndPermanentHire-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:serviceTask id="ServiceTask-UpdateProfileContinueReceivingOffers-id-0001" name="Update Profile: Continue Receiving Offers">
+        <bpmn:incoming>SequenceFlow-BusinessRuleToUpdateProfile-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-UpdateProfileToDisableReporting-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-DisableReportingRequirement-id-0001" name="Disable Reporting Requirement">
+        <bpmn:incoming>SequenceFlow-UpdateProfileToDisableReporting-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-DisableReportingToEndActiveSearch-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-ProcessCompleteActiveSearchContinues-id-0001" name="Process Complete - Active Search Continues">
+        <bpmn:incoming>SequenceFlow-DisableReportingToEndActiveSearch-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:endEvent id="EndEvent-ProcessCompleteProbationNotConverted-id-0001" name="Process Complete - Probation Not Converted">
+        <bpmn:incoming>SequenceFlow-GatewayToEndProbationNotConverted-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-ProbationStartToEnterProbation-id-0001" sourceRef="StartEvent-ProbationStart-id-0001" targetRef="UserTask-EnterProbationPhase-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-EnterProbationToProbationPeriod-id-0001" sourceRef="UserTask-EnterProbationPhase-id-0001" targetRef="IntermediateCatchEvent-ProbationPeriod-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ProbationPeriodToRateCompany-id-0001" sourceRef="IntermediateCatchEvent-ProbationPeriod-id-0001" targetRef="UserTask-RateCompanyApplicant-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RateCompanyToRateApplicant-id-0001" sourceRef="UserTask-RateCompanyApplicant-id-0001" targetRef="UserTask-RateApplicantCompany-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RateApplicantToCalculateVisibility-id-0001" sourceRef="UserTask-RateApplicantCompany-id-0001" targetRef="ScriptTask-CalculateReviewVisibilityDate-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CalculateVisibilityToGateway-id-0001" sourceRef="ScriptTask-CalculateReviewVisibilityDate-id-0001" targetRef="ExclusiveGateway-ProbationOutcome-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BoundaryToPublishReviews-id-0001" sourceRef="BoundaryEvent-Timer1Year-CalculateReviewVisibilityDate-id-0001" targetRef="ServiceTask-PublishCompanyReviews-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-PublishReviewsToEnd-id-0001" sourceRef="ServiceTask-PublishCompanyReviews-id-0001" targetRef="EndEvent-ProcessCompletePermanentHire-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToBusinessRule-id-0001" name="offer_permanent == true" sourceRef="ExclusiveGateway-ProbationOutcome-id-0001" targetRef="BusinessRuleTask-DetermineProcessContinuation-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BusinessRuleToEndPermanentHire-id-0001" name="applicant_rating in [&#39;A&#39;,&#39;B&#39;,&#39;C&#39;]" sourceRef="BusinessRuleTask-DetermineProcessContinuation-id-0001" targetRef="EndEvent-ProcessCompletePermanentHire-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BusinessRuleToUpdateProfile-id-0001" sourceRef="BusinessRuleTask-DetermineProcessContinuation-id-0001" targetRef="ServiceTask-UpdateProfileContinueReceivingOffers-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-UpdateProfileToDisableReporting-id-0001" sourceRef="ServiceTask-UpdateProfileContinueReceivingOffers-id-0001" targetRef="ServiceTask-DisableReportingRequirement-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-DisableReportingToEndActiveSearch-id-0001" sourceRef="ServiceTask-DisableReportingRequirement-id-0001" targetRef="EndEvent-ProcessCompleteActiveSearchContinues-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToEndProbationNotConverted-id-0001" name="offer_permanent == false" sourceRef="ExclusiveGateway-ProbationOutcome-id-0001" targetRef="EndEvent-ProcessCompleteProbationNotConverted-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:endEvent id="EndEvent-ProcessCompleteNoMatch-id-0001" name="Process Complete - No Match">
+      <bpmn:incoming>SequenceFlow-ProbationPhaseToEndNoMatch-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-ProcessCompleteLowRating-id-0001" name="Process Complete - Low Rating">
+      <bpmn:incoming>SequenceFlow-ProbationPhaseToEndLowRating-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-ReportingReminderToReportApplications-id-0001" sourceRef="StartEvent-ReportingReminder-id-0001" targetRef="UserTask-ReportJobApplications-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReportApplicationsToLogApplications-id-0001" sourceRef="UserTask-ReportJobApplications-id-0001" targetRef="ServiceTask-LogApplicationsInSystem-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogApplicationsToMatchApplications-id-0001" sourceRef="ServiceTask-LogApplicationsInSystem-id-0001" targetRef="ServiceTask-MatchApplicationsToJobOffers-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MatchApplicationsToEvaluationCycle-id-0001" sourceRef="ServiceTask-MatchApplicationsToJobOffers-id-0001" targetRef="SubProcess-ApplicationEvaluationCycle-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EvaluationCycleToProbationPhase-id-0001" sourceRef="SubProcess-ApplicationEvaluationCycle-id-0001" targetRef="SubProcess-ProbationAndRatingPhase-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProbationPhaseToEndNoMatch-id-0001" sourceRef="SubProcess-ProbationAndRatingPhase-id-0001" targetRef="EndEvent-ProcessCompleteNoMatch-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProbationPhaseToEndLowRating-id-0001" sourceRef="SubProcess-ProbationAndRatingPhase-id-0001" targetRef="EndEvent-ProcessCompleteLowRating-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_JobApplicationManagementProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_JobApplicationManagementProcess" bpmnElement="JobApplicationManagementProcess">
+      <bpmndi:BPMNShape id="StartEvent-ReportingReminder-id-0001_di" bpmnElement="StartEvent-ReportingReminder-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReportJobApplications-id-0001_di" bpmnElement="UserTask-ReportJobApplications-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogApplicationsInSystem-id-0001_di" bpmnElement="ServiceTask-LogApplicationsInSystem-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MatchApplicationsToJobOffers-id-0001_di" bpmnElement="ServiceTask-MatchApplicationsToJobOffers-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-ApplicationEvaluationCycle-id-0001_di" bpmnElement="SubProcess-ApplicationEvaluationCycle-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-ProbationAndRatingPhase-id-0001_di" bpmnElement="SubProcess-ProbationAndRatingPhase-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessCompleteNoMatch-id-0001_di" bpmnElement="EndEvent-ProcessCompleteNoMatch-id-0001">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessCompleteLowRating-id-0001_di" bpmnElement="EndEvent-ProcessCompleteLowRating-id-0001">
+        <dc:Bounds x="957" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReportingReminderToReportApplications-id-0001_di" bpmnElement="SequenceFlow-ReportingReminderToReportApplications-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReportApplicationsToLogApplications-id-0001_di" bpmnElement="SequenceFlow-ReportApplicationsToLogApplications-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogApplicationsToMatchApplications-id-0001_di" bpmnElement="SequenceFlow-LogApplicationsToMatchApplications-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MatchApplicationsToEvaluationCycle-id-0001_di" bpmnElement="SequenceFlow-MatchApplicationsToEvaluationCycle-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EvaluationCycleToProbationPhase-id-0001_di" bpmnElement="SequenceFlow-EvaluationCycleToProbationPhase-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProbationPhaseToEndNoMatch-id-0001_di" bpmnElement="SequenceFlow-ProbationPhaseToEndNoMatch-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProbationPhaseToEndLowRating-id-0001_di" bpmnElement="SequenceFlow-ProbationPhaseToEndLowRating-id-0001">
+        <di:waypoint x="825" y="110" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="957" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-ProbationAndRatingPhase-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-ProbationAndRatingPhase-id-0001" bpmnElement="SubProcess-ProbationAndRatingPhase-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ProbationStart-id-0001_di" bpmnElement="StartEvent-ProbationStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterProbationPhase-id-0001_di" bpmnElement="UserTask-EnterProbationPhase-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-ProbationPeriod-id-0001_di" bpmnElement="IntermediateCatchEvent-ProbationPeriod-id-0001">
+        <dc:Bounds x="357" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-RateCompanyApplicant-id-0001_di" bpmnElement="UserTask-RateCompanyApplicant-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-RateApplicantCompany-id-0001_di" bpmnElement="UserTask-RateApplicantCompany-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-CalculateReviewVisibilityDate-id-0001_di" bpmnElement="ScriptTask-CalculateReviewVisibilityDate-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer1Year-CalculateReviewVisibilityDate-id-0001_di" bpmnElement="BoundaryEvent-Timer1Year-CalculateReviewVisibilityDate-id-0001">
+        <dc:Bounds x="807" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ProbationOutcome-id-0001_di" bpmnElement="ExclusiveGateway-ProbationOutcome-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BusinessRuleTask-DetermineProcessContinuation-id-0001_di" bpmnElement="BusinessRuleTask-DetermineProcessContinuation-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessCompletePermanentHire-id-0001_di" bpmnElement="EndEvent-ProcessCompletePermanentHire-id-0001">
+        <dc:Bounds x="1257" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PublishCompanyReviews-id-0001_di" bpmnElement="ServiceTask-PublishCompanyReviews-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessCompleteProbationNotConverted-id-0001_di" bpmnElement="EndEvent-ProcessCompleteProbationNotConverted-id-0001">
+        <dc:Bounds x="1107" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateProfileContinueReceivingOffers-id-0001_di" bpmnElement="ServiceTask-UpdateProfileContinueReceivingOffers-id-0001">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DisableReportingRequirement-id-0001_di" bpmnElement="ServiceTask-DisableReportingRequirement-id-0001">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessCompleteActiveSearchContinues-id-0001_di" bpmnElement="EndEvent-ProcessCompleteActiveSearchContinues-id-0001">
+        <dc:Bounds x="1557" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProbationStartToEnterProbation-id-0001_di" bpmnElement="SequenceFlow-ProbationStartToEnterProbation-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EnterProbationToProbationPeriod-id-0001_di" bpmnElement="SequenceFlow-EnterProbationToProbationPeriod-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="357" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProbationPeriodToRateCompany-id-0001_di" bpmnElement="SequenceFlow-ProbationPeriodToRateCompany-id-0001">
+        <di:waypoint x="393" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RateCompanyToRateApplicant-id-0001_di" bpmnElement="SequenceFlow-RateCompanyToRateApplicant-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RateApplicantToCalculateVisibility-id-0001_di" bpmnElement="SequenceFlow-RateApplicantToCalculateVisibility-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculateVisibilityToGateway-id-0001_di" bpmnElement="SequenceFlow-CalculateVisibilityToGateway-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToPublishReviews-id-0001_di" bpmnElement="SequenceFlow-BoundaryToPublishReviews-id-0001">
+        <di:waypoint x="825" y="128" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToBusinessRule-id-0001_di" bpmnElement="SequenceFlow-GatewayToBusinessRule-id-0001">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToEndProbationNotConverted-id-0001_di" bpmnElement="SequenceFlow-GatewayToEndProbationNotConverted-id-0001">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1050" y="70" />
+        <di:waypoint x="1050" y="140" />
+        <di:waypoint x="1050" y="140" />
+        <di:waypoint x="1050" y="210" />
+        <di:waypoint x="1107" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BusinessRuleToEndPermanentHire-id-0001_di" bpmnElement="SequenceFlow-BusinessRuleToEndPermanentHire-id-0001">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1257" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BusinessRuleToUpdateProfile-id-0001_di" bpmnElement="SequenceFlow-BusinessRuleToUpdateProfile-id-0001">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1200" y="70" />
+        <di:waypoint x="1200" y="140" />
+        <di:waypoint x="1200" y="140" />
+        <di:waypoint x="1200" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PublishReviewsToEnd-id-0001_di" bpmnElement="SequenceFlow-PublishReviewsToEnd-id-0001">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1050" y="210" />
+        <di:waypoint x="1050" y="140" />
+        <di:waypoint x="1200" y="140" />
+        <di:waypoint x="1200" y="70" />
+        <di:waypoint x="1257" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateProfileToDisableReporting-id-0001_di" bpmnElement="SequenceFlow-UpdateProfileToDisableReporting-id-0001">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DisableReportingToEndActiveSearch-id-0001_di" bpmnElement="SequenceFlow-DisableReportingToEndActiveSearch-id-0001">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1557" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-ApplicationEvaluationCycle-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-ApplicationEvaluationCycle-id-0001" bpmnElement="SubProcess-ApplicationEvaluationCycle-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-EvaluationStart-id-0001_di" bpmnElement="StartEvent-EvaluationStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendPotentialJobOffers-id-0001_di" bpmnElement="SendTask-SendPotentialJobOffers-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveApplicationConfirmation-id-0001_di" bpmnElement="ReceiveTask-ReceiveApplicationConfirmation-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer3Days-ReceiveApplicationConfirmation-id-0001_di" bpmnElement="BoundaryEvent-Timer3Days-ReceiveApplicationConfirmation-id-0001">
+        <dc:Bounds x="357" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-RateApplicationCompany-id-0001_di" bpmnElement="UserTask-RateApplicationCompany-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ApplicationRating-id-0001_di" bpmnElement="ExclusiveGateway-ApplicationRating-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-NegotiateInterview-id-0001_di" bpmnElement="UserTask-NegotiateInterview-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-EvaluationCompleteInterviewScheduled-id-0001_di" bpmnElement="EndEvent-EvaluationCompleteInterviewScheduled-id-0001">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendConfirmationReminder-id-0001_di" bpmnElement="SendTask-SendConfirmationReminder-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendImprovementSuggestions-id-0001_di" bpmnElement="SendTask-SendImprovementSuggestions-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-EvaluationCompleteNeedsImprovement-id-0001_di" bpmnElement="EndEvent-EvaluationCompleteNeedsImprovement-id-0001">
+        <dc:Bounds x="957" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ArchiveApplication-id-0001_di" bpmnElement="ServiceTask-ArchiveApplication-id-0001">
+        <dc:Bounds x="775" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-EvaluationCompleteArchived-id-0001_di" bpmnElement="EndEvent-EvaluationCompleteArchived-id-0001">
+        <dc:Bounds x="957" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-EvaluationStartToSendOffers-id-0001_di" bpmnElement="SequenceFlow-EvaluationStartToSendOffers-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendOffersToReceiveConfirmation-id-0001_di" bpmnElement="SequenceFlow-SendOffersToReceiveConfirmation-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveConfirmationToRateApplication-id-0001_di" bpmnElement="SequenceFlow-ReceiveConfirmationToRateApplication-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToSendReminder-id-0001_di" bpmnElement="SequenceFlow-BoundaryToSendReminder-id-0001">
+        <di:waypoint x="375" y="128" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RateApplicationToGateway-id-0001_di" bpmnElement="SequenceFlow-RateApplicationToGateway-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToNegotiateInterview-id-0001_di" bpmnElement="SequenceFlow-GatewayToNegotiateInterview-id-0001">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToSendSuggestions-id-0001_di" bpmnElement="SequenceFlow-GatewayToSendSuggestions-id-0001">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToArchive-id-0001_di" bpmnElement="SequenceFlow-GatewayToArchive-id-0001">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="350" />
+        <di:waypoint x="775" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NegotiateInterviewToEnd-id-0001_di" bpmnElement="SequenceFlow-NegotiateInterviewToEnd-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendReminderToEnd-id-0001_di" bpmnElement="SequenceFlow-SendReminderToEnd-id-0001">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="600" y="210" />
+        <di:waypoint x="600" y="280" />
+        <di:waypoint x="900" y="280" />
+        <di:waypoint x="900" y="350" />
+        <di:waypoint x="957" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendSuggestionsToEnd-id-0001_di" bpmnElement="SequenceFlow-SendSuggestionsToEnd-id-0001">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="957" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ArchiveToEnd-id-0001_di" bpmnElement="SequenceFlow-ArchiveToEnd-id-0001">
+        <di:waypoint x="875" y="350" />
+        <di:waypoint x="957" y="350" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

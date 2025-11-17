@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="SubscriptionLifecycleDefinitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="SubscriptionLifecycleProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-CustomerInitiatesSignup-id-0001" name="Customer Initiates Signup">
+      <bpmn:outgoing>SequenceFlow-SignupToEnterInfo-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-EnterSubscriptionInformation-id-0001" name="Enter Subscription Information">
+      <bpmn:incoming>SequenceFlow-SignupToEnterInfo-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EnterInfoToGenerateAccount-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-GenerateAccount-id-0001" name="Generate Account">
+      <bpmn:incoming>SequenceFlow-EnterInfoToGenerateAccount-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GenerateAccountToAssignAccess-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-AssignAccess-id-0001" name="Assign Access">
+      <bpmn:incoming>SequenceFlow-GenerateAccountToAssignAccess-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AssignAccessToProcessPayment-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ProcessInitialPayment-id-0001" name="Process Initial Payment">
+      <bpmn:incoming>SequenceFlow-AssignAccessToProcessPayment-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProcessPaymentToWelcomeEmail-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-WelcomeEmail-id-0001" name="Send: Welcome Email and Access Instructions">
+      <bpmn:incoming>SequenceFlow-ProcessPaymentToWelcomeEmail-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-WelcomeEmailToActive-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-SubscriptionActive-id-0001" name="Subscription Active">
+      <bpmn:incoming>SequenceFlow-WelcomeEmailToActive-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:subProcess id="SubProcess-MonthlyBillingCycle-id-0001" name="Monthly Billing Cycle">
+      <bpmn:startEvent id="StartEvent-MonthlyBillingTrigger-id-0001" name="Monthly Billing Trigger">
+        <bpmn:outgoing>SequenceFlow-BillingTriggerToNotification-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:sendTask id="SendTask-RenewalNotification-id-0001" name="Send: Renewal Notification (7 days prior)">
+        <bpmn:incoming>SequenceFlow-BillingTriggerToNotification-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-NotificationToGenerateInvoice-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:serviceTask id="ServiceTask-GenerateInvoice-id-0001" name="Generate Invoice">
+        <bpmn:incoming>SequenceFlow-NotificationToGenerateInvoice-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GenerateInvoiceToProcessPayment-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-ProcessBillingPayment-id-0001" name="Process Billing Payment">
+        <bpmn:incoming>SequenceFlow-GenerateInvoiceToProcessPayment-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ProcessPaymentToGateway-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-PaymentSuccess-id-0001" name="Payment Successful?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-ProcessPaymentToGateway-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GatewayToPaymentReceipt-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToPaymentFailed-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:sendTask id="SendTask-PaymentReceipt-id-0001" name="Send: Payment Receipt">
+        <bpmn:incoming>SequenceFlow-GatewayToPaymentReceipt-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PaymentReceiptToProductUpdates-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:serviceTask id="ServiceTask-SendProductUpdates-id-0001" name="Send Product Updates">
+        <bpmn:incoming>SequenceFlow-PaymentReceiptToProductUpdates-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ProductUpdatesToEnhancements-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-SendEnhancementNotifications-id-0001" name="Send Enhancement Notifications">
+        <bpmn:incoming>SequenceFlow-ProductUpdatesToEnhancements-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-EnhancementsToEnd-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-BillingCycleComplete-id-0001" name="Billing Cycle Complete">
+        <bpmn:incoming>SequenceFlow-EnhancementsToEnd-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-GatewayToEnd-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sendTask id="SendTask-PaymentFailedNotification-id-0001" name="Send: Payment Failed Notification">
+        <bpmn:incoming>SequenceFlow-GatewayToPaymentFailed-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-PaymentFailedToUpdateMethod-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:userTask id="UserTask-UpdatePaymentMethod-id-0001" name="Customer Updates Payment Method">
+        <bpmn:incoming>SequenceFlow-PaymentFailedToUpdateMethod-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-UpdateMethodToRetryPayment-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:serviceTask id="ServiceTask-RetryBillingPayment-id-0001" name="Retry Billing Payment">
+        <bpmn:incoming>SequenceFlow-UpdateMethodToRetryPayment-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RetryPaymentToGateway-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-PaymentSuccess-id-0002" name="Payment Successful?" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-RetryPaymentToGateway-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GatewayToEnd-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:sequenceFlow id="SequenceFlow-BillingTriggerToNotification-id-0001" sourceRef="StartEvent-MonthlyBillingTrigger-id-0001" targetRef="SendTask-RenewalNotification-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-NotificationToGenerateInvoice-id-0001" sourceRef="SendTask-RenewalNotification-id-0001" targetRef="ServiceTask-GenerateInvoice-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GenerateInvoiceToProcessPayment-id-0001" sourceRef="ServiceTask-GenerateInvoice-id-0001" targetRef="ServiceTask-ProcessBillingPayment-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ProcessPaymentToGateway-id-0001" sourceRef="ServiceTask-ProcessBillingPayment-id-0001" targetRef="ExclusiveGateway-PaymentSuccess-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToPaymentReceipt-id-0001" name="payment_successful" sourceRef="ExclusiveGateway-PaymentSuccess-id-0001" targetRef="SendTask-PaymentReceipt-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-PaymentReceiptToProductUpdates-id-0001" sourceRef="SendTask-PaymentReceipt-id-0001" targetRef="ServiceTask-SendProductUpdates-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ProductUpdatesToEnhancements-id-0001" sourceRef="ServiceTask-SendProductUpdates-id-0001" targetRef="ServiceTask-SendEnhancementNotifications-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-EnhancementsToEnd-id-0001" sourceRef="ServiceTask-SendEnhancementNotifications-id-0001" targetRef="EndEvent-BillingCycleComplete-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToPaymentFailed-id-0001" name="!payment_successful" sourceRef="ExclusiveGateway-PaymentSuccess-id-0001" targetRef="SendTask-PaymentFailedNotification-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-PaymentFailedToUpdateMethod-id-0001" sourceRef="SendTask-PaymentFailedNotification-id-0001" targetRef="UserTask-UpdatePaymentMethod-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-UpdateMethodToRetryPayment-id-0001" sourceRef="UserTask-UpdatePaymentMethod-id-0001" targetRef="ServiceTask-RetryBillingPayment-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RetryPaymentToGateway-id-0001" sourceRef="ServiceTask-RetryBillingPayment-id-0001" targetRef="ExclusiveGateway-PaymentSuccess-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToEnd-id-0001" sourceRef="ExclusiveGateway-PaymentSuccess-id-0002" targetRef="EndEvent-BillingCycleComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-CancellationProcessing-id-0001" name="Cancellation Processing">
+      <bpmn:startEvent id="StartEvent-CancellationRequestReceived-id-0001" name="Cancellation Request Received">
+        <bpmn:outgoing>SequenceFlow-CancellationRequestToReview-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-SupportTeamReviewsCancellation-id-0001" name="Support Team Reviews Cancellation">
+        <bpmn:incoming>SequenceFlow-CancellationRequestToReview-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReviewToCancellationGateway-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-CancellationApproved-id-0001" name="Cancellation Approved?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-ReviewToCancellationGateway-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CancellationApprovedToCalculateBalance-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-CancellationDeniedToRejection-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-CalculateFinalBalance-id-0001" name="Calculate Final Balance">
+        <bpmn:incoming>SequenceFlow-CancellationApprovedToCalculateBalance-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CalculateBalanceToRefundGateway-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-RefundDue-id-0001" name="Refund Due?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-CalculateBalanceToRefundGateway-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RefundGatewayToProcessRefund-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-RefundGatewayToApplyCharges-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-ProcessRefund-id-0001" name="Process Refund">
+        <bpmn:incoming>SequenceFlow-RefundGatewayToProcessRefund-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ProcessRefundToConfirmation-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-RefundConfirmation-id-0001" name="Send: Refund Confirmation">
+        <bpmn:incoming>SequenceFlow-ProcessRefundToConfirmation-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RefundConfirmationToRefundGateway-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:serviceTask id="ServiceTask-ApplyFinalCharges-id-0001" name="Apply Final Charges">
+        <bpmn:incoming>SequenceFlow-RefundGatewayToApplyCharges-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ApplyChargesToFinalInvoice-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-FinalInvoice-id-0001" name="Send: Final Invoice">
+        <bpmn:incoming>SequenceFlow-ApplyChargesToFinalInvoice-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-FinalInvoiceToRefundGateway-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-RefundDue-id-0002" name="Refund Due?" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-RefundConfirmationToRefundGateway-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-FinalInvoiceToRefundGateway-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RefundGatewayToDeactivate-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-DeactivateSubscription-id-0001" name="Deactivate Subscription">
+        <bpmn:incoming>SequenceFlow-RefundGatewayToDeactivate-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-DeactivateToConfirmation-id-0001</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-CancellationConfirmation-id-0001" name="Send: Cancellation Confirmation">
+        <bpmn:incoming>SequenceFlow-DeactivateToConfirmation-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ConfirmationToCancelled-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:endEvent id="EndEvent-SubscriptionCancelled-id-0001" name="Subscription Cancelled">
+        <bpmn:incoming>SequenceFlow-ConfirmationToCancelled-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sendTask id="SendTask-CancellationRejectionNotice-id-0001" name="Send: Cancellation Rejection Notice">
+        <bpmn:incoming>SequenceFlow-CancellationDeniedToRejection-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RejectionToDenied-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:endEvent id="EndEvent-CancellationDenied-id-0001" name="Cancellation Denied">
+        <bpmn:incoming>SequenceFlow-RejectionToDenied-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-CancellationRequestToReview-id-0001" sourceRef="StartEvent-CancellationRequestReceived-id-0001" targetRef="UserTask-SupportTeamReviewsCancellation-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReviewToCancellationGateway-id-0001" sourceRef="UserTask-SupportTeamReviewsCancellation-id-0001" targetRef="ExclusiveGateway-CancellationApproved-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CancellationApprovedToCalculateBalance-id-0001" name="cancellation_approved" sourceRef="ExclusiveGateway-CancellationApproved-id-0001" targetRef="ServiceTask-CalculateFinalBalance-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CalculateBalanceToRefundGateway-id-0001" sourceRef="ServiceTask-CalculateFinalBalance-id-0001" targetRef="ExclusiveGateway-RefundDue-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RefundGatewayToProcessRefund-id-0001" name="refund_due &#62; 0" sourceRef="ExclusiveGateway-RefundDue-id-0001" targetRef="ServiceTask-ProcessRefund-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ProcessRefundToConfirmation-id-0001" sourceRef="ServiceTask-ProcessRefund-id-0001" targetRef="SendTask-RefundConfirmation-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RefundConfirmationToRefundGateway-id-0001" sourceRef="SendTask-RefundConfirmation-id-0001" targetRef="ExclusiveGateway-RefundDue-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-RefundGatewayToApplyCharges-id-0001" name="refund_due &#60;= 0" sourceRef="ExclusiveGateway-RefundDue-id-0001" targetRef="ServiceTask-ApplyFinalCharges-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ApplyChargesToFinalInvoice-id-0001" sourceRef="ServiceTask-ApplyFinalCharges-id-0001" targetRef="SendTask-FinalInvoice-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-FinalInvoiceToRefundGateway-id-0001" sourceRef="SendTask-FinalInvoice-id-0001" targetRef="ExclusiveGateway-RefundDue-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-RefundGatewayToDeactivate-id-0001" sourceRef="ExclusiveGateway-RefundDue-id-0002" targetRef="ServiceTask-DeactivateSubscription-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-DeactivateToConfirmation-id-0001" sourceRef="ServiceTask-DeactivateSubscription-id-0001" targetRef="SendTask-CancellationConfirmation-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ConfirmationToCancelled-id-0001" sourceRef="SendTask-CancellationConfirmation-id-0001" targetRef="EndEvent-SubscriptionCancelled-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CancellationDeniedToRejection-id-0001" name="!cancellation_approved" sourceRef="ExclusiveGateway-CancellationApproved-id-0001" targetRef="SendTask-CancellationRejectionNotice-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RejectionToDenied-id-0001" sourceRef="SendTask-CancellationRejectionNotice-id-0001" targetRef="EndEvent-CancellationDenied-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="SequenceFlow-SignupToEnterInfo-id-0001" sourceRef="StartEvent-CustomerInitiatesSignup-id-0001" targetRef="UserTask-EnterSubscriptionInformation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EnterInfoToGenerateAccount-id-0001" sourceRef="UserTask-EnterSubscriptionInformation-id-0001" targetRef="ServiceTask-GenerateAccount-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GenerateAccountToAssignAccess-id-0001" sourceRef="ServiceTask-GenerateAccount-id-0001" targetRef="ServiceTask-AssignAccess-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AssignAccessToProcessPayment-id-0001" sourceRef="ServiceTask-AssignAccess-id-0001" targetRef="ServiceTask-ProcessInitialPayment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProcessPaymentToWelcomeEmail-id-0001" sourceRef="ServiceTask-ProcessInitialPayment-id-0001" targetRef="SendTask-WelcomeEmail-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-WelcomeEmailToActive-id-0001" sourceRef="SendTask-WelcomeEmail-id-0001" targetRef="EndEvent-SubscriptionActive-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubscriptionLifecycleProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubscriptionLifecycleProcess" bpmnElement="SubscriptionLifecycleProcess">
+      <bpmndi:BPMNShape id="StartEvent-CustomerInitiatesSignup-id-0001_di" bpmnElement="StartEvent-CustomerInitiatesSignup-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterSubscriptionInformation-id-0001_di" bpmnElement="UserTask-EnterSubscriptionInformation-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateAccount-id-0001_di" bpmnElement="ServiceTask-GenerateAccount-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AssignAccess-id-0001_di" bpmnElement="ServiceTask-AssignAccess-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessInitialPayment-id-0001_di" bpmnElement="ServiceTask-ProcessInitialPayment-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-WelcomeEmail-id-0001_di" bpmnElement="SendTask-WelcomeEmail-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-SubscriptionActive-id-0001_di" bpmnElement="EndEvent-SubscriptionActive-id-0001">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-MonthlyBillingCycle-id-0001_di" bpmnElement="SubProcess-MonthlyBillingCycle-id-0001">
+        <dc:Bounds x="25" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-CancellationProcessing-id-0001_di" bpmnElement="SubProcess-CancellationProcessing-id-0001">
+        <dc:Bounds x="25" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-SignupToEnterInfo-id-0001_di" bpmnElement="SequenceFlow-SignupToEnterInfo-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EnterInfoToGenerateAccount-id-0001_di" bpmnElement="SequenceFlow-EnterInfoToGenerateAccount-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateAccountToAssignAccess-id-0001_di" bpmnElement="SequenceFlow-GenerateAccountToAssignAccess-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AssignAccessToProcessPayment-id-0001_di" bpmnElement="SequenceFlow-AssignAccessToProcessPayment-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessPaymentToWelcomeEmail-id-0001_di" bpmnElement="SequenceFlow-ProcessPaymentToWelcomeEmail-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WelcomeEmailToActive-id-0001_di" bpmnElement="SequenceFlow-WelcomeEmailToActive-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-MonthlyBillingCycle-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-MonthlyBillingCycle-id-0001" bpmnElement="SubProcess-MonthlyBillingCycle-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-MonthlyBillingTrigger-id-0001_di" bpmnElement="StartEvent-MonthlyBillingTrigger-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RenewalNotification-id-0001_di" bpmnElement="SendTask-RenewalNotification-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateInvoice-id-0001_di" bpmnElement="ServiceTask-GenerateInvoice-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessBillingPayment-id-0001_di" bpmnElement="ServiceTask-ProcessBillingPayment-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PaymentSuccess-id-0001_di" bpmnElement="ExclusiveGateway-PaymentSuccess-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-PaymentReceipt-id-0001_di" bpmnElement="SendTask-PaymentReceipt-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SendProductUpdates-id-0001_di" bpmnElement="ServiceTask-SendProductUpdates-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SendEnhancementNotifications-id-0001_di" bpmnElement="ServiceTask-SendEnhancementNotifications-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-BillingCycleComplete-id-0001_di" bpmnElement="EndEvent-BillingCycleComplete-id-0001">
+        <dc:Bounds x="1407" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-PaymentFailedNotification-id-0001_di" bpmnElement="SendTask-PaymentFailedNotification-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-UpdatePaymentMethod-id-0001_di" bpmnElement="UserTask-UpdatePaymentMethod-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RetryBillingPayment-id-0001_di" bpmnElement="ServiceTask-RetryBillingPayment-id-0001">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PaymentSuccess-id-0002_di" bpmnElement="ExclusiveGateway-PaymentSuccess-id-0002" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-BillingTriggerToNotification-id-0001_di" bpmnElement="SequenceFlow-BillingTriggerToNotification-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotificationToGenerateInvoice-id-0001_di" bpmnElement="SequenceFlow-NotificationToGenerateInvoice-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateInvoiceToProcessPayment-id-0001_di" bpmnElement="SequenceFlow-GenerateInvoiceToProcessPayment-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessPaymentToGateway-id-0001_di" bpmnElement="SequenceFlow-ProcessPaymentToGateway-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToPaymentReceipt-id-0001_di" bpmnElement="SequenceFlow-GatewayToPaymentReceipt-id-0001">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToPaymentFailed-id-0001_di" bpmnElement="SequenceFlow-GatewayToPaymentFailed-id-0001">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentReceiptToProductUpdates-id-0001_di" bpmnElement="SequenceFlow-PaymentReceiptToProductUpdates-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProductUpdatesToEnhancements-id-0001_di" bpmnElement="SequenceFlow-ProductUpdatesToEnhancements-id-0001">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EnhancementsToEnd-id-0001_di" bpmnElement="SequenceFlow-EnhancementsToEnd-id-0001">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1407" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentFailedToUpdateMethod-id-0001_di" bpmnElement="SequenceFlow-PaymentFailedToUpdateMethod-id-0001">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateMethodToRetryPayment-id-0001_di" bpmnElement="SequenceFlow-UpdateMethodToRetryPayment-id-0001">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RetryPaymentToGateway-id-0001_di" bpmnElement="SequenceFlow-RetryPaymentToGateway-id-0001">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1250" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToEnd-id-0001_di" bpmnElement="SequenceFlow-GatewayToEnd-id-0001">
+        <di:waypoint x="1300" y="210" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1425" y="88" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-CancellationProcessing-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-CancellationProcessing-id-0001" bpmnElement="SubProcess-CancellationProcessing-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-CancellationRequestReceived-id-0001_di" bpmnElement="StartEvent-CancellationRequestReceived-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SupportTeamReviewsCancellation-id-0001_di" bpmnElement="UserTask-SupportTeamReviewsCancellation-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CancellationApproved-id-0001_di" bpmnElement="ExclusiveGateway-CancellationApproved-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CalculateFinalBalance-id-0001_di" bpmnElement="ServiceTask-CalculateFinalBalance-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RefundDue-id-0001_di" bpmnElement="ExclusiveGateway-RefundDue-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessRefund-id-0001_di" bpmnElement="ServiceTask-ProcessRefund-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RefundConfirmation-id-0001_di" bpmnElement="SendTask-RefundConfirmation-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-RefundDue-id-0002_di" bpmnElement="ExclusiveGateway-RefundDue-id-0002" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DeactivateSubscription-id-0001_di" bpmnElement="ServiceTask-DeactivateSubscription-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-CancellationConfirmation-id-0001_di" bpmnElement="SendTask-CancellationConfirmation-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-SubscriptionCancelled-id-0001_di" bpmnElement="EndEvent-SubscriptionCancelled-id-0001">
+        <dc:Bounds x="1557" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-CancellationRejectionNotice-id-0001_di" bpmnElement="SendTask-CancellationRejectionNotice-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CancellationDenied-id-0001_di" bpmnElement="EndEvent-CancellationDenied-id-0001">
+        <dc:Bounds x="657" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ApplyFinalCharges-id-0001_di" bpmnElement="ServiceTask-ApplyFinalCharges-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-FinalInvoice-id-0001_di" bpmnElement="SendTask-FinalInvoice-id-0001">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-CancellationRequestToReview-id-0001_di" bpmnElement="SequenceFlow-CancellationRequestToReview-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToCancellationGateway-id-0001_di" bpmnElement="SequenceFlow-ReviewToCancellationGateway-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CancellationApprovedToCalculateBalance-id-0001_di" bpmnElement="SequenceFlow-CancellationApprovedToCalculateBalance-id-0001">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CancellationDeniedToRejection-id-0001_di" bpmnElement="SequenceFlow-CancellationDeniedToRejection-id-0001">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculateBalanceToRefundGateway-id-0001_di" bpmnElement="SequenceFlow-CalculateBalanceToRefundGateway-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RefundGatewayToProcessRefund-id-0001_di" bpmnElement="SequenceFlow-RefundGatewayToProcessRefund-id-0001">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RefundGatewayToApplyCharges-id-0001_di" bpmnElement="SequenceFlow-RefundGatewayToApplyCharges-id-0001">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="750" y="70" />
+        <di:waypoint x="750" y="140" />
+        <di:waypoint x="900" y="140" />
+        <di:waypoint x="900" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessRefundToConfirmation-id-0001_di" bpmnElement="SequenceFlow-ProcessRefundToConfirmation-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RefundConfirmationToRefundGateway-id-0001_di" bpmnElement="SequenceFlow-RefundConfirmationToRefundGateway-id-0001">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RefundGatewayToDeactivate-id-0001_di" bpmnElement="SequenceFlow-RefundGatewayToDeactivate-id-0001">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DeactivateToConfirmation-id-0001_di" bpmnElement="SequenceFlow-DeactivateToConfirmation-id-0001">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmationToCancelled-id-0001_di" bpmnElement="SequenceFlow-ConfirmationToCancelled-id-0001">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1557" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RejectionToDenied-id-0001_di" bpmnElement="SequenceFlow-RejectionToDenied-id-0001">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="657" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApplyChargesToFinalInvoice-id-0001_di" bpmnElement="SequenceFlow-ApplyChargesToFinalInvoice-id-0001">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FinalInvoiceToRefundGateway-id-0001_di" bpmnElement="SequenceFlow-FinalInvoiceToRefundGateway-id-0001">
+        <di:waypoint x="1125" y="170" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

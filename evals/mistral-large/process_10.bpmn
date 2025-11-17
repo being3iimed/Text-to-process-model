@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="IT-Solution-Request-Process" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process-ITSolutionRequest-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ITRequestSubmitted-id-0001" name="IT Request Submitted">
+      <bpmn:outgoing>SequenceFlow-StartToSubmitRequest-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-SubmitITRequest-id-0001" name="Submit IT Request">
+      <bpmn:incoming>SequenceFlow-StartToSubmitRequest-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SubmitToAssessCompatibility-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-AssessCompatibility-id-0001" name="Assess Compatibility">
+      <bpmn:incoming>SequenceFlow-SubmitToAssessCompatibility-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AssessToEvaluateCost-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-EvaluateCostResources-id-0001" name="Evaluate Cost/Resources">
+      <bpmn:incoming>SequenceFlow-AssessToEvaluateCost-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EvaluateToApproval-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-ITApprovalDecision-id-0001" name="IT Approval Decision">
+      <bpmn:incoming>SequenceFlow-EvaluateToApproval-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ApprovalToGateway-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ApprovalRouting-id-0001" name="Approval Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ApprovalToGateway-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToRejected-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToProcure-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="EndEvent-RequestRejected-id-0001" name="Request Rejected">
+      <bpmn:incoming>SequenceFlow-GatewayToRejected-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-ProcureToolsLicenses-id-0001" name="Procure Tools/Licenses">
+      <bpmn:incoming>SequenceFlow-GatewayToProcure-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProcureToInstall-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Error-ProcureToolsLicenses-id-0001" name="Procurement Failed" attachedToRef="ServiceTask-ProcureToolsLicenses-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryToManualProcure-id-0001</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="BoundaryEvent-Error-ProcureToolsLicenses-id-0001_EventDef" errorRef="PROCUREMENT_ERROR" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="UserTask-ManualProcurement-id-0001" name="Manual Procurement (Vendor Issue)">
+      <bpmn:incoming>SequenceFlow-BoundaryToManualProcure-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ManualProcureToInstall-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-InstallSolution-id-0001" name="Install Solution">
+      <bpmn:incoming>SequenceFlow-ProcureToInstall-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ManualProcureToInstall-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InstallToTest-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-TestInControlledEnvironment-id-0001" name="Test in Controlled Environment">
+      <bpmn:incoming>SequenceFlow-InstallToTest-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TestToRollOut-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-RollOutToDepartment-id-0001" name="Roll Out to Department">
+      <bpmn:incoming>SequenceFlow-TestToRollOut-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RollOutToTrainingGateway-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-TrainingDecision-id-0001" name="Training Needed?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-RollOutToTrainingGateway-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TrainingGatewayToTraining-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-TrainingGatewayToSupport-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-ProvideTraining-id-0001" name="Provide Training">
+      <bpmn:incoming>SequenceFlow-TrainingGatewayToTraining-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TrainingToSupport-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-OfferITSupport-id-0001" name="Offer IT Support">
+      <bpmn:incoming>SequenceFlow-TrainingGatewayToSupport-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-TrainingToSupport-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SupportToEnd-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-SolutionDeployed-id-0001" name="Solution Deployed">
+      <bpmn:incoming>SequenceFlow-SupportToEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSubmitRequest-id-0001" sourceRef="StartEvent-ITRequestSubmitted-id-0001" targetRef="UserTask-SubmitITRequest-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubmitToAssessCompatibility-id-0001" sourceRef="UserTask-SubmitITRequest-id-0001" targetRef="ServiceTask-AssessCompatibility-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AssessToEvaluateCost-id-0001" sourceRef="ServiceTask-AssessCompatibility-id-0001" targetRef="ServiceTask-EvaluateCostResources-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EvaluateToApproval-id-0001" sourceRef="ServiceTask-EvaluateCostResources-id-0001" targetRef="UserTask-ITApprovalDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApprovalToGateway-id-0001" sourceRef="UserTask-ITApprovalDecision-id-0001" targetRef="ExclusiveGateway-ApprovalRouting-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToRejected-id-0001" name="rejected" sourceRef="ExclusiveGateway-ApprovalRouting-id-0001" targetRef="EndEvent-RequestRejected-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToProcure-id-0001" name="approved" sourceRef="ExclusiveGateway-ApprovalRouting-id-0001" targetRef="ServiceTask-ProcureToolsLicenses-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProcureToInstall-id-0001" sourceRef="ServiceTask-ProcureToolsLicenses-id-0001" targetRef="ServiceTask-InstallSolution-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToManualProcure-id-0001" sourceRef="BoundaryEvent-Error-ProcureToolsLicenses-id-0001" targetRef="UserTask-ManualProcurement-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ManualProcureToInstall-id-0001" sourceRef="UserTask-ManualProcurement-id-0001" targetRef="ServiceTask-InstallSolution-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InstallToTest-id-0001" sourceRef="ServiceTask-InstallSolution-id-0001" targetRef="ServiceTask-TestInControlledEnvironment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TestToRollOut-id-0001" sourceRef="ServiceTask-TestInControlledEnvironment-id-0001" targetRef="ServiceTask-RollOutToDepartment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RollOutToTrainingGateway-id-0001" sourceRef="ServiceTask-RollOutToDepartment-id-0001" targetRef="ExclusiveGateway-TrainingDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TrainingGatewayToTraining-id-0001" name="training_needed" sourceRef="ExclusiveGateway-TrainingDecision-id-0001" targetRef="UserTask-ProvideTraining-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TrainingGatewayToSupport-id-0001" sourceRef="ExclusiveGateway-TrainingDecision-id-0001" targetRef="ServiceTask-OfferITSupport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TrainingToSupport-id-0001" sourceRef="UserTask-ProvideTraining-id-0001" targetRef="ServiceTask-OfferITSupport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SupportToEnd-id-0001" sourceRef="ServiceTask-OfferITSupport-id-0001" targetRef="EndEvent-SolutionDeployed-id-0001" />
+  </bpmn:process>
+  <bpmn:error id="PROCUREMENT_ERROR" name="PROCUREMENT_ERROR" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process-ITSolutionRequest-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process-ITSolutionRequest-id-0001" bpmnElement="Process-ITSolutionRequest-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ITRequestSubmitted-id-0001_di" bpmnElement="StartEvent-ITRequestSubmitted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SubmitITRequest-id-0001_di" bpmnElement="UserTask-SubmitITRequest-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AssessCompatibility-id-0001_di" bpmnElement="ServiceTask-AssessCompatibility-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-EvaluateCostResources-id-0001_di" bpmnElement="ServiceTask-EvaluateCostResources-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ITApprovalDecision-id-0001_di" bpmnElement="UserTask-ITApprovalDecision-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ApprovalRouting-id-0001_di" bpmnElement="ExclusiveGateway-ApprovalRouting-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-RequestRejected-id-0001_di" bpmnElement="EndEvent-RequestRejected-id-0001">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcureToolsLicenses-id-0001_di" bpmnElement="ServiceTask-ProcureToolsLicenses-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Error-ProcureToolsLicenses-id-0001_di" bpmnElement="BoundaryEvent-Error-ProcureToolsLicenses-id-0001">
+        <dc:Bounds x="957" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-InstallSolution-id-0001_di" bpmnElement="ServiceTask-InstallSolution-id-0001">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-TestInControlledEnvironment-id-0001_di" bpmnElement="ServiceTask-TestInControlledEnvironment-id-0001">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RollOutToDepartment-id-0001_di" bpmnElement="ServiceTask-RollOutToDepartment-id-0001">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-TrainingDecision-id-0001_di" bpmnElement="ExclusiveGateway-TrainingDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1700" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ProvideTraining-id-0001_di" bpmnElement="UserTask-ProvideTraining-id-0001">
+        <dc:Bounds x="1825" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-OfferITSupport-id-0001_di" bpmnElement="ServiceTask-OfferITSupport-id-0001">
+        <dc:Bounds x="1975" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-SolutionDeployed-id-0001_di" bpmnElement="EndEvent-SolutionDeployed-id-0001">
+        <dc:Bounds x="2157" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ManualProcurement-id-0001_di" bpmnElement="UserTask-ManualProcurement-id-0001">
+        <dc:Bounds x="1075" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSubmitRequest-id-0001_di" bpmnElement="SequenceFlow-StartToSubmitRequest-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubmitToAssessCompatibility-id-0001_di" bpmnElement="SequenceFlow-SubmitToAssessCompatibility-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AssessToEvaluateCost-id-0001_di" bpmnElement="SequenceFlow-AssessToEvaluateCost-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EvaluateToApproval-id-0001_di" bpmnElement="SequenceFlow-EvaluateToApproval-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalToGateway-id-0001_di" bpmnElement="SequenceFlow-ApprovalToGateway-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToRejected-id-0001_di" bpmnElement="SequenceFlow-GatewayToRejected-id-0001">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToProcure-id-0001_di" bpmnElement="SequenceFlow-GatewayToProcure-id-0001">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcureToInstall-id-0001_di" bpmnElement="SequenceFlow-ProcureToInstall-id-0001">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToManualProcure-id-0001_di" bpmnElement="SequenceFlow-BoundaryToManualProcure-id-0001">
+        <di:waypoint x="975" y="268" />
+        <di:waypoint x="975" y="350" />
+        <di:waypoint x="1075" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InstallToTest-id-0001_di" bpmnElement="SequenceFlow-InstallToTest-id-0001">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TestToRollOut-id-0001_di" bpmnElement="SequenceFlow-TestToRollOut-id-0001">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RollOutToTrainingGateway-id-0001_di" bpmnElement="SequenceFlow-RollOutToTrainingGateway-id-0001">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1700" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TrainingGatewayToTraining-id-0001_di" bpmnElement="SequenceFlow-TrainingGatewayToTraining-id-0001">
+        <di:waypoint x="1750" y="210" />
+        <di:waypoint x="1825" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TrainingGatewayToSupport-id-0001_di" bpmnElement="SequenceFlow-TrainingGatewayToSupport-id-0001">
+        <di:waypoint x="1725" y="235" />
+        <di:waypoint x="1725" y="280" />
+        <di:waypoint x="2025" y="280" />
+        <di:waypoint x="2025" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TrainingToSupport-id-0001_di" bpmnElement="SequenceFlow-TrainingToSupport-id-0001">
+        <di:waypoint x="1925" y="210" />
+        <di:waypoint x="1975" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SupportToEnd-id-0001_di" bpmnElement="SequenceFlow-SupportToEnd-id-0001">
+        <di:waypoint x="2075" y="210" />
+        <di:waypoint x="2157" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ManualProcureToInstall-id-0001_di" bpmnElement="SequenceFlow-ManualProcureToInstall-id-0001">
+        <di:waypoint x="1175" y="350" />
+        <di:waypoint x="1275" y="350" />
+        <di:waypoint x="1275" y="250" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

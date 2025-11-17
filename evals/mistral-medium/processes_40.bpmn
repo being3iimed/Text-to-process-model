@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="OEE-Monitoring-Definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="2.0">
+  <bpmn:process id="OEE-Monitoring-Process" isExecutable="true">
+    <bpmn:startEvent id="MessageStartEvent-MachineConnected-id-0001" name="Machine Connected">
+      <bpmn:outgoing>SequenceFlow-StartToSubProcess-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-StartToConnectionCheck-id-0002</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:subProcess id="SubProcess-OEECalculation-id-0001" name="OEE Calculation">
+      <bpmn:incoming>SequenceFlow-StartToSubProcess-id-0001</bpmn:incoming>
+      <bpmn:startEvent id="StartEvent-StartOEEMonitoring-id-0001" name="Start OEE Monitoring">
+        <bpmn:outgoing>SequenceFlow-StartToTimer-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-Timer5Minutes-id-0001" name="Wait 5 Minutes">
+        <bpmn:incoming>SequenceFlow-StartToTimer-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-OEECheckToTimer-id-0006</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-RestartToTimer-id-0011</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-TimerToCollect-id-0002</bpmn:outgoing>
+      </bpmn:intermediateCatchEvent>
+      <bpmn:serviceTask id="ServiceTask-CollectMachineData-id-0001" name="Collect Machine Data">
+        <bpmn:incoming>SequenceFlow-TimerToCollect-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CollectToCalculate-id-0003</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:scriptTask id="ScriptTask-CalculateOEE-id-0001" name="Calculate OEE">
+        <bpmn:incoming>SequenceFlow-CollectToCalculate-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CalculateToOEECheck-id-0004</bpmn:outgoing>
+      </bpmn:scriptTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-OEECheck-id-0001" name="OEE &#60; Threshold?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-CalculateToOEECheck-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-OEECheckToStop-id-0005</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-OEECheckToTimer-id-0006</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-StopMachine-id-0001" name="Stop Machine">
+        <bpmn:incoming>SequenceFlow-OEECheckToStop-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-StopToAlert-id-0007</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sendTask id="SendTask-OEEAlertEmail-id-0001" name="Send OEE Alert Email">
+        <bpmn:incoming>SequenceFlow-StopToAlert-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AlertToStatusCheck-id-0008</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-MachineStatus-id-0001" name="Machine Status" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-AlertToStatusCheck-id-0008</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-StatusToRestart-id-0009</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-StatusToTerminate-id-0010</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-RestartMachine-id-0001" name="Restart Machine">
+        <bpmn:incoming>SequenceFlow-StatusToRestart-id-0009</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RestartToTimer-id-0011</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-ProcessTerminated-id-0001" name="Process Terminated">
+        <bpmn:incoming>SequenceFlow-StatusToTerminate-id-0010</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-BoundaryToTerminate-id-0003</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToTimer-id-0001" sourceRef="StartEvent-StartOEEMonitoring-id-0001" targetRef="IntermediateCatchEvent-Timer5Minutes-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-TimerToCollect-id-0002" sourceRef="IntermediateCatchEvent-Timer5Minutes-id-0001" targetRef="ServiceTask-CollectMachineData-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CollectToCalculate-id-0003" sourceRef="ServiceTask-CollectMachineData-id-0001" targetRef="ScriptTask-CalculateOEE-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CalculateToOEECheck-id-0004" sourceRef="ScriptTask-CalculateOEE-id-0001" targetRef="ExclusiveGateway-OEECheck-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-OEECheckToStop-id-0005" name="OEE &#60; threshold" sourceRef="ExclusiveGateway-OEECheck-id-0001" targetRef="ServiceTask-StopMachine-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-OEECheckToTimer-id-0006" name="OEE ≥ threshold" sourceRef="ExclusiveGateway-OEECheck-id-0001" targetRef="IntermediateCatchEvent-Timer5Minutes-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-StopToAlert-id-0007" sourceRef="ServiceTask-StopMachine-id-0001" targetRef="SendTask-OEEAlertEmail-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-AlertToStatusCheck-id-0008" sourceRef="SendTask-OEEAlertEmail-id-0001" targetRef="ExclusiveGateway-MachineStatus-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-StatusToRestart-id-0009" name="machine_restarted" sourceRef="ExclusiveGateway-MachineStatus-id-0001" targetRef="ServiceTask-RestartMachine-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-StatusToTerminate-id-0010" name="machine_disconnected" sourceRef="ExclusiveGateway-MachineStatus-id-0001" targetRef="EndEvent-ProcessTerminated-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RestartToTimer-id-0011" sourceRef="ServiceTask-RestartMachine-id-0001" targetRef="IntermediateCatchEvent-Timer5Minutes-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:serviceTask id="ServiceTask-CheckMachineConnection-id-0001" name="Check Machine Connection">
+      <bpmn:incoming>SequenceFlow-StartToConnectionCheck-id-0002</bpmn:incoming>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer1Hour-id-0001" name="1 Hour Timeout" attachedToRef="ServiceTask-CheckMachineConnection-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryToTerminate-id-0003</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer1Hour-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:endEvent id="EndEvent-ProcessTerminated-id-0002" name="Process Terminated" />
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSubProcess-id-0001" sourceRef="MessageStartEvent-MachineConnected-id-0001" targetRef="SubProcess-OEECalculation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-StartToConnectionCheck-id-0002" sourceRef="MessageStartEvent-MachineConnected-id-0001" targetRef="ServiceTask-CheckMachineConnection-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToTerminate-id-0003" sourceRef="BoundaryEvent-Timer1Hour-id-0001" targetRef="EndEvent-ProcessTerminated-id-0001" />
+  </bpmn:process>
+</bpmn:definitions>

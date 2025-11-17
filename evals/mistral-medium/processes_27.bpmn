@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_WorkAccidentReporting" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="Process_WorkAccidentReporting" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-AccidentOccurs-id-0001" name="Accident Occurs">
+      <bpmn:outgoing>SequenceFlow-StartToReport-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-ReportAccidentToEmployer-id-0001" name="Report Accident to Employer">
+      <bpmn:incoming>SequenceFlow-StartToReport-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReportToContextGateway-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer24H-ReportAccident-id-0001" name="24 Hour Timeout" attachedToRef="UserTask-ReportAccidentToEmployer-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryToEscalation-id-0003</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer24H-ReportAccident-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT24H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-EscalationToHR-id-0001" name="Send: Escalation to HR">
+      <bpmn:incoming>SequenceFlow-BoundaryToEscalation-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EscalationToLog-id-0004</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-AccidentContext-id-0001" name="Accident Context" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReportToContextGateway-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ContextToWorkRelated-id-0005</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ContextToSchoolRelated-id-0006</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ContextToLogOnly-id-0007</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-EmployerAssessesSeverity-id-0001" name="Employer Assesses Severity">
+      <bpmn:incoming>SequenceFlow-ContextToWorkRelated-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AssessToReportingGateway-id-0008</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-DirectorateReviewSchools-id-0001" name="Directorate Review (Schools)">
+      <bpmn:incoming>SequenceFlow-ContextToSchoolRelated-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DirectorateToReportingGateway-id-0009</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-LogIncidentInSystem-id-0001" name="Log Incident in System">
+      <bpmn:incoming>SequenceFlow-EscalationToLog-id-0004</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ContextToLogOnly-id-0007</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ReportingToLogOnly-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LogToConfirmation-id-0010</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-AssessReportingRequirement-id-0001" name="Assess Reporting Requirement" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-AssessToReportingGateway-id-0008</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-DirectorateToReportingGateway-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReportingToLabourInspectorate-id-0011</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ReportingToInsurance-id-0012</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ReportingToDirectorate-id-0013</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ReportingToLogOnly-id-0014</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-ReportToLabourInspectorate-id-0001" name="Send: Report to Labour Inspectorate">
+      <bpmn:incoming>SequenceFlow-ReportingToLabourInspectorate-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LabourInspectorateToGenerate-id-0015</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:subProcess id="SubProcess-GenerateInsuranceReport-id-0001" name="Generate Insurance Report">
+      <bpmn:incoming>SequenceFlow-ReportingToInsurance-id-0012</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ReportingToDirectorate-id-0013</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-LabourInspectorateToGenerate-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GenerateToInsuranceProvider-id-0016</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-DirectorateToGenerate-id-0017</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-GenerateReport-id-0001" name="Generate Report">
+        <bpmn:outgoing>SequenceFlow-GenerateToValidate-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-ValidateIncidentData-id-0001" name="Validate Incident Data">
+        <bpmn:incoming>SequenceFlow-GenerateToValidate-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ValidateToFormat-id-0002</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-FormatReportForInsurance-id-0001" name="Format Report for Insurance">
+        <bpmn:incoming>SequenceFlow-ValidateToFormat-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-FormatToAttach-id-0003</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-AttachSupportingDocuments-id-0001" name="Attach Supporting Documents">
+        <bpmn:incoming>SequenceFlow-FormatToAttach-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AttachToEnd-id-0004</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-ReportReady-id-0001" name="Report Ready">
+        <bpmn:incoming>SequenceFlow-AttachToEnd-id-0004</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-GenerateToValidate-id-0001" sourceRef="StartEvent-GenerateReport-id-0001" targetRef="ServiceTask-ValidateIncidentData-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ValidateToFormat-id-0002" sourceRef="ServiceTask-ValidateIncidentData-id-0001" targetRef="ServiceTask-FormatReportForInsurance-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-FormatToAttach-id-0003" sourceRef="ServiceTask-FormatReportForInsurance-id-0001" targetRef="ServiceTask-AttachSupportingDocuments-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-AttachToEnd-id-0004" sourceRef="ServiceTask-AttachSupportingDocuments-id-0001" targetRef="EndEvent-ReportReady-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:sendTask id="SendTask-ReportToInsuranceProvider-id-0001" name="Send: Report to Insurance Provider">
+      <bpmn:incoming>SequenceFlow-GenerateToInsuranceProvider-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InsuranceToConfirmation-id-0018</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="SendTask-ReportToCompetentDirectorate-id-0001" name="Send: Report to Competent Directorate">
+      <bpmn:incoming>SequenceFlow-DirectorateToGenerate-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DirectorateToConfirmation-id-0019</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="SendTask-ConfirmationToEmployee-id-0001" name="Send: Confirmation to Employee">
+      <bpmn:incoming>SequenceFlow-LogToConfirmation-id-0010</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-InsuranceToConfirmation-id-0018</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-DirectorateToConfirmation-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmationToEnd-id-0020</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0001" name="Process Complete">
+      <bpmn:incoming>SequenceFlow-ConfirmationToEnd-id-0020</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:startEvent id="StartEvent-DailyAudit-id-0001" name="Daily Audit Trigger">
+      <bpmn:outgoing>SequenceFlow-AuditStartToQuery-id-0021</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-QueryUnreportedIncidents-id-0001" name="Query Unreported Incidents">
+      <bpmn:incoming>SequenceFlow-AuditStartToQuery-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-QueryToUnreportedGateway-id-0022</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-UnreportedIncidents-id-0001" name="Unreported Incidents Found?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-QueryToUnreportedGateway-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UnreportedToAlert-id-0023</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-UnreportedToAuditEnd-id-0024</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-ComplianceAlertToManagement-id-0001" name="Send: Compliance Alert to Management">
+      <bpmn:incoming>SequenceFlow-UnreportedToAlert-id-0023</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AlertToAuditEnd-id-0025</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-AuditComplete-id-0001" name="Audit Complete">
+      <bpmn:incoming>SequenceFlow-UnreportedToAuditEnd-id-0024</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-AlertToAuditEnd-id-0025</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToReport-id-0001" sourceRef="StartEvent-AccidentOccurs-id-0001" targetRef="UserTask-ReportAccidentToEmployer-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReportToContextGateway-id-0002" sourceRef="UserTask-ReportAccidentToEmployer-id-0001" targetRef="ExclusiveGateway-AccidentContext-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToEscalation-id-0003" sourceRef="BoundaryEvent-Timer24H-ReportAccident-id-0001" targetRef="SendTask-EscalationToHR-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EscalationToLog-id-0004" sourceRef="SendTask-EscalationToHR-id-0001" targetRef="ServiceTask-LogIncidentInSystem-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ContextToWorkRelated-id-0005" name="work_related" sourceRef="ExclusiveGateway-AccidentContext-id-0001" targetRef="UserTask-EmployerAssessesSeverity-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ContextToSchoolRelated-id-0006" name="school_related" sourceRef="ExclusiveGateway-AccidentContext-id-0001" targetRef="UserTask-DirectorateReviewSchools-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ContextToLogOnly-id-0007" name="non_work_related OR agricultural_special_case" sourceRef="ExclusiveGateway-AccidentContext-id-0001" targetRef="ServiceTask-LogIncidentInSystem-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AssessToReportingGateway-id-0008" sourceRef="UserTask-EmployerAssessesSeverity-id-0001" targetRef="ExclusiveGateway-AssessReportingRequirement-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DirectorateToReportingGateway-id-0009" sourceRef="UserTask-DirectorateReviewSchools-id-0001" targetRef="ExclusiveGateway-AssessReportingRequirement-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-LogToConfirmation-id-0010" sourceRef="ServiceTask-LogIncidentInSystem-id-0001" targetRef="SendTask-ConfirmationToEmployee-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReportingToLabourInspectorate-id-0011" name="fatality OR serious_injury" sourceRef="ExclusiveGateway-AssessReportingRequirement-id-0001" targetRef="SendTask-ReportToLabourInspectorate-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReportingToInsurance-id-0012" name="incapacity &#62;= 3_days" sourceRef="ExclusiveGateway-AssessReportingRequirement-id-0001" targetRef="SubProcess-GenerateInsuranceReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReportingToDirectorate-id-0013" name="school_related" sourceRef="ExclusiveGateway-AssessReportingRequirement-id-0001" targetRef="SubProcess-GenerateInsuranceReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReportingToLogOnly-id-0014" sourceRef="ExclusiveGateway-AssessReportingRequirement-id-0001" targetRef="ServiceTask-LogIncidentInSystem-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-LabourInspectorateToGenerate-id-0015" sourceRef="SendTask-ReportToLabourInspectorate-id-0001" targetRef="SubProcess-GenerateInsuranceReport-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GenerateToInsuranceProvider-id-0016" sourceRef="SubProcess-GenerateInsuranceReport-id-0001" targetRef="SendTask-ReportToInsuranceProvider-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DirectorateToGenerate-id-0017" sourceRef="SubProcess-GenerateInsuranceReport-id-0001" targetRef="SendTask-ReportToCompetentDirectorate-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InsuranceToConfirmation-id-0018" sourceRef="SendTask-ReportToInsuranceProvider-id-0001" targetRef="SendTask-ConfirmationToEmployee-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DirectorateToConfirmation-id-0019" sourceRef="SendTask-ReportToCompetentDirectorate-id-0001" targetRef="SendTask-ConfirmationToEmployee-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmationToEnd-id-0020" sourceRef="SendTask-ConfirmationToEmployee-id-0001" targetRef="EndEvent-ProcessComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AuditStartToQuery-id-0021" sourceRef="StartEvent-DailyAudit-id-0001" targetRef="ServiceTask-QueryUnreportedIncidents-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-QueryToUnreportedGateway-id-0022" sourceRef="ServiceTask-QueryUnreportedIncidents-id-0001" targetRef="ExclusiveGateway-UnreportedIncidents-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UnreportedToAlert-id-0023" name="unreported_incidents_found" sourceRef="ExclusiveGateway-UnreportedIncidents-id-0001" targetRef="SendTask-ComplianceAlertToManagement-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UnreportedToAuditEnd-id-0024" sourceRef="ExclusiveGateway-UnreportedIncidents-id-0001" targetRef="EndEvent-AuditComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AlertToAuditEnd-id-0025" sourceRef="SendTask-ComplianceAlertToManagement-id-0001" targetRef="EndEvent-AuditComplete-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process_WorkAccidentReporting">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process_WorkAccidentReporting" bpmnElement="Process_WorkAccidentReporting">
+      <bpmndi:BPMNShape id="StartEvent-AccidentOccurs-id-0001_di" bpmnElement="StartEvent-AccidentOccurs-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReportAccidentToEmployer-id-0001_di" bpmnElement="UserTask-ReportAccidentToEmployer-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer24H-ReportAccident-id-0001_di" bpmnElement="BoundaryEvent-Timer24H-ReportAccident-id-0001">
+        <dc:Bounds x="207" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-AccidentContext-id-0001_di" bpmnElement="ExclusiveGateway-AccidentContext-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EmployerAssessesSeverity-id-0001_di" bpmnElement="UserTask-EmployerAssessesSeverity-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-AssessReportingRequirement-id-0001_di" bpmnElement="ExclusiveGateway-AssessReportingRequirement-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ReportToLabourInspectorate-id-0001_di" bpmnElement="SendTask-ReportToLabourInspectorate-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-GenerateInsuranceReport-id-0001_di" bpmnElement="SubProcess-GenerateInsuranceReport-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ReportToInsuranceProvider-id-0001_di" bpmnElement="SendTask-ReportToInsuranceProvider-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ConfirmationToEmployee-id-0001_di" bpmnElement="SendTask-ConfirmationToEmployee-id-0001">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0001_di" bpmnElement="EndEvent-ProcessComplete-id-0001">
+        <dc:Bounds x="1857" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-EscalationToHR-id-0001_di" bpmnElement="SendTask-EscalationToHR-id-0001">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-DirectorateReviewSchools-id-0001_di" bpmnElement="UserTask-DirectorateReviewSchools-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ReportToCompetentDirectorate-id-0001_di" bpmnElement="SendTask-ReportToCompetentDirectorate-id-0001">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent-DailyAudit-id-0001_di" bpmnElement="StartEvent-DailyAudit-id-0001">
+        <dc:Bounds x="57" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-QueryUnreportedIncidents-id-0001_di" bpmnElement="ServiceTask-QueryUnreportedIncidents-id-0001">
+        <dc:Bounds x="175" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-UnreportedIncidents-id-0001_di" bpmnElement="ExclusiveGateway-UnreportedIncidents-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="325" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ComplianceAlertToManagement-id-0001_di" bpmnElement="SendTask-ComplianceAlertToManagement-id-0001">
+        <dc:Bounds x="475" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AuditComplete-id-0001_di" bpmnElement="EndEvent-AuditComplete-id-0001">
+        <dc:Bounds x="657" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-LogIncidentInSystem-id-0001_di" bpmnElement="ServiceTask-LogIncidentInSystem-id-0001">
+        <dc:Bounds x="1225" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToReport-id-0001_di" bpmnElement="SequenceFlow-StartToReport-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReportToContextGateway-id-0002_di" bpmnElement="SequenceFlow-ReportToContextGateway-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToEscalation-id-0003_di" bpmnElement="SequenceFlow-BoundaryToEscalation-id-0003">
+        <di:waypoint x="225" y="128" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ContextToWorkRelated-id-0005_di" bpmnElement="SequenceFlow-ContextToWorkRelated-id-0005">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ContextToSchoolRelated-id-0006_di" bpmnElement="SequenceFlow-ContextToSchoolRelated-id-0006">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ContextToLogOnly-id-0007_di" bpmnElement="SequenceFlow-ContextToLogOnly-id-0007">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="350" />
+        <di:waypoint x="1225" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AssessToReportingGateway-id-0008_di" bpmnElement="SequenceFlow-AssessToReportingGateway-id-0008">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReportingToLabourInspectorate-id-0011_di" bpmnElement="SequenceFlow-ReportingToLabourInspectorate-id-0011">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReportingToInsurance-id-0012_di" bpmnElement="SequenceFlow-ReportingToInsurance-id-0012">
+        <di:waypoint x="1125" y="95" />
+        <di:waypoint x="1125" y="140" />
+        <di:waypoint x="1425" y="140" />
+        <di:waypoint x="1425" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReportingToDirectorate-id-0013_di" bpmnElement="SequenceFlow-ReportingToDirectorate-id-0013">
+        <di:waypoint x="1125" y="95" />
+        <di:waypoint x="1125" y="140" />
+        <di:waypoint x="1425" y="140" />
+        <di:waypoint x="1425" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReportingToLogOnly-id-0014_di" bpmnElement="SequenceFlow-ReportingToLogOnly-id-0014">
+        <di:waypoint x="1125" y="95" />
+        <di:waypoint x="1125" y="350" />
+        <di:waypoint x="1225" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LabourInspectorateToGenerate-id-0015_di" bpmnElement="SequenceFlow-LabourInspectorateToGenerate-id-0015">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateToInsuranceProvider-id-0016_di" bpmnElement="SequenceFlow-GenerateToInsuranceProvider-id-0016">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DirectorateToGenerate-id-0017_di" bpmnElement="SequenceFlow-DirectorateToGenerate-id-0017">
+        <di:waypoint x="1425" y="110" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InsuranceToConfirmation-id-0018_di" bpmnElement="SequenceFlow-InsuranceToConfirmation-id-0018">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmationToEnd-id-0020_di" bpmnElement="SequenceFlow-ConfirmationToEnd-id-0020">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1857" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EscalationToLog-id-0004_di" bpmnElement="SequenceFlow-EscalationToLog-id-0004">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="450" y="210" />
+        <di:waypoint x="450" y="280" />
+        <di:waypoint x="1200" y="280" />
+        <di:waypoint x="1200" y="350" />
+        <di:waypoint x="1225" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DirectorateToReportingGateway-id-0009_di" bpmnElement="SequenceFlow-DirectorateToReportingGateway-id-0009">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DirectorateToConfirmation-id-0019_di" bpmnElement="SequenceFlow-DirectorateToConfirmation-id-0019">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1725" y="210" />
+        <di:waypoint x="1725" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AuditStartToQuery-id-0021_di" bpmnElement="SequenceFlow-AuditStartToQuery-id-0021">
+        <di:waypoint x="93" y="350" />
+        <di:waypoint x="175" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-QueryToUnreportedGateway-id-0022_di" bpmnElement="SequenceFlow-QueryToUnreportedGateway-id-0022">
+        <di:waypoint x="275" y="350" />
+        <di:waypoint x="350" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UnreportedToAlert-id-0023_di" bpmnElement="SequenceFlow-UnreportedToAlert-id-0023">
+        <di:waypoint x="400" y="350" />
+        <di:waypoint x="475" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UnreportedToAuditEnd-id-0024_di" bpmnElement="SequenceFlow-UnreportedToAuditEnd-id-0024">
+        <di:waypoint x="375" y="375" />
+        <di:waypoint x="375" y="420" />
+        <di:waypoint x="675" y="420" />
+        <di:waypoint x="675" y="368" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlertToAuditEnd-id-0025_di" bpmnElement="SequenceFlow-AlertToAuditEnd-id-0025">
+        <di:waypoint x="575" y="350" />
+        <di:waypoint x="657" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LogToConfirmation-id-0010_di" bpmnElement="SequenceFlow-LogToConfirmation-id-0010">
+        <di:waypoint x="1325" y="350" />
+        <di:waypoint x="1725" y="350" />
+        <di:waypoint x="1725" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-GenerateInsuranceReport-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-GenerateInsuranceReport-id-0001" bpmnElement="SubProcess-GenerateInsuranceReport-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-GenerateReport-id-0001_di" bpmnElement="StartEvent-GenerateReport-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ValidateIncidentData-id-0001_di" bpmnElement="ServiceTask-ValidateIncidentData-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-FormatReportForInsurance-id-0001_di" bpmnElement="ServiceTask-FormatReportForInsurance-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AttachSupportingDocuments-id-0001_di" bpmnElement="ServiceTask-AttachSupportingDocuments-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ReportReady-id-0001_di" bpmnElement="EndEvent-ReportReady-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateToValidate-id-0001_di" bpmnElement="SequenceFlow-GenerateToValidate-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidateToFormat-id-0002_di" bpmnElement="SequenceFlow-ValidateToFormat-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FormatToAttach-id-0003_di" bpmnElement="SequenceFlow-FormatToAttach-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AttachToEnd-id-0004_di" bpmnElement="SequenceFlow-AttachToEnd-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

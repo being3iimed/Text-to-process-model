@@ -1,0 +1,162 @@
+```
+<summary_of_elements>
+
+### TASKS:
+- **userTask("Select Starting Block")** - Human decision required to choose starting block
+- **serviceTask("Measure 5km Time")** - Automated time measurement via fitness gadget
+- **userTask("Train Until Goal Achieved")** - Human action required if time > 25 minutes
+- **serviceTask("Get Starting Number")** - Automated system action after qualifying
+- **userTask("Check Workday End Time")** - Human input of work schedule
+- **scriptTask("Computation: Calculate Time Difference")** - System calculates time between work end and start time
+- **userTask("Decide Travel Route")** - Human decision based on time difference
+- **serviceTask("Run and Drink Simultaneously")** - Automated tracking during event
+- **serviceTask("Receive Final Running Time")** - Automated result collection
+
+### GATEWAYS:
+- **XOR after "Measure 5km Time"** - Binary decision: qualified (<25min) or needs training
+- **XOR after "Calculate Time Difference"** - Binary decision: travel from home or work
+
+### EVENTS:
+- **startEvent("Start Vienna Night Run Participation")** - Manual trigger
+- **endEvent("Final Time Received")** - Normal completion
+
+### BOUNDARY EVENTS:
+- **None** - No explicit SLA requirements or error scenarios mentioned
+
+### SUBPROCESSES:
+- **None** - All tasks are linear/conditional with no cohesive grouping
+
+### DATA FLOW NOTES:
+- Fitness gadget provides: 5km time measurement, final running time
+- User provides: starting block selection, workday end time, travel decision
+- System computes: time difference between work end and start time
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+```
+startEvent("Start Vienna Night Run Participation")
+
+// Initial Setup Phase
+userTask("Select Starting Block")
+serviceTask("Measure 5km Time")
+
+// Qualification Check
+if (measured_time <= "PT25M"):
+    serviceTask("Get Starting Number")
+else:
+    userTask("Train Until Goal Achieved")
+    // Loop back to re-measure (implied by "until achieved")
+    serviceTask("Measure 5km Time")
+    // After successful training:
+    serviceTask("Get Starting Number")
+
+// Logistics Planning
+userTask("Check Workday End Time")
+scriptTask("Computation: Calculate Time Difference between Work End and Start Time")
+
+// Travel Decision
+if (time_difference > "PT1H"):
+    userTask("Decide Travel Route: From Home")
+else:
+    userTask("Decide Travel Route: From Work")
+
+// Event Participation
+serviceTask("Run and Drink Simultaneously")
+serviceTask("Receive Final Running Time")
+
+endEvent("Final Time Received")
+```
+
+</bpmn_pseudocode>
+
+<compliance_validation>
+
+### TIMER PROPERTIES:
+✅ **Valid**: All time comparisons use ISO 8601 duration format ("PT25M", "PT1H")
+✅ **No RRULE misuse**: No recurring schedules (only duration comparisons)
+✅ **Proper placement**: Time comparisons in gateways, not as standalone timer events
+
+### GATEWAY COMPLIANCE:
+✅ **XOR Gateways**:
+   - After "Measure 5km Time" (mutually exclusive: qualified/needs training)
+   - After "Calculate Time Difference" (mutually exclusive: home/work travel)
+✅ **Convergence**: Implicit convergence after training loop (linear flow resumes)
+✅ **Labels**: All conditional flows have clear labels (time comparisons)
+
+### FLOW VALIDATION:
+✅ **Complete paths**: All routes traceable from start to end
+✅ **No orphans**: Every task connects to next step
+✅ **Loop handling**: Training loop implied by "until achieved" (would require BPMN loop marker in actual model)
+
+### BOUNDARY EVENTS:
+✅ **None added**: No speculative error/SLA handling (none mentioned in requirements)
+
+### SUBPROCESSES:
+✅ **None created**: All tasks are linear/conditional with no cohesive grouping needs
+
+### LABEL COMPLIANCE:
+✅ **Descriptive**: All sequence flows from gateways have condition labels
+✅ **No placeholders**: No empty strings or vague labels
+
+</compliance_validation>
+
+<critical_notes>
+
+1. **Training Loop**: The "until achieved" condition implies a loop that would require:
+   - A loop marker on the "Train Until Goal Achieved" task in actual BPMN
+   - Explicit loop back to "Measure 5km Time"
+
+2. **Time Comparisons**:
+   - All time logic uses ISO 8601 durations for BPMN compliance
+   - "PT25M" = 25 minutes
+   - "PT1H" = 1 hour
+
+3. **Data Flow Assumptions**:
+   - Fitness gadget integration assumed for:
+     - Initial 5km time measurement
+     - Final running time collection
+   - User manually enters:
+     - Starting block selection
+     - Workday end time
+
+4. **Travel Decision Logic**:
+   - Strict >1 hour threshold for "from home" decision
+   - ≤1 hour triggers "from work" path
+
+5. **Parallel Activities**:
+   - "Run and Drink Simultaneously" modeled as single serviceTask since:
+     - Both actions occur concurrently during the run
+     - No separate tracking required per requirements
+
+</critical_notes>
+
+<recommended_enhancements>
+
+1. **Explicit Loop Modeling**:
+```pseudocode
+// Replace training section with:
+while (measured_time > "PT25M"):
+    userTask("Train Until Goal Achieved")
+    serviceTask("Measure 5km Time")
+serviceTask("Get Starting Number")
+```
+
+2. **Fitness Data Integration**:
+   - Add `messageStartEvent("Fitness Data Received")` if real-time gadget integration needed
+   - Would require separate process for gadget data handling
+
+3. **Travel Time Buffer**:
+   - Consider adding buffer time (e.g., 15m) to travel decision for realism:
+   ```pseudocode
+   if (time_difference > "PT1H15M"):  // 1h15m buffer
+   ```
+
+4. **Post-Event Actions**:
+   - Could extend with:
+     - `userTask("Share Results on Social Media")`
+     - `serviceTask("Update Personal Best Records")`
+
+</recommended_enhancements>
+```

@@ -1,0 +1,401 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "JobApplicationLifecycleDefinitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "2.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "JobApplicationLifecycleProcess",
+      "isExecutable": false,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-ReportingCycleTrigger-id-0001",
+          "name": "Reporting Cycle Trigger",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeCycle": "RRULE:FREQ=WEEKLY;BYDAY=MO;BYHOUR=9;BYMINUTE=0"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-ApplicationReporting-id-0001",
+          "name": "Application Reporting",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-ReportingCycleBegins-id-0001",
+              "name": "Reporting Cycle Begins"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ReportJobApplications-id-0001",
+              "name": "Report Job Applications"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-ApplicationReport-id-0001",
+              "name": "Send: Application Report"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-GeneratePotentialOffers-id-0001",
+              "name": "Generate Potential Offers"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-NewJobOffers-id-0001",
+              "name": "Send: New Job Offers"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-ReportingComplete-id-0001",
+              "name": "Reporting Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReportingStartToReport-id-0001",
+              "sourceRef": "StartEvent-ReportingCycleBegins-id-0001",
+              "targetRef": "UserTask-ReportJobApplications-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReportToSendReport-id-0002",
+              "sourceRef": "UserTask-ReportJobApplications-id-0001",
+              "targetRef": "SendTask-ApplicationReport-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendReportToGenerateOffers-id-0003",
+              "sourceRef": "SendTask-ApplicationReport-id-0001",
+              "targetRef": "ServiceTask-GeneratePotentialOffers-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GenerateOffersToSendOffers-id-0004",
+              "sourceRef": "ServiceTask-GeneratePotentialOffers-id-0001",
+              "targetRef": "SendTask-NewJobOffers-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendOffersToReportingEnd-id-0005",
+              "sourceRef": "SendTask-NewJobOffers-id-0001",
+              "targetRef": "EndEvent-ReportingComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-CompanyConfirmation-id-0001",
+          "name": "Receive Company Confirmation"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-ConfirmationTimeout-id-0001",
+          "name": "7 Day Confirmation Timeout",
+          "attachedToRef": "ReceiveTask-CompanyConfirmation-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "P7D"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-ConfirmationReminder-id-0001",
+          "name": "Send: confirmation reminder to company"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-ApplicationRating-id-0001",
+          "name": "Receive Application Rating"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-RatingTimeout-id-0001",
+          "name": "14 Day Rating Timeout",
+          "attachedToRef": "ReceiveTask-ApplicationRating-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "P14D"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-RatingReminder-id-0001",
+          "name": "Send: rating reminder to company"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-RatingCheck-id-0001",
+          "name": "Rating Threshold Check?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-NegotiateInterview-id-0001",
+          "name": "Negotiate Interview"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-JobOffer-id-0001",
+          "name": "Receive Job Offer"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-ProbationPhase-id-0001",
+          "name": "Probation Phase",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-ProbationBegins-id-0001",
+              "name": "Probation Begins"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ConfirmProbationCompletion-id-0001",
+              "name": "Confirm Probation Completion"
+            },
+            {
+              "$type": "bpmn:ReceiveTask",
+              "id": "ReceiveTask-ProbationOutcome-id-0001",
+              "name": "Receive Probation Outcome"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-ProbationOutcome-id-0001",
+              "name": "Probation Outcome?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-MarkJobPermanent-id-0001",
+              "name": "Mark Job as Permanent"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ReviewCompanyRating-id-0001",
+              "name": "Review Company Rating"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-CompanyRating-id-0001",
+              "name": "Company Rating?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-UpdatePreferences-id-0001",
+              "name": "Update Preferences: No Reporting"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-PermanentJob-id-0001",
+              "name": "Process Complete - Permanent Job"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-ProbationFailed-id-0001",
+              "name": "Process Complete - Probation Failed"
+            },
+            {
+              "$type": "bpmn:IntermediateCatchEvent",
+              "id": "IntermediateCatchEvent-ReviewVisibility-id-0001",
+              "name": "1 Year Review Visibility",
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:TimerEventDefinition",
+                  "timeDuration": "P1Y"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-ReviewVisibilityNotification-id-0001",
+              "name": "Send: Review Visibility Notification"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-ProbationPhaseComplete-id-0001",
+              "name": "Probation Phase Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ProbationStartToConfirm-id-0001",
+              "sourceRef": "StartEvent-ProbationBegins-id-0001",
+              "targetRef": "UserTask-ConfirmProbationCompletion-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ConfirmToReceiveOutcome-id-0002",
+              "sourceRef": "UserTask-ConfirmProbationCompletion-id-0001",
+              "targetRef": "ReceiveTask-ProbationOutcome-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReceiveOutcomeToGateway-id-0003",
+              "sourceRef": "ReceiveTask-ProbationOutcome-id-0001",
+              "targetRef": "ExclusiveGateway-ProbationOutcome-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ProbationPermanentToMarkJob-id-0004",
+              "sourceRef": "ExclusiveGateway-ProbationOutcome-id-0001",
+              "targetRef": "ServiceTask-MarkJobPermanent-id-0001",
+              "name": "permanent"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-MarkJobToReviewRating-id-0005",
+              "sourceRef": "ServiceTask-MarkJobPermanent-id-0001",
+              "targetRef": "UserTask-ReviewCompanyRating-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReviewRatingToRatingGateway-id-0006",
+              "sourceRef": "UserTask-ReviewCompanyRating-id-0001",
+              "targetRef": "ExclusiveGateway-CompanyRating-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RatingHighToEndPermanent-id-0007",
+              "sourceRef": "ExclusiveGateway-CompanyRating-id-0001",
+              "targetRef": "EndEvent-PermanentJob-id-0001",
+              "name": "rating > 'C'"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RatingLowToUpdatePrefs-id-0008",
+              "sourceRef": "ExclusiveGateway-CompanyRating-id-0001",
+              "targetRef": "ServiceTask-UpdatePreferences-id-0001",
+              "name": "rating <= 'C'"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ProbationTerminatedToEndFailed-id-0009",
+              "sourceRef": "ExclusiveGateway-ProbationOutcome-id-0001",
+              "targetRef": "EndEvent-ProbationFailed-id-0001",
+              "name": "terminated",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-UpdatePrefsToVisibilityTimer-id-0010",
+              "sourceRef": "ServiceTask-UpdatePreferences-id-0001",
+              "targetRef": "IntermediateCatchEvent-ReviewVisibility-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-VisibilityTimerToNotification-id-0011",
+              "sourceRef": "IntermediateCatchEvent-ReviewVisibility-id-0001",
+              "targetRef": "SendTask-ReviewVisibilityNotification-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-NotificationToProbationEnd-id-0012",
+              "sourceRef": "SendTask-ReviewVisibilityNotification-id-0001",
+              "targetRef": "EndEvent-ProbationPhaseComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-VoluntaryExit-id-0001",
+          "name": "Process Complete - Voluntary Exit"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToReportingSubprocess-id-0001",
+          "sourceRef": "StartEvent-ReportingCycleTrigger-id-0001",
+          "targetRef": "SubProcess-ApplicationReporting-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReportingToCompanyConfirmation-id-0002",
+          "sourceRef": "SubProcess-ApplicationReporting-id-0001",
+          "targetRef": "ReceiveTask-CompanyConfirmation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmationToRating-id-0003",
+          "sourceRef": "ReceiveTask-CompanyConfirmation-id-0001",
+          "targetRef": "ReceiveTask-ApplicationRating-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmationTimeoutToReminder-id-0004",
+          "sourceRef": "BoundaryEvent-ConfirmationTimeout-id-0001",
+          "targetRef": "SendTask-ConfirmationReminder-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReminderToRating-id-0005",
+          "sourceRef": "SendTask-ConfirmationReminder-id-0001",
+          "targetRef": "ReceiveTask-ApplicationRating-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RatingToRatingGateway-id-0006",
+          "sourceRef": "ReceiveTask-ApplicationRating-id-0001",
+          "targetRef": "ExclusiveGateway-RatingCheck-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RatingTimeoutToRatingReminder-id-0007",
+          "sourceRef": "BoundaryEvent-RatingTimeout-id-0001",
+          "targetRef": "SendTask-RatingReminder-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RatingReminderToRatingGateway-id-0008",
+          "sourceRef": "SendTask-RatingReminder-id-0001",
+          "targetRef": "ExclusiveGateway-RatingCheck-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RatingHighToNegotiate-id-0009",
+          "sourceRef": "ExclusiveGateway-RatingCheck-id-0001",
+          "targetRef": "UserTask-NegotiateInterview-id-0001",
+          "name": "rating >= threshold"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RatingLowToGenerateOffers-id-0010",
+          "sourceRef": "ExclusiveGateway-RatingCheck-id-0001",
+          "targetRef": "ServiceTask-GeneratePotentialOffers-id-0001",
+          "name": "rating < threshold",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NegotiateToJobOffer-id-0011",
+          "sourceRef": "UserTask-NegotiateInterview-id-0001",
+          "targetRef": "ReceiveTask-JobOffer-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JobOfferToProbation-id-0012",
+          "sourceRef": "ReceiveTask-JobOffer-id-0001",
+          "targetRef": "SubProcess-ProbationPhase-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ProbationToVoluntaryExit-id-0013",
+          "sourceRef": "SubProcess-ProbationPhase-id-0001",
+          "targetRef": "EndEvent-VoluntaryExit-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

@@ -1,0 +1,147 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "claims-processing-definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "ClaimsProcessing",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-ClaimRegistered-id-0001",
+          "name": "Claim Registered"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ExamineClaim-id-0001",
+          "name": "Examine Claim"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-WriteSettlementRecommendation-id-0002",
+          "name": "Write Settlement Recommendation"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ReviewRecommendation-id-0003",
+          "name": "Review Recommendation"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-RecommendationStatus-id-0001",
+          "name": "Recommendation Status?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-RecommendationApproved-id-0001",
+          "name": "Recommendation Approved"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ReviseRecommendation-id-0004",
+          "name": "Revise Recommendation"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ReviewRecommendationSecond-id-0005",
+          "name": "Review Recommendation"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-RecommendationStatusSecond-id-0002",
+          "name": "Recommendation Status (2nd)?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-FinalDecisionByManager-id-0006",
+          "name": "Final Decision by Manager"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-RecommendationApprovedSecond-id-0002",
+          "name": "Recommendation Approved"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToExamine-id-0001",
+          "sourceRef": "StartEvent-ClaimRegistered-id-0001",
+          "targetRef": "UserTask-ExamineClaim-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ExamineToWrite-id-0002",
+          "sourceRef": "UserTask-ExamineClaim-id-0001",
+          "targetRef": "UserTask-WriteSettlementRecommendation-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-WriteToReview-id-0003",
+          "sourceRef": "UserTask-WriteSettlementRecommendation-id-0002",
+          "targetRef": "UserTask-ReviewRecommendation-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReviewToGateway-id-0004",
+          "sourceRef": "UserTask-ReviewRecommendation-id-0003",
+          "targetRef": "ExclusiveGateway-RecommendationStatus-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToApproved-id-0005",
+          "name": "recommendation == OK",
+          "sourceRef": "ExclusiveGateway-RecommendationStatus-id-0001",
+          "targetRef": "EndEvent-RecommendationApproved-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToRevise-id-0006",
+          "name": "recommendation == Not OK",
+          "sourceRef": "ExclusiveGateway-RecommendationStatus-id-0001",
+          "targetRef": "UserTask-ReviseRecommendation-id-0004",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReviseToReviewSecond-id-0007",
+          "sourceRef": "UserTask-ReviseRecommendation-id-0004",
+          "targetRef": "UserTask-ReviewRecommendationSecond-id-0005"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReviewSecondToGatewaySecond-id-0008",
+          "sourceRef": "UserTask-ReviewRecommendationSecond-id-0005",
+          "targetRef": "ExclusiveGateway-RecommendationStatusSecond-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewaySecondToApproved-id-0009",
+          "name": "recommendation == OK",
+          "sourceRef": "ExclusiveGateway-RecommendationStatusSecond-id-0002",
+          "targetRef": "EndEvent-RecommendationApprovedSecond-id-0002",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewaySecondToManager-id-0010",
+          "name": "recommendation == Not OK",
+          "sourceRef": "ExclusiveGateway-RecommendationStatusSecond-id-0002",
+          "targetRef": "UserTask-FinalDecisionByManager-id-0006",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ManagerToApproved-id-0011",
+          "sourceRef": "UserTask-FinalDecisionByManager-id-0006",
+          "targetRef": "EndEvent-RecommendationApprovedSecond-id-0002"
+        }
+      ]
+    }
+  ]
+}

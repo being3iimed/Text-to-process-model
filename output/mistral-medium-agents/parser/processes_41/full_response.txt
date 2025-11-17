@@ -1,0 +1,94 @@
+Here's the BPMN pseudocode for the Energy Drink Bottling Machine Inspection process, with rigorous semantic validation:
+
+```
+<summary>
+TASKS:
+- userTask("Enter Machine Type") - Human input required
+- userTask("Enter Serial Number") - Human input required
+- userTask("Answer Inspection Questions") - Human judgment required
+- serviceTask("Collect Automatic Values") - System reads machine sensors
+- userTask("Answer Additional Questions") - Conditional human input
+- serviceTask("Validate All Inputs") - System validation
+
+GATEWAYS:
+- XOR at "Check Automatic Values" with conditions:
+  - values_within_spec
+  - values_out_of_spec (default)
+
+- XOR at "Check Question Answers" with conditions:
+  - answers_acceptable
+  - answers_require_followup
+
+EVENTS:
+- startEvent("Inspection Started") - Manual trigger
+- endEvent("Inspection Complete") - Normal completion
+- endEvent("Inspection Failed") - Abnormal termination
+
+BOUNDARY EVENTS:
+- None (no explicit SLA or error handling mentioned)
+
+SUBPROCESSES:
+- None (all steps are linear or simple branching)
+</summary>
+
+<pseudocode>
+startEvent("Inspection Started")
+
+// Initial data collection
+userTask("Enter Machine Type")
+userTask("Enter Serial Number")
+
+// Main inspection sequence
+userTask("Answer Inspection Questions")
+serviceTask("Collect Automatic Values")
+
+// Decision point 1: Automatic values check
+if (values_within_spec):
+    // Decision point 2: Question answers check
+    if (answers_acceptable):
+        serviceTask("Validate All Inputs")
+        endEvent("Inspection Complete")
+    else if (answers_require_followup):
+        userTask("Answer Additional Questions")
+        serviceTask("Validate All Inputs")
+        endEvent("Inspection Complete")
+    end_if
+else: // values_out_of_spec (default)
+    endEvent("Inspection Failed")
+end_if
+</pseudocode>
+
+<compliance_validation>
+1. TIMER EVENTS:
+   - None used (no scheduling requirements mentioned)
+   - ✅ Compliant
+
+2. GATEWAYS:
+   - XOR gateways properly converged via if/else structure
+   - Conditions are mutually exclusive
+   - ✅ Compliant
+
+3. SEQUENCE FLOWS:
+   - All conditional flows have descriptive labels
+   - No empty string labels
+   - ✅ Compliant
+
+4. BOUNDARY EVENTS:
+   - None added (no explicit SLA or error handling mentioned)
+   - ✅ Compliant
+
+5. SUBPROCESSES:
+   - None created (all steps are simple linear/branching)
+   - ✅ Compliant
+
+6. FLOW PATHS:
+   - All paths traceable start-to-end
+   - No orphaned flows
+   - ✅ Compliant
+
+7. BALANCE:
+   - Core elements (tasks/gateways) comprise 100% of design
+   - No over-engineering
+   - ✅ Compliant
+</compliance_validation>
+```

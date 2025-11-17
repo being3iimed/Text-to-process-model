@@ -1,0 +1,206 @@
+```
+<summary_of_elements>
+
+## Summary of Elements
+
+### TASKS
+- **userTask("Log in to Account")** - Manual user action to initiate order
+- **userTask("Select Items to Purchase")** - User selects products (parallel with payment setup)
+- **userTask("Set Payment Method")** - User configures payment (parallel with item selection)
+- **userTask("Pay for Order")** - User completes payment (XOR with installment)
+- **userTask("Complete Installment Agreement")** - User sets up installment plan (XOR with payment)
+- **userTask("Choose Free Reward")** - User selects reward (dependent on purchase value, independent of payment)
+- **serviceTask("Process Delivery")** - System initiates delivery
+- **userTask("Request Item Exchange")** - User initiates return (loop condition)
+- **serviceTask("Process Return")** - System handles return
+- **serviceTask("Schedule New Delivery")** - System triggers replacement delivery
+
+### GATEWAYS
+- **AND Gateway** after login to parallelize item selection and payment setup
+- **XOR Gateway** after payment setup (pay now vs. installment)
+- **Loop Gateway** for returns/exchanges (conditional on user request)
+
+### EVENTS
+- **startEvent("Order Process Started")** - Manual trigger
+- **endEvent("Order Fulfilled")** - Final completion
+- **intermediateEvent** - Implicit between delivery and return decision
+
+### BOUNDARY EVENTS
+- **None** (No explicit SLAs or error scenarios mentioned)
+
+### SUBPROCESSES
+- **None** (All tasks are linear/parallel with clear dependencies)
+
+---
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+```pseudocode
+startEvent("Order Process Started")
+
+// --- Parallel Activities ---
+AND:
+    userTask("Log in to Account")
+    AND:
+        userTask("Select Items to Purchase")
+        userTask("Set Payment Method")
+    END_AND
+END_AND
+
+// --- Payment Decision ---
+if (payment_method == "full_payment"):
+    userTask("Pay for Order")
+else:
+    userTask("Complete Installment Agreement")
+end_if
+
+// --- Reward Selection (Independent) ---
+userTask("Choose Free Reward")
+
+// --- Delivery & Returns Loop ---
+serviceTask("Process Delivery")
+
+// Exchange/Return Decision
+if (user_requests_exchange):
+    userTask("Request Item Exchange")
+    serviceTask("Process Return")
+    serviceTask("Schedule New Delivery")
+    // Loop back to delivery
+    GOTO: serviceTask("Process Delivery")
+else:
+    // Exit loop
+end_if
+
+endEvent("Order Fulfilled")
+```
+
+---
+</bpmn_pseudocode>
+
+<compliance_validation>
+
+## Compliance Validation
+
+### **1. Timer Events**
+✅ **No timer events** used (none required by description).
+
+### **2. Gateway Convergence**
+✅ **AND Gateway** after login has implicit convergence (all parallel paths merge before payment decision).
+✅ **XOR Gateway** for payment has clear branches (full payment vs. installment).
+✅ **Loop Gateway** for returns is self-converging (conditional exit).
+
+### **3. Sequence Flow Labels**
+✅ All decision flows labeled:
+   - `payment_method == "full_payment"`
+   - `user_requests_exchange` (loop condition)
+
+### **4. Boundary Events**
+✅ **None added** (no SLAs or error scenarios mentioned).
+
+### **5. Subprocesses**
+✅ **None created** (all tasks are linear/parallel with clear dependencies; no cohesive grouping needed).
+
+### **6. Flow Consistency**
+✅ All paths traceable:
+   - Start → Login → (Item Selection || Payment Setup) → Payment Decision → Reward → Delivery → [Return Loop] → End.
+✅ No orphaned flows.
+
+### **7. Data Dependencies**
+✅ Reward selection depends on **purchase value** (logical, as it follows item selection).
+✅ Payment decision independent of reward selection (correctly modeled).
+
+### **8. Loop Handling**
+✅ Return/exchange loop:
+   - Conditional on `user_requests_exchange`.
+   - Explicit exit path when no exchange requested.
+
+---
+</compliance_validation>
+
+<key_design_decisions>
+
+## Key Design Decisions
+
+### **1. Parallelism for Item Selection & Payment Setup**
+- **Why AND Gateway?**
+  The description states these actions occur *simultaneously* ("the user simultaneously selects the items... and sets a payment method").
+  **BPMN Compliance**: Parallel gateways are the correct construct for independent concurrent tasks.
+
+### **2. XOR for Payment Decision**
+- **Why not OR?**
+  The user either pays in full **or** sets up installments—these are mutually exclusive.
+  **BPMN Compliance**: XOR gateways enforce exclusive branches.
+
+### **3. Reward Selection After Items (But Independent of Payment)**
+- **Placement Justification**:
+  The reward depends on *purchase value* (from item selection) but is *independent of payment*.
+  **Modeling Choice**: Placed after item selection but outside the payment XOR branch to reflect independence.
+
+### **4. Return/Exchange Loop**
+- **Why a Loop?**
+  The description states: *"Every time items are returned, a new delivery is made."*
+  **BPMN Compliance**: Loops are explicitly supported for repetitive actions. The loop exits when `user_requests_exchange` is false.
+
+### **5. No Subprocesses**
+- **Necessity Test Failed**:
+  - No cohesive grouping of 3+ tasks with a single purpose.
+  - No reuse or complexity isolation needed.
+  **Compliance**: Avoids unnecessary abstraction.
+
+### **6. No Boundary Events**
+- **Gating Criteria Not Met**:
+  - No hard SLAs (e.g., "delivery must complete in 2 days").
+  - No expected error scenarios (e.g., "payment fails").
+  **Compliance**: Boundary events omitted to prevent speculative design.
+
+---
+</key_design_decisions>
+
+<alternatives_considered>
+
+## Alternatives Considered (and Rejected)
+
+### **1. Subprocess for "Delivery & Returns"**
+- **Why Rejected?**
+  The loop is simple (3 tasks) and tightly coupled to the main flow. A subprocess would add overhead without clarity benefits.
+  **Validation**: Fails the **Three-Question Test** (Q2: Only 3 tasks; Q3: Removal doesn’t hurt readability).
+
+### **2. OR Gateway for Payment**
+- **Why Rejected?**
+  The description implies mutual exclusivity ("either pays or completes an installment agreement").
+  **BPMN Compliance**: OR gateways are for non-exclusive conditions (e.g., "if VIP **and** high-value order").
+
+### **3. Timer Boundary on Delivery**
+- **Why Rejected?**
+  No SLA mentioned (e.g., "delivery must arrive in 48 hours").
+  **Compliance**: Boundary events require explicit business requirements.
+
+### **4. Separate Process for Returns**
+- **Why Rejected?**
+  Returns are part of the **same order lifecycle**. Separating would break traceability.
+  **BPMN Best Practice**: Keep related activities in one process unless reuse is needed.
+
+---
+</alternatives_considered>
+
+<final_compliance_checklist>
+
+## Final Compliance Checklist
+
+| **Criteria**               | **Status** | **Notes**                                  |
+|----------------------------|------------|--------------------------------------------|
+| Valid BPMN properties      | ✅ PASS    | No invalid timer/event properties.         |
+| Gateway convergence        | ✅ PASS    | All diverging gateways have merges.       |
+| No orphaned flows          | ✅ PASS    | All paths traceable start-to-end.         |
+| Boundary event gating      | ✅ PASS    | None added (no SLAs/errors mentioned).     |
+| Subprocess necessity       | ✅ PASS    | None created (not justified).              |
+| Sequence flow labels       | ✅ PASS    | All decision flows labeled.               |
+| Loop exit condition        | ✅ PASS    | Clear exit (`user_requests_exchange`).     |
+| Parallelism correctness     | ✅ PASS    | AND gateway for independent tasks.        |
+| Mutual exclusivity (XOR)  | ✅ PASS    | Payment branches are exclusive.            |
+| Data dependency satisfaction | ✅ PASS  | Reward depends on item selection.         |
+
+---
+</final_compliance_checklist>
+```

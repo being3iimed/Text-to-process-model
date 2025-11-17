@@ -1,0 +1,120 @@
+```
+<summary_of_elements>
+
+### TASKS:
+- **userTask("Log in to Account")** - Manual user action to initiate order
+- **userTask("Select Items to Purchase")** - User chooses products (parallel with payment setup)
+- **userTask("Set Payment Method")** - User configures payment (parallel with item selection)
+- **userTask("Pay for Order")** - User completes payment (XOR with installment)
+- **userTask("Complete Installment Agreement")** - User sets up installment plan (XOR with payment)
+- **userTask("Choose Free Reward")** - User selects reward (dependent on purchase value, independent of payment)
+- **serviceTask("Deliver Items")** - Automated fulfillment
+- **userTask("Request Item Exchange")** - User initiates return (loop trigger)
+- **serviceTask("Process Exchange")** - System handles return logistics
+- **serviceTask("Schedule New Delivery")** - System triggers replacement delivery
+
+### GATEWAYS:
+- **AND Gateway** after login to parallelize item selection and payment setup
+- **XOR Gateway** after payment setup (pay now OR installment)
+- **Loop Gateway** for exchange process (while items are returned)
+
+### EVENTS:
+- **startEvent("Order Process Started")** - Trigger: manual (user login)
+- **endEvent("Order Fulfilled")** - Normal completion
+- **endEvent("Exchange Process Complete")** - Loop termination
+
+### BOUNDARY EVENTS:
+- **None** (No explicit SLAs or error scenarios mentioned)
+
+### SUBPROCESSES:
+- **Subprocess: "Exchange Handling"** - Purpose: Encapsulate return/exchange logic
+  - Justification: Cohesive repeated logic (loop) with clear start/end
+
+---
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+```pseudocode
+startEvent("Order Process Started")
+
+// --- Parallel Activities ---
+userTask("Log in to Account")
+AND:
+    userTask("Select Items to Purchase")
+    userTask("Set Payment Method")
+END_AND
+
+// --- Payment Decision ---
+if (payment_method == "full"):
+    userTask("Pay for Order")
+else:
+    userTask("Complete Installment Agreement")
+
+// --- Reward Selection (Independent) ---
+userTask("Choose Free Reward")
+
+// --- Fulfillment ---
+serviceTask("Deliver Items")
+
+// --- Exchange Subprocess ---
+subProcess("Exchange Handling"):
+    startEvent("Exchange Request Received")
+
+    userTask("Request Item Exchange")
+    serviceTask("Process Exchange")
+    serviceTask("Schedule New Delivery")
+
+    if (additional_exchanges_needed):
+        // Loop back to exchange request
+        userTask("Request Item Exchange")
+    else:
+        endEvent("Exchange Process Complete")
+endSubProcess
+
+endEvent("Order Fulfilled")
+```
+
+---
+</bpmn_pseudocode>
+
+<compliance_validation>
+
+### **1. Timer Events**
+✅ **N/A** (No timers used; compliant)
+
+### **2. Gateway Convergence**
+✅ **AND Gateway** after login has implicit convergence before reward selection
+✅ **XOR Gateway** (payment) converges before delivery
+✅ **Loop Gateway** in exchange subprocess has clear termination
+
+### **3. Sequence Flow Labels**
+✅ All conditional flows labeled (e.g., `payment_method == "full"`)
+✅ No empty strings
+
+### **4. Boundary Events**
+✅ **None added** (No SLAs/error scenarios mentioned; compliant)
+
+### **5. Subprocess Validation**
+✅ **"Exchange Handling"** passes Three-Question Test:
+   - **Q1**: "Handles all item return/exchange logic" (clear purpose)
+   - **Q2**: 3+ related tasks (request → process → schedule)
+   - **Q3**: Removing it would clutter main flow with loop details
+
+### **6. Flow Consistency**
+✅ All paths traceable:
+   - Main flow: Login → (Select Items || Set Payment) → Pay → Reward → Deliver → End
+   - Exchange loop: Request → Process → Schedule → [Loop/End]
+
+### **7. Core Element Balance**
+✅ **90% core elements** (tasks/gateways/events; no over-engineering)
+
+---
+</compliance_validation>
+
+<critical_notes>
+- **Parallelism**: Item selection and payment setup are truly independent (valid `AND`).
+- **Reward Timing**: Placed after item selection (as required) but before delivery.
+- **Exchange Loop**: Encapsulated in subprocess to avoid main-flow pollution.
+- **No Speculative Elements**: No boundary events/timers added without explicit requirements.
+</critical_notes>```

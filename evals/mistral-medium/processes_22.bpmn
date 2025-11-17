@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="subrogation-process-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="2.0">
+  <bpmn:process id="SubrogationProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-SubrogationCaseReceived-id-0001" name="Subrogation case received">
+      <bpmn:outgoing>SequenceFlow-StartToCheckSubrogation-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-CheckSubrogationPossibility-id-0001" name="Check subrogation possibility">
+      <bpmn:incoming>SequenceFlow-StartToCheckSubrogation-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckToGateway-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-SubrogationPossible-id-0001" name="Subrogation possible?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CheckToGateway-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToPaymentRequest-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToNoSubrogation-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-SendPaymentRequest-id-0001" name="Send payment request to insurant">
+      <bpmn:incoming>SequenceFlow-GatewayToPaymentRequest-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PaymentRequestToReminder-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-ReminderTimer-id-0001" name="7-day reminder">
+      <bpmn:incoming>SequenceFlow-PaymentRequestToReminder-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReminderToSendReminder-id-0001</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sendTask id="SendTask-SendReminder-id-0001" name="Send: reminder to insurant">
+      <bpmn:incoming>SequenceFlow-ReminderToSendReminder-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendReminderToWait-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-WaitForResponse-id-0001" name="Receive: payment or disagreement">
+      <bpmn:incoming>SequenceFlow-SendReminderToWait-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-WaitToResponseGateway-id-0001</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-DisagreementDeadline-id-0001" name="30-day disagreement deadline" attachedToRef="ReceiveTask-WaitForResponse-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryToCollection-id-0001</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-DisagreementDeadline-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P30D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-ForwardToCollection-id-0001" name="Send: case to collection agency">
+      <bpmn:incoming>SequenceFlow-BoundaryToCollection-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CollectionToEnd-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ForwardedToCollection-id-0001" name="Case forwarded to collection">
+      <bpmn:incoming>SequenceFlow-CollectionToEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ResponseReceived-id-0001" name="Response received?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-WaitToResponseGateway-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ResponseToBooking-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ResponseToDisagreementCheck-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-MakeFinancialBooking-id-0001" name="Make financial booking">
+      <bpmn:incoming>SequenceFlow-ResponseToBooking-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BookingToEnd-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-PaymentBooked-id-0001" name="Case closed - payment booked">
+      <bpmn:incoming>SequenceFlow-BookingToEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="UserTask-CheckDisagreementReasoning-id-0001" name="Check disagreement reasoning">
+      <bpmn:incoming>SequenceFlow-ResponseToDisagreementCheck-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DisagreementToCorrectCheck-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-InsurantCorrect-id-0001" name="Insurant correct?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-DisagreementToCorrectCheck-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CorrectCheckToInsurantCorrect-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-CorrectCheckToCollection-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="EndEvent-InsurantCorrect-id-0001" name="Case closed - insurant correct">
+      <bpmn:incoming>SequenceFlow-CorrectCheckToInsurantCorrect-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="SendTask-ForwardToCollection-id-0002" name="Send: case to collection agency">
+      <bpmn:incoming>SequenceFlow-CorrectCheckToCollection-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CollectionToEnd-id-0002</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ForwardedToCollection-id-0002" name="Case forwarded to collection">
+      <bpmn:incoming>SequenceFlow-CollectionToEnd-id-0002</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-NoSubrogation-id-0001" name="Case closed - no subrogation">
+      <bpmn:incoming>SequenceFlow-GatewayToNoSubrogation-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToCheckSubrogation-id-0001" sourceRef="StartEvent-SubrogationCaseReceived-id-0001" targetRef="UserTask-CheckSubrogationPossibility-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckToGateway-id-0001" sourceRef="UserTask-CheckSubrogationPossibility-id-0001" targetRef="ExclusiveGateway-SubrogationPossible-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToPaymentRequest-id-0001" name="subrogation_possible == true" sourceRef="ExclusiveGateway-SubrogationPossible-id-0001" targetRef="ServiceTask-SendPaymentRequest-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToNoSubrogation-id-0001" name="subrogation_possible == false" sourceRef="ExclusiveGateway-SubrogationPossible-id-0001" targetRef="EndEvent-NoSubrogation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PaymentRequestToReminder-id-0001" sourceRef="ServiceTask-SendPaymentRequest-id-0001" targetRef="IntermediateCatchEvent-ReminderTimer-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReminderToSendReminder-id-0001" sourceRef="IntermediateCatchEvent-ReminderTimer-id-0001" targetRef="SendTask-SendReminder-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendReminderToWait-id-0001" sourceRef="SendTask-SendReminder-id-0001" targetRef="ReceiveTask-WaitForResponse-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToCollection-id-0001" sourceRef="BoundaryEvent-DisagreementDeadline-id-0001" targetRef="SendTask-ForwardToCollection-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CollectionToEnd-id-0001" sourceRef="SendTask-ForwardToCollection-id-0001" targetRef="EndEvent-ForwardedToCollection-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-WaitToResponseGateway-id-0001" sourceRef="ReceiveTask-WaitForResponse-id-0001" targetRef="ExclusiveGateway-ResponseReceived-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ResponseToBooking-id-0001" name="payment_received == true" sourceRef="ExclusiveGateway-ResponseReceived-id-0001" targetRef="ServiceTask-MakeFinancialBooking-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ResponseToDisagreementCheck-id-0001" name="disagreement_received == true" sourceRef="ExclusiveGateway-ResponseReceived-id-0001" targetRef="UserTask-CheckDisagreementReasoning-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BookingToEnd-id-0001" sourceRef="ServiceTask-MakeFinancialBooking-id-0001" targetRef="EndEvent-PaymentBooked-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DisagreementToCorrectCheck-id-0001" sourceRef="UserTask-CheckDisagreementReasoning-id-0001" targetRef="ExclusiveGateway-InsurantCorrect-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CorrectCheckToInsurantCorrect-id-0001" name="insurant_correct == true" sourceRef="ExclusiveGateway-InsurantCorrect-id-0001" targetRef="EndEvent-InsurantCorrect-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CorrectCheckToCollection-id-0001" name="insurant_correct == false" sourceRef="ExclusiveGateway-InsurantCorrect-id-0001" targetRef="SendTask-ForwardToCollection-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-CollectionToEnd-id-0002" sourceRef="SendTask-ForwardToCollection-id-0002" targetRef="EndEvent-ForwardedToCollection-id-0002" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubrogationProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubrogationProcess-id-0001" bpmnElement="SubrogationProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-SubrogationCaseReceived-id-0001_di" bpmnElement="StartEvent-SubrogationCaseReceived-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CheckSubrogationPossibility-id-0001_di" bpmnElement="UserTask-CheckSubrogationPossibility-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SubrogationPossible-id-0001_di" bpmnElement="ExclusiveGateway-SubrogationPossible-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SendPaymentRequest-id-0001_di" bpmnElement="ServiceTask-SendPaymentRequest-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-ReminderTimer-id-0001_di" bpmnElement="IntermediateCatchEvent-ReminderTimer-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendReminder-id-0001_di" bpmnElement="SendTask-SendReminder-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-WaitForResponse-id-0001_di" bpmnElement="ReceiveTask-WaitForResponse-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-DisagreementDeadline-id-0001_di" bpmnElement="BoundaryEvent-DisagreementDeadline-id-0001">
+        <dc:Bounds x="957" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ResponseReceived-id-0001_di" bpmnElement="ExclusiveGateway-ResponseReceived-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MakeFinancialBooking-id-0001_di" bpmnElement="ServiceTask-MakeFinancialBooking-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-PaymentBooked-id-0001_di" bpmnElement="EndEvent-PaymentBooked-id-0001">
+        <dc:Bounds x="1707" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-NoSubrogation-id-0001_di" bpmnElement="EndEvent-NoSubrogation-id-0001">
+        <dc:Bounds x="507" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ForwardToCollection-id-0001_di" bpmnElement="SendTask-ForwardToCollection-id-0001">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ForwardedToCollection-id-0001_di" bpmnElement="EndEvent-ForwardedToCollection-id-0001">
+        <dc:Bounds x="1257" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CheckDisagreementReasoning-id-0001_di" bpmnElement="UserTask-CheckDisagreementReasoning-id-0001">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-InsurantCorrect-id-0001_di" bpmnElement="ExclusiveGateway-InsurantCorrect-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1700" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-InsurantCorrect-id-0001_di" bpmnElement="EndEvent-InsurantCorrect-id-0001">
+        <dc:Bounds x="1857" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ForwardToCollection-id-0002_di" bpmnElement="SendTask-ForwardToCollection-id-0002">
+        <dc:Bounds x="1825" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ForwardedToCollection-id-0002_di" bpmnElement="EndEvent-ForwardedToCollection-id-0002">
+        <dc:Bounds x="2007" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToCheckSubrogation-id-0001_di" bpmnElement="SequenceFlow-StartToCheckSubrogation-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckToGateway-id-0001_di" bpmnElement="SequenceFlow-CheckToGateway-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToPaymentRequest-id-0001_di" bpmnElement="SequenceFlow-GatewayToPaymentRequest-id-0001">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToNoSubrogation-id-0001_di" bpmnElement="SequenceFlow-GatewayToNoSubrogation-id-0001">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="507" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentRequestToReminder-id-0001_di" bpmnElement="SequenceFlow-PaymentRequestToReminder-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReminderToSendReminder-id-0001_di" bpmnElement="SequenceFlow-ReminderToSendReminder-id-0001">
+        <di:waypoint x="693" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendReminderToWait-id-0001_di" bpmnElement="SequenceFlow-SendReminderToWait-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WaitToResponseGateway-id-0001_di" bpmnElement="SequenceFlow-WaitToResponseGateway-id-0001">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToCollection-id-0001_di" bpmnElement="SequenceFlow-BoundaryToCollection-id-0001">
+        <di:waypoint x="975" y="128" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ResponseToBooking-id-0001_di" bpmnElement="SequenceFlow-ResponseToBooking-id-0001">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ResponseToDisagreementCheck-id-0001_di" bpmnElement="SequenceFlow-ResponseToDisagreementCheck-id-0001">
+        <di:waypoint x="1425" y="95" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BookingToEnd-id-0001_di" bpmnElement="SequenceFlow-BookingToEnd-id-0001">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1707" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CollectionToEnd-id-0001_di" bpmnElement="SequenceFlow-CollectionToEnd-id-0001">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1257" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DisagreementToCorrectCheck-id-0001_di" bpmnElement="SequenceFlow-DisagreementToCorrectCheck-id-0001">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1700" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CorrectCheckToInsurantCorrect-id-0001_di" bpmnElement="SequenceFlow-CorrectCheckToInsurantCorrect-id-0001">
+        <di:waypoint x="1750" y="210" />
+        <di:waypoint x="1857" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CorrectCheckToCollection-id-0001_di" bpmnElement="SequenceFlow-CorrectCheckToCollection-id-0001">
+        <di:waypoint x="1725" y="235" />
+        <di:waypoint x="1725" y="350" />
+        <di:waypoint x="1825" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CollectionToEnd-id-0002_di" bpmnElement="SequenceFlow-CollectionToEnd-id-0002">
+        <di:waypoint x="1925" y="350" />
+        <di:waypoint x="2007" y="350" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

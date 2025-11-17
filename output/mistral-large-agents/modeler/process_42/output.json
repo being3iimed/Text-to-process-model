@@ -1,0 +1,202 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "fridge-repair-process-definitions",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler (https://bpmn.io)",
+    "exporterVersion": "18.0.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "FridgeRepairProcess-id-0001",
+        "name": "Fridge Repair Service Process",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-FridgeIssueReported-id-0001",
+            "name": "Fridge issue reported"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-DescribeFridgeSymptoms-id-0001",
+            "name": "Describe fridge symptoms"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-SubmitSymptoms-id-0001",
+            "name": "Submit symptoms and fridge type to central service"
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-SelectLocalFacility-id-0001",
+            "name": "Select local service facility"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-SendRequestToFacility-id-0001",
+            "name": "Send: request to local facility"
+          },
+          {
+            "$type": "bpmn:ReceiveTask",
+            "id": "ReceiveTask-AppointmentConfirmation-id-0001",
+            "name": "Receive: appointment confirmation from facility"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ConfirmAppointmentTime-id-0001",
+            "name": "Confirm appointment time"
+          },
+          {
+            "$type": "bpmn:IntermediateCatchEvent",
+            "id": "IntermediateCatchEvent-TechnicianArrivalWindow-id-0001",
+            "name": "Wait for technician arrival (9 AM - 5 PM window)",
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:TimerEventDefinition",
+                "timeDuration": "PT8H"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-TechnicianAttemptsRepair-id-0001",
+            "name": "Technician arrives and attempts repair"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-RepairOutcome-id-0001",
+            "name": "Repair Outcome?",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-ConfirmRepair-id-0001",
+            "name": "Confirm fridge is repaired"
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-RateServiceFacility-id-0001",
+            "name": "Rate service facility"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ServiceCompletedAndRated-id-0001",
+            "name": "Service completed and rated"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ServiceIncomplete-id-0002",
+            "name": "Service incomplete (awaiting parts)"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToDescribeSymptoms-id-0001",
+            "sourceRef": "StartEvent-FridgeIssueReported-id-0001",
+            "targetRef": "UserTask-DescribeFridgeSymptoms-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DescribeToSubmit-id-0002",
+            "sourceRef": "UserTask-DescribeFridgeSymptoms-id-0001",
+            "targetRef": "ServiceTask-SubmitSymptoms-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SubmitToSelectFacility-id-0003",
+            "sourceRef": "ServiceTask-SubmitSymptoms-id-0001",
+            "targetRef": "ServiceTask-SelectLocalFacility-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SelectFacilityToSendRequest-id-0004",
+            "sourceRef": "ServiceTask-SelectLocalFacility-id-0001",
+            "targetRef": "SendTask-SendRequestToFacility-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-SendRequestToReceiveConfirmation-id-0005",
+            "sourceRef": "SendTask-SendRequestToFacility-id-0001",
+            "targetRef": "ReceiveTask-AppointmentConfirmation-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ReceiveConfirmationToConfirmTime-id-0006",
+            "sourceRef": "ReceiveTask-AppointmentConfirmation-id-0001",
+            "targetRef": "UserTask-ConfirmAppointmentTime-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ConfirmTimeToArrivalWindow-id-0007",
+            "sourceRef": "UserTask-ConfirmAppointmentTime-id-0001",
+            "targetRef": "IntermediateCatchEvent-TechnicianArrivalWindow-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ArrivalWindowToRepairAttempt-id-0008",
+            "sourceRef": "IntermediateCatchEvent-TechnicianArrivalWindow-id-0001",
+            "targetRef": "UserTask-TechnicianAttemptsRepair-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RepairAttemptToGateway-id-0009",
+            "sourceRef": "UserTask-TechnicianAttemptsRepair-id-0001",
+            "targetRef": "ExclusiveGateway-RepairOutcome-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToConfirmRepair-id-0010",
+            "sourceRef": "ExclusiveGateway-RepairOutcome-id-0001",
+            "targetRef": "UserTask-ConfirmRepair-id-0001",
+            "name": "repair_successful",
+            "isDefault": false
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToServiceIncomplete-id-0011",
+            "sourceRef": "ExclusiveGateway-RepairOutcome-id-0001",
+            "targetRef": "EndEvent-ServiceIncomplete-id-0002",
+            "name": "needs_additional_parts",
+            "isDefault": true
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ConfirmRepairToRateService-id-0012",
+            "sourceRef": "UserTask-ConfirmRepair-id-0001",
+            "targetRef": "UserTask-RateServiceFacility-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RateServiceToEnd-id-0013",
+            "sourceRef": "UserTask-RateServiceFacility-id-0001",
+            "targetRef": "EndEvent-ServiceCompletedAndRated-id-0001"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-large-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 12480,
+        "total_tokens": 14375,
+        "completion_tokens": 1895
+      },
+      "model_name": "mistral-large-latest",
+      "model": "mistral-large-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 12480,
+      "output_tokens": 1895,
+      "total_tokens": 14375
+    },
+    "id": "lc_run--37c3a840-91e1-47c6-9191-b5f1ca8fd1a3-0"
+  },
+  "status": "success"
+}

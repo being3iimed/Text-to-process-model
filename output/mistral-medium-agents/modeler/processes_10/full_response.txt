@@ -1,0 +1,250 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "IT-Solution-Request-Process",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "IT-Solution-Request-Process-id-0001",
+      "isExecutable": false,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-RequestSubmitted-id-0001",
+          "name": "IT Solution Request Submitted"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-AssessRequest-id-0001",
+          "name": "IT Assesses Request"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ApprovalDecision-id-0001",
+          "name": "Approval Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-RejectionNotice-id-0001",
+          "name": "Send: Rejection Notice to Requester"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-RequestRejected-id-0001",
+          "name": "Request Rejected"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-DeploySolution-id-0001",
+          "name": "Deploy Solution",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-DeploymentInitiated-id-0001",
+              "name": "Deployment Initiated"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-ProcureTools-id-0001",
+              "name": "Procure Tools/Licenses"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-InstallSolution-id-0001",
+              "name": "Install Solution"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-TestSolution-id-0001",
+              "name": "Test in Controlled Environment"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-TestResult-id-0001",
+              "name": "Test Result",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-Troubleshoot-id-0001",
+              "name": "Troubleshoot Installation Issues"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-DeploymentFailed-id-0001",
+              "name": "Deployment Failed"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-DeploymentComplete-id-0001",
+              "name": "Deployment Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-StartToProcure-id-0001",
+              "sourceRef": "StartEvent-DeploymentInitiated-id-0001",
+              "targetRef": "ServiceTask-ProcureTools-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ProcureToInstall-id-0002",
+              "sourceRef": "ServiceTask-ProcureTools-id-0001",
+              "targetRef": "ServiceTask-InstallSolution-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-InstallToTest-id-0003",
+              "sourceRef": "ServiceTask-InstallSolution-id-0001",
+              "targetRef": "ServiceTask-TestSolution-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-TestToGateway-id-0004",
+              "sourceRef": "ServiceTask-TestSolution-id-0001",
+              "targetRef": "ExclusiveGateway-TestResult-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToSuccess-id-0005",
+              "name": "test_successful",
+              "sourceRef": "ExclusiveGateway-TestResult-id-0001",
+              "targetRef": "EndEvent-DeploymentComplete-id-0001",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GatewayToTroubleshoot-id-0006",
+              "name": "",
+              "sourceRef": "ExclusiveGateway-TestResult-id-0001",
+              "targetRef": "UserTask-Troubleshoot-id-0001",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-TroubleshootToFail-id-0007",
+              "sourceRef": "UserTask-Troubleshoot-id-0001",
+              "targetRef": "EndEvent-DeploymentFailed-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-RollOut-id-0001",
+          "name": "Roll Out to Department"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-TrainingDecision-id-0001",
+          "name": "Training Required?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ProvideTraining-id-0001",
+          "name": "Provide Training"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ITSupport-id-0001",
+          "name": "IT Support Available"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-RequestFulfilled-id-0001",
+          "name": "Request Fulfilled"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-MergePaths-id-0001",
+          "name": "",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToAssess-id-0001",
+          "sourceRef": "StartEvent-RequestSubmitted-id-0001",
+          "targetRef": "UserTask-AssessRequest-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AssessToApproval-id-0002",
+          "sourceRef": "UserTask-AssessRequest-id-0001",
+          "targetRef": "ExclusiveGateway-ApprovalDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ApprovalToReject-id-0003",
+          "name": "rejected",
+          "sourceRef": "ExclusiveGateway-ApprovalDecision-id-0001",
+          "targetRef": "SendTask-RejectionNotice-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RejectToEnd-id-0004",
+          "sourceRef": "SendTask-RejectionNotice-id-0001",
+          "targetRef": "EndEvent-RequestRejected-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ApprovalToDeploy-id-0005",
+          "name": "approved",
+          "sourceRef": "ExclusiveGateway-ApprovalDecision-id-0001",
+          "targetRef": "SubProcess-DeploySolution-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DeployToRollOut-id-0006",
+          "sourceRef": "SubProcess-DeploySolution-id-0001",
+          "targetRef": "ServiceTask-RollOut-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RollOutToTraining-id-0007",
+          "sourceRef": "ServiceTask-RollOut-id-0001",
+          "targetRef": "ExclusiveGateway-TrainingDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TrainingToSupport-id-0008",
+          "name": "training_required",
+          "sourceRef": "ExclusiveGateway-TrainingDecision-id-0001",
+          "targetRef": "UserTask-ProvideTraining-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TrainingToMerge-id-0009",
+          "sourceRef": "UserTask-ProvideTraining-id-0001",
+          "targetRef": "ExclusiveGateway-MergePaths-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NoTrainingToMerge-id-0010",
+          "name": "",
+          "sourceRef": "ExclusiveGateway-TrainingDecision-id-0001",
+          "targetRef": "ExclusiveGateway-MergePaths-id-0001",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MergeToSupport-id-0011",
+          "sourceRef": "ExclusiveGateway-MergePaths-id-0001",
+          "targetRef": "ServiceTask-ITSupport-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SupportToEnd-id-0012",
+          "sourceRef": "ServiceTask-ITSupport-id-0001",
+          "targetRef": "EndEvent-RequestFulfilled-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

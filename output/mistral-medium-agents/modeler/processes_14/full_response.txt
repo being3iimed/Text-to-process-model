@@ -1,0 +1,155 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "BudgetPlanningProcess",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "BudgetPlanningProcess-id-0001",
+      "isExecutable": false,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-BudgetPlanningInitiated-id-0001",
+          "name": "Budget Planning Initiated"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-DraftBudgetPlan-id-0001",
+          "name": "Draft Budget Plan"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToDraft-id-0001",
+          "sourceRef": "StartEvent-BudgetPlanningInitiated-id-0001",
+          "targetRef": "UserTask-DraftBudgetPlan-id-0001"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-StrategicAlignmentReview-id-0002",
+          "name": "Strategic Alignment Review"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DraftToStrategicReview-id-0002",
+          "sourceRef": "UserTask-DraftBudgetPlan-id-0001",
+          "targetRef": "UserTask-StrategicAlignmentReview-id-0002"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-StrategicAlignment-id-0001",
+          "name": "Strategic Alignment Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StrategicReviewToGateway-id-0003",
+          "sourceRef": "UserTask-StrategicAlignmentReview-id-0002",
+          "targetRef": "ExclusiveGateway-StrategicAlignment-id-0001"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-FinanceDepartmentReview-id-0003",
+          "name": "Finance Department Review"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StrategicAlignedToFinance-id-0004",
+          "name": "aligned_with_goals",
+          "sourceRef": "ExclusiveGateway-StrategicAlignment-id-0001",
+          "targetRef": "UserTask-FinanceDepartmentReview-id-0003",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-AdjustBudgetPlan-id-0004",
+          "name": "Adjust Budget Plan"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StrategicNeedsAdjustmentToAdjust-id-0005",
+          "name": "needs_adjustment",
+          "sourceRef": "ExclusiveGateway-StrategicAlignment-id-0001",
+          "targetRef": "UserTask-AdjustBudgetPlan-id-0004",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-DocumentAdjustments-id-0001",
+          "name": "Document Adjustments"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AdjustToDocument-id-0006",
+          "sourceRef": "UserTask-AdjustBudgetPlan-id-0004",
+          "targetRef": "ServiceTask-DocumentAdjustments-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DocumentToStrategicReview-id-0007",
+          "sourceRef": "ServiceTask-DocumentAdjustments-id-0001",
+          "targetRef": "UserTask-StrategicAlignmentReview-id-0002"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-FinanceReview-id-0002",
+          "name": "Finance Review Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FinanceReviewToGateway-id-0008",
+          "sourceRef": "UserTask-FinanceDepartmentReview-id-0003",
+          "targetRef": "ExclusiveGateway-FinanceReview-id-0002"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-StakeholderApproval-id-0005",
+          "name": "Stakeholder Approval"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FinanceFeasibleToApproval-id-0009",
+          "name": "feasible",
+          "sourceRef": "ExclusiveGateway-FinanceReview-id-0002",
+          "targetRef": "UserTask-StakeholderApproval-id-0005",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FinanceNeedsAdjustmentToAdjust-id-0010",
+          "name": "needs_adjustment",
+          "sourceRef": "ExclusiveGateway-FinanceReview-id-0002",
+          "targetRef": "UserTask-AdjustBudgetPlan-id-0004",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-AllocateBudget-id-0006",
+          "name": "Allocate Budget"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ApprovalToAllocate-id-0011",
+          "sourceRef": "UserTask-StakeholderApproval-id-0005",
+          "targetRef": "UserTask-AllocateBudget-id-0006"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-BudgetAllocated-id-0001",
+          "name": "Budget Allocated and Implementation Begins"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AllocateToEnd-id-0012",
+          "sourceRef": "UserTask-AllocateBudget-id-0006",
+          "targetRef": "EndEvent-BudgetAllocated-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

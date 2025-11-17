@@ -1,0 +1,358 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "ContractProjectDefinitions",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler",
+    "exporterVersion": "1.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "ContractProjectProcess",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "StartEvent-ContractProjectInitiated-id-0001",
+            "name": "Contract Project Initiated"
+          },
+          {
+            "$type": "bpmn:SubProcess",
+            "id": "SubProcess-OrderParts-id-0001",
+            "name": "Order Parts",
+            "flowElements": [
+              {
+                "$type": "bpmn:StartEvent",
+                "id": "StartEvent-OrderingStarted-id-0001",
+                "name": "Ordering Started"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-QueryWebshopsForPartsAvailability-id-0001",
+                "name": "Query Webshops for Parts Availability"
+              },
+              {
+                "$type": "bpmn:ScriptTask",
+                "id": "ScriptTask-CalculateOptimalOrderDistribution-id-0001",
+                "name": "Computation: Calculate Optimal Order Distribution"
+              },
+              {
+                "$type": "bpmn:ParallelGateway",
+                "id": "ParallelGateway-PlaceOrdersSplit-id-0001",
+                "name": "Place Orders (Split)",
+                "gatewayDirection": "Diverging"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-PlaceOrdersWithWebshopA-id-0001",
+                "name": "Place Orders with Webshop A"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-PlaceOrdersWithWebshopB-id-0001",
+                "name": "Place Orders with Webshop B"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-PlaceOrdersWithWebshopC-id-0001",
+                "name": "Place Orders with Webshop C"
+              },
+              {
+                "$type": "bpmn:ParallelGateway",
+                "id": "ParallelGateway-PlaceOrdersJoin-id-0001",
+                "name": "Place Orders (Join)",
+                "gatewayDirection": "Converging"
+              },
+              {
+                "$type": "bpmn:EndEvent",
+                "id": "EndEvent-OrdersPlaced-id-0001",
+                "name": "Orders Placed"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-OrderingStartedToQuery-id-0001",
+                "sourceRef": "StartEvent-OrderingStarted-id-0001",
+                "targetRef": "ServiceTask-QueryWebshopsForPartsAvailability-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-QueryToCalculate-id-0002",
+                "sourceRef": "ServiceTask-QueryWebshopsForPartsAvailability-id-0001",
+                "targetRef": "ScriptTask-CalculateOptimalOrderDistribution-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-CalculateToSplit-id-0003",
+                "sourceRef": "ScriptTask-CalculateOptimalOrderDistribution-id-0001",
+                "targetRef": "ParallelGateway-PlaceOrdersSplit-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SplitToWebshopA-id-0004",
+                "sourceRef": "ParallelGateway-PlaceOrdersSplit-id-0001",
+                "targetRef": "ServiceTask-PlaceOrdersWithWebshopA-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SplitToWebshopB-id-0005",
+                "sourceRef": "ParallelGateway-PlaceOrdersSplit-id-0001",
+                "targetRef": "ServiceTask-PlaceOrdersWithWebshopB-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-SplitToWebshopC-id-0006",
+                "sourceRef": "ParallelGateway-PlaceOrdersSplit-id-0001",
+                "targetRef": "ServiceTask-PlaceOrdersWithWebshopC-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-WebshopAToJoin-id-0007",
+                "sourceRef": "ServiceTask-PlaceOrdersWithWebshopA-id-0001",
+                "targetRef": "ParallelGateway-PlaceOrdersJoin-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-WebshopBToJoin-id-0008",
+                "sourceRef": "ServiceTask-PlaceOrdersWithWebshopB-id-0001",
+                "targetRef": "ParallelGateway-PlaceOrdersJoin-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-WebshopCToJoin-id-0009",
+                "sourceRef": "ServiceTask-PlaceOrdersWithWebshopC-id-0001",
+                "targetRef": "ParallelGateway-PlaceOrdersJoin-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-JoinToOrdersPlaced-id-0010",
+                "sourceRef": "ParallelGateway-PlaceOrdersJoin-id-0001",
+                "targetRef": "EndEvent-OrdersPlaced-id-0001"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:SubProcess",
+            "id": "SubProcess-ManageStockAndReorders-id-0001",
+            "name": "Manage Stock and Reorders",
+            "flowElements": [
+              {
+                "$type": "bpmn:StartEvent",
+                "id": "StartEvent-StockManagementStarted-id-0001",
+                "name": "Stock Management Started"
+              },
+              {
+                "$type": "bpmn:ReceiveTask",
+                "id": "ReceiveTask-ReceivePartsDelivery-id-0001",
+                "name": "Receive: Parts Delivery"
+              },
+              {
+                "$type": "bpmn:BoundaryEvent",
+                "id": "BoundaryEvent-Timer2Day-PartsDelivery-id-0001",
+                "name": "2 Day Delivery Buffer",
+                "attachedToRef": "ReceiveTask-ReceivePartsDelivery-id-0001",
+                "cancelActivity": false,
+                "eventDefinitions": [
+                  {
+                    "$type": "bpmn:TimerEventDefinition",
+                    "timeDuration": "P2D"
+                  }
+                ]
+              },
+              {
+                "$type": "bpmn:SendTask",
+                "id": "SendTask-SendReminderToWebshops-id-0001",
+                "name": "Send: Reminder to Webshops"
+              },
+              {
+                "$type": "bpmn:ScriptTask",
+                "id": "ScriptTask-CheckStockLevels-id-0001",
+                "name": "Computation: Check Stock Levels"
+              },
+              {
+                "$type": "bpmn:ExclusiveGateway",
+                "id": "ExclusiveGateway-StockLevels-id-0001",
+                "name": "Stock Level Decision",
+                "gatewayDirection": "Diverging"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-ReorderPartsCheapest-id-0001",
+                "name": "Reorder Parts (Cheapest)"
+              },
+              {
+                "$type": "bpmn:ServiceTask",
+                "id": "ServiceTask-ReorderPartsFastest-id-0001",
+                "name": "Reorder Parts (Fastest)"
+              },
+              {
+                "$type": "bpmn:SendTask",
+                "id": "SendTask-SendComplaintEmailToFriends-id-0001",
+                "name": "Send: Complaint Email to Friends"
+              },
+              {
+                "$type": "bpmn:IntermediateCatchEvent",
+                "id": "IntermediateCatchEvent-Timer1Day-id-0001",
+                "name": "1 Day Recheck",
+                "eventDefinitions": [
+                  {
+                    "$type": "bpmn:TimerEventDefinition",
+                    "timeDuration": "P1D"
+                  }
+                ]
+              },
+              {
+                "$type": "bpmn:EndEvent",
+                "id": "EndEvent-StockManaged-id-0001",
+                "name": "Stock Managed"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-StockManagementToReceive-id-0001",
+                "sourceRef": "StartEvent-StockManagementStarted-id-0001",
+                "targetRef": "ReceiveTask-ReceivePartsDelivery-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ReceiveToCheckStock-id-0002",
+                "sourceRef": "ReceiveTask-ReceivePartsDelivery-id-0001",
+                "targetRef": "ScriptTask-CheckStockLevels-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-BoundaryToReminder-id-0003",
+                "sourceRef": "BoundaryEvent-Timer2Day-PartsDelivery-id-0001",
+                "targetRef": "SendTask-SendReminderToWebshops-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ReminderToCheckStock-id-0004",
+                "sourceRef": "SendTask-SendReminderToWebshops-id-0001",
+                "targetRef": "ScriptTask-CheckStockLevels-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-CheckStockToGateway-id-0005",
+                "sourceRef": "ScriptTask-CheckStockLevels-id-0001",
+                "targetRef": "ExclusiveGateway-StockLevels-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-GatewayToReorderCheapest-id-0006",
+                "name": "stock < 5",
+                "sourceRef": "ExclusiveGateway-StockLevels-id-0001",
+                "targetRef": "ServiceTask-ReorderPartsCheapest-id-0001",
+                "isDefault": false
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-GatewayToReorderFastest-id-0007",
+                "name": "stock < 3",
+                "sourceRef": "ExclusiveGateway-StockLevels-id-0001",
+                "targetRef": "ServiceTask-ReorderPartsFastest-id-0001",
+                "isDefault": false
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-GatewayToComplaint-id-0008",
+                "name": "stock == 0",
+                "sourceRef": "ExclusiveGateway-StockLevels-id-0001",
+                "targetRef": "SendTask-SendComplaintEmailToFriends-id-0001",
+                "isDefault": false
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-GatewayToTimer-id-0009",
+                "name": "",
+                "sourceRef": "ExclusiveGateway-StockLevels-id-0001",
+                "targetRef": "IntermediateCatchEvent-Timer1Day-id-0001",
+                "isDefault": true
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-TimerToCheckStock-id-0010",
+                "sourceRef": "IntermediateCatchEvent-Timer1Day-id-0001",
+                "targetRef": "ScriptTask-CheckStockLevels-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-CheapestToStockManaged-id-0011",
+                "sourceRef": "ServiceTask-ReorderPartsCheapest-id-0001",
+                "targetRef": "EndEvent-StockManaged-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-FastestToStockManaged-id-0012",
+                "sourceRef": "ServiceTask-ReorderPartsFastest-id-0001",
+                "targetRef": "EndEvent-StockManaged-id-0001"
+              },
+              {
+                "$type": "bpmn:SequenceFlow",
+                "id": "SequenceFlow-ComplaintToStockManaged-id-0013",
+                "sourceRef": "SendTask-SendComplaintEmailToFriends-id-0001",
+                "targetRef": "EndEvent-StockManaged-id-0001"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:UserTask",
+            "id": "UserTask-StartBuildingContract-id-0001",
+            "name": "Start Building Contract"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ContractProjectCompleted-id-0001",
+            "name": "Contract Project Completed"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-ContractInitiatedToOrderParts-id-0001",
+            "sourceRef": "StartEvent-ContractProjectInitiated-id-0001",
+            "targetRef": "SubProcess-OrderParts-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-OrderPartsToStockManagement-id-0002",
+            "sourceRef": "SubProcess-OrderParts-id-0001",
+            "targetRef": "SubProcess-ManageStockAndReorders-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StockManagementToBuilding-id-0003",
+            "sourceRef": "SubProcess-ManageStockAndReorders-id-0001",
+            "targetRef": "UserTask-StartBuildingContract-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-BuildingToCompletion-id-0004",
+            "sourceRef": "UserTask-StartBuildingContract-id-0001",
+            "targetRef": "EndEvent-ContractProjectCompleted-id-0001"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-medium-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 12061,
+        "total_tokens": 15577,
+        "completion_tokens": 3516
+      },
+      "model_name": "mistral-medium-latest",
+      "model": "mistral-medium-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 12061,
+      "output_tokens": 3516,
+      "total_tokens": 15577
+    },
+    "id": "lc_run--f8f52d98-6117-460c-ac14-50ecdee1ea52-0"
+  },
+  "status": "success"
+}

@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="RunningEventParticipationProcess" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="2.0">
+  <bpmn:process id="RunningEventParticipationProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-StartParticipationProcess-id-0001" name="Start Participation Process">
+      <bpmn:outgoing>SequenceFlow-StartToSelectBlock-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-SelectStartingBlock-id-0001" name="Select Starting Block">
+      <bpmn:incoming>SequenceFlow-StartToSelectBlock-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectToEnterSchedule-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-EnterWorkSchedule-id-0002" name="Enter Work Schedule">
+      <bpmn:incoming>SequenceFlow-SelectToEnterSchedule-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EnterToTraining-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="SubProcess-TrainingCycle-id-0001" name="Training Cycle">
+      <bpmn:incoming>SequenceFlow-EnterToTraining-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TrainingToGenerate-id-0004</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-BeginTraining-id-0001" name="Begin Training">
+        <bpmn:outgoing>SequenceFlow-TrainingStartToMeasure-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask-Measure5kmTime-id-0001" name="Measure 5km Time">
+        <bpmn:incoming>SequenceFlow-TrainingStartToMeasure-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ContinueToMeasure-id-0007</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-MeasureToCheck-id-0002</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask-CheckTimeGoal-id-0002" name="Check Time Goal">
+        <bpmn:incoming>SequenceFlow-MeasureToCheck-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CheckToGateway-id-0003</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-Qualified-id-0001" name="Qualified">
+        <bpmn:incoming>SequenceFlow-GatewayToQualified-id-0004</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:serviceTask id="ServiceTask-CollectTrainingData-id-0003" name="Collect Training Data">
+        <bpmn:incoming>SequenceFlow-GatewayToCollect-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CollectToContinue-id-0006</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-ContinueTraining-id-0001" name="Continue Training">
+        <bpmn:incoming>SequenceFlow-CollectToContinue-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ContinueToMeasure-id-0007</bpmn:outgoing>
+      </bpmn:intermediateCatchEvent>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-TimeCheck-id-0001" name="Time Check" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-CheckToGateway-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GatewayToQualified-id-0004</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToCollect-id-0005</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:sequenceFlow id="SequenceFlow-TrainingStartToMeasure-id-0001" sourceRef="StartEvent-BeginTraining-id-0001" targetRef="ServiceTask-Measure5kmTime-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-MeasureToCheck-id-0002" sourceRef="ServiceTask-Measure5kmTime-id-0001" targetRef="ServiceTask-CheckTimeGoal-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-CheckToGateway-id-0003" sourceRef="ServiceTask-CheckTimeGoal-id-0002" targetRef="ExclusiveGateway-TimeCheck-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToQualified-id-0004" name="time &#60; 25 minutes" sourceRef="ExclusiveGateway-TimeCheck-id-0001" targetRef="EndEvent-Qualified-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToCollect-id-0005" name="time ≥ 25 minutes" sourceRef="ExclusiveGateway-TimeCheck-id-0001" targetRef="ServiceTask-CollectTrainingData-id-0003" />
+      <bpmn:sequenceFlow id="SequenceFlow-CollectToContinue-id-0006" sourceRef="ServiceTask-CollectTrainingData-id-0003" targetRef="IntermediateCatchEvent-ContinueTraining-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ContinueToMeasure-id-0007" sourceRef="IntermediateCatchEvent-ContinueTraining-id-0001" targetRef="ServiceTask-Measure5kmTime-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:serviceTask id="ServiceTask-GenerateStartingNumber-id-0001" name="Generate Starting Number">
+      <bpmn:incoming>SequenceFlow-TrainingToGenerate-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GenerateToCalculate-id-0005</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-CalculateTravelTime-id-0002" name="Calculate Travel Time">
+      <bpmn:incoming>SequenceFlow-GenerateToCalculate-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CalculateToTravelGateway-id-0006</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-TravelTimeCheck-id-0002" name="Travel Time Check" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CalculateToTravelGateway-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TravelGatewayToHome-id-0007</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-TravelGatewayToWork-id-0008</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-TravelFromHome-id-0003" name="Travel from Home">
+      <bpmn:incoming>SequenceFlow-TravelGatewayToHome-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-HomeToParallelSplit-id-0009</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-TravelFromWork-id-0004" name="Travel from Work">
+      <bpmn:incoming>SequenceFlow-TravelGatewayToWork-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-WorkToParallelSplit-id-0010</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-RunDrinkSplit-id-0001" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-HomeToParallelSplit-id-0009</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-WorkToParallelSplit-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToRun-id-0011</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToDrink-id-0012</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:parallelGateway id="ParallelGateway-RunDrinkJoin-id-0002" name="Synchronize Activities" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-RunToJoin-id-0013</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-DrinkToJoin-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToRecord-id-0015</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-Run5kmRoute-id-0005" name="Run 5km Route">
+      <bpmn:incoming>SequenceFlow-SplitToRun-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RunToJoin-id-0013</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-DrinkDuringRun-id-0006" name="Drink During Run">
+      <bpmn:incoming>SequenceFlow-SplitToDrink-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DrinkToJoin-id-0014</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-RecordFinalTime-id-0003" name="Record Final Time">
+      <bpmn:incoming>SequenceFlow-JoinToRecord-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RecordToEnd-id-0016</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-FinalTimeRecorded-id-0001" name="Final Time Recorded">
+      <bpmn:incoming>SequenceFlow-RecordToEnd-id-0016</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSelectBlock-id-0001" sourceRef="StartEvent-StartParticipationProcess-id-0001" targetRef="UserTask-SelectStartingBlock-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectToEnterSchedule-id-0002" sourceRef="UserTask-SelectStartingBlock-id-0001" targetRef="UserTask-EnterWorkSchedule-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-EnterToTraining-id-0003" sourceRef="UserTask-EnterWorkSchedule-id-0002" targetRef="SubProcess-TrainingCycle-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TrainingToGenerate-id-0004" sourceRef="SubProcess-TrainingCycle-id-0001" targetRef="ServiceTask-GenerateStartingNumber-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GenerateToCalculate-id-0005" sourceRef="ServiceTask-GenerateStartingNumber-id-0001" targetRef="ServiceTask-CalculateTravelTime-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-CalculateToTravelGateway-id-0006" sourceRef="ServiceTask-CalculateTravelTime-id-0002" targetRef="ExclusiveGateway-TravelTimeCheck-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-TravelGatewayToHome-id-0007" name="time_difference &#62; 1 hour" sourceRef="ExclusiveGateway-TravelTimeCheck-id-0002" targetRef="UserTask-TravelFromHome-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-TravelGatewayToWork-id-0008" name="time_difference ≤ 1 hour" sourceRef="ExclusiveGateway-TravelTimeCheck-id-0002" targetRef="UserTask-TravelFromWork-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-HomeToParallelSplit-id-0009" sourceRef="UserTask-TravelFromHome-id-0003" targetRef="ParallelGateway-RunDrinkSplit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-WorkToParallelSplit-id-0010" sourceRef="UserTask-TravelFromWork-id-0004" targetRef="ParallelGateway-RunDrinkSplit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToRun-id-0011" sourceRef="ParallelGateway-RunDrinkSplit-id-0001" targetRef="UserTask-Run5kmRoute-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToDrink-id-0012" sourceRef="ParallelGateway-RunDrinkSplit-id-0001" targetRef="UserTask-DrinkDuringRun-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-RunToJoin-id-0013" sourceRef="UserTask-Run5kmRoute-id-0005" targetRef="ParallelGateway-RunDrinkJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-DrinkToJoin-id-0014" sourceRef="UserTask-DrinkDuringRun-id-0006" targetRef="ParallelGateway-RunDrinkJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToRecord-id-0015" sourceRef="ParallelGateway-RunDrinkJoin-id-0002" targetRef="ServiceTask-RecordFinalTime-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-RecordToEnd-id-0016" sourceRef="ServiceTask-RecordFinalTime-id-0003" targetRef="EndEvent-FinalTimeRecorded-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_RunningEventParticipationProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_RunningEventParticipationProcess-id-0001" bpmnElement="RunningEventParticipationProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-StartParticipationProcess-id-0001_di" bpmnElement="StartEvent-StartParticipationProcess-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectStartingBlock-id-0001_di" bpmnElement="UserTask-SelectStartingBlock-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterWorkSchedule-id-0002_di" bpmnElement="UserTask-EnterWorkSchedule-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-TrainingCycle-id-0001_di" bpmnElement="SubProcess-TrainingCycle-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateStartingNumber-id-0001_di" bpmnElement="ServiceTask-GenerateStartingNumber-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CalculateTravelTime-id-0002_di" bpmnElement="ServiceTask-CalculateTravelTime-id-0002">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-TravelTimeCheck-id-0002_di" bpmnElement="ExclusiveGateway-TravelTimeCheck-id-0002" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-TravelFromHome-id-0003_di" bpmnElement="UserTask-TravelFromHome-id-0003">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-RunDrinkSplit-id-0001_di" bpmnElement="ParallelGateway-RunDrinkSplit-id-0001">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-Run5kmRoute-id-0005_di" bpmnElement="UserTask-Run5kmRoute-id-0005">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-RunDrinkJoin-id-0002_di" bpmnElement="ParallelGateway-RunDrinkJoin-id-0002">
+        <dc:Bounds x="1550" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RecordFinalTime-id-0003_di" bpmnElement="ServiceTask-RecordFinalTime-id-0003">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-FinalTimeRecorded-id-0001_di" bpmnElement="EndEvent-FinalTimeRecorded-id-0001">
+        <dc:Bounds x="1857" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-TravelFromWork-id-0004_di" bpmnElement="UserTask-TravelFromWork-id-0004">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-DrinkDuringRun-id-0006_di" bpmnElement="UserTask-DrinkDuringRun-id-0006">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSelectBlock-id-0001_di" bpmnElement="SequenceFlow-StartToSelectBlock-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectToEnterSchedule-id-0002_di" bpmnElement="SequenceFlow-SelectToEnterSchedule-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EnterToTraining-id-0003_di" bpmnElement="SequenceFlow-EnterToTraining-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TrainingToGenerate-id-0004_di" bpmnElement="SequenceFlow-TrainingToGenerate-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateToCalculate-id-0005_di" bpmnElement="SequenceFlow-GenerateToCalculate-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculateToTravelGateway-id-0006_di" bpmnElement="SequenceFlow-CalculateToTravelGateway-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TravelGatewayToHome-id-0007_di" bpmnElement="SequenceFlow-TravelGatewayToHome-id-0007">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TravelGatewayToWork-id-0008_di" bpmnElement="SequenceFlow-TravelGatewayToWork-id-0008">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HomeToParallelSplit-id-0009_di" bpmnElement="SequenceFlow-HomeToParallelSplit-id-0009">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToRun-id-0011_di" bpmnElement="SequenceFlow-SplitToRun-id-0011">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToDrink-id-0012_di" bpmnElement="SequenceFlow-SplitToDrink-id-0012">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RunToJoin-id-0013_di" bpmnElement="SequenceFlow-RunToJoin-id-0013">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1550" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToRecord-id-0015_di" bpmnElement="SequenceFlow-JoinToRecord-id-0015">
+        <di:waypoint x="1600" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RecordToEnd-id-0016_di" bpmnElement="SequenceFlow-RecordToEnd-id-0016">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1857" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WorkToParallelSplit-id-0010_di" bpmnElement="SequenceFlow-WorkToParallelSplit-id-0010">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1275" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DrinkToJoin-id-0014_di" bpmnElement="SequenceFlow-DrinkToJoin-id-0014">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1575" y="210" />
+        <di:waypoint x="1575" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-TrainingCycle-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-TrainingCycle-id-0001" bpmnElement="SubProcess-TrainingCycle-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-BeginTraining-id-0001_di" bpmnElement="StartEvent-BeginTraining-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-Measure5kmTime-id-0001_di" bpmnElement="ServiceTask-Measure5kmTime-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CheckTimeGoal-id-0002_di" bpmnElement="ServiceTask-CheckTimeGoal-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-TimeCheck-id-0001_di" bpmnElement="ExclusiveGateway-TimeCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-Qualified-id-0001_di" bpmnElement="EndEvent-Qualified-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CollectTrainingData-id-0003_di" bpmnElement="ServiceTask-CollectTrainingData-id-0003">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-ContinueTraining-id-0001_di" bpmnElement="IntermediateCatchEvent-ContinueTraining-id-0001">
+        <dc:Bounds x="807" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-TrainingStartToMeasure-id-0001_di" bpmnElement="SequenceFlow-TrainingStartToMeasure-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MeasureToCheck-id-0002_di" bpmnElement="SequenceFlow-MeasureToCheck-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckToGateway-id-0003_di" bpmnElement="SequenceFlow-CheckToGateway-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToQualified-id-0004_di" bpmnElement="SequenceFlow-GatewayToQualified-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToCollect-id-0005_di" bpmnElement="SequenceFlow-GatewayToCollect-id-0005">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CollectToContinue-id-0006_di" bpmnElement="SequenceFlow-CollectToContinue-id-0006">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="807" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ContinueToMeasure-id-0007_di" bpmnElement="SequenceFlow-ContinueToMeasure-id-0007">
+        <di:waypoint x="825" y="228" />
+        <di:waypoint x="825" y="280" />
+        <di:waypoint x="225" y="280" />
+        <di:waypoint x="225" y="110" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

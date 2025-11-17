@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="inventory-restock-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="Inventory-Restock-Process-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-InventoryThresholdReached-id-0001" name="Inventory Threshold Reached">
+      <bpmn:outgoing>SequenceFlow-StartToMonitor-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-MonitorInventoryLevels-id-0001" name="Monitor inventory levels">
+      <bpmn:incoming>SequenceFlow-StartToMonitor-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MonitorToReview-id-0002</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-ProcurementTeamReviewsSuppliers-id-0001" name="Procurement team reviews suppliers">
+      <bpmn:incoming>SequenceFlow-MonitorToReview-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToPlaceOrder-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-PlaceOrderWithSupplier-id-0001" name="Place order with selected supplier">
+      <bpmn:incoming>SequenceFlow-ReviewToPlaceOrder-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PlaceOrderToUpdateSystem-id-0004</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-UpdateInventorySystem-id-0001" name="Update inventory system with expected delivery dates">
+      <bpmn:incoming>SequenceFlow-PlaceOrderToUpdateSystem-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateSystemToReceiveStock-id-0005</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveStockFromSupplier-id-0001" name="Receive stock from supplier">
+      <bpmn:incoming>SequenceFlow-UpdateSystemToReceiveStock-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveStockToInspect-id-0006</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:userTask id="UserTask-InspectStockQuality-id-0001" name="Inspect stock quality">
+      <bpmn:incoming>SequenceFlow-ReceiveStockToInspect-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InspectToRecord-id-0007</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-RecordStockInSystem-id-0001" name="Record stock in inventory system">
+      <bpmn:incoming>SequenceFlow-InspectToRecord-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RecordToPlaceStock-id-0008</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-PlaceStockOnShelves-id-0001" name="Place stock on shelves/storage">
+      <bpmn:incoming>SequenceFlow-RecordToPlaceStock-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PlaceStockToUpdateLevels-id-0009</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-UpdateInventoryLevelsPostRestock-id-0001" name="Update inventory levels post-restock">
+      <bpmn:incoming>SequenceFlow-PlaceStockToUpdateLevels-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateLevelsToEnd-id-0010</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-InventoryRestockComplete-id-0001" name="Inventory restock complete">
+      <bpmn:incoming>SequenceFlow-UpdateLevelsToEnd-id-0010</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToMonitor-id-0001" sourceRef="StartEvent-InventoryThresholdReached-id-0001" targetRef="ServiceTask-MonitorInventoryLevels-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MonitorToReview-id-0002" sourceRef="ServiceTask-MonitorInventoryLevels-id-0001" targetRef="UserTask-ProcurementTeamReviewsSuppliers-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToPlaceOrder-id-0003" sourceRef="UserTask-ProcurementTeamReviewsSuppliers-id-0001" targetRef="ServiceTask-PlaceOrderWithSupplier-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PlaceOrderToUpdateSystem-id-0004" sourceRef="ServiceTask-PlaceOrderWithSupplier-id-0001" targetRef="ServiceTask-UpdateInventorySystem-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateSystemToReceiveStock-id-0005" sourceRef="ServiceTask-UpdateInventorySystem-id-0001" targetRef="ReceiveTask-ReceiveStockFromSupplier-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveStockToInspect-id-0006" sourceRef="ReceiveTask-ReceiveStockFromSupplier-id-0001" targetRef="UserTask-InspectStockQuality-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InspectToRecord-id-0007" sourceRef="UserTask-InspectStockQuality-id-0001" targetRef="ServiceTask-RecordStockInSystem-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RecordToPlaceStock-id-0008" sourceRef="ServiceTask-RecordStockInSystem-id-0001" targetRef="ServiceTask-PlaceStockOnShelves-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PlaceStockToUpdateLevels-id-0009" sourceRef="ServiceTask-PlaceStockOnShelves-id-0001" targetRef="ServiceTask-UpdateInventoryLevelsPostRestock-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateLevelsToEnd-id-0010" sourceRef="ServiceTask-UpdateInventoryLevelsPostRestock-id-0001" targetRef="EndEvent-InventoryRestockComplete-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Inventory-Restock-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Inventory-Restock-Process-id-0001" bpmnElement="Inventory-Restock-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-InventoryThresholdReached-id-0001_di" bpmnElement="StartEvent-InventoryThresholdReached-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MonitorInventoryLevels-id-0001_di" bpmnElement="ServiceTask-MonitorInventoryLevels-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ProcurementTeamReviewsSuppliers-id-0001_di" bpmnElement="UserTask-ProcurementTeamReviewsSuppliers-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PlaceOrderWithSupplier-id-0001_di" bpmnElement="ServiceTask-PlaceOrderWithSupplier-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateInventorySystem-id-0001_di" bpmnElement="ServiceTask-UpdateInventorySystem-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveStockFromSupplier-id-0001_di" bpmnElement="ReceiveTask-ReceiveStockFromSupplier-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-InspectStockQuality-id-0001_di" bpmnElement="UserTask-InspectStockQuality-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-RecordStockInSystem-id-0001_di" bpmnElement="ServiceTask-RecordStockInSystem-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PlaceStockOnShelves-id-0001_di" bpmnElement="ServiceTask-PlaceStockOnShelves-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-UpdateInventoryLevelsPostRestock-id-0001_di" bpmnElement="ServiceTask-UpdateInventoryLevelsPostRestock-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-InventoryRestockComplete-id-0001_di" bpmnElement="EndEvent-InventoryRestockComplete-id-0001">
+        <dc:Bounds x="1557" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToMonitor-id-0001_di" bpmnElement="SequenceFlow-StartToMonitor-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MonitorToReview-id-0002_di" bpmnElement="SequenceFlow-MonitorToReview-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToPlaceOrder-id-0003_di" bpmnElement="SequenceFlow-ReviewToPlaceOrder-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PlaceOrderToUpdateSystem-id-0004_di" bpmnElement="SequenceFlow-PlaceOrderToUpdateSystem-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateSystemToReceiveStock-id-0005_di" bpmnElement="SequenceFlow-UpdateSystemToReceiveStock-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveStockToInspect-id-0006_di" bpmnElement="SequenceFlow-ReceiveStockToInspect-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InspectToRecord-id-0007_di" bpmnElement="SequenceFlow-InspectToRecord-id-0007">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RecordToPlaceStock-id-0008_di" bpmnElement="SequenceFlow-RecordToPlaceStock-id-0008">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PlaceStockToUpdateLevels-id-0009_di" bpmnElement="SequenceFlow-PlaceStockToUpdateLevels-id-0009">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-UpdateLevelsToEnd-id-0010_di" bpmnElement="SequenceFlow-UpdateLevelsToEnd-id-0010">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1557" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

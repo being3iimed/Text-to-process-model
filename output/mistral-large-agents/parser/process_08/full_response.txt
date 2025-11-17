@@ -1,0 +1,131 @@
+<analysis>
+**Clarifications Needed Before Parsing**:
+1. **Error Scenarios**: Are there expected failure points (e.g., system unavailability during logging, team unresponsiveness)?
+   - *Assumption*: No explicit error scenarios mentioned → No error boundaries unless specified.
+2. **SLA Requirements**: Are there hard time constraints (e.g., "must resolve within 24 hours")?
+   - *Assumption*: No explicit SLAs → No timer boundaries unless specified.
+3. **Parallelism**: Are any tasks truly independent (e.g., gathering info AND notifying stakeholders simultaneously)?
+   - *Assumption*: Sequential unless stated otherwise.
+4. **Subprocess Candidates**: Are there repeated/complex sub-flows (e.g., "gather information" involves 3+ steps)?
+   - *Assumption*: Atomic tasks unless detailed.
+
+**Ambiguities Flagged**:
+- "Gathers necessary information": Is this a single task or a multi-step subprocess?
+  - *Resolution*: Treated as atomic unless expanded.
+- "Proposes corrective actions": Is this a decision point (e.g., fix/training/policy) or a single task?
+  - *Resolution*: Modeled as a **decision gateway** (XOR) with 3 branches.
+
+**Boundary Event Gating**:
+- No explicit SLAs or error scenarios → **No boundary events** added (compliance with `<boundary_event_gating>`).
+
+**Subprocess Validation**:
+- "Gather information" and "implement solution" are potential candidates but fail the **Three-Question Test** (Q1: Purpose unclear in 1 sentence; Q2: Likely <3 tasks).
+  - *Resolution*: Inline tasks.
+
+**Timer Validation**:
+- No scheduled triggers or delays → **No timer events**.
+
+---
+### **BPMN Pseudocode**
+*(Strict adherence to `<pseudocode_to_json_mapping>` and `<semantic_validation_framework>`)*
+
+```pseudocode
+startEvent("Incident Reported")
+
+// --- Logging & Assignment ---
+userTask("Log Incident in Tracking System")
+serviceTask("Assign to Appropriate Team")
+
+// --- Investigation ---
+userTask("Gather Necessary Information")
+userTask("Identify Root Cause")
+
+// --- Decision: Corrective Action Type (XOR Gateway)
+if (requires_technical_fix):
+    serviceTask("Implement Technical Fix")
+else if (requires_training):
+    userTask("Conduct Training Session")
+else:  // requires_policy_change (default)
+    userTask("Update Policy Documentation")
+END_IF
+
+// --- Resolution & Follow-Up ---
+userTask("Verify Solution Effectiveness")
+userTask("Conduct Follow-Up with Stakeholders")
+
+// --- Closure ---
+serviceTask("Close Incident Report")
+sendTask("Send: Resolution Notification to All Stakeholders")
+
+endEvent("Incident Resolved")
+```
+
+---
+### **Compliance Validation Output**
+
+| **Element**               | **Type**                     | **Validation Status**                                                                 | **Notes**                                                                 |
+|---------------------------|------------------------------|--------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| Start Event               | `startEvent`                 | ✅ Valid (manual trigger)                                                             |                                                                           |
+| Log Incident              | `userTask`                   | ✅ Valid (human action)                                                              |                                                                           |
+| Assign Team               | `serviceTask`                | ✅ Valid (system action)                                                            |                                                                           |
+| Gather Info               | `userTask`                   | ✅ Valid (human action)                                                              |                                                                           |
+| Identify Cause            | `userTask`                   | ✅ Valid (human judgment)                                                            |                                                                           |
+| **Decision Gateway**      | `XOR`                        | ✅ Valid (mutually exclusive branches: fix/training/policy)                           | Conditions exhaustive; default path defined.                            |
+| Technical Fix             | `serviceTask`                | ✅ Valid (automated)                                                                 |                                                                           |
+| Training Session          | `userTask`                   | ✅ Valid (human-led)                                                                 |                                                                           |
+| Policy Update             | `userTask`                   | ✅ Valid (human-led)                                                                 | Default path.                                                             |
+| Verify Solution           | `userTask`                   | ✅ Valid (human validation)                                                          |                                                                           |
+| Follow-Up                 | `userTask`                   | ✅ Valid (human interaction)                                                         |                                                                           |
+| Close Report              | `serviceTask`                | ✅ Valid (system action)                                                            |                                                                           |
+| Send Notification         | `sendTask`                   | ✅ Valid (one-way communication)                                                    | Prefix "Send:" complies with `<pseudocode_to_json_mapping>`.              |
+| End Event                 | `endEvent`                   | ✅ Valid (single termination)                                                       |                                                                           |
+| **Boundary Events**       | N/A                          | ✅ Compliant (none added; no SLAs/errors specified)                                  |                                                                           |
+| **Subprocesses**          | N/A                          | ✅ Compliant (none added; failed necessity test)                                     |                                                                           |
+| **Timer Events**          | N/A                          | ✅ Compliant (none added; no schedules/delays)                                       |                                                                           |
+| **Gateway Convergence**   | Implicit                     | ✅ Valid (XOR branches reconverge implicitly after corrective actions)               | No explicit merge gateway needed (linear flow post-decision).           |
+| **Sequence Flow Labels**  | Implicit                     | ✅ Valid (no conditional flows require labels; linear steps are unlabeled)           | Complies with `<sequence_flow_labeling>`.                               |
+
+---
+### **Critical Success Criteria Met**
+1. **No Invalid BPMN**: All elements map 1:1 to valid BPMN 2.0 constructs.
+2. **No Orphaned Flows**: Every path traces from `startEvent` to `endEvent`.
+3. **No Unreachable Elements**: All tasks/events are on executable paths.
+4. **Balanced Design**: 100% core elements (tasks/gateways/events); no over-engineering.
+5. **Label Compliance**: No empty conditional labels (none needed here).
+6. **Gateway Convergence**: XOR branches implicitly reconverge (valid per `<gateway_convergence>` for linear post-decision flows).
+7. **Timer/Error Compliance**: No speculative boundaries or invalid timer properties.
+
+---
+### **Recommended Enhancements (If Business Rules Change)**
+1. **Add SLA Timer**:
+   ```pseudocode
+   userTask("Implement Technical Fix"):
+       timerBoundary("PT24H"):  // ISO 8601 for 24 hours
+           sendTask("Send: Escalation Alert")
+   ```
+   *Trigger*: Explicit requirement like "must resolve within 24 hours."
+
+2. **Error Boundary**:
+   ```pseudocode
+   serviceTask("Assign to Appropriate Team"):
+       errorBoundary():
+           userTask("Manual Reassignment")
+   ```
+   *Trigger*: Explicit mention of "system may fail to assign team."
+
+3. **Subprocess for "Gather Information"**:
+   ```pseudocode
+   subProcess("Gather Incident Details"):
+       startEvent("Details Collection Start")
+       AND:
+           userTask("Interview Reporter")
+           serviceTask("Pull System Logs")
+           userTask("Inspect Physical Site")
+       END_AND
+       endEvent("Details Collected")
+   endSubProcess
+   ```
+   *Trigger*: Explicit breakdown of 3+ steps in gathering info.
+
+---
+**Final Note**: This output strictly adheres to the `<critical_success_criteria>`. All deviations from atomic tasks/gateways would require explicit business justification.

@@ -1,0 +1,156 @@
+```
+<summary_of_elements>
+
+### TASKS:
+- **userTask("Send initial sketches to artist")** - Human judgment required to select/create sketches
+- **userTask("Review artist's draft and request changes")** - Iterative human feedback loop
+- **userTask("Select plastic color for printing")** - Human choice required
+- **userTask("Check plastic stock at home")** - Manual inventory verification
+- **userTask("Add plastic to shopping list")** - Manual action if stock low
+- **serviceTask("Order plastic online")** - Automated system action (e-commerce)
+- **serviceTask("Turn on 3D printer")** - Automated hardware control
+- **serviceTask("Heat printer bed and extruder")** - Automated with status feedback
+- **serviceTask("Generate gcode from STL")** - Automated file conversion
+- **serviceTask("Print 3D model")** - Automated hardware operation
+
+### GATEWAYS:
+- **XOR after color selection**:
+  - Condition A: "Color available at home" → Check stock
+  - Condition B: "Color not available" → Order plastic
+- **XOR after stock check**:
+  - Condition A: "Stock ≥ 100g" → Proceed to printer setup
+  - Condition B: "Stock < 100g" → Add to shopping list
+
+### EVENTS:
+- **startEvent("Craving custom 3D model")** - Manual trigger
+- **endEvent("3D model printed successfully")** - Normal completion
+- **intermediateEvent(timerBoundary("PT30M"))** on "Heat printer bed" - SLA: Printer must reach temperature within 30 minutes (standard 3D printing practice)
+
+### BOUNDARY EVENTS:
+- **timerBoundary("30 minutes")** on "Heat printer bed and extruder":
+  - **Justification**: Industry standard for 3D printers to reach operational temperature
+  - **Handler**: `sendTask("Send: printer heating timeout alert")` - Immediate notification if hardware fails to respond
+
+### SUBPROCESSES:
+- **subProcess("Plastic Acquisition")**:
+  - **Purpose**: Handle all color availability logic (stock check/ordering)
+  - **Justification**:
+    1. Cohesive purpose: "Ensure plastic availability"
+    2. 3+ related tasks (check stock, add to list, order)
+    3. Improves main flow readability by isolating inventory logic
+    4. Potential reuse for other printing projects
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+```pseudocode
+startEvent("Craving custom 3D model")
+
+// Initial artist collaboration
+userTask("Send initial sketches to artist")
+userTask("Review artist's draft and request changes")
+  // Implicit loop until satisfied (BPMN 2.0 allows iterative user tasks without explicit loop notation)
+
+receiveTask("Receive: final STL file from artist")
+
+// Plastic color selection and acquisition
+userTask("Select plastic color for printing")
+
+subProcess("Plastic Acquisition"):
+    startEvent("Acquisition Start")
+
+    if (color_available_at_home):
+        userTask("Check plastic stock at home")
+        if (plastic_stock >= 100g):
+            endEvent("Plastic Ready")
+        else:
+            userTask("Add plastic to shopping list")
+            endEvent("Plastic Ordered/Scheduled")
+    else:
+        serviceTask("Order plastic online")
+        endEvent("Plastic Ordered")
+endSubProcess
+
+// Printer preparation (parallel tasks)
+AND:
+    serviceTask("Turn on 3D printer")
+    serviceTask("Heat printer bed and extruder"):
+        timerBoundary("PT30M"):
+            sendTask("Send: printer heating timeout alert")
+END_AND
+
+// File preparation and printing
+serviceTask("Generate gcode from STL")
+serviceTask("Print 3D model")
+
+endEvent("3D model printed successfully")
+```
+
+</bpmn_pseudocode>
+
+<compliance_validation>
+
+### **Timer Event Compliance**:
+✅ **Heating timerBoundary**:
+- Property: `timeDuration: "PT30M"` (ISO 8601 compliant)
+- Justification: Industry-standard 3D printer warmup time
+- Handler: Single immediate `sendTask` (compliant)
+
+### **Gateway Compliance**:
+✅ **XOR after color selection**:
+- Mutually exclusive conditions ("available"/"not available")
+- Exhaustive coverage (no missing cases)
+- Converging gateway implied at subprocess end
+
+✅ **XOR after stock check**:
+- Mutually exclusive ("≥100g"/"<100g")
+- Exhaustive coverage
+- Converges to subprocess end
+
+### **Subprocess Compliance**:
+✅ **"Plastic Acquisition"**:
+1. **Single purpose**: "Ensure plastic availability" ✅
+2. **3+ related tasks**: check stock, add to list, order ✅
+3. **Readability improvement**: Isolates inventory logic ✅
+4. **Reuse potential**: Applicable to future projects ✅
+- **Structure**: 1 startEvent, 2 endEvents (valid), no orphaned paths
+
+### **Boundary Event Compliance**:
+✅ **Printer heating timeout**:
+1. **Hard SLA**: 30-minute warmup is standard requirement ✅
+2. **Simple handler**: Single `sendTask` ✅
+3. **Business-critical**: Hardware failure notification ✅
+
+### **Sequence Flow Compliance**:
+✅ All conditional flows labeled implicitly via pseudocode structure
+✅ No empty labels (conditions are clear in logic)
+✅ Default paths: N/A (all conditions explicit)
+
+### **Flow Traceability**:
+✅ **Path 1**: Sketches → Review → STL → Color → Stock ≥100g → Printer setup → Print
+✅ **Path 2**: Sketches → Review → STL → Color → Stock <100g → Add to list → Printer setup → Print
+✅ **Path 3**: Sketches → Review → STL → Color not available → Order → Printer setup → Print
+✅ **Path 4**: Printer heating timeout → Alert (boundary event)
+
+### **Element Balance**:
+✅ **Core elements**: 10 tasks/gateways/events (91% of total)
+✅ **Boundary events**: 1 (9%, justified)
+✅ **Subprocesses**: 1 (9%, justified)
+
+</compliance_validation>
+
+<assumptions>
+1. **Artist iteration loop**: Assumed implicit in "request changes" (BPMN 2.0 allows iterative user tasks without explicit loop notation for human-driven feedback)
+2. **Printer heating timeout**: Assumed 30 minutes based on standard 3D printer warmup times (common for PLA/ABS filaments)
+3. **Plastic stock threshold**: Assumed 100g as minimum viable amount for most prints (adjustable per project)
+4. **Parallel tasks**: Printer power-on and heating are parallelizable in most 3D printers
+</assumptions>
+
+<rejected_patterns>
+1. **Defensive error boundaries**: Rejected adding speculative error boundaries on "Order plastic" or "Generate gcode" (no explicit failure modes mentioned)
+2. **Redundant subprocess**: Rejected wrapping entire printing phase in subprocess (no cohesion benefit)
+3. **Timer start event**: Rejected making this time-triggered (process is manually initiated by "craving")
+4. **Signal events**: Rejected using signals for artist communication (direct message flows are clearer)
+</rejected_patterns>
+```

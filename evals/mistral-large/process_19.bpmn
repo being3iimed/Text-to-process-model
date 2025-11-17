@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_OrderProcess" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="Process_OrderProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-OrderProcessStarted-id-0001" name="Order Process Started">
+      <bpmn:outgoing>SequenceFlow-StartToLogin-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-LogInToAccount-id-0001" name="Log in to Account">
+      <bpmn:incoming>SequenceFlow-StartToLogin-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LoginToSplit-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-Split-id-0001" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-LoginToSplit-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToSelectItems-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToSetPayment-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-SelectItemsToPurchase-id-0001" name="Select Items to Purchase">
+      <bpmn:incoming>SequenceFlow-SplitToSelectItems-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectItemsToJoin-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-SetPaymentMethod-id-0001" name="Set Payment Method">
+      <bpmn:incoming>SequenceFlow-SplitToSetPayment-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SetPaymentToJoin-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join-id-0001" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-SelectItemsToJoin-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-SetPaymentToJoin-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToPaymentDecision-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-PaymentDecision-id-0001" name="Payment Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-JoinToPaymentDecision-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PaymentDecisionToPayNow-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-PaymentDecisionToInstallment-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-PayForOrder-id-0001" name="Pay for Order">
+      <bpmn:incoming>SequenceFlow-PaymentDecisionToPayNow-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PayNowToMerge-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-CompleteInstallmentAgreement-id-0001" name="Complete Installment Agreement">
+      <bpmn:incoming>SequenceFlow-PaymentDecisionToInstallment-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InstallmentToMerge-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-PaymentMerge-id-0001" name="Merge Payment Paths" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-PayNowToMerge-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-InstallmentToMerge-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MergeToReward-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-ChooseFreeReward-id-0001" name="Choose Free Reward">
+      <bpmn:incoming>SequenceFlow-MergeToReward-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RewardToDelivery-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ProcessDelivery-id-0001" name="Process Delivery">
+      <bpmn:incoming>SequenceFlow-RewardToDelivery-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ScheduleToDelivery-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DeliveryToReturnDecision-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ReturnDecision-id-0001" name="Return Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-DeliveryToReturnDecision-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReturnDecisionToExchange-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ReturnDecisionToEnd-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-RequestItemExchange-id-0001" name="Request Item Exchange">
+      <bpmn:incoming>SequenceFlow-ReturnDecisionToExchange-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ExchangeToProcessReturn-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ProcessReturn-id-0001" name="Process Return">
+      <bpmn:incoming>SequenceFlow-ExchangeToProcessReturn-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProcessReturnToSchedule-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ScheduleNewDelivery-id-0001" name="Schedule New Delivery">
+      <bpmn:incoming>SequenceFlow-ProcessReturnToSchedule-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ScheduleToDelivery-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-OrderFulfilled-id-0001" name="Order Fulfilled">
+      <bpmn:incoming>SequenceFlow-ReturnDecisionToEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToLogin-id-0001" sourceRef="StartEvent-OrderProcessStarted-id-0001" targetRef="UserTask-LogInToAccount-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-LoginToSplit-id-0001" sourceRef="UserTask-LogInToAccount-id-0001" targetRef="ParallelGateway-Split-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToSelectItems-id-0001" sourceRef="ParallelGateway-Split-id-0001" targetRef="UserTask-SelectItemsToPurchase-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToSetPayment-id-0001" sourceRef="ParallelGateway-Split-id-0001" targetRef="UserTask-SetPaymentMethod-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectItemsToJoin-id-0001" sourceRef="UserTask-SelectItemsToPurchase-id-0001" targetRef="ParallelGateway-Join-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SetPaymentToJoin-id-0001" sourceRef="UserTask-SetPaymentMethod-id-0001" targetRef="ParallelGateway-Join-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToPaymentDecision-id-0001" sourceRef="ParallelGateway-Join-id-0001" targetRef="ExclusiveGateway-PaymentDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PaymentDecisionToPayNow-id-0001" name="payment_method == &#34;full_payment&#34;" sourceRef="ExclusiveGateway-PaymentDecision-id-0001" targetRef="UserTask-PayForOrder-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PaymentDecisionToInstallment-id-0001" sourceRef="ExclusiveGateway-PaymentDecision-id-0001" targetRef="UserTask-CompleteInstallmentAgreement-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PayNowToMerge-id-0001" sourceRef="UserTask-PayForOrder-id-0001" targetRef="ExclusiveGateway-PaymentMerge-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InstallmentToMerge-id-0001" sourceRef="UserTask-CompleteInstallmentAgreement-id-0001" targetRef="ExclusiveGateway-PaymentMerge-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MergeToReward-id-0001" sourceRef="ExclusiveGateway-PaymentMerge-id-0001" targetRef="UserTask-ChooseFreeReward-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RewardToDelivery-id-0001" sourceRef="UserTask-ChooseFreeReward-id-0001" targetRef="ServiceTask-ProcessDelivery-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DeliveryToReturnDecision-id-0001" sourceRef="ServiceTask-ProcessDelivery-id-0001" targetRef="ExclusiveGateway-ReturnDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReturnDecisionToExchange-id-0001" name="user_requests_exchange" sourceRef="ExclusiveGateway-ReturnDecision-id-0001" targetRef="UserTask-RequestItemExchange-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReturnDecisionToEnd-id-0001" sourceRef="ExclusiveGateway-ReturnDecision-id-0001" targetRef="EndEvent-OrderFulfilled-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ExchangeToProcessReturn-id-0001" sourceRef="UserTask-RequestItemExchange-id-0001" targetRef="ServiceTask-ProcessReturn-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProcessReturnToSchedule-id-0001" sourceRef="ServiceTask-ProcessReturn-id-0001" targetRef="ServiceTask-ScheduleNewDelivery-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ScheduleToDelivery-id-0001" sourceRef="ServiceTask-ScheduleNewDelivery-id-0001" targetRef="ServiceTask-ProcessDelivery-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process_OrderProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process_OrderProcess" bpmnElement="Process_OrderProcess">
+      <bpmndi:BPMNShape id="StartEvent-OrderProcessStarted-id-0001_di" bpmnElement="StartEvent-OrderProcessStarted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-LogInToAccount-id-0001_di" bpmnElement="UserTask-LogInToAccount-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0001_di" bpmnElement="ParallelGateway-Split-id-0001">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectItemsToPurchase-id-0001_di" bpmnElement="UserTask-SelectItemsToPurchase-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0001_di" bpmnElement="ParallelGateway-Join-id-0001">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PaymentDecision-id-0001_di" bpmnElement="ExclusiveGateway-PaymentDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-PayForOrder-id-0001_di" bpmnElement="UserTask-PayForOrder-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PaymentMerge-id-0001_di" bpmnElement="ExclusiveGateway-PaymentMerge-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ChooseFreeReward-id-0001_di" bpmnElement="UserTask-ChooseFreeReward-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessDelivery-id-0001_di" bpmnElement="ServiceTask-ProcessDelivery-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ReturnDecision-id-0001_di" bpmnElement="ExclusiveGateway-ReturnDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1550" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-RequestItemExchange-id-0001_di" bpmnElement="UserTask-RequestItemExchange-id-0001">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessReturn-id-0001_di" bpmnElement="ServiceTask-ProcessReturn-id-0001">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ScheduleNewDelivery-id-0001_di" bpmnElement="ServiceTask-ScheduleNewDelivery-id-0001">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SetPaymentMethod-id-0001_di" bpmnElement="UserTask-SetPaymentMethod-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CompleteInstallmentAgreement-id-0001_di" bpmnElement="UserTask-CompleteInstallmentAgreement-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-OrderFulfilled-id-0001_di" bpmnElement="EndEvent-OrderFulfilled-id-0001">
+        <dc:Bounds x="1707" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToLogin-id-0001_di" bpmnElement="SequenceFlow-StartToLogin-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LoginToSplit-id-0001_di" bpmnElement="SequenceFlow-LoginToSplit-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToSelectItems-id-0001_di" bpmnElement="SequenceFlow-SplitToSelectItems-id-0001">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToSetPayment-id-0001_di" bpmnElement="SequenceFlow-SplitToSetPayment-id-0001">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectItemsToJoin-id-0001_di" bpmnElement="SequenceFlow-SelectItemsToJoin-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToPaymentDecision-id-0001_di" bpmnElement="SequenceFlow-JoinToPaymentDecision-id-0001">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentDecisionToPayNow-id-0001_di" bpmnElement="SequenceFlow-PaymentDecisionToPayNow-id-0001">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PaymentDecisionToInstallment-id-0001_di" bpmnElement="SequenceFlow-PaymentDecisionToInstallment-id-0001">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PayNowToMerge-id-0001_di" bpmnElement="SequenceFlow-PayNowToMerge-id-0001">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MergeToReward-id-0001_di" bpmnElement="SequenceFlow-MergeToReward-id-0001">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RewardToDelivery-id-0001_di" bpmnElement="SequenceFlow-RewardToDelivery-id-0001">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DeliveryToReturnDecision-id-0001_di" bpmnElement="SequenceFlow-DeliveryToReturnDecision-id-0001">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1550" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReturnDecisionToExchange-id-0001_di" bpmnElement="SequenceFlow-ReturnDecisionToExchange-id-0001">
+        <di:waypoint x="1600" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReturnDecisionToEnd-id-0001_di" bpmnElement="SequenceFlow-ReturnDecisionToEnd-id-0001">
+        <di:waypoint x="1575" y="95" />
+        <di:waypoint x="1575" y="210" />
+        <di:waypoint x="1707" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExchangeToProcessReturn-id-0001_di" bpmnElement="SequenceFlow-ExchangeToProcessReturn-id-0001">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessReturnToSchedule-id-0001_di" bpmnElement="SequenceFlow-ProcessReturnToSchedule-id-0001">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ScheduleToDelivery-id-0001_di" bpmnElement="SequenceFlow-ScheduleToDelivery-id-0001">
+        <di:waypoint x="2025" y="110" />
+        <di:waypoint x="2025" y="140" />
+        <di:waypoint x="1425" y="140" />
+        <di:waypoint x="1425" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SetPaymentToJoin-id-0001_di" bpmnElement="SequenceFlow-SetPaymentToJoin-id-0001">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InstallmentToMerge-id-0001_di" bpmnElement="SequenceFlow-InstallmentToMerge-id-0001">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

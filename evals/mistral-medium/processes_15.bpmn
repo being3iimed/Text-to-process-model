@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="ComplianceAuditProcess-Definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="2.0.0">
+  <bpmn:process id="ComplianceAuditProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-ComplianceAuditScheduled-id-0001" name="Compliance Audit Scheduled">
+      <bpmn:outgoing>SequenceFlow-StartToPreparationSplit-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:parallelGateway id="ParallelGateway-PreparationSplit-id-0001" name="Parallel Preparation" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-StartToPreparationSplit-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PreparationSplitToPrepareDocs-id-0002</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-PreparationSplitToGatherEvidence-id-0003</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-PreparationSplitToSelfAssessment-id-0004</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-PrepareDocumentation-id-0001" name="Prepare Documentation">
+      <bpmn:incoming>SequenceFlow-PreparationSplitToPrepareDocs-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PrepareDocsToPreparationJoin-id-0005</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-GatherEvidence-id-0002" name="Gather Evidence">
+      <bpmn:incoming>SequenceFlow-PreparationSplitToGatherEvidence-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatherEvidenceToPreparationJoin-id-0006</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-ConductSelfAssessment-id-0001" name="Conduct Self-Assessment">
+      <bpmn:incoming>SequenceFlow-PreparationSplitToSelfAssessment-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelfAssessmentToPreparationJoin-id-0007</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-PreparationJoin-id-0002" name="Synchronize Preparation" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-PrepareDocsToPreparationJoin-id-0005</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-GatherEvidenceToPreparationJoin-id-0006</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-SelfAssessmentToPreparationJoin-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PreparationJoinToAuditorsReview-id-0008</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-AuditorsReview-id-0001" name="Auditors Review Processes and Identify Gaps">
+      <bpmn:incoming>SequenceFlow-PreparationJoinToAuditorsReview-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AuditorsReviewToGapsIdentified-id-0009</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-GapsIdentified-id-0001" name="Gaps Identified?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-AuditorsReviewToGapsIdentified-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GapsIdentifiedToImplementCorrections-id-0010</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GapsIdentifiedToFinalAudit-id-0011</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-ImplementCorrections-id-0001" name="Implement Corrections/Improvements">
+      <bpmn:incoming>SequenceFlow-GapsIdentifiedToImplementCorrections-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ImplementCorrectionsToGapsResolved-id-0012</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-GapsResolved-id-0002" name="Gaps Resolved?" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-ImplementCorrectionsToGapsResolved-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GapsResolvedToFinalAudit-id-0013</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-FinalAudit-id-0001" name="Final Audit by External Auditors">
+      <bpmn:incoming>SequenceFlow-GapsIdentifiedToFinalAudit-id-0011</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-GapsResolvedToFinalAudit-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FinalAuditToFinalAuditOutcome-id-0014</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-FinalAuditOutcome-id-0003" name="Final Audit Outcome" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-FinalAuditToFinalAuditOutcome-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FinalAuditOutcomeToIssueCertification-id-0015</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-FinalAuditOutcomeToAuditFailed-id-0016</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-IssueCertification-id-0001" name="Issue Compliance Certification">
+      <bpmn:incoming>SequenceFlow-FinalAuditOutcomeToIssueCertification-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-IssueCertificationToCertificationAwarded-id-0017</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-CertificationAwarded-id-0001" name="Certification Awarded">
+      <bpmn:incoming>SequenceFlow-IssueCertificationToCertificationAwarded-id-0017</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-AuditFailed-id-0002" name="Audit Failed - Process Terminated">
+      <bpmn:incoming>SequenceFlow-FinalAuditOutcomeToAuditFailed-id-0016</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToPreparationSplit-id-0001" sourceRef="StartEvent-ComplianceAuditScheduled-id-0001" targetRef="ParallelGateway-PreparationSplit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PreparationSplitToPrepareDocs-id-0002" sourceRef="ParallelGateway-PreparationSplit-id-0001" targetRef="ServiceTask-PrepareDocumentation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PreparationSplitToGatherEvidence-id-0003" sourceRef="ParallelGateway-PreparationSplit-id-0001" targetRef="ServiceTask-GatherEvidence-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-PreparationSplitToSelfAssessment-id-0004" sourceRef="ParallelGateway-PreparationSplit-id-0001" targetRef="UserTask-ConductSelfAssessment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrepareDocsToPreparationJoin-id-0005" sourceRef="ServiceTask-PrepareDocumentation-id-0001" targetRef="ParallelGateway-PreparationJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatherEvidenceToPreparationJoin-id-0006" sourceRef="ServiceTask-GatherEvidence-id-0002" targetRef="ParallelGateway-PreparationJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelfAssessmentToPreparationJoin-id-0007" sourceRef="UserTask-ConductSelfAssessment-id-0001" targetRef="ParallelGateway-PreparationJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-PreparationJoinToAuditorsReview-id-0008" sourceRef="ParallelGateway-PreparationJoin-id-0002" targetRef="UserTask-AuditorsReview-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AuditorsReviewToGapsIdentified-id-0009" sourceRef="UserTask-AuditorsReview-id-0001" targetRef="ExclusiveGateway-GapsIdentified-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GapsIdentifiedToImplementCorrections-id-0010" name="gaps_identified = true" sourceRef="ExclusiveGateway-GapsIdentified-id-0001" targetRef="UserTask-ImplementCorrections-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GapsIdentifiedToFinalAudit-id-0011" sourceRef="ExclusiveGateway-GapsIdentified-id-0001" targetRef="UserTask-FinalAudit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ImplementCorrectionsToGapsResolved-id-0012" sourceRef="UserTask-ImplementCorrections-id-0001" targetRef="ExclusiveGateway-GapsResolved-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-GapsResolvedToFinalAudit-id-0013" sourceRef="ExclusiveGateway-GapsResolved-id-0002" targetRef="UserTask-FinalAudit-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FinalAuditToFinalAuditOutcome-id-0014" sourceRef="UserTask-FinalAudit-id-0001" targetRef="ExclusiveGateway-FinalAuditOutcome-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-FinalAuditOutcomeToIssueCertification-id-0015" name="final_audit_passed = true" sourceRef="ExclusiveGateway-FinalAuditOutcome-id-0003" targetRef="ServiceTask-IssueCertification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FinalAuditOutcomeToAuditFailed-id-0016" name="final_audit_passed = false" sourceRef="ExclusiveGateway-FinalAuditOutcome-id-0003" targetRef="EndEvent-AuditFailed-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-IssueCertificationToCertificationAwarded-id-0017" sourceRef="ServiceTask-IssueCertification-id-0001" targetRef="EndEvent-CertificationAwarded-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ComplianceAuditProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_ComplianceAuditProcess" bpmnElement="ComplianceAuditProcess">
+      <bpmndi:BPMNShape id="StartEvent-ComplianceAuditScheduled-id-0001_di" bpmnElement="StartEvent-ComplianceAuditScheduled-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-PreparationSplit-id-0001_di" bpmnElement="ParallelGateway-PreparationSplit-id-0001">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareDocumentation-id-0001_di" bpmnElement="ServiceTask-PrepareDocumentation-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-PreparationJoin-id-0002_di" bpmnElement="ParallelGateway-PreparationJoin-id-0002">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AuditorsReview-id-0001_di" bpmnElement="UserTask-AuditorsReview-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-GapsIdentified-id-0001_di" bpmnElement="ExclusiveGateway-GapsIdentified-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ImplementCorrections-id-0001_di" bpmnElement="UserTask-ImplementCorrections-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-GapsResolved-id-0002_di" bpmnElement="ExclusiveGateway-GapsResolved-id-0002" isMarkerVisible="true">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-FinalAudit-id-0001_di" bpmnElement="UserTask-FinalAudit-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-FinalAuditOutcome-id-0003_di" bpmnElement="ExclusiveGateway-FinalAuditOutcome-id-0003" isMarkerVisible="true">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-IssueCertification-id-0001_di" bpmnElement="ServiceTask-IssueCertification-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CertificationAwarded-id-0001_di" bpmnElement="EndEvent-CertificationAwarded-id-0001">
+        <dc:Bounds x="1707" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GatherEvidence-id-0002_di" bpmnElement="ServiceTask-GatherEvidence-id-0002">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AuditFailed-id-0002_di" bpmnElement="EndEvent-AuditFailed-id-0002">
+        <dc:Bounds x="1557" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConductSelfAssessment-id-0001_di" bpmnElement="UserTask-ConductSelfAssessment-id-0001">
+        <dc:Bounds x="325" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToPreparationSplit-id-0001_di" bpmnElement="SequenceFlow-StartToPreparationSplit-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PreparationSplitToPrepareDocs-id-0002_di" bpmnElement="SequenceFlow-PreparationSplitToPrepareDocs-id-0002">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PreparationSplitToGatherEvidence-id-0003_di" bpmnElement="SequenceFlow-PreparationSplitToGatherEvidence-id-0003">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PreparationSplitToSelfAssessment-id-0004_di" bpmnElement="SequenceFlow-PreparationSplitToSelfAssessment-id-0004">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="350" />
+        <di:waypoint x="325" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrepareDocsToPreparationJoin-id-0005_di" bpmnElement="SequenceFlow-PrepareDocsToPreparationJoin-id-0005">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PreparationJoinToAuditorsReview-id-0008_di" bpmnElement="SequenceFlow-PreparationJoinToAuditorsReview-id-0008">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AuditorsReviewToGapsIdentified-id-0009_di" bpmnElement="SequenceFlow-AuditorsReviewToGapsIdentified-id-0009">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GapsIdentifiedToImplementCorrections-id-0010_di" bpmnElement="SequenceFlow-GapsIdentifiedToImplementCorrections-id-0010">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GapsIdentifiedToFinalAudit-id-0011_di" bpmnElement="SequenceFlow-GapsIdentifiedToFinalAudit-id-0011">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="140" />
+        <di:waypoint x="1275" y="140" />
+        <di:waypoint x="1275" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ImplementCorrectionsToGapsResolved-id-0012_di" bpmnElement="SequenceFlow-ImplementCorrectionsToGapsResolved-id-0012">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GapsResolvedToFinalAudit-id-0013_di" bpmnElement="SequenceFlow-GapsResolvedToFinalAudit-id-0013">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FinalAuditToFinalAuditOutcome-id-0014_di" bpmnElement="SequenceFlow-FinalAuditToFinalAuditOutcome-id-0014">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FinalAuditOutcomeToIssueCertification-id-0015_di" bpmnElement="SequenceFlow-FinalAuditOutcomeToIssueCertification-id-0015">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FinalAuditOutcomeToAuditFailed-id-0016_di" bpmnElement="SequenceFlow-FinalAuditOutcomeToAuditFailed-id-0016">
+        <di:waypoint x="1425" y="95" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1557" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IssueCertificationToCertificationAwarded-id-0017_di" bpmnElement="SequenceFlow-IssueCertificationToCertificationAwarded-id-0017">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1707" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatherEvidenceToPreparationJoin-id-0006_di" bpmnElement="SequenceFlow-GatherEvidenceToPreparationJoin-id-0006">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelfAssessmentToPreparationJoin-id-0007_di" bpmnElement="SequenceFlow-SelfAssessmentToPreparationJoin-id-0007">
+        <di:waypoint x="425" y="350" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions-SubrogationProcess-id-0001" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="1.0">
+  <bpmn:process id="Process-Subrogation-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-SubrogationCaseInitiated-id-0001" name="Subrogation Case Initiated">
+      <bpmn:outgoing>SequenceFlow-StartToCheckSubrogation-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-CheckSubrogationPossibility-id-0001" name="Check Subrogation Possibility">
+      <bpmn:incoming>SequenceFlow-StartToCheckSubrogation-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CheckToSubrogationPossible-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-SubrogationPossible-id-0001" name="Subrogation Possible?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-CheckToSubrogationPossible-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SubrogationPossibleToSendRequest-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SubrogationNotPossibleToEnd-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-SendPaymentRequest-id-0001" name="Send Payment Request">
+      <bpmn:incoming>SequenceFlow-SubrogationPossibleToSendRequest-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendRequestToCreateReminder-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-CreateReminder-id-0001" name="Create Reminder">
+      <bpmn:incoming>SequenceFlow-SendRequestToCreateReminder-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CreateReminderToReceiveMoney-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveMoneyOrDisagreement-id-0001" name="Receive: Money or Disagreement">
+      <bpmn:incoming>SequenceFlow-CreateReminderToReceiveMoney-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveMoneyToMoneyOrDisagreement-id-0001</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer14Day-ReceiveMoneyOrDisagreement-id-0001" name="14 Day Deadline Reached" attachedToRef="ReceiveTask-ReceiveMoneyOrDisagreement-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryToForwardToAgency-id-0001</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer14Day-ReceiveMoneyOrDisagreement-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P14D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-ForwardToCollectionAgency-id-0001" name="Send: Forward to Collection Agency">
+      <bpmn:incoming>SequenceFlow-BoundaryToForwardToAgency-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-DisagreementInvalidToForward-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ForwardToAgencyToEnd-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-CaseClosed-id-0001" name="Case Closed">
+      <bpmn:incoming>SequenceFlow-SubrogationNotPossibleToEnd-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ForwardToAgencyToEnd-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-MakeBookingToEnd-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-DisagreementValidToEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-MoneyOrDisagreement-id-0001" name="Money or Disagreement?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReceiveMoneyToMoneyOrDisagreement-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MoneyReceivedToMakeBooking-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-DisagreementReceivedToReview-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-MakeBooking-id-0001" name="Make Booking">
+      <bpmn:incoming>SequenceFlow-MoneyReceivedToMakeBooking-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MakeBookingToEnd-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-ReviewInsurantDisagreement-id-0001" name="Review Insurant&#39;s Disagreement">
+      <bpmn:incoming>SequenceFlow-DisagreementReceivedToReview-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToDisagreementValid-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-DisagreementValid-id-0001" name="Disagreement Valid?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewToDisagreementValid-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DisagreementValidToEnd-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-DisagreementInvalidToForward-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToCheckSubrogation-id-0001" sourceRef="StartEvent-SubrogationCaseInitiated-id-0001" targetRef="UserTask-CheckSubrogationPossibility-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CheckToSubrogationPossible-id-0001" sourceRef="UserTask-CheckSubrogationPossibility-id-0001" targetRef="ExclusiveGateway-SubrogationPossible-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubrogationPossibleToSendRequest-id-0001" name="subrogation_possible" sourceRef="ExclusiveGateway-SubrogationPossible-id-0001" targetRef="ServiceTask-SendPaymentRequest-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubrogationNotPossibleToEnd-id-0001" sourceRef="ExclusiveGateway-SubrogationPossible-id-0001" targetRef="EndEvent-CaseClosed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendRequestToCreateReminder-id-0001" sourceRef="ServiceTask-SendPaymentRequest-id-0001" targetRef="ServiceTask-CreateReminder-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CreateReminderToReceiveMoney-id-0001" sourceRef="ServiceTask-CreateReminder-id-0001" targetRef="ReceiveTask-ReceiveMoneyOrDisagreement-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveMoneyToMoneyOrDisagreement-id-0001" sourceRef="ReceiveTask-ReceiveMoneyOrDisagreement-id-0001" targetRef="ExclusiveGateway-MoneyOrDisagreement-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToForwardToAgency-id-0001" sourceRef="BoundaryEvent-Timer14Day-ReceiveMoneyOrDisagreement-id-0001" targetRef="SendTask-ForwardToCollectionAgency-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ForwardToAgencyToEnd-id-0001" sourceRef="SendTask-ForwardToCollectionAgency-id-0001" targetRef="EndEvent-CaseClosed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MoneyReceivedToMakeBooking-id-0001" name="money_received" sourceRef="ExclusiveGateway-MoneyOrDisagreement-id-0001" targetRef="ServiceTask-MakeBooking-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DisagreementReceivedToReview-id-0001" name="disagreement_received" sourceRef="ExclusiveGateway-MoneyOrDisagreement-id-0001" targetRef="UserTask-ReviewInsurantDisagreement-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MakeBookingToEnd-id-0001" sourceRef="ServiceTask-MakeBooking-id-0001" targetRef="EndEvent-CaseClosed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToDisagreementValid-id-0001" sourceRef="UserTask-ReviewInsurantDisagreement-id-0001" targetRef="ExclusiveGateway-DisagreementValid-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DisagreementValidToEnd-id-0001" name="disagreement_valid" sourceRef="ExclusiveGateway-DisagreementValid-id-0001" targetRef="EndEvent-CaseClosed-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DisagreementInvalidToForward-id-0001" sourceRef="ExclusiveGateway-DisagreementValid-id-0001" targetRef="SendTask-ForwardToCollectionAgency-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process-Subrogation-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_Process-Subrogation-id-0001" bpmnElement="Process-Subrogation-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-SubrogationCaseInitiated-id-0001_di" bpmnElement="StartEvent-SubrogationCaseInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CheckSubrogationPossibility-id-0001_di" bpmnElement="UserTask-CheckSubrogationPossibility-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SubrogationPossible-id-0001_di" bpmnElement="ExclusiveGateway-SubrogationPossible-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SendPaymentRequest-id-0001_di" bpmnElement="ServiceTask-SendPaymentRequest-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CreateReminder-id-0001_di" bpmnElement="ServiceTask-CreateReminder-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveMoneyOrDisagreement-id-0001_di" bpmnElement="ReceiveTask-ReceiveMoneyOrDisagreement-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer14Day-ReceiveMoneyOrDisagreement-id-0001_di" bpmnElement="BoundaryEvent-Timer14Day-ReceiveMoneyOrDisagreement-id-0001">
+        <dc:Bounds x="807" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-MoneyOrDisagreement-id-0001_di" bpmnElement="ExclusiveGateway-MoneyOrDisagreement-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-MakeBooking-id-0001_di" bpmnElement="ServiceTask-MakeBooking-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CaseClosed-id-0001_di" bpmnElement="EndEvent-CaseClosed-id-0001">
+        <dc:Bounds x="1407" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ForwardToCollectionAgency-id-0001_di" bpmnElement="SendTask-ForwardToCollectionAgency-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewInsurantDisagreement-id-0001_di" bpmnElement="UserTask-ReviewInsurantDisagreement-id-0001">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-DisagreementValid-id-0001_di" bpmnElement="ExclusiveGateway-DisagreementValid-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToCheckSubrogation-id-0001_di" bpmnElement="SequenceFlow-StartToCheckSubrogation-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckToSubrogationPossible-id-0001_di" bpmnElement="SequenceFlow-CheckToSubrogationPossible-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubrogationPossibleToSendRequest-id-0001_di" bpmnElement="SequenceFlow-SubrogationPossibleToSendRequest-id-0001">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubrogationNotPossibleToEnd-id-0001_di" bpmnElement="SequenceFlow-SubrogationNotPossibleToEnd-id-0001">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="140" />
+        <di:waypoint x="1425" y="140" />
+        <di:waypoint x="1425" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendRequestToCreateReminder-id-0001_di" bpmnElement="SequenceFlow-SendRequestToCreateReminder-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CreateReminderToReceiveMoney-id-0001_di" bpmnElement="SequenceFlow-CreateReminderToReceiveMoney-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveMoneyToMoneyOrDisagreement-id-0001_di" bpmnElement="SequenceFlow-ReceiveMoneyToMoneyOrDisagreement-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToForwardToAgency-id-0001_di" bpmnElement="SequenceFlow-BoundaryToForwardToAgency-id-0001">
+        <di:waypoint x="825" y="128" />
+        <di:waypoint x="825" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MoneyReceivedToMakeBooking-id-0001_di" bpmnElement="SequenceFlow-MoneyReceivedToMakeBooking-id-0001">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DisagreementReceivedToReview-id-0001_di" bpmnElement="SequenceFlow-DisagreementReceivedToReview-id-0001">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1050" y="70" />
+        <di:waypoint x="1050" y="140" />
+        <di:waypoint x="1050" y="140" />
+        <di:waypoint x="1050" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MakeBookingToEnd-id-0001_di" bpmnElement="SequenceFlow-MakeBookingToEnd-id-0001">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1407" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ForwardToAgencyToEnd-id-0001_di" bpmnElement="SequenceFlow-ForwardToAgencyToEnd-id-0001">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1050" y="210" />
+        <di:waypoint x="1050" y="140" />
+        <di:waypoint x="1350" y="140" />
+        <di:waypoint x="1350" y="70" />
+        <di:waypoint x="1407" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToDisagreementValid-id-0001_di" bpmnElement="SequenceFlow-ReviewToDisagreementValid-id-0001">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1250" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DisagreementValidToEnd-id-0001_di" bpmnElement="SequenceFlow-DisagreementValidToEnd-id-0001">
+        <di:waypoint x="1300" y="210" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1425" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DisagreementInvalidToForward-id-0001_di" bpmnElement="SequenceFlow-DisagreementInvalidToForward-id-0001">
+        <di:waypoint x="1275" y="235" />
+        <di:waypoint x="1275" y="280" />
+        <di:waypoint x="975" y="280" />
+        <di:waypoint x="975" y="250" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

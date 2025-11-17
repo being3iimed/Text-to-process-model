@@ -1,0 +1,650 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="LuxuryAirplaneCustomization-Definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="LuxuryAirplaneCustomization-Process-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-CustomizationProcessInitiated-id-0001" name="Customization Process Initiated">
+      <bpmn:outgoing>SequenceFlow-StartToReceiveSpecs-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-ReceiveCustomerSpecifications-id-0001" name="Receive Customer Specifications">
+      <bpmn:incoming>SequenceFlow-StartToReceiveSpecs-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveSpecsToValidate-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ValidateSpecifications-id-0002" name="Validate Specifications">
+      <bpmn:incoming>SequenceFlow-ReceiveSpecsToValidate-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidateToFeasibilityCheck-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-SpecificationsFeasible-id-0001" name="Specifications Feasible?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ValidateToFeasibilityCheck-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FeasibilityNoToRejection-id-0004</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-FeasibilityYesToManufacturing-id-0006</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-FeasibilityRejectionToCustomer-id-0001" name="Send: Feasibility Rejection to Customer">
+      <bpmn:incoming>SequenceFlow-FeasibilityNoToRejection-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RejectionToEnd-id-0005</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-CustomizationRejected-id-0001" name="Customization Rejected">
+      <bpmn:incoming>SequenceFlow-RejectionToEnd-id-0005</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:subProcess id="SubProcess-ManufacturingCoordination-id-0001" name="Manufacturing Coordination">
+      <bpmn:incoming>SequenceFlow-FeasibilityYesToManufacturing-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ManufacturingToComponentReception-id-0007</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-ManufacturingRequestsInitiated-id-0001" name="Manufacturing Requests Initiated">
+        <bpmn:outgoing>SequenceFlow-StartToSplit-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:parallelGateway id="ParallelGateway-SplitManufacturingRequests-id-0001" name="Split Manufacturing Requests" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-StartToSplit-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SplitToRussianBar-id-0002</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToIrishBar-id-0003</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToItalianSeats-id-0004</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToGermanToilets-id-0005</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:sendTask id="SendTask-BarRequirementsToRussianTeam-id-0001" name="Send: Bar Requirements to Russian Team">
+        <bpmn:incoming>SequenceFlow-SplitToRussianBar-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RussianBarToJoin-id-0006</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:sendTask id="SendTask-BarRequirementsToIrishTeam-id-0002" name="Send: Bar Requirements to Irish Team">
+        <bpmn:incoming>SequenceFlow-SplitToIrishBar-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-IrishBarToJoin-id-0007</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:sendTask id="SendTask-SeatRequirementsToItalianTeam-id-0003" name="Send: Seat Requirements to Italian Team">
+        <bpmn:incoming>SequenceFlow-SplitToItalianSeats-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ItalianSeatsToJoin-id-0008</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:sendTask id="SendTask-ToiletRequirementsToGermanTeam-id-0004" name="Send: Toilet Requirements to German Team">
+        <bpmn:incoming>SequenceFlow-SplitToGermanToilets-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GermanToiletsToJoin-id-0009</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:parallelGateway id="ParallelGateway-JoinManufacturingRequests-id-0001" name="Join Manufacturing Requests" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-RussianBarToJoin-id-0006</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-IrishBarToJoin-id-0007</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ItalianSeatsToJoin-id-0008</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-GermanToiletsToJoin-id-0009</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-JoinToEnd-id-0010</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:endEvent id="EndEvent-AllManufacturingRequestsSent-id-0001" name="All Manufacturing Requests Sent">
+        <bpmn:incoming>SequenceFlow-JoinToEnd-id-0010</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToSplit-id-0001" sourceRef="StartEvent-ManufacturingRequestsInitiated-id-0001" targetRef="ParallelGateway-SplitManufacturingRequests-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToRussianBar-id-0002" sourceRef="ParallelGateway-SplitManufacturingRequests-id-0001" targetRef="SendTask-BarRequirementsToRussianTeam-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToIrishBar-id-0003" sourceRef="ParallelGateway-SplitManufacturingRequests-id-0001" targetRef="SendTask-BarRequirementsToIrishTeam-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToItalianSeats-id-0004" sourceRef="ParallelGateway-SplitManufacturingRequests-id-0001" targetRef="SendTask-SeatRequirementsToItalianTeam-id-0003" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToGermanToilets-id-0005" sourceRef="ParallelGateway-SplitManufacturingRequests-id-0001" targetRef="SendTask-ToiletRequirementsToGermanTeam-id-0004" />
+      <bpmn:sequenceFlow id="SequenceFlow-RussianBarToJoin-id-0006" sourceRef="SendTask-BarRequirementsToRussianTeam-id-0001" targetRef="ParallelGateway-JoinManufacturingRequests-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-IrishBarToJoin-id-0007" sourceRef="SendTask-BarRequirementsToIrishTeam-id-0002" targetRef="ParallelGateway-JoinManufacturingRequests-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ItalianSeatsToJoin-id-0008" sourceRef="SendTask-SeatRequirementsToItalianTeam-id-0003" targetRef="ParallelGateway-JoinManufacturingRequests-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GermanToiletsToJoin-id-0009" sourceRef="SendTask-ToiletRequirementsToGermanTeam-id-0004" targetRef="ParallelGateway-JoinManufacturingRequests-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-JoinToEnd-id-0010" sourceRef="ParallelGateway-JoinManufacturingRequests-id-0001" targetRef="EndEvent-AllManufacturingRequestsSent-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-ComponentReception-id-0001" name="Component Reception">
+      <bpmn:incoming>SequenceFlow-ManufacturingToComponentReception-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ComponentsToAssembly-id-0008</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-WaitingForComponents-id-0001" name="Waiting for Components">
+        <bpmn:outgoing>SequenceFlow-StartToSplitReception-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:parallelGateway id="ParallelGateway-SplitComponentReception-id-0001" name="Split Component Reception" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-StartToSplitReception-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SplitToVodkaBar-id-0002</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToWhiskeyBar-id-0003</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToSeats-id-0004</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToToilets-id-0005</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:receiveTask id="ReceiveTask-VodkaBarFromRussianTeam-id-0001" name="Receive: Vodka Bar from Russian Team">
+        <bpmn:incoming>SequenceFlow-SplitToVodkaBar-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-VodkaBarToJoin-id-0006</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:receiveTask id="ReceiveTask-WhiskeyBarFromIrishTeam-id-0002" name="Receive: Whiskey Bar from Irish Team">
+        <bpmn:incoming>SequenceFlow-SplitToWhiskeyBar-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-WhiskeyBarToJoin-id-0007</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:receiveTask id="ReceiveTask-SeatsFromItalianTeam-id-0003" name="Receive: Seats from Italian Team">
+        <bpmn:incoming>SequenceFlow-SplitToSeats-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SeatsToJoin-id-0008</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:receiveTask id="ReceiveTask-ToiletsFromGermanTeam-id-0004" name="Receive: Toilets from German Team">
+        <bpmn:incoming>SequenceFlow-SplitToToilets-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ToiletsToJoin-id-0009</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:parallelGateway id="ParallelGateway-JoinComponentReception-id-0001" name="Join Component Reception" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-VodkaBarToJoin-id-0006</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-WhiskeyBarToJoin-id-0007</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-SeatsToJoin-id-0008</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ToiletsToJoin-id-0009</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-FollowupToJoin-id-0012</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-IrishFollowupToJoin-id-0014</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ItalianFollowupToJoin-id-0016</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-GermanFollowupToJoin-id-0018</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-JoinToEndReception-id-0010</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:endEvent id="EndEvent-AllComponentsReceived-id-0001" name="All Components Received">
+        <bpmn:incoming>SequenceFlow-JoinToEndReception-id-0010</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:boundaryEvent id="BoundaryEvent-Timer14Day-VodkaBar-id-0001" name="14 Day SLA Timeout" attachedToRef="ReceiveTask-VodkaBarFromRussianTeam-id-0001">
+        <bpmn:outgoing>SequenceFlow-VodkaBarTimeoutToFollowup-id-0011</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="BoundaryEvent-Timer14Day-VodkaBar-id-0001_EventDef">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P14D</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:boundaryEvent>
+      <bpmn:sendTask id="SendTask-UrgentFollowupToRussianTeam-id-0001" name="Send: Urgent Follow-up to Russian Team">
+        <bpmn:incoming>SequenceFlow-VodkaBarTimeoutToFollowup-id-0011</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-FollowupToJoin-id-0012</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-Timer10Day-WhiskeyBar-id-0002" name="10 Day SLA Timeout" attachedToRef="ReceiveTask-WhiskeyBarFromIrishTeam-id-0002">
+        <bpmn:outgoing>SequenceFlow-WhiskeyBarTimeoutToFollowup-id-0013</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="BoundaryEvent-Timer10Day-WhiskeyBar-id-0002_EventDef">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P10D</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:boundaryEvent>
+      <bpmn:sendTask id="SendTask-UrgentFollowupToIrishTeam-id-0002" name="Send: Urgent Follow-up to Irish Team">
+        <bpmn:incoming>SequenceFlow-WhiskeyBarTimeoutToFollowup-id-0013</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-IrishFollowupToJoin-id-0014</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-Timer7Day-Seats-id-0003" name="7 Day SLA Timeout" attachedToRef="ReceiveTask-SeatsFromItalianTeam-id-0003">
+        <bpmn:outgoing>SequenceFlow-SeatsTimeoutToFollowup-id-0015</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="BoundaryEvent-Timer7Day-Seats-id-0003_EventDef">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P7D</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:boundaryEvent>
+      <bpmn:sendTask id="SendTask-UrgentFollowupToItalianTeam-id-0003" name="Send: Urgent Follow-up to Italian Team">
+        <bpmn:incoming>SequenceFlow-SeatsTimeoutToFollowup-id-0015</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ItalianFollowupToJoin-id-0016</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-Timer5Day-Toilets-id-0004" name="5 Day SLA Timeout" attachedToRef="ReceiveTask-ToiletsFromGermanTeam-id-0004">
+        <bpmn:outgoing>SequenceFlow-ToiletsTimeoutToFollowup-id-0017</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="BoundaryEvent-Timer5Day-Toilets-id-0004_EventDef">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P5D</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:boundaryEvent>
+      <bpmn:sendTask id="SendTask-UrgentFollowupToGermanTeam-id-0004" name="Send: Urgent Follow-up to German Team">
+        <bpmn:incoming>SequenceFlow-ToiletsTimeoutToFollowup-id-0017</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GermanFollowupToJoin-id-0018</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:sequenceFlow id="SequenceFlow-StartToSplitReception-id-0001" sourceRef="StartEvent-WaitingForComponents-id-0001" targetRef="ParallelGateway-SplitComponentReception-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToVodkaBar-id-0002" sourceRef="ParallelGateway-SplitComponentReception-id-0001" targetRef="ReceiveTask-VodkaBarFromRussianTeam-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToWhiskeyBar-id-0003" sourceRef="ParallelGateway-SplitComponentReception-id-0001" targetRef="ReceiveTask-WhiskeyBarFromIrishTeam-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToSeats-id-0004" sourceRef="ParallelGateway-SplitComponentReception-id-0001" targetRef="ReceiveTask-SeatsFromItalianTeam-id-0003" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToToilets-id-0005" sourceRef="ParallelGateway-SplitComponentReception-id-0001" targetRef="ReceiveTask-ToiletsFromGermanTeam-id-0004" />
+      <bpmn:sequenceFlow id="SequenceFlow-VodkaBarToJoin-id-0006" sourceRef="ReceiveTask-VodkaBarFromRussianTeam-id-0001" targetRef="ParallelGateway-JoinComponentReception-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-WhiskeyBarToJoin-id-0007" sourceRef="ReceiveTask-WhiskeyBarFromIrishTeam-id-0002" targetRef="ParallelGateway-JoinComponentReception-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SeatsToJoin-id-0008" sourceRef="ReceiveTask-SeatsFromItalianTeam-id-0003" targetRef="ParallelGateway-JoinComponentReception-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ToiletsToJoin-id-0009" sourceRef="ReceiveTask-ToiletsFromGermanTeam-id-0004" targetRef="ParallelGateway-JoinComponentReception-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-JoinToEndReception-id-0010" sourceRef="ParallelGateway-JoinComponentReception-id-0001" targetRef="EndEvent-AllComponentsReceived-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-VodkaBarTimeoutToFollowup-id-0011" sourceRef="BoundaryEvent-Timer14Day-VodkaBar-id-0001" targetRef="SendTask-UrgentFollowupToRussianTeam-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-FollowupToJoin-id-0012" sourceRef="SendTask-UrgentFollowupToRussianTeam-id-0001" targetRef="ParallelGateway-JoinComponentReception-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-WhiskeyBarTimeoutToFollowup-id-0013" sourceRef="BoundaryEvent-Timer10Day-WhiskeyBar-id-0002" targetRef="SendTask-UrgentFollowupToIrishTeam-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-IrishFollowupToJoin-id-0014" sourceRef="SendTask-UrgentFollowupToIrishTeam-id-0002" targetRef="ParallelGateway-JoinComponentReception-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SeatsTimeoutToFollowup-id-0015" sourceRef="BoundaryEvent-Timer7Day-Seats-id-0003" targetRef="SendTask-UrgentFollowupToItalianTeam-id-0003" />
+      <bpmn:sequenceFlow id="SequenceFlow-ItalianFollowupToJoin-id-0016" sourceRef="SendTask-UrgentFollowupToItalianTeam-id-0003" targetRef="ParallelGateway-JoinComponentReception-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ToiletsTimeoutToFollowup-id-0017" sourceRef="BoundaryEvent-Timer5Day-Toilets-id-0004" targetRef="SendTask-UrgentFollowupToGermanTeam-id-0004" />
+      <bpmn:sequenceFlow id="SequenceFlow-GermanFollowupToJoin-id-0018" sourceRef="SendTask-UrgentFollowupToGermanTeam-id-0004" targetRef="ParallelGateway-JoinComponentReception-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:serviceTask id="ServiceTask-AssembleInterior-id-0001" name="Assemble Interior">
+      <bpmn:incoming>SequenceFlow-ComponentsToAssembly-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AssemblyToTestFlight-id-0009</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-ConductTestFlight-id-0002" name="Conduct Test Flight">
+      <bpmn:incoming>SequenceFlow-AssemblyToTestFlight-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TestFlightToProtocol-id-0010</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:scriptTask id="ScriptTask-GenerateTestProtocol-id-0001" name="Computation: Generate Test Protocol">
+      <bpmn:incoming>SequenceFlow-TestFlightToProtocol-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProtocolToSplitDistribution-id-0011</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:parallelGateway id="ParallelGateway-SplitProtocolDistribution-id-0001" name="Split Protocol Distribution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ProtocolToSplitDistribution-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToCustomerProtocol-id-0012</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToInternalProtocol-id-0013</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sendTask id="SendTask-TestProtocolToCustomer-id-0001" name="Send: Test Protocol to Customer">
+      <bpmn:incoming>SequenceFlow-SplitToCustomerProtocol-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CustomerProtocolToJoin-id-0014</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="SendTask-TestProtocolToInternalRecords-id-0002" name="Send: Test Protocol to Internal Records">
+      <bpmn:incoming>SequenceFlow-SplitToInternalProtocol-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InternalProtocolToJoin-id-0015</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:parallelGateway id="ParallelGateway-JoinProtocolDistribution-id-0001" name="Join Protocol Distribution" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-CustomerProtocolToJoin-id-0014</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-InternalProtocolToJoin-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToCustomerConfirmation-id-0016</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:receiveTask id="ReceiveTask-CustomerConfirmation-id-0001" name="Receive: Customer Confirmation">
+      <bpmn:incoming>SequenceFlow-JoinToCustomerConfirmation-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CustomerConfirmationToApproval-id-0019</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer7Day-CustomerConfirmation-id-0001" name="7 Day Confirmation Timeout" attachedToRef="ReceiveTask-CustomerConfirmation-id-0001">
+      <bpmn:outgoing>SequenceFlow-CustomerConfirmationTimeoutToReminder-id-0017</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer7Day-CustomerConfirmation-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P7D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-DeliveryReminderToCustomer-id-0001" name="Send: Delivery Reminder to Customer">
+      <bpmn:incoming>SequenceFlow-CustomerConfirmationTimeoutToReminder-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReminderToApprovalCheck-id-0018</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-CustomerApproval-id-0001" name="Customer Approval?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReminderToApprovalCheck-id-0018</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-CustomerConfirmationToApproval-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ApprovalYesToDelivery-id-0020</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ApprovalNoToRejection-id-0022</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-DeliverAirplane-id-0001" name="Deliver Airplane">
+      <bpmn:incoming>SequenceFlow-ApprovalYesToDelivery-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DeliveryToEnd-id-0021</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-AirplaneDelivered-id-0001" name="Airplane Delivered">
+      <bpmn:incoming>SequenceFlow-DeliveryToEnd-id-0021</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="UserTask-HandleCustomerRejection-id-0001" name="Handle Customer Rejection">
+      <bpmn:incoming>SequenceFlow-ApprovalNoToRejection-id-0022</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RejectionToEnd-id-0023</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-DeliveryCancelled-id-0001" name="Delivery Cancelled">
+      <bpmn:incoming>SequenceFlow-RejectionToEnd-id-0023</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToReceiveSpecs-id-0001" sourceRef="StartEvent-CustomizationProcessInitiated-id-0001" targetRef="UserTask-ReceiveCustomerSpecifications-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveSpecsToValidate-id-0002" sourceRef="UserTask-ReceiveCustomerSpecifications-id-0001" targetRef="ServiceTask-ValidateSpecifications-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidateToFeasibilityCheck-id-0003" sourceRef="ServiceTask-ValidateSpecifications-id-0002" targetRef="ExclusiveGateway-SpecificationsFeasible-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FeasibilityNoToRejection-id-0004" name="not feasible" sourceRef="ExclusiveGateway-SpecificationsFeasible-id-0001" targetRef="SendTask-FeasibilityRejectionToCustomer-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RejectionToEnd-id-0005" sourceRef="SendTask-FeasibilityRejectionToCustomer-id-0001" targetRef="EndEvent-CustomizationRejected-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FeasibilityYesToManufacturing-id-0006" name="feasible" sourceRef="ExclusiveGateway-SpecificationsFeasible-id-0001" targetRef="SubProcess-ManufacturingCoordination-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ManufacturingToComponentReception-id-0007" sourceRef="SubProcess-ManufacturingCoordination-id-0001" targetRef="SubProcess-ComponentReception-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ComponentsToAssembly-id-0008" sourceRef="SubProcess-ComponentReception-id-0001" targetRef="ServiceTask-AssembleInterior-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AssemblyToTestFlight-id-0009" sourceRef="ServiceTask-AssembleInterior-id-0001" targetRef="ServiceTask-ConductTestFlight-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-TestFlightToProtocol-id-0010" sourceRef="ServiceTask-ConductTestFlight-id-0002" targetRef="ScriptTask-GenerateTestProtocol-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProtocolToSplitDistribution-id-0011" sourceRef="ScriptTask-GenerateTestProtocol-id-0001" targetRef="ParallelGateway-SplitProtocolDistribution-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToCustomerProtocol-id-0012" sourceRef="ParallelGateway-SplitProtocolDistribution-id-0001" targetRef="SendTask-TestProtocolToCustomer-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToInternalProtocol-id-0013" sourceRef="ParallelGateway-SplitProtocolDistribution-id-0001" targetRef="SendTask-TestProtocolToInternalRecords-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-CustomerProtocolToJoin-id-0014" sourceRef="SendTask-TestProtocolToCustomer-id-0001" targetRef="ParallelGateway-JoinProtocolDistribution-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InternalProtocolToJoin-id-0015" sourceRef="SendTask-TestProtocolToInternalRecords-id-0002" targetRef="ParallelGateway-JoinProtocolDistribution-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToCustomerConfirmation-id-0016" sourceRef="ParallelGateway-JoinProtocolDistribution-id-0001" targetRef="ReceiveTask-CustomerConfirmation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CustomerConfirmationTimeoutToReminder-id-0017" sourceRef="BoundaryEvent-Timer7Day-CustomerConfirmation-id-0001" targetRef="SendTask-DeliveryReminderToCustomer-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReminderToApprovalCheck-id-0018" sourceRef="SendTask-DeliveryReminderToCustomer-id-0001" targetRef="ExclusiveGateway-CustomerApproval-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CustomerConfirmationToApproval-id-0019" sourceRef="ReceiveTask-CustomerConfirmation-id-0001" targetRef="ExclusiveGateway-CustomerApproval-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApprovalYesToDelivery-id-0020" name="approved" sourceRef="ExclusiveGateway-CustomerApproval-id-0001" targetRef="ServiceTask-DeliverAirplane-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DeliveryToEnd-id-0021" sourceRef="ServiceTask-DeliverAirplane-id-0001" targetRef="EndEvent-AirplaneDelivered-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ApprovalNoToRejection-id-0022" name="rejected" sourceRef="ExclusiveGateway-CustomerApproval-id-0001" targetRef="UserTask-HandleCustomerRejection-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RejectionToEnd-id-0023" sourceRef="UserTask-HandleCustomerRejection-id-0001" targetRef="EndEvent-DeliveryCancelled-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_LuxuryAirplaneCustomization-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_LuxuryAirplaneCustomization-Process-id-0001" bpmnElement="LuxuryAirplaneCustomization-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-CustomizationProcessInitiated-id-0001_di" bpmnElement="StartEvent-CustomizationProcessInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReceiveCustomerSpecifications-id-0001_di" bpmnElement="UserTask-ReceiveCustomerSpecifications-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ValidateSpecifications-id-0002_di" bpmnElement="ServiceTask-ValidateSpecifications-id-0002">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SpecificationsFeasible-id-0001_di" bpmnElement="ExclusiveGateway-SpecificationsFeasible-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-FeasibilityRejectionToCustomer-id-0001_di" bpmnElement="SendTask-FeasibilityRejectionToCustomer-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-CustomizationRejected-id-0001_di" bpmnElement="EndEvent-CustomizationRejected-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-ManufacturingCoordination-id-0001_di" bpmnElement="SubProcess-ManufacturingCoordination-id-0001">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-ComponentReception-id-0001_di" bpmnElement="SubProcess-ComponentReception-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-AssembleInterior-id-0001_di" bpmnElement="ServiceTask-AssembleInterior-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ConductTestFlight-id-0002_di" bpmnElement="ServiceTask-ConductTestFlight-id-0002">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask-GenerateTestProtocol-id-0001_di" bpmnElement="ScriptTask-GenerateTestProtocol-id-0001">
+        <dc:Bounds x="1225" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-SplitProtocolDistribution-id-0001_di" bpmnElement="ParallelGateway-SplitProtocolDistribution-id-0001">
+        <dc:Bounds x="1400" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-TestProtocolToCustomer-id-0001_di" bpmnElement="SendTask-TestProtocolToCustomer-id-0001">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-JoinProtocolDistribution-id-0001_di" bpmnElement="ParallelGateway-JoinProtocolDistribution-id-0001">
+        <dc:Bounds x="1700" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-CustomerConfirmation-id-0001_di" bpmnElement="ReceiveTask-CustomerConfirmation-id-0001">
+        <dc:Bounds x="1825" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer7Day-CustomerConfirmation-id-0001_di" bpmnElement="BoundaryEvent-Timer7Day-CustomerConfirmation-id-0001">
+        <dc:Bounds x="1857" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-CustomerApproval-id-0001_di" bpmnElement="ExclusiveGateway-CustomerApproval-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="2150" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DeliverAirplane-id-0001_di" bpmnElement="ServiceTask-DeliverAirplane-id-0001">
+        <dc:Bounds x="2275" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AirplaneDelivered-id-0001_di" bpmnElement="EndEvent-AirplaneDelivered-id-0001">
+        <dc:Bounds x="2457" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-TestProtocolToInternalRecords-id-0002_di" bpmnElement="SendTask-TestProtocolToInternalRecords-id-0002">
+        <dc:Bounds x="1525" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-DeliveryReminderToCustomer-id-0001_di" bpmnElement="SendTask-DeliveryReminderToCustomer-id-0001">
+        <dc:Bounds x="1975" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-HandleCustomerRejection-id-0001_di" bpmnElement="UserTask-HandleCustomerRejection-id-0001">
+        <dc:Bounds x="2275" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-DeliveryCancelled-id-0001_di" bpmnElement="EndEvent-DeliveryCancelled-id-0001">
+        <dc:Bounds x="2457" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToReceiveSpecs-id-0001_di" bpmnElement="SequenceFlow-StartToReceiveSpecs-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveSpecsToValidate-id-0002_di" bpmnElement="SequenceFlow-ReceiveSpecsToValidate-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidateToFeasibilityCheck-id-0003_di" bpmnElement="SequenceFlow-ValidateToFeasibilityCheck-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FeasibilityNoToRejection-id-0004_di" bpmnElement="SequenceFlow-FeasibilityNoToRejection-id-0004">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FeasibilityYesToManufacturing-id-0006_di" bpmnElement="SequenceFlow-FeasibilityYesToManufacturing-id-0006">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RejectionToEnd-id-0005_di" bpmnElement="SequenceFlow-RejectionToEnd-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ManufacturingToComponentReception-id-0007_di" bpmnElement="SequenceFlow-ManufacturingToComponentReception-id-0007">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ComponentsToAssembly-id-0008_di" bpmnElement="SequenceFlow-ComponentsToAssembly-id-0008">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AssemblyToTestFlight-id-0009_di" bpmnElement="SequenceFlow-AssemblyToTestFlight-id-0009">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TestFlightToProtocol-id-0010_di" bpmnElement="SequenceFlow-TestFlightToProtocol-id-0010">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1225" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProtocolToSplitDistribution-id-0011_di" bpmnElement="SequenceFlow-ProtocolToSplitDistribution-id-0011">
+        <di:waypoint x="1325" y="210" />
+        <di:waypoint x="1400" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToCustomerProtocol-id-0012_di" bpmnElement="SequenceFlow-SplitToCustomerProtocol-id-0012">
+        <di:waypoint x="1450" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToInternalProtocol-id-0013_di" bpmnElement="SequenceFlow-SplitToInternalProtocol-id-0013">
+        <di:waypoint x="1425" y="235" />
+        <di:waypoint x="1425" y="350" />
+        <di:waypoint x="1525" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CustomerProtocolToJoin-id-0014_di" bpmnElement="SequenceFlow-CustomerProtocolToJoin-id-0014">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1700" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToCustomerConfirmation-id-0016_di" bpmnElement="SequenceFlow-JoinToCustomerConfirmation-id-0016">
+        <di:waypoint x="1750" y="210" />
+        <di:waypoint x="1825" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CustomerConfirmationToApproval-id-0019_di" bpmnElement="SequenceFlow-CustomerConfirmationToApproval-id-0019">
+        <di:waypoint x="1925" y="210" />
+        <di:waypoint x="2150" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CustomerConfirmationTimeoutToReminder-id-0017_di" bpmnElement="SequenceFlow-CustomerConfirmationTimeoutToReminder-id-0017">
+        <di:waypoint x="1875" y="268" />
+        <di:waypoint x="1875" y="350" />
+        <di:waypoint x="1975" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalYesToDelivery-id-0020_di" bpmnElement="SequenceFlow-ApprovalYesToDelivery-id-0020">
+        <di:waypoint x="2200" y="210" />
+        <di:waypoint x="2275" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ApprovalNoToRejection-id-0022_di" bpmnElement="SequenceFlow-ApprovalNoToRejection-id-0022">
+        <di:waypoint x="2175" y="235" />
+        <di:waypoint x="2175" y="350" />
+        <di:waypoint x="2275" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DeliveryToEnd-id-0021_di" bpmnElement="SequenceFlow-DeliveryToEnd-id-0021">
+        <di:waypoint x="2375" y="210" />
+        <di:waypoint x="2457" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InternalProtocolToJoin-id-0015_di" bpmnElement="SequenceFlow-InternalProtocolToJoin-id-0015">
+        <di:waypoint x="1625" y="350" />
+        <di:waypoint x="1725" y="350" />
+        <di:waypoint x="1725" y="235" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReminderToApprovalCheck-id-0018_di" bpmnElement="SequenceFlow-ReminderToApprovalCheck-id-0018">
+        <di:waypoint x="2075" y="350" />
+        <di:waypoint x="2175" y="350" />
+        <di:waypoint x="2175" y="235" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RejectionToEnd-id-0023_di" bpmnElement="SequenceFlow-RejectionToEnd-id-0023">
+        <di:waypoint x="2375" y="350" />
+        <di:waypoint x="2457" y="350" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-ComponentReception-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-ComponentReception-id-0001" bpmnElement="SubProcess-ComponentReception-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-WaitingForComponents-id-0001_di" bpmnElement="StartEvent-WaitingForComponents-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-SplitComponentReception-id-0001_di" bpmnElement="ParallelGateway-SplitComponentReception-id-0001">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-VodkaBarFromRussianTeam-id-0001_di" bpmnElement="ReceiveTask-VodkaBarFromRussianTeam-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer14Day-VodkaBar-id-0001_di" bpmnElement="BoundaryEvent-Timer14Day-VodkaBar-id-0001">
+        <dc:Bounds x="357" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-JoinComponentReception-id-0001_di" bpmnElement="ParallelGateway-JoinComponentReception-id-0001">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AllComponentsReceived-id-0001_di" bpmnElement="EndEvent-AllComponentsReceived-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-UrgentFollowupToRussianTeam-id-0001_di" bpmnElement="SendTask-UrgentFollowupToRussianTeam-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-WhiskeyBarFromIrishTeam-id-0002_di" bpmnElement="ReceiveTask-WhiskeyBarFromIrishTeam-id-0002">
+        <dc:Bounds x="325" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer10Day-WhiskeyBar-id-0002_di" bpmnElement="BoundaryEvent-Timer10Day-WhiskeyBar-id-0002">
+        <dc:Bounds x="357" y="372" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-UrgentFollowupToIrishTeam-id-0002_di" bpmnElement="SendTask-UrgentFollowupToIrishTeam-id-0002">
+        <dc:Bounds x="475" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-SeatsFromItalianTeam-id-0003_di" bpmnElement="ReceiveTask-SeatsFromItalianTeam-id-0003">
+        <dc:Bounds x="325" y="590" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer7Day-Seats-id-0003_di" bpmnElement="BoundaryEvent-Timer7Day-Seats-id-0003">
+        <dc:Bounds x="357" y="652" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-UrgentFollowupToItalianTeam-id-0003_di" bpmnElement="SendTask-UrgentFollowupToItalianTeam-id-0003">
+        <dc:Bounds x="475" y="730" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ToiletsFromGermanTeam-id-0004_di" bpmnElement="ReceiveTask-ToiletsFromGermanTeam-id-0004">
+        <dc:Bounds x="325" y="870" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer5Day-Toilets-id-0004_di" bpmnElement="BoundaryEvent-Timer5Day-Toilets-id-0004">
+        <dc:Bounds x="357" y="932" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-UrgentFollowupToGermanTeam-id-0004_di" bpmnElement="SendTask-UrgentFollowupToGermanTeam-id-0004">
+        <dc:Bounds x="475" y="1010" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSplitReception-id-0001_di" bpmnElement="SequenceFlow-StartToSplitReception-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToVodkaBar-id-0002_di" bpmnElement="SequenceFlow-SplitToVodkaBar-id-0002">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToWhiskeyBar-id-0003_di" bpmnElement="SequenceFlow-SplitToWhiskeyBar-id-0003">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="350" />
+        <di:waypoint x="325" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToSeats-id-0004_di" bpmnElement="SequenceFlow-SplitToSeats-id-0004">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="630" />
+        <di:waypoint x="325" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToToilets-id-0005_di" bpmnElement="SequenceFlow-SplitToToilets-id-0005">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="910" />
+        <di:waypoint x="325" y="910" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VodkaBarToJoin-id-0006_di" bpmnElement="SequenceFlow-VodkaBarToJoin-id-0006">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VodkaBarTimeoutToFollowup-id-0011_di" bpmnElement="SequenceFlow-VodkaBarTimeoutToFollowup-id-0011">
+        <di:waypoint x="375" y="128" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToEndReception-id-0010_di" bpmnElement="SequenceFlow-JoinToEndReception-id-0010">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FollowupToJoin-id-0012_di" bpmnElement="SequenceFlow-FollowupToJoin-id-0012">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WhiskeyBarToJoin-id-0007_di" bpmnElement="SequenceFlow-WhiskeyBarToJoin-id-0007">
+        <di:waypoint x="425" y="350" />
+        <di:waypoint x="675" y="350" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WhiskeyBarTimeoutToFollowup-id-0013_di" bpmnElement="SequenceFlow-WhiskeyBarTimeoutToFollowup-id-0013">
+        <di:waypoint x="375" y="408" />
+        <di:waypoint x="375" y="490" />
+        <di:waypoint x="475" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IrishFollowupToJoin-id-0014_di" bpmnElement="SequenceFlow-IrishFollowupToJoin-id-0014">
+        <di:waypoint x="575" y="490" />
+        <di:waypoint x="675" y="490" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SeatsToJoin-id-0008_di" bpmnElement="SequenceFlow-SeatsToJoin-id-0008">
+        <di:waypoint x="425" y="630" />
+        <di:waypoint x="675" y="630" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SeatsTimeoutToFollowup-id-0015_di" bpmnElement="SequenceFlow-SeatsTimeoutToFollowup-id-0015">
+        <di:waypoint x="375" y="688" />
+        <di:waypoint x="375" y="770" />
+        <di:waypoint x="475" y="770" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ItalianFollowupToJoin-id-0016_di" bpmnElement="SequenceFlow-ItalianFollowupToJoin-id-0016">
+        <di:waypoint x="575" y="770" />
+        <di:waypoint x="675" y="770" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ToiletsToJoin-id-0009_di" bpmnElement="SequenceFlow-ToiletsToJoin-id-0009">
+        <di:waypoint x="425" y="910" />
+        <di:waypoint x="675" y="910" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ToiletsTimeoutToFollowup-id-0017_di" bpmnElement="SequenceFlow-ToiletsTimeoutToFollowup-id-0017">
+        <di:waypoint x="375" y="968" />
+        <di:waypoint x="375" y="1050" />
+        <di:waypoint x="475" y="1050" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GermanFollowupToJoin-id-0018_di" bpmnElement="SequenceFlow-GermanFollowupToJoin-id-0018">
+        <di:waypoint x="575" y="1050" />
+        <di:waypoint x="675" y="1050" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-ManufacturingCoordination-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-ManufacturingCoordination-id-0001" bpmnElement="SubProcess-ManufacturingCoordination-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-ManufacturingRequestsInitiated-id-0001_di" bpmnElement="StartEvent-ManufacturingRequestsInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-SplitManufacturingRequests-id-0001_di" bpmnElement="ParallelGateway-SplitManufacturingRequests-id-0001">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-BarRequirementsToRussianTeam-id-0001_di" bpmnElement="SendTask-BarRequirementsToRussianTeam-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-JoinManufacturingRequests-id-0001_di" bpmnElement="ParallelGateway-JoinManufacturingRequests-id-0001">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AllManufacturingRequestsSent-id-0001_di" bpmnElement="EndEvent-AllManufacturingRequestsSent-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-BarRequirementsToIrishTeam-id-0002_di" bpmnElement="SendTask-BarRequirementsToIrishTeam-id-0002">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SeatRequirementsToItalianTeam-id-0003_di" bpmnElement="SendTask-SeatRequirementsToItalianTeam-id-0003">
+        <dc:Bounds x="325" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-ToiletRequirementsToGermanTeam-id-0004_di" bpmnElement="SendTask-ToiletRequirementsToGermanTeam-id-0004">
+        <dc:Bounds x="325" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSplit-id-0001_di" bpmnElement="SequenceFlow-StartToSplit-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToRussianBar-id-0002_di" bpmnElement="SequenceFlow-SplitToRussianBar-id-0002">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToIrishBar-id-0003_di" bpmnElement="SequenceFlow-SplitToIrishBar-id-0003">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToItalianSeats-id-0004_di" bpmnElement="SequenceFlow-SplitToItalianSeats-id-0004">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="350" />
+        <di:waypoint x="325" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToGermanToilets-id-0005_di" bpmnElement="SequenceFlow-SplitToGermanToilets-id-0005">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="490" />
+        <di:waypoint x="325" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RussianBarToJoin-id-0006_di" bpmnElement="SequenceFlow-RussianBarToJoin-id-0006">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToEnd-id-0010_di" bpmnElement="SequenceFlow-JoinToEnd-id-0010">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IrishBarToJoin-id-0007_di" bpmnElement="SequenceFlow-IrishBarToJoin-id-0007">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ItalianSeatsToJoin-id-0008_di" bpmnElement="SequenceFlow-ItalianSeatsToJoin-id-0008">
+        <di:waypoint x="425" y="350" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GermanToiletsToJoin-id-0009_di" bpmnElement="SequenceFlow-GermanToiletsToJoin-id-0009">
+        <di:waypoint x="425" y="490" />
+        <di:waypoint x="525" y="490" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

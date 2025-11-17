@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="university-enrollment-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.0.0">
+  <bpmn:process id="UniversityEnrollmentProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-EnrollmentProcessInitiated-id-0001" name="Enrollment Process Initiated">
+      <bpmn:outgoing>SequenceFlow-StartToSubmitApplication-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-SubmitApplication-id-0001" name="Submit Application">
+      <bpmn:incoming>SequenceFlow-StartToSubmitApplication-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SubmitToReview-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ReviewApplication-id-0001" name="Review Application">
+      <bpmn:incoming>SequenceFlow-SubmitToReview-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ReceiveMissingToReview-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToDocumentsCheck-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-DocumentsComplete-id-0001" name="Documents Complete?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewToDocumentsCheck-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DocumentsCheckToNotification-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-DocumentsCheckToParallel-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-SendMissingDocumentsNotification-id-0001" name="Send: Missing Documents Notification">
+      <bpmn:incoming>SequenceFlow-DocumentsCheckToNotification-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotificationToReceiveMissing-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveMissingDocuments-id-0001" name="Receive: Missing Documents">
+      <bpmn:incoming>SequenceFlow-NotificationToReceiveMissing-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveMissingToReview-id-0001</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:parallelGateway id="ParallelGateway-Split-id-0001" name="Parallel Execution" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-DocumentsCheckToParallel-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ParallelSplitToEvaluate-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ParallelSplitToProcessFee-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-EvaluateApplication-id-0001" name="Evaluate Application">
+      <bpmn:incoming>SequenceFlow-ParallelSplitToEvaluate-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EvaluateToJoin-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ProcessApplicationFee-id-0001" name="Process Application Fee">
+      <bpmn:incoming>SequenceFlow-ParallelSplitToProcessFee-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProcessFeeToJoin-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-Join-id-0001" name="Synchronize Branches" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-EvaluateToJoin-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ProcessFeeToJoin-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToDecision-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ApplicationDecision-id-0001" name="Application Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-JoinToDecision-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DecisionToAcceptance-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-DecisionToRejection-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="SendTask-SendAcceptanceLetter-id-0001" name="Send: Acceptance Letter">
+      <bpmn:incoming>SequenceFlow-DecisionToAcceptance-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AcceptanceToConfirmation-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveEnrollmentConfirmation-id-0001" name="Receive: Enrollment Confirmation">
+      <bpmn:incoming>SequenceFlow-AcceptanceToConfirmation-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConfirmationToOrientation-id-0001</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-TimerDeadline-EnrollmentConfirmation-id-0001" name="Enrollment Confirmation Deadline" attachedToRef="ReceiveTask-ReceiveEnrollmentConfirmation-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryToCanceled-id-0001</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-TimerDeadline-EnrollmentConfirmation-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P7D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-SendOrientationMaterials-id-0001" name="Send: Orientation Materials">
+      <bpmn:incoming>SequenceFlow-ConfirmationToOrientation-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OrientationToAccounts-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-SetupStudentAccounts-id-0001" name="Setup Student Accounts">
+      <bpmn:incoming>SequenceFlow-OrientationToAccounts-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AccountsToInternationalCheck-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-InternationalStudent-id-0001" name="International Student?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-AccountsToInternationalCheck-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InternationalCheckToVisa-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-InternationalCheckToIDCard-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-AssistWithVisaProcessing-id-0001" name="Assist with Visa Processing">
+      <bpmn:incoming>SequenceFlow-InternationalCheckToVisa-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VisaToIDCard-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-IssueStudentIDCard-id-0001" name="Issue Student ID Card">
+      <bpmn:incoming>SequenceFlow-InternationalCheckToIDCard-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-VisaToIDCard-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-IDCardToStudyPlan-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:subProcess id="SubProcess-CreateStudyPlan-id-0001" name="Create Study Plan">
+      <bpmn:incoming>SequenceFlow-IDCardToStudyPlan-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-StudyPlanToAttendClasses-id-0001</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-StudyPlanInitiation-id-0001" name="Study Plan Initiation">
+        <bpmn:outgoing>SequenceFlow-StudyPlanStartToAdvisor-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-MeetWithAcademicAdvisor-id-0001" name="Meet with Academic Advisor">
+        <bpmn:incoming>SequenceFlow-StudyPlanStartToAdvisor-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AdvisorToSelectCourses-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-SelectCourses-id-0001" name="Select Courses">
+        <bpmn:incoming>SequenceFlow-AdvisorToSelectCourses-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SelectCoursesToConflictCheck-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-ScheduleConflicts-id-0001" name="Schedule Conflicts?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-SelectCoursesToConflictCheck-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ConflictCheckToResolve-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-ConflictCheckToEnd-id-0001</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:userTask id="UserTask-ResolveScheduleConflicts-id-0001" name="Resolve Schedule Conflicts">
+        <bpmn:incoming>SequenceFlow-ConflictCheckToResolve-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ResolveToEnd-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:endEvent id="EndEvent-StudyPlanComplete-id-0001" name="Study Plan Complete">
+        <bpmn:incoming>SequenceFlow-ConflictCheckToEnd-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ResolveToEnd-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-StudyPlanStartToAdvisor-id-0001" sourceRef="StartEvent-StudyPlanInitiation-id-0001" targetRef="UserTask-MeetWithAcademicAdvisor-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-AdvisorToSelectCourses-id-0001" sourceRef="UserTask-MeetWithAcademicAdvisor-id-0001" targetRef="UserTask-SelectCourses-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SelectCoursesToConflictCheck-id-0001" sourceRef="UserTask-SelectCourses-id-0001" targetRef="ExclusiveGateway-ScheduleConflicts-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ConflictCheckToResolve-id-0001" name="schedule_conflicts" sourceRef="ExclusiveGateway-ScheduleConflicts-id-0001" targetRef="UserTask-ResolveScheduleConflicts-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ConflictCheckToEnd-id-0001" sourceRef="ExclusiveGateway-ScheduleConflicts-id-0001" targetRef="EndEvent-StudyPlanComplete-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ResolveToEnd-id-0001" sourceRef="UserTask-ResolveScheduleConflicts-id-0001" targetRef="EndEvent-StudyPlanComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:userTask id="UserTask-AttendClasses-id-0001" name="Attend Classes">
+      <bpmn:incoming>SequenceFlow-StudyPlanToAttendClasses-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-GrievanceCheckToAttend-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-AppealToAttend-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AttendToAddDrop-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-AddDropCourses-id-0001" name="Add/Drop Courses">
+      <bpmn:incoming>SequenceFlow-AttendToAddDrop-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AddDropToPostGrades-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-PostGrades-id-0001" name="Post Grades">
+      <bpmn:incoming>SequenceFlow-AddDropToPostGrades-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PostGradesToReview-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-ReviewGrades-id-0001" name="Review Grades">
+      <bpmn:incoming>SequenceFlow-PostGradesToReview-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToGrievanceCheck-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-GrievanceExists-id-0001" name="Grievance Exists?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReviewToGrievanceCheck-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GrievanceCheckToAppeal-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GrievanceCheckToAttend-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:subProcess id="SubProcess-HandleAppeal-id-0001" name="Handle Appeal">
+      <bpmn:incoming>SequenceFlow-GrievanceCheckToAppeal-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AppealToAttend-id-0001</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-AppealInitiated-id-0001" name="Appeal Initiated">
+        <bpmn:outgoing>SequenceFlow-AppealStartToSubmitForm-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-SubmitAppealForm-id-0001" name="Submit Appeal Form">
+        <bpmn:incoming>SequenceFlow-AppealStartToSubmitForm-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SubmitFormToCommittee-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-MeetWithAppealsCommittee-id-0001" name="Meet with Appeals Committee">
+        <bpmn:incoming>SequenceFlow-SubmitFormToCommittee-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CommitteeToDecision-id-0001</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:receiveTask id="ReceiveTask-ReceiveAppealDecision-id-0001" name="Receive: Appeal Decision">
+        <bpmn:incoming>SequenceFlow-CommitteeToDecision-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-DecisionToEnd-id-0001</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:endEvent id="EndEvent-AppealResolved-id-0001" name="Appeal Resolved">
+        <bpmn:incoming>SequenceFlow-DecisionToEnd-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-AppealStartToSubmitForm-id-0001" sourceRef="StartEvent-AppealInitiated-id-0001" targetRef="UserTask-SubmitAppealForm-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SubmitFormToCommittee-id-0001" sourceRef="UserTask-SubmitAppealForm-id-0001" targetRef="UserTask-MeetWithAppealsCommittee-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CommitteeToDecision-id-0001" sourceRef="UserTask-MeetWithAppealsCommittee-id-0001" targetRef="ReceiveTask-ReceiveAppealDecision-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-DecisionToEnd-id-0001" sourceRef="ReceiveTask-ReceiveAppealDecision-id-0001" targetRef="EndEvent-AppealResolved-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:sendTask id="SendTask-SendRejectionLetter-id-0001" name="Send: Rejection Letter">
+      <bpmn:incoming>SequenceFlow-DecisionToRejection-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RejectionToEnd-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0001" name="Process Complete">
+      <bpmn:incoming>SequenceFlow-RejectionToEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-ApplicationCanceled-id-0001" name="Application Canceled">
+      <bpmn:incoming>SequenceFlow-BoundaryToCanceled-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSubmitApplication-id-0001" sourceRef="StartEvent-EnrollmentProcessInitiated-id-0001" targetRef="UserTask-SubmitApplication-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SubmitToReview-id-0001" sourceRef="UserTask-SubmitApplication-id-0001" targetRef="UserTask-ReviewApplication-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToDocumentsCheck-id-0001" sourceRef="UserTask-ReviewApplication-id-0001" targetRef="ExclusiveGateway-DocumentsComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DocumentsCheckToNotification-id-0001" name="documents_incomplete" sourceRef="ExclusiveGateway-DocumentsComplete-id-0001" targetRef="SendTask-SendMissingDocumentsNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DocumentsCheckToParallel-id-0001" sourceRef="ExclusiveGateway-DocumentsComplete-id-0001" targetRef="ParallelGateway-Split-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotificationToReceiveMissing-id-0001" sourceRef="SendTask-SendMissingDocumentsNotification-id-0001" targetRef="ReceiveTask-ReceiveMissingDocuments-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveMissingToReview-id-0001" sourceRef="ReceiveTask-ReceiveMissingDocuments-id-0001" targetRef="UserTask-ReviewApplication-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelSplitToEvaluate-id-0001" sourceRef="ParallelGateway-Split-id-0001" targetRef="UserTask-EvaluateApplication-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ParallelSplitToProcessFee-id-0001" sourceRef="ParallelGateway-Split-id-0001" targetRef="ServiceTask-ProcessApplicationFee-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EvaluateToJoin-id-0001" sourceRef="UserTask-EvaluateApplication-id-0001" targetRef="ParallelGateway-Join-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProcessFeeToJoin-id-0001" sourceRef="ServiceTask-ProcessApplicationFee-id-0001" targetRef="ParallelGateway-Join-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToDecision-id-0001" sourceRef="ParallelGateway-Join-id-0001" targetRef="ExclusiveGateway-ApplicationDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DecisionToAcceptance-id-0001" name="application_accepted" sourceRef="ExclusiveGateway-ApplicationDecision-id-0001" targetRef="SendTask-SendAcceptanceLetter-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DecisionToRejection-id-0001" sourceRef="ExclusiveGateway-ApplicationDecision-id-0001" targetRef="SendTask-SendRejectionLetter-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AcceptanceToConfirmation-id-0001" sourceRef="SendTask-SendAcceptanceLetter-id-0001" targetRef="ReceiveTask-ReceiveEnrollmentConfirmation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToCanceled-id-0001" sourceRef="BoundaryEvent-TimerDeadline-EnrollmentConfirmation-id-0001" targetRef="EndEvent-ApplicationCanceled-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConfirmationToOrientation-id-0001" sourceRef="ReceiveTask-ReceiveEnrollmentConfirmation-id-0001" targetRef="SendTask-SendOrientationMaterials-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-OrientationToAccounts-id-0001" sourceRef="SendTask-SendOrientationMaterials-id-0001" targetRef="ServiceTask-SetupStudentAccounts-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AccountsToInternationalCheck-id-0001" sourceRef="ServiceTask-SetupStudentAccounts-id-0001" targetRef="ExclusiveGateway-InternationalStudent-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InternationalCheckToVisa-id-0001" name="student_is_international" sourceRef="ExclusiveGateway-InternationalStudent-id-0001" targetRef="UserTask-AssistWithVisaProcessing-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InternationalCheckToIDCard-id-0001" sourceRef="ExclusiveGateway-InternationalStudent-id-0001" targetRef="ServiceTask-IssueStudentIDCard-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-VisaToIDCard-id-0001" sourceRef="UserTask-AssistWithVisaProcessing-id-0001" targetRef="ServiceTask-IssueStudentIDCard-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-IDCardToStudyPlan-id-0001" sourceRef="ServiceTask-IssueStudentIDCard-id-0001" targetRef="SubProcess-CreateStudyPlan-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-StudyPlanToAttendClasses-id-0001" sourceRef="SubProcess-CreateStudyPlan-id-0001" targetRef="UserTask-AttendClasses-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AttendToAddDrop-id-0001" sourceRef="UserTask-AttendClasses-id-0001" targetRef="UserTask-AddDropCourses-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AddDropToPostGrades-id-0001" sourceRef="UserTask-AddDropCourses-id-0001" targetRef="ServiceTask-PostGrades-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PostGradesToReview-id-0001" sourceRef="ServiceTask-PostGrades-id-0001" targetRef="UserTask-ReviewGrades-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToGrievanceCheck-id-0001" sourceRef="UserTask-ReviewGrades-id-0001" targetRef="ExclusiveGateway-GrievanceExists-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GrievanceCheckToAppeal-id-0001" name="grievance_exists" sourceRef="ExclusiveGateway-GrievanceExists-id-0001" targetRef="SubProcess-HandleAppeal-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GrievanceCheckToAttend-id-0001" sourceRef="ExclusiveGateway-GrievanceExists-id-0001" targetRef="UserTask-AttendClasses-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AppealToAttend-id-0001" sourceRef="SubProcess-HandleAppeal-id-0001" targetRef="UserTask-AttendClasses-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RejectionToEnd-id-0001" sourceRef="SendTask-SendRejectionLetter-id-0001" targetRef="EndEvent-ProcessComplete-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_UniversityEnrollmentProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_UniversityEnrollmentProcess-id-0001" bpmnElement="UniversityEnrollmentProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-EnrollmentProcessInitiated-id-0001_di" bpmnElement="StartEvent-EnrollmentProcessInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SubmitApplication-id-0001_di" bpmnElement="UserTask-SubmitApplication-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewApplication-id-0001_di" bpmnElement="UserTask-ReviewApplication-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-DocumentsComplete-id-0001_di" bpmnElement="ExclusiveGateway-DocumentsComplete-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendMissingDocumentsNotification-id-0001_di" bpmnElement="SendTask-SendMissingDocumentsNotification-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveMissingDocuments-id-0001_di" bpmnElement="ReceiveTask-ReceiveMissingDocuments-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Split-id-0001_di" bpmnElement="ParallelGateway-Split-id-0001">
+        <dc:Bounds x="950" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EvaluateApplication-id-0001_di" bpmnElement="UserTask-EvaluateApplication-id-0001">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-Join-id-0001_di" bpmnElement="ParallelGateway-Join-id-0001">
+        <dc:Bounds x="1250" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ApplicationDecision-id-0001_di" bpmnElement="ExclusiveGateway-ApplicationDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1400" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendAcceptanceLetter-id-0001_di" bpmnElement="SendTask-SendAcceptanceLetter-id-0001">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveEnrollmentConfirmation-id-0001_di" bpmnElement="ReceiveTask-ReceiveEnrollmentConfirmation-id-0001">
+        <dc:Bounds x="1675" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-TimerDeadline-EnrollmentConfirmation-id-0001_di" bpmnElement="BoundaryEvent-TimerDeadline-EnrollmentConfirmation-id-0001">
+        <dc:Bounds x="1707" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendOrientationMaterials-id-0001_di" bpmnElement="SendTask-SendOrientationMaterials-id-0001">
+        <dc:Bounds x="1825" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SetupStudentAccounts-id-0001_di" bpmnElement="ServiceTask-SetupStudentAccounts-id-0001">
+        <dc:Bounds x="1975" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-InternationalStudent-id-0001_di" bpmnElement="ExclusiveGateway-InternationalStudent-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="2150" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AssistWithVisaProcessing-id-0001_di" bpmnElement="UserTask-AssistWithVisaProcessing-id-0001">
+        <dc:Bounds x="2275" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-IssueStudentIDCard-id-0001_di" bpmnElement="ServiceTask-IssueStudentIDCard-id-0001">
+        <dc:Bounds x="2425" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-CreateStudyPlan-id-0001_di" bpmnElement="SubProcess-CreateStudyPlan-id-0001">
+        <dc:Bounds x="2575" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AttendClasses-id-0001_di" bpmnElement="UserTask-AttendClasses-id-0001">
+        <dc:Bounds x="2725" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-AddDropCourses-id-0001_di" bpmnElement="UserTask-AddDropCourses-id-0001">
+        <dc:Bounds x="2875" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PostGrades-id-0001_di" bpmnElement="ServiceTask-PostGrades-id-0001">
+        <dc:Bounds x="3025" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewGrades-id-0001_di" bpmnElement="UserTask-ReviewGrades-id-0001">
+        <dc:Bounds x="3175" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-GrievanceExists-id-0001_di" bpmnElement="ExclusiveGateway-GrievanceExists-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="3350" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-HandleAppeal-id-0001_di" bpmnElement="SubProcess-HandleAppeal-id-0001">
+        <dc:Bounds x="3475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessApplicationFee-id-0001_di" bpmnElement="ServiceTask-ProcessApplicationFee-id-0001">
+        <dc:Bounds x="1075" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendRejectionLetter-id-0001_di" bpmnElement="SendTask-SendRejectionLetter-id-0001">
+        <dc:Bounds x="1525" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessComplete-id-0001_di" bpmnElement="EndEvent-ProcessComplete-id-0001">
+        <dc:Bounds x="1707" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ApplicationCanceled-id-0001_di" bpmnElement="EndEvent-ApplicationCanceled-id-0001">
+        <dc:Bounds x="2007" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToSubmitApplication-id-0001_di" bpmnElement="SequenceFlow-StartToSubmitApplication-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubmitToReview-id-0001_di" bpmnElement="SequenceFlow-SubmitToReview-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToDocumentsCheck-id-0001_di" bpmnElement="SequenceFlow-ReviewToDocumentsCheck-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DocumentsCheckToNotification-id-0001_di" bpmnElement="SequenceFlow-DocumentsCheckToNotification-id-0001">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DocumentsCheckToParallel-id-0001_di" bpmnElement="SequenceFlow-DocumentsCheckToParallel-id-0001">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="950" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotificationToReceiveMissing-id-0001_di" bpmnElement="SequenceFlow-NotificationToReceiveMissing-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveMissingToReview-id-0001_di" bpmnElement="SequenceFlow-ReceiveMissingToReview-id-0001">
+        <di:waypoint x="825" y="110" />
+        <di:waypoint x="825" y="140" />
+        <di:waypoint x="375" y="140" />
+        <di:waypoint x="375" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelSplitToEvaluate-id-0001_di" bpmnElement="SequenceFlow-ParallelSplitToEvaluate-id-0001">
+        <di:waypoint x="1000" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ParallelSplitToProcessFee-id-0001_di" bpmnElement="SequenceFlow-ParallelSplitToProcessFee-id-0001">
+        <di:waypoint x="975" y="235" />
+        <di:waypoint x="975" y="350" />
+        <di:waypoint x="1075" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EvaluateToJoin-id-0001_di" bpmnElement="SequenceFlow-EvaluateToJoin-id-0001">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1250" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToDecision-id-0001_di" bpmnElement="SequenceFlow-JoinToDecision-id-0001">
+        <di:waypoint x="1300" y="210" />
+        <di:waypoint x="1400" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DecisionToAcceptance-id-0001_di" bpmnElement="SequenceFlow-DecisionToAcceptance-id-0001">
+        <di:waypoint x="1450" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DecisionToRejection-id-0001_di" bpmnElement="SequenceFlow-DecisionToRejection-id-0001">
+        <di:waypoint x="1425" y="235" />
+        <di:waypoint x="1425" y="350" />
+        <di:waypoint x="1525" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AcceptanceToConfirmation-id-0001_di" bpmnElement="SequenceFlow-AcceptanceToConfirmation-id-0001">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1675" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConfirmationToOrientation-id-0001_di" bpmnElement="SequenceFlow-ConfirmationToOrientation-id-0001">
+        <di:waypoint x="1775" y="210" />
+        <di:waypoint x="1825" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToCanceled-id-0001_di" bpmnElement="SequenceFlow-BoundaryToCanceled-id-0001">
+        <di:waypoint x="1725" y="268" />
+        <di:waypoint x="1725" y="280" />
+        <di:waypoint x="1800" y="280" />
+        <di:waypoint x="1800" y="250" />
+        <di:waypoint x="1800" y="280" />
+        <di:waypoint x="1950" y="280" />
+        <di:waypoint x="1950" y="350" />
+        <di:waypoint x="2007" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrientationToAccounts-id-0001_di" bpmnElement="SequenceFlow-OrientationToAccounts-id-0001">
+        <di:waypoint x="1925" y="210" />
+        <di:waypoint x="1975" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AccountsToInternationalCheck-id-0001_di" bpmnElement="SequenceFlow-AccountsToInternationalCheck-id-0001">
+        <di:waypoint x="2075" y="210" />
+        <di:waypoint x="2150" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InternationalCheckToVisa-id-0001_di" bpmnElement="SequenceFlow-InternationalCheckToVisa-id-0001">
+        <di:waypoint x="2200" y="210" />
+        <di:waypoint x="2275" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InternationalCheckToIDCard-id-0001_di" bpmnElement="SequenceFlow-InternationalCheckToIDCard-id-0001">
+        <di:waypoint x="2175" y="235" />
+        <di:waypoint x="2175" y="280" />
+        <di:waypoint x="2475" y="280" />
+        <di:waypoint x="2475" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VisaToIDCard-id-0001_di" bpmnElement="SequenceFlow-VisaToIDCard-id-0001">
+        <di:waypoint x="2375" y="210" />
+        <di:waypoint x="2425" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IDCardToStudyPlan-id-0001_di" bpmnElement="SequenceFlow-IDCardToStudyPlan-id-0001">
+        <di:waypoint x="2525" y="210" />
+        <di:waypoint x="2575" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-StudyPlanToAttendClasses-id-0001_di" bpmnElement="SequenceFlow-StudyPlanToAttendClasses-id-0001">
+        <di:waypoint x="2675" y="210" />
+        <di:waypoint x="2725" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AttendToAddDrop-id-0001_di" bpmnElement="SequenceFlow-AttendToAddDrop-id-0001">
+        <di:waypoint x="2825" y="210" />
+        <di:waypoint x="2875" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AddDropToPostGrades-id-0001_di" bpmnElement="SequenceFlow-AddDropToPostGrades-id-0001">
+        <di:waypoint x="2975" y="210" />
+        <di:waypoint x="3025" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PostGradesToReview-id-0001_di" bpmnElement="SequenceFlow-PostGradesToReview-id-0001">
+        <di:waypoint x="3125" y="210" />
+        <di:waypoint x="3175" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToGrievanceCheck-id-0001_di" bpmnElement="SequenceFlow-ReviewToGrievanceCheck-id-0001">
+        <di:waypoint x="3275" y="210" />
+        <di:waypoint x="3350" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GrievanceCheckToAppeal-id-0001_di" bpmnElement="SequenceFlow-GrievanceCheckToAppeal-id-0001">
+        <di:waypoint x="3400" y="210" />
+        <di:waypoint x="3475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GrievanceCheckToAttend-id-0001_di" bpmnElement="SequenceFlow-GrievanceCheckToAttend-id-0001">
+        <di:waypoint x="3375" y="235" />
+        <di:waypoint x="3375" y="280" />
+        <di:waypoint x="2775" y="280" />
+        <di:waypoint x="2775" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AppealToAttend-id-0001_di" bpmnElement="SequenceFlow-AppealToAttend-id-0001">
+        <di:waypoint x="3525" y="250" />
+        <di:waypoint x="3525" y="280" />
+        <di:waypoint x="2775" y="280" />
+        <di:waypoint x="2775" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcessFeeToJoin-id-0001_di" bpmnElement="SequenceFlow-ProcessFeeToJoin-id-0001">
+        <di:waypoint x="1175" y="350" />
+        <di:waypoint x="1275" y="350" />
+        <di:waypoint x="1275" y="235" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RejectionToEnd-id-0001_di" bpmnElement="SequenceFlow-RejectionToEnd-id-0001">
+        <di:waypoint x="1625" y="350" />
+        <di:waypoint x="1707" y="350" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-HandleAppeal-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-HandleAppeal-id-0001" bpmnElement="SubProcess-HandleAppeal-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-AppealInitiated-id-0001_di" bpmnElement="StartEvent-AppealInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SubmitAppealForm-id-0001_di" bpmnElement="UserTask-SubmitAppealForm-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-MeetWithAppealsCommittee-id-0001_di" bpmnElement="UserTask-MeetWithAppealsCommittee-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveAppealDecision-id-0001_di" bpmnElement="ReceiveTask-ReceiveAppealDecision-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AppealResolved-id-0001_di" bpmnElement="EndEvent-AppealResolved-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-AppealStartToSubmitForm-id-0001_di" bpmnElement="SequenceFlow-AppealStartToSubmitForm-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SubmitFormToCommittee-id-0001_di" bpmnElement="SequenceFlow-SubmitFormToCommittee-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CommitteeToDecision-id-0001_di" bpmnElement="SequenceFlow-CommitteeToDecision-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DecisionToEnd-id-0001_di" bpmnElement="SequenceFlow-DecisionToEnd-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-CreateStudyPlan-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-CreateStudyPlan-id-0001" bpmnElement="SubProcess-CreateStudyPlan-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-StudyPlanInitiation-id-0001_di" bpmnElement="StartEvent-StudyPlanInitiation-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-MeetWithAcademicAdvisor-id-0001_di" bpmnElement="UserTask-MeetWithAcademicAdvisor-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectCourses-id-0001_di" bpmnElement="UserTask-SelectCourses-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ScheduleConflicts-id-0001_di" bpmnElement="ExclusiveGateway-ScheduleConflicts-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ResolveScheduleConflicts-id-0001_di" bpmnElement="UserTask-ResolveScheduleConflicts-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-StudyPlanComplete-id-0001_di" bpmnElement="EndEvent-StudyPlanComplete-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StudyPlanStartToAdvisor-id-0001_di" bpmnElement="SequenceFlow-StudyPlanStartToAdvisor-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AdvisorToSelectCourses-id-0001_di" bpmnElement="SequenceFlow-AdvisorToSelectCourses-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectCoursesToConflictCheck-id-0001_di" bpmnElement="SequenceFlow-SelectCoursesToConflictCheck-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConflictCheckToResolve-id-0001_di" bpmnElement="SequenceFlow-ConflictCheckToResolve-id-0001">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConflictCheckToEnd-id-0001_di" bpmnElement="SequenceFlow-ConflictCheckToEnd-id-0001">
+        <di:waypoint x="525" y="95" />
+        <di:waypoint x="525" y="140" />
+        <di:waypoint x="825" y="140" />
+        <di:waypoint x="825" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ResolveToEnd-id-0001_di" bpmnElement="SequenceFlow-ResolveToEnd-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

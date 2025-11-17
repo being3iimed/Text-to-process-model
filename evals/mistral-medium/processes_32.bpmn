@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="farming-bot-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="CustomFarmingBotProcess" isExecutable="true">
+    <bpmn:startEvent id="MessageStartEvent-FarmingRequest-id-0001" name="Farming Request Received">
+      <bpmn:outgoing>SequenceFlow-StartToSelect-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-SelectResources-id-0001" name="Select Resources">
+      <bpmn:incoming>SequenceFlow-StartToSelect-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectToDefine-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-DefineDependencies-id-0002" name="Define Dependencies">
+      <bpmn:incoming>SequenceFlow-SelectToDefine-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DefineToValidate-id-0003</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ValidateDependencies-id-0003" name="Validate Dependencies">
+      <bpmn:incoming>SequenceFlow-DefineToValidate-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidateToToolCheck-id-0004</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ToolCheck-id-0001" name="Tools Required?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ValidateToToolCheck-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ToolCheckToToolCreation-id-0005</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ToolCheckToFarming-id-0006</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:subProcess id="SubProcess-ToolCreation-id-0001" name="Tool Creation">
+      <bpmn:incoming>SequenceFlow-ToolCheckToToolCreation-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ToolCreationToFarming-id-0007</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-ToolCreationStart-id-0001" name="Tool Creation Start">
+        <bpmn:outgoing>SequenceFlow-ToolStartToSplit-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:parallelGateway id="ParallelGateway-ToolCheckSplit-id-0001" name="Parallel Tool Checks" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-ToolStartToSplit-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SplitToCheckTools-id-0002</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToConfirm-id-0003</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:serviceTask id="ServiceTask-CheckRequiredTools-id-0001" name="Check Required Tools">
+        <bpmn:incoming>SequenceFlow-SplitToCheckTools-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CheckToJoin-id-0004</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:userTask id="UserTask-ConfirmToolCreation-id-0001" name="Confirm Tool Creation">
+        <bpmn:incoming>SequenceFlow-SplitToConfirm-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ConfirmToJoin-id-0005</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:parallelGateway id="ParallelGateway-ToolCheckJoin-id-0002" name="Tool Check Complete" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-CheckToJoin-id-0004</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ConfirmToJoin-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-JoinToCreate-id-0006</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:serviceTask id="ServiceTask-CreateTool-id-0001" name="Create Tool">
+        <bpmn:incoming>SequenceFlow-JoinToCreate-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CreateToEnd-id-0007</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent-ToolCreationComplete-id-0001" name="Tool Creation Complete">
+        <bpmn:incoming>SequenceFlow-CreateToEnd-id-0007</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-ToolStartToSplit-id-0001" sourceRef="StartEvent-ToolCreationStart-id-0001" targetRef="ParallelGateway-ToolCheckSplit-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToCheckTools-id-0002" sourceRef="ParallelGateway-ToolCheckSplit-id-0001" targetRef="ServiceTask-CheckRequiredTools-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToConfirm-id-0003" sourceRef="ParallelGateway-ToolCheckSplit-id-0001" targetRef="UserTask-ConfirmToolCreation-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CheckToJoin-id-0004" sourceRef="ServiceTask-CheckRequiredTools-id-0001" targetRef="ParallelGateway-ToolCheckJoin-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-ConfirmToJoin-id-0005" sourceRef="UserTask-ConfirmToolCreation-id-0001" targetRef="ParallelGateway-ToolCheckJoin-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-JoinToCreate-id-0006" sourceRef="ParallelGateway-ToolCheckJoin-id-0002" targetRef="ServiceTask-CreateTool-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CreateToEnd-id-0007" sourceRef="ServiceTask-CreateTool-id-0001" targetRef="EndEvent-ToolCreationComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-ResourceFarming-id-0001" name="Resource Farming">
+      <bpmn:incoming>SequenceFlow-ToolCheckToFarming-id-0006</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ToolCreationToFarming-id-0007</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ValidToFarming-id-0013</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ResolveToFarming-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FarmingToUpdates-id-0008</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-FarmingCompleteToJoin-id-0018</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-FarmingStart-id-0001" name="Farming Start">
+        <bpmn:outgoing>SequenceFlow-FarmingStartToSplit-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:parallelGateway id="ParallelGateway-FarmingSplit-id-0001" name="Start Parallel Farming" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-FarmingStartToSplit-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SplitToJoin-id-0002</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToResource1-id-0026</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToResource2-id-0027</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToResource3-id-0028</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToResource4-id-0029</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToResource5-id-0030</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToResource6-id-0031</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToResource7-id-0032</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToResource8-id-0033</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToResource9-id-0034</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToResource10-id-0035</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:parallelGateway id="ParallelGateway-FarmingJoin-id-0002" name="Complete Parallel Farming" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-SplitToJoin-id-0002</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-Resource1ToJoin-id-0036</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-Resource2ToJoin-id-0037</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-Resource3ToJoin-id-0038</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-Resource4ToJoin-id-0039</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-Resource5ToJoin-id-0040</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-Resource6ToJoin-id-0041</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-Resource7ToJoin-id-0042</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-Resource8ToJoin-id-0043</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-Resource9ToJoin-id-0044</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-Resource10ToJoin-id-0045</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-RecoverToJoin-id-0050</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-JoinToComplete-id-0003</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:endEvent id="EndEvent-FarmingComplete-id-0001" name="Farming Complete">
+        <bpmn:incoming>SequenceFlow-JoinToComplete-id-0003</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-FarmingStartToSplit-id-0001" sourceRef="StartEvent-FarmingStart-id-0001" targetRef="ParallelGateway-FarmingSplit-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToJoin-id-0002" sourceRef="ParallelGateway-FarmingSplit-id-0001" targetRef="ParallelGateway-FarmingJoin-id-0002" />
+      <bpmn:sequenceFlow id="SequenceFlow-JoinToComplete-id-0003" sourceRef="ParallelGateway-FarmingJoin-id-0002" targetRef="EndEvent-FarmingComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:inclusiveGateway id="InclusiveGateway-DynamicUpdates-id-0001" name="Dynamic Updates Available?">
+      <bpmn:incoming>SequenceFlow-FarmingToUpdates-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdatesToUpdateTask-id-0009</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-UpdatesToSharing-id-0010</bpmn:outgoing>
+    </bpmn:inclusiveGateway>
+    <bpmn:userTask id="UserTask-UpdateResourceList-id-0001" name="Update Resource List">
+      <bpmn:incoming>SequenceFlow-UpdatesToUpdateTask-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateToRevalidate-id-0011</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-UpdatePathsToJoin-id-0016</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-RevalidateDependencies-id-0001" name="Revalidate Dependencies">
+      <bpmn:incoming>SequenceFlow-UpdateToRevalidate-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RevalidateToValidCheck-id-0012</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-UpdateValid-id-0001" name="Update Valid?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-RevalidateToValidCheck-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidToFarming-id-0013</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ValidToResolve-id-0014</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-ResolveConflicts-id-0001" name="Resolve Conflicts">
+      <bpmn:incoming>SequenceFlow-ValidToResolve-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ResolveToFarming-id-0015</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ResolveToJoin-id-0017</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:inclusiveGateway id="InclusiveGateway-UpdateJoin-id-0002" name="Update Processing Complete">
+      <bpmn:incoming>SequenceFlow-UpdatePathsToJoin-id-0016</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ResolveToJoin-id-0017</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-FarmingCompleteToJoin-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-UpdateJoinToSharing-id-0019</bpmn:outgoing>
+    </bpmn:inclusiveGateway>
+    <bpmn:userTask id="UserTask-SelectSharingOptions-id-0001" name="Select Sharing Options">
+      <bpmn:incoming>SequenceFlow-UpdatesToSharing-id-0010</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-UpdateJoinToSharing-id-0019</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SharingToShareDecision-id-0020</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:inclusiveGateway id="InclusiveGateway-ShareDecision-id-0001" name="Share with Friends?">
+      <bpmn:incoming>SequenceFlow-SharingToShareDecision-id-0020</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ShareDecisionToSend-id-0021</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ShareDecisionToComplete-id-0022</bpmn:outgoing>
+    </bpmn:inclusiveGateway>
+    <bpmn:sendTask id="SendTask-SendMaterials-id-0001" name="Send materials to friends">
+      <bpmn:incoming>SequenceFlow-ShareDecisionToSend-id-0021</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendToShareJoin-id-0023</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:inclusiveGateway id="InclusiveGateway-ShareJoin-id-0002" name="Sharing Complete">
+      <bpmn:incoming>SequenceFlow-SendToShareJoin-id-0023</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ShareJoinToSharedEnd-id-0024</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ShareJoinToComplete-id-0025</bpmn:outgoing>
+    </bpmn:inclusiveGateway>
+    <bpmn:endEvent id="EndEvent-ProcessComplete-id-0001" name="Process Complete">
+      <bpmn:incoming>SequenceFlow-ShareDecisionToComplete-id-0022</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ShareJoinToComplete-id-0025</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-SharedWithFriends-id-0001" name="Shared With Friends">
+      <bpmn:incoming>SequenceFlow-ShareJoinToSharedEnd-id-0024</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask-StartFarmingResource1-id-0001" name="Start Farming Resource 1">
+      <bpmn:incoming>SequenceFlow-SplitToResource1-id-0026</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-NotificationToFarming-id-0051</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Resource1ToJoin-id-0036</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-StartFarmingResource2-id-0002" name="Start Farming Resource 2">
+      <bpmn:incoming>SequenceFlow-SplitToResource2-id-0027</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Resource2ToJoin-id-0037</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-StartFarmingResource3-id-0003" name="Start Farming Resource 3">
+      <bpmn:incoming>SequenceFlow-SplitToResource3-id-0028</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Resource3ToJoin-id-0038</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-StartFarmingResource4-id-0004" name="Start Farming Resource 4">
+      <bpmn:incoming>SequenceFlow-SplitToResource4-id-0029</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Resource4ToJoin-id-0039</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-StartFarmingResource5-id-0005" name="Start Farming Resource 5">
+      <bpmn:incoming>SequenceFlow-SplitToResource5-id-0030</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Resource5ToJoin-id-0040</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-StartFarmingResource6-id-0006" name="Start Farming Resource 6">
+      <bpmn:incoming>SequenceFlow-SplitToResource6-id-0031</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Resource6ToJoin-id-0041</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-StartFarmingResource7-id-0007" name="Start Farming Resource 7">
+      <bpmn:incoming>SequenceFlow-SplitToResource7-id-0032</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Resource7ToJoin-id-0042</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-StartFarmingResource8-id-0008" name="Start Farming Resource 8">
+      <bpmn:incoming>SequenceFlow-SplitToResource8-id-0033</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Resource8ToJoin-id-0043</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-StartFarmingResource9-id-0009" name="Start Farming Resource 9">
+      <bpmn:incoming>SequenceFlow-SplitToResource9-id-0034</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Resource9ToJoin-id-0044</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-StartFarmingResource10-id-0010" name="Start Farming Resource 10">
+      <bpmn:incoming>SequenceFlow-SplitToResource10-id-0035</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-Resource10ToJoin-id-0045</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-CalculateMilestones-id-0001" name="Calculate Milestones">
+      <bpmn:incoming>SequenceFlow-TimerToMilestone-id-0046</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MilestoneToNotification-id-0047</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-MilestoneNotification-id-0001" name="Send milestone notification">
+      <bpmn:incoming>SequenceFlow-MilestoneToNotification-id-0047</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotificationToFarming-id-0051</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-AssessDamage-id-0001" name="Assess Damage">
+      <bpmn:incoming>SequenceFlow-DisasterToAssess-id-0048</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AssessToRecover-id-0049</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-RecoverResources-id-0001" name="Recover Resources">
+      <bpmn:incoming>SequenceFlow-AssessToRecover-id-0049</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RecoverToJoin-id-0050</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer1Hour-Resource1-id-0001" name="1 Hour Milestone Check" cancelActivity="false" attachedToRef="ServiceTask-StartFarmingResource1-id-0001">
+      <bpmn:outgoing>SequenceFlow-TimerToMilestone-id-0046</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer1Hour-Resource1-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1H</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:boundaryEvent id="BoundaryEvent-SignalDisaster-Resource1-id-0001" name="Natural Disaster" attachedToRef="ServiceTask-StartFarmingResource1-id-0001">
+      <bpmn:outgoing>SequenceFlow-DisasterToAssess-id-0048</bpmn:outgoing>
+      <bpmn:signalEventDefinition id="BoundaryEvent-SignalDisaster-Resource1-id-0001_EventDef" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToSelect-id-0001" sourceRef="MessageStartEvent-FarmingRequest-id-0001" targetRef="UserTask-SelectResources-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectToDefine-id-0002" sourceRef="UserTask-SelectResources-id-0001" targetRef="UserTask-DefineDependencies-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-DefineToValidate-id-0003" sourceRef="UserTask-DefineDependencies-id-0002" targetRef="ServiceTask-ValidateDependencies-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidateToToolCheck-id-0004" sourceRef="ServiceTask-ValidateDependencies-id-0003" targetRef="ExclusiveGateway-ToolCheck-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ToolCheckToToolCreation-id-0005" name="tools required" sourceRef="ExclusiveGateway-ToolCheck-id-0001" targetRef="SubProcess-ToolCreation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ToolCheckToFarming-id-0006" name="no tools required" sourceRef="ExclusiveGateway-ToolCheck-id-0001" targetRef="SubProcess-ResourceFarming-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ToolCreationToFarming-id-0007" sourceRef="SubProcess-ToolCreation-id-0001" targetRef="SubProcess-ResourceFarming-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FarmingToUpdates-id-0008" sourceRef="SubProcess-ResourceFarming-id-0001" targetRef="InclusiveGateway-DynamicUpdates-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdatesToUpdateTask-id-0009" name="update requested" sourceRef="InclusiveGateway-DynamicUpdates-id-0001" targetRef="UserTask-UpdateResourceList-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdatesToSharing-id-0010" name="no updates" sourceRef="InclusiveGateway-DynamicUpdates-id-0001" targetRef="UserTask-SelectSharingOptions-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateToRevalidate-id-0011" sourceRef="UserTask-UpdateResourceList-id-0001" targetRef="ServiceTask-RevalidateDependencies-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RevalidateToValidCheck-id-0012" sourceRef="ServiceTask-RevalidateDependencies-id-0001" targetRef="ExclusiveGateway-UpdateValid-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidToFarming-id-0013" name="changes valid" sourceRef="ExclusiveGateway-UpdateValid-id-0001" targetRef="SubProcess-ResourceFarming-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidToResolve-id-0014" name="changes invalid" sourceRef="ExclusiveGateway-UpdateValid-id-0001" targetRef="UserTask-ResolveConflicts-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ResolveToFarming-id-0015" sourceRef="UserTask-ResolveConflicts-id-0001" targetRef="SubProcess-ResourceFarming-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdatePathsToJoin-id-0016" sourceRef="UserTask-UpdateResourceList-id-0001" targetRef="InclusiveGateway-UpdateJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ResolveToJoin-id-0017" sourceRef="UserTask-ResolveConflicts-id-0001" targetRef="InclusiveGateway-UpdateJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-FarmingCompleteToJoin-id-0018" sourceRef="SubProcess-ResourceFarming-id-0001" targetRef="InclusiveGateway-UpdateJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-UpdateJoinToSharing-id-0019" sourceRef="InclusiveGateway-UpdateJoin-id-0002" targetRef="UserTask-SelectSharingOptions-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SharingToShareDecision-id-0020" sourceRef="UserTask-SelectSharingOptions-id-0001" targetRef="InclusiveGateway-ShareDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ShareDecisionToSend-id-0021" name="share selected" sourceRef="InclusiveGateway-ShareDecision-id-0001" targetRef="SendTask-SendMaterials-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ShareDecisionToComplete-id-0022" name="no sharing" sourceRef="InclusiveGateway-ShareDecision-id-0001" targetRef="EndEvent-ProcessComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendToShareJoin-id-0023" sourceRef="SendTask-SendMaterials-id-0001" targetRef="InclusiveGateway-ShareJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ShareJoinToSharedEnd-id-0024" sourceRef="InclusiveGateway-ShareJoin-id-0002" targetRef="EndEvent-SharedWithFriends-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ShareJoinToComplete-id-0025" sourceRef="InclusiveGateway-ShareJoin-id-0002" targetRef="EndEvent-ProcessComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToResource1-id-0026" sourceRef="ParallelGateway-FarmingSplit-id-0001" targetRef="ServiceTask-StartFarmingResource1-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToResource2-id-0027" sourceRef="ParallelGateway-FarmingSplit-id-0001" targetRef="ServiceTask-StartFarmingResource2-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToResource3-id-0028" sourceRef="ParallelGateway-FarmingSplit-id-0001" targetRef="ServiceTask-StartFarmingResource3-id-0003" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToResource4-id-0029" sourceRef="ParallelGateway-FarmingSplit-id-0001" targetRef="ServiceTask-StartFarmingResource4-id-0004" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToResource5-id-0030" sourceRef="ParallelGateway-FarmingSplit-id-0001" targetRef="ServiceTask-StartFarmingResource5-id-0005" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToResource6-id-0031" sourceRef="ParallelGateway-FarmingSplit-id-0001" targetRef="ServiceTask-StartFarmingResource6-id-0006" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToResource7-id-0032" sourceRef="ParallelGateway-FarmingSplit-id-0001" targetRef="ServiceTask-StartFarmingResource7-id-0007" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToResource8-id-0033" sourceRef="ParallelGateway-FarmingSplit-id-0001" targetRef="ServiceTask-StartFarmingResource8-id-0008" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToResource9-id-0034" sourceRef="ParallelGateway-FarmingSplit-id-0001" targetRef="ServiceTask-StartFarmingResource9-id-0009" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToResource10-id-0035" sourceRef="ParallelGateway-FarmingSplit-id-0001" targetRef="ServiceTask-StartFarmingResource10-id-0010" />
+    <bpmn:sequenceFlow id="SequenceFlow-Resource1ToJoin-id-0036" sourceRef="ServiceTask-StartFarmingResource1-id-0001" targetRef="ParallelGateway-FarmingJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-Resource2ToJoin-id-0037" sourceRef="ServiceTask-StartFarmingResource2-id-0002" targetRef="ParallelGateway-FarmingJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-Resource3ToJoin-id-0038" sourceRef="ServiceTask-StartFarmingResource3-id-0003" targetRef="ParallelGateway-FarmingJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-Resource4ToJoin-id-0039" sourceRef="ServiceTask-StartFarmingResource4-id-0004" targetRef="ParallelGateway-FarmingJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-Resource5ToJoin-id-0040" sourceRef="ServiceTask-StartFarmingResource5-id-0005" targetRef="ParallelGateway-FarmingJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-Resource6ToJoin-id-0041" sourceRef="ServiceTask-StartFarmingResource6-id-0006" targetRef="ParallelGateway-FarmingJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-Resource7ToJoin-id-0042" sourceRef="ServiceTask-StartFarmingResource7-id-0007" targetRef="ParallelGateway-FarmingJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-Resource8ToJoin-id-0043" sourceRef="ServiceTask-StartFarmingResource8-id-0008" targetRef="ParallelGateway-FarmingJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-Resource9ToJoin-id-0044" sourceRef="ServiceTask-StartFarmingResource9-id-0009" targetRef="ParallelGateway-FarmingJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-Resource10ToJoin-id-0045" sourceRef="ServiceTask-StartFarmingResource10-id-0010" targetRef="ParallelGateway-FarmingJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-TimerToMilestone-id-0046" sourceRef="BoundaryEvent-Timer1Hour-Resource1-id-0001" targetRef="ServiceTask-CalculateMilestones-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MilestoneToNotification-id-0047" sourceRef="ServiceTask-CalculateMilestones-id-0001" targetRef="SendTask-MilestoneNotification-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DisasterToAssess-id-0048" sourceRef="BoundaryEvent-SignalDisaster-Resource1-id-0001" targetRef="ServiceTask-AssessDamage-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AssessToRecover-id-0049" sourceRef="ServiceTask-AssessDamage-id-0001" targetRef="ServiceTask-RecoverResources-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RecoverToJoin-id-0050" sourceRef="ServiceTask-RecoverResources-id-0001" targetRef="ParallelGateway-FarmingJoin-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotificationToFarming-id-0051" sourceRef="SendTask-MilestoneNotification-id-0001" targetRef="ServiceTask-StartFarmingResource1-id-0001" />
+  </bpmn:process>
+</bpmn:definitions>

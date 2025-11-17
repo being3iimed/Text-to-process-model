@@ -1,0 +1,192 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "ProductDevelopmentProcess-Definitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler (https://bpmn.io)",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "ProductDevelopmentProcess",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-ProductDevelopmentInitiated-id-0001",
+          "name": "Product Development Initiated"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-IdentifyNewProductIdea-id-0001",
+          "name": "Identify New Product Idea"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ConductInitialResearch-id-0001",
+          "name": "Conduct Initial Research"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-DraftDesignConcepts-id-0001",
+          "name": "Draft Design Concepts"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SelectPromisingDesign-id-0001",
+          "name": "Select Promising Design"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-BuildPrototype-id-0001",
+          "name": "Build Prototype"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-TestPrototype-id-0001",
+          "name": "Test Prototype"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-PrototypeDecision-id-0001",
+          "name": "Prototype Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CollectFeedback-id-0001",
+          "name": "Collect Feedback"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-RefinePrototype-id-0001",
+          "name": "Refine Prototype"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-FinalApprovalDecision-id-0001",
+          "name": "Final Approval Decision"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ApprovalDecision-id-0001",
+          "name": "Approval Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-PrototypeApproved-id-0001",
+          "name": "Prototype Approved"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-PrototypeDiscarded-id-0002",
+          "name": "Prototype Discarded"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-PrototypeDecisionMerge-id-0002",
+          "name": "Prototype Decision Merge",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToIdentifyIdea-id-0001",
+          "sourceRef": "StartEvent-ProductDevelopmentInitiated-id-0001",
+          "targetRef": "UserTask-IdentifyNewProductIdea-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-IdeaToResearch-id-0002",
+          "sourceRef": "UserTask-IdentifyNewProductIdea-id-0001",
+          "targetRef": "ServiceTask-ConductInitialResearch-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ResearchToDraft-id-0003",
+          "sourceRef": "ServiceTask-ConductInitialResearch-id-0001",
+          "targetRef": "UserTask-DraftDesignConcepts-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DraftToSelect-id-0004",
+          "sourceRef": "UserTask-DraftDesignConcepts-id-0001",
+          "targetRef": "UserTask-SelectPromisingDesign-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SelectToBuild-id-0005",
+          "sourceRef": "UserTask-SelectPromisingDesign-id-0001",
+          "targetRef": "ServiceTask-BuildPrototype-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BuildToTest-id-0006",
+          "sourceRef": "ServiceTask-BuildPrototype-id-0001",
+          "targetRef": "ServiceTask-TestPrototype-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-TestToDecision-id-0007",
+          "sourceRef": "ServiceTask-TestPrototype-id-0001",
+          "targetRef": "ExclusiveGateway-PrototypeDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DecisionToFeedback-id-0008",
+          "name": "needs_refinement == true",
+          "sourceRef": "ExclusiveGateway-PrototypeDecision-id-0001",
+          "targetRef": "UserTask-CollectFeedback-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DecisionToApproval-id-0009",
+          "name": "ready_for_approval == true",
+          "sourceRef": "ExclusiveGateway-PrototypeDecision-id-0001",
+          "targetRef": "ExclusiveGateway-PrototypeDecisionMerge-id-0002",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FeedbackToRefine-id-0010",
+          "sourceRef": "UserTask-CollectFeedback-id-0001",
+          "targetRef": "UserTask-RefinePrototype-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RefineToTest-id-0011",
+          "sourceRef": "UserTask-RefinePrototype-id-0001",
+          "targetRef": "ServiceTask-TestPrototype-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-MergeToApproval-id-0012",
+          "sourceRef": "ExclusiveGateway-PrototypeDecisionMerge-id-0002",
+          "targetRef": "UserTask-FinalApprovalDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ApprovalToDecision-id-0013",
+          "sourceRef": "UserTask-FinalApprovalDecision-id-0001",
+          "targetRef": "ExclusiveGateway-ApprovalDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DecisionToApproved-id-0014",
+          "name": "approved == true",
+          "sourceRef": "ExclusiveGateway-ApprovalDecision-id-0001",
+          "targetRef": "EndEvent-PrototypeApproved-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DecisionToDiscarded-id-0015",
+          "name": "",
+          "sourceRef": "ExclusiveGateway-ApprovalDecision-id-0001",
+          "targetRef": "EndEvent-PrototypeDiscarded-id-0002",
+          "isDefault": true
+        }
+      ]
+    }
+  ]
+}

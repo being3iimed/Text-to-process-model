@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Supplier-Selection-Process-Definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="1.0.0">
+  <bpmn:process id="Supplier-Selection-Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-NeedForNewSupplier-id-0001" name="Need for New Supplier Identified">
+      <bpmn:outgoing>SequenceFlow-StartToIssueRFP-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-IssueRFP-id-0001" name="Issue Request for Proposals (RFP)">
+      <bpmn:incoming>SequenceFlow-StartToIssueRFP-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-IssueRFPToReceiveProposals-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveProposals-id-0001" name="Receive Supplier Proposals">
+      <bpmn:incoming>SequenceFlow-IssueRFPToReceiveProposals-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveProposalsToEvaluate-id-0003</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:userTask id="UserTask-EvaluateProposals-id-0001" name="Evaluate Proposals">
+      <bpmn:incoming>SequenceFlow-ReceiveProposalsToEvaluate-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EvaluateToSiteVisitGateway-id-0004</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-SiteVisitRequired-id-0001" name="Site Visit Required?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-EvaluateToSiteVisitGateway-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SiteVisitRequiredToConductSiteVisits-id-0005</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SiteVisitNotRequiredToMerge-id-0006</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-ConductSiteVisits-id-0001" name="Conduct Site Visits/Interviews">
+      <bpmn:incoming>SequenceFlow-SiteVisitRequiredToConductSiteVisits-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConductSiteVisitsToMerge-id-0007</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-SiteVisitMerge-id-0002" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-SiteVisitNotRequiredToMerge-id-0006</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ConductSiteVisitsToMerge-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MergeToSelectSupplier-id-0008</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-SelectSupplier-id-0001" name="Select Supplier">
+      <bpmn:incoming>SequenceFlow-MergeToSelectSupplier-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectSupplierToNegotiate-id-0009</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-NegotiateContract-id-0001" name="Negotiate Contract Terms">
+      <bpmn:incoming>SequenceFlow-SelectSupplierToNegotiate-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NegotiateToSign-id-0010</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-SignContract-id-0001" name="Sign Contract">
+      <bpmn:incoming>SequenceFlow-NegotiateToSign-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SignToOnboard-id-0011</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-OnboardSupplier-id-0001" name="Onboard Supplier">
+      <bpmn:incoming>SequenceFlow-SignToOnboard-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OnboardToEnd-id-0012</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-SupplierOnboarded-id-0001" name="Supplier Onboarded and Contract Executed">
+      <bpmn:incoming>SequenceFlow-OnboardToEnd-id-0012</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToIssueRFP-id-0001" sourceRef="StartEvent-NeedForNewSupplier-id-0001" targetRef="UserTask-IssueRFP-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-IssueRFPToReceiveProposals-id-0002" sourceRef="UserTask-IssueRFP-id-0001" targetRef="ReceiveTask-ReceiveProposals-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveProposalsToEvaluate-id-0003" sourceRef="ReceiveTask-ReceiveProposals-id-0001" targetRef="UserTask-EvaluateProposals-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EvaluateToSiteVisitGateway-id-0004" sourceRef="UserTask-EvaluateProposals-id-0001" targetRef="ExclusiveGateway-SiteVisitRequired-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SiteVisitRequiredToConductSiteVisits-id-0005" name="site_visit_required == true" sourceRef="ExclusiveGateway-SiteVisitRequired-id-0001" targetRef="UserTask-ConductSiteVisits-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SiteVisitNotRequiredToMerge-id-0006" sourceRef="ExclusiveGateway-SiteVisitRequired-id-0001" targetRef="ExclusiveGateway-SiteVisitMerge-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConductSiteVisitsToMerge-id-0007" sourceRef="UserTask-ConductSiteVisits-id-0001" targetRef="ExclusiveGateway-SiteVisitMerge-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-MergeToSelectSupplier-id-0008" sourceRef="ExclusiveGateway-SiteVisitMerge-id-0002" targetRef="UserTask-SelectSupplier-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectSupplierToNegotiate-id-0009" sourceRef="UserTask-SelectSupplier-id-0001" targetRef="UserTask-NegotiateContract-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NegotiateToSign-id-0010" sourceRef="UserTask-NegotiateContract-id-0001" targetRef="UserTask-SignContract-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SignToOnboard-id-0011" sourceRef="UserTask-SignContract-id-0001" targetRef="ServiceTask-OnboardSupplier-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-OnboardToEnd-id-0012" sourceRef="ServiceTask-OnboardSupplier-id-0001" targetRef="EndEvent-SupplierOnboarded-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Supplier-Selection-Process">
+    <bpmndi:BPMNPlane id="BPMNPlane_Supplier-Selection-Process" bpmnElement="Supplier-Selection-Process">
+      <bpmndi:BPMNShape id="StartEvent-NeedForNewSupplier-id-0001_di" bpmnElement="StartEvent-NeedForNewSupplier-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-IssueRFP-id-0001_di" bpmnElement="UserTask-IssueRFP-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveProposals-id-0001_di" bpmnElement="ReceiveTask-ReceiveProposals-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EvaluateProposals-id-0001_di" bpmnElement="UserTask-EvaluateProposals-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SiteVisitRequired-id-0001_di" bpmnElement="ExclusiveGateway-SiteVisitRequired-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConductSiteVisits-id-0001_di" bpmnElement="UserTask-ConductSiteVisits-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-SiteVisitMerge-id-0002_di" bpmnElement="ExclusiveGateway-SiteVisitMerge-id-0002" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectSupplier-id-0001_di" bpmnElement="UserTask-SelectSupplier-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-NegotiateContract-id-0001_di" bpmnElement="UserTask-NegotiateContract-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SignContract-id-0001_di" bpmnElement="UserTask-SignContract-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-OnboardSupplier-id-0001_di" bpmnElement="ServiceTask-OnboardSupplier-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-SupplierOnboarded-id-0001_di" bpmnElement="EndEvent-SupplierOnboarded-id-0001">
+        <dc:Bounds x="1707" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToIssueRFP-id-0001_di" bpmnElement="SequenceFlow-StartToIssueRFP-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-IssueRFPToReceiveProposals-id-0002_di" bpmnElement="SequenceFlow-IssueRFPToReceiveProposals-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveProposalsToEvaluate-id-0003_di" bpmnElement="SequenceFlow-ReceiveProposalsToEvaluate-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EvaluateToSiteVisitGateway-id-0004_di" bpmnElement="SequenceFlow-EvaluateToSiteVisitGateway-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SiteVisitRequiredToConductSiteVisits-id-0005_di" bpmnElement="SequenceFlow-SiteVisitRequiredToConductSiteVisits-id-0005">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SiteVisitNotRequiredToMerge-id-0006_di" bpmnElement="SequenceFlow-SiteVisitNotRequiredToMerge-id-0006">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="140" />
+        <di:waypoint x="975" y="140" />
+        <di:waypoint x="975" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConductSiteVisitsToMerge-id-0007_di" bpmnElement="SequenceFlow-ConductSiteVisitsToMerge-id-0007">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MergeToSelectSupplier-id-0008_di" bpmnElement="SequenceFlow-MergeToSelectSupplier-id-0008">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectSupplierToNegotiate-id-0009_di" bpmnElement="SequenceFlow-SelectSupplierToNegotiate-id-0009">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NegotiateToSign-id-0010_di" bpmnElement="SequenceFlow-NegotiateToSign-id-0010">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SignToOnboard-id-0011_di" bpmnElement="SequenceFlow-SignToOnboard-id-0011">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OnboardToEnd-id-0012_di" bpmnElement="SequenceFlow-OnboardToEnd-id-0012">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1707" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

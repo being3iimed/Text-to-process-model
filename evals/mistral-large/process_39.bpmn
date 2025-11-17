@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="DIY-Phone-Repair-Process" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="DIY-Phone-Repair-Process-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-BeginRepair-id-0001" name="Begin DIY Repair Process">
+      <bpmn:outgoing>SequenceFlow-StartToEnterDetails-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-EnterPhoneDetails-id-0001" name="Enter phone model and damage description">
+      <bpmn:incoming>SequenceFlow-StartToEnterDetails-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-EnterToMaterials-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-GenerateMaterialsList-id-0001" name="Generate repair materials list">
+      <bpmn:incoming>SequenceFlow-EnterToMaterials-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-MaterialsToTools-id-0003</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-GenerateToolsList-id-0001" name="Generate tools list">
+      <bpmn:incoming>SequenceFlow-MaterialsToTools-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ToolsToProcurement-id-0004</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:subProcess id="SubProcess-OrderFulfillment-id-0001" name="Order Fulfillment">
+      <bpmn:incoming>SequenceFlow-ToolsToProcurement-id-0004</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProcurementToInstructions-id-0005</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-BeginProcurement-id-0001" name="Begin Procurement">
+        <bpmn:outgoing>SequenceFlow-ProcureStartToCheck-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:userTask id="UserTask-CheckInventory-id-0001" name="Check inventory for existing tools/parts">
+        <bpmn:incoming>SequenceFlow-ProcureStartToCheck-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CheckToContact-id-0002</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:userTask id="UserTask-ContactFriends-id-0001" name="Contact friends for tools/parts">
+        <bpmn:incoming>SequenceFlow-CheckToContact-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ContactToReceive-id-0003</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:receiveTask id="ReceiveTask-FriendsResponses-id-0001" name="Receive: friends&#39; responses">
+        <bpmn:incoming>SequenceFlow-ContactToReceive-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReceiveToCalculate-id-0004</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:serviceTask id="ServiceTask-CalculateNeeds-id-0001" name="Calculate remaining needed items">
+        <bpmn:incoming>SequenceFlow-ReceiveToCalculate-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CalculateToGateway-id-0005</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-MissingItems-id-0001" name="Missing items?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-CalculateToGateway-id-0005</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-GatewayToOrder-id-0006</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-GatewayToEnd-id-0007</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:userTask id="UserTask-OrderMissingItems-id-0001" name="Order missing items">
+        <bpmn:incoming>SequenceFlow-GatewayToOrder-id-0006</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-OrderToReceive-id-0008</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:receiveTask id="ReceiveTask-OrderedItems-id-0001" name="Receive: ordered items">
+        <bpmn:incoming>SequenceFlow-OrderToReceive-id-0008</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ReceiveToEnd-id-0009</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:endEvent id="EndEvent-ProcurementComplete-id-0001" name="Procurement Complete">
+        <bpmn:incoming>SequenceFlow-GatewayToEnd-id-0007</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-ReceiveToEnd-id-0009</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-ProcureStartToCheck-id-0001" sourceRef="StartEvent-BeginProcurement-id-0001" targetRef="UserTask-CheckInventory-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CheckToContact-id-0002" sourceRef="UserTask-CheckInventory-id-0001" targetRef="UserTask-ContactFriends-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ContactToReceive-id-0003" sourceRef="UserTask-ContactFriends-id-0001" targetRef="ReceiveTask-FriendsResponses-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReceiveToCalculate-id-0004" sourceRef="ReceiveTask-FriendsResponses-id-0001" targetRef="ServiceTask-CalculateNeeds-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CalculateToGateway-id-0005" sourceRef="ServiceTask-CalculateNeeds-id-0001" targetRef="ExclusiveGateway-MissingItems-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToOrder-id-0006" name="missing_items_count &#62; 0" sourceRef="ExclusiveGateway-MissingItems-id-0001" targetRef="UserTask-OrderMissingItems-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-GatewayToEnd-id-0007" sourceRef="ExclusiveGateway-MissingItems-id-0001" targetRef="EndEvent-ProcurementComplete-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-OrderToReceive-id-0008" sourceRef="UserTask-OrderMissingItems-id-0001" targetRef="ReceiveTask-OrderedItems-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ReceiveToEnd-id-0009" sourceRef="ReceiveTask-OrderedItems-id-0001" targetRef="EndEvent-ProcurementComplete-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:serviceTask id="ServiceTask-GenerateInstructions-id-0001" name="Generate step-by-step repair instructions">
+      <bpmn:incoming>SequenceFlow-ProcurementToInstructions-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InstructionsToRepair-id-0006</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-FollowInstructions-id-0001" name="Follow instructions to repair phone">
+      <bpmn:incoming>SequenceFlow-InstructionsToRepair-id-0006</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ReminderToRepair-id-0018</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RepairToTest-id-0007</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer7Day-Repair-id-0001" name="7 Day Repair Timeout" cancelActivity="false" attachedToRef="UserTask-FollowInstructions-id-0001">
+      <bpmn:outgoing>SequenceFlow-TimerToReminder-id-0017</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer7Day-Repair-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P7D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-RepairReminder-id-0001" name="Send: repair progress reminder">
+      <bpmn:incoming>SequenceFlow-TimerToReminder-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReminderToRepair-id-0018</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:userTask id="UserTask-TestPhone-id-0001" name="Test repaired phone">
+      <bpmn:incoming>SequenceFlow-RepairToTest-id-0007</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TestToGateway-id-0008</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-PhoneWorks-id-0001" name="Phone works?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-TestToGateway-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToSuccess-id-0009</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToFailure-id-0010</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:parallelGateway id="ParallelGateway-SuccessActions-id-0001" name="Success Actions" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-GatewayToSuccess-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SuccessToReview-id-0011</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SuccessToVideo-id-0012</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sendTask id="SendTask-RepairReview-id-0001" name="Send: repair review">
+      <bpmn:incoming>SequenceFlow-SuccessToReview-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToJoin-id-0013</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="SendTask-RepairVideo-id-0001" name="Send: repair video">
+      <bpmn:incoming>SequenceFlow-SuccessToVideo-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-VideoToJoin-id-0014</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:parallelGateway id="ParallelGateway-SuccessActionsJoin-id-0001" name="Success Actions Join" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-ReviewToJoin-id-0013</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-VideoToJoin-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToSuccessEnd-id-0015</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:endEvent id="EndEvent-RepairSuccess-id-0001" name="Repair Complete - Success">
+      <bpmn:incoming>SequenceFlow-JoinToSuccessEnd-id-0015</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="SendTask-SendToExpert-id-0001" name="Send: phone to expert">
+      <bpmn:incoming>SequenceFlow-GatewayToFailure-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FailureToExpertEnd-id-0016</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ExpertRepair-id-0001" name="Expert Repair Initiated">
+      <bpmn:incoming>SequenceFlow-FailureToExpertEnd-id-0016</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToEnterDetails-id-0001" sourceRef="StartEvent-BeginRepair-id-0001" targetRef="UserTask-EnterPhoneDetails-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-EnterToMaterials-id-0002" sourceRef="UserTask-EnterPhoneDetails-id-0001" targetRef="ServiceTask-GenerateMaterialsList-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-MaterialsToTools-id-0003" sourceRef="ServiceTask-GenerateMaterialsList-id-0001" targetRef="ServiceTask-GenerateToolsList-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ToolsToProcurement-id-0004" sourceRef="ServiceTask-GenerateToolsList-id-0001" targetRef="SubProcess-OrderFulfillment-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProcurementToInstructions-id-0005" sourceRef="SubProcess-OrderFulfillment-id-0001" targetRef="ServiceTask-GenerateInstructions-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InstructionsToRepair-id-0006" sourceRef="ServiceTask-GenerateInstructions-id-0001" targetRef="UserTask-FollowInstructions-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RepairToTest-id-0007" sourceRef="UserTask-FollowInstructions-id-0001" targetRef="UserTask-TestPhone-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TestToGateway-id-0008" sourceRef="UserTask-TestPhone-id-0001" targetRef="ExclusiveGateway-PhoneWorks-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToSuccess-id-0009" name="phone_works == true" sourceRef="ExclusiveGateway-PhoneWorks-id-0001" targetRef="ParallelGateway-SuccessActions-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToFailure-id-0010" name="phone_works == false" sourceRef="ExclusiveGateway-PhoneWorks-id-0001" targetRef="SendTask-SendToExpert-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SuccessToReview-id-0011" sourceRef="ParallelGateway-SuccessActions-id-0001" targetRef="SendTask-RepairReview-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SuccessToVideo-id-0012" sourceRef="ParallelGateway-SuccessActions-id-0001" targetRef="SendTask-RepairVideo-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToJoin-id-0013" sourceRef="SendTask-RepairReview-id-0001" targetRef="ParallelGateway-SuccessActionsJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-VideoToJoin-id-0014" sourceRef="SendTask-RepairVideo-id-0001" targetRef="ParallelGateway-SuccessActionsJoin-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToSuccessEnd-id-0015" sourceRef="ParallelGateway-SuccessActionsJoin-id-0001" targetRef="EndEvent-RepairSuccess-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FailureToExpertEnd-id-0016" sourceRef="SendTask-SendToExpert-id-0001" targetRef="EndEvent-ExpertRepair-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TimerToReminder-id-0017" sourceRef="BoundaryEvent-Timer7Day-Repair-id-0001" targetRef="SendTask-RepairReminder-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReminderToRepair-id-0018" sourceRef="SendTask-RepairReminder-id-0001" targetRef="UserTask-FollowInstructions-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_DIY-Phone-Repair-Process-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_DIY-Phone-Repair-Process-id-0001" bpmnElement="DIY-Phone-Repair-Process-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-BeginRepair-id-0001_di" bpmnElement="StartEvent-BeginRepair-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-EnterPhoneDetails-id-0001_di" bpmnElement="UserTask-EnterPhoneDetails-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateMaterialsList-id-0001_di" bpmnElement="ServiceTask-GenerateMaterialsList-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateToolsList-id-0001_di" bpmnElement="ServiceTask-GenerateToolsList-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-OrderFulfillment-id-0001_di" bpmnElement="SubProcess-OrderFulfillment-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateInstructions-id-0001_di" bpmnElement="ServiceTask-GenerateInstructions-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-FollowInstructions-id-0001_di" bpmnElement="UserTask-FollowInstructions-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer7Day-Repair-id-0001_di" bpmnElement="BoundaryEvent-Timer7Day-Repair-id-0001">
+        <dc:Bounds x="957" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-TestPhone-id-0001_di" bpmnElement="UserTask-TestPhone-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-PhoneWorks-id-0001_di" bpmnElement="ExclusiveGateway-PhoneWorks-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-SuccessActions-id-0001_di" bpmnElement="ParallelGateway-SuccessActions-id-0001">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RepairReview-id-0001_di" bpmnElement="SendTask-RepairReview-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-SuccessActionsJoin-id-0001_di" bpmnElement="ParallelGateway-SuccessActionsJoin-id-0001">
+        <dc:Bounds x="1700" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-RepairSuccess-id-0001_di" bpmnElement="EndEvent-RepairSuccess-id-0001">
+        <dc:Bounds x="1857" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RepairReminder-id-0001_di" bpmnElement="SendTask-RepairReminder-id-0001">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendToExpert-id-0001_di" bpmnElement="SendTask-SendToExpert-id-0001">
+        <dc:Bounds x="1375" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ExpertRepair-id-0001_di" bpmnElement="EndEvent-ExpertRepair-id-0001">
+        <dc:Bounds x="1557" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-RepairVideo-id-0001_di" bpmnElement="SendTask-RepairVideo-id-0001">
+        <dc:Bounds x="1675" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToEnterDetails-id-0001_di" bpmnElement="SequenceFlow-StartToEnterDetails-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-EnterToMaterials-id-0002_di" bpmnElement="SequenceFlow-EnterToMaterials-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-MaterialsToTools-id-0003_di" bpmnElement="SequenceFlow-MaterialsToTools-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ToolsToProcurement-id-0004_di" bpmnElement="SequenceFlow-ToolsToProcurement-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcurementToInstructions-id-0005_di" bpmnElement="SequenceFlow-ProcurementToInstructions-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InstructionsToRepair-id-0006_di" bpmnElement="SequenceFlow-InstructionsToRepair-id-0006">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RepairToTest-id-0007_di" bpmnElement="SequenceFlow-RepairToTest-id-0007">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TimerToReminder-id-0017_di" bpmnElement="SequenceFlow-TimerToReminder-id-0017">
+        <di:waypoint x="975" y="128" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TestToGateway-id-0008_di" bpmnElement="SequenceFlow-TestToGateway-id-0008">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToSuccess-id-0009_di" bpmnElement="SequenceFlow-GatewayToSuccess-id-0009">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToFailure-id-0010_di" bpmnElement="SequenceFlow-GatewayToFailure-id-0010">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1375" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SuccessToReview-id-0011_di" bpmnElement="SequenceFlow-SuccessToReview-id-0011">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SuccessToVideo-id-0012_di" bpmnElement="SequenceFlow-SuccessToVideo-id-0012">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1500" y="70" />
+        <di:waypoint x="1500" y="140" />
+        <di:waypoint x="1650" y="140" />
+        <di:waypoint x="1650" y="210" />
+        <di:waypoint x="1675" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToJoin-id-0013_di" bpmnElement="SequenceFlow-ReviewToJoin-id-0013">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1700" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToSuccessEnd-id-0015_di" bpmnElement="SequenceFlow-JoinToSuccessEnd-id-0015">
+        <di:waypoint x="1750" y="70" />
+        <di:waypoint x="1857" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReminderToRepair-id-0018_di" bpmnElement="SequenceFlow-ReminderToRepair-id-0018">
+        <di:waypoint x="1125" y="250" />
+        <di:waypoint x="1125" y="280" />
+        <di:waypoint x="975" y="280" />
+        <di:waypoint x="975" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FailureToExpertEnd-id-0016_di" bpmnElement="SequenceFlow-FailureToExpertEnd-id-0016">
+        <di:waypoint x="1475" y="210" />
+        <di:waypoint x="1557" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-VideoToJoin-id-0014_di" bpmnElement="SequenceFlow-VideoToJoin-id-0014">
+        <di:waypoint x="1725" y="170" />
+        <di:waypoint x="1725" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-OrderFulfillment-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-OrderFulfillment-id-0001" bpmnElement="SubProcess-OrderFulfillment-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-BeginProcurement-id-0001_di" bpmnElement="StartEvent-BeginProcurement-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CheckInventory-id-0001_di" bpmnElement="UserTask-CheckInventory-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ContactFriends-id-0001_di" bpmnElement="UserTask-ContactFriends-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-FriendsResponses-id-0001_di" bpmnElement="ReceiveTask-FriendsResponses-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CalculateNeeds-id-0001_di" bpmnElement="ServiceTask-CalculateNeeds-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-MissingItems-id-0001_di" bpmnElement="ExclusiveGateway-MissingItems-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="800" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-OrderMissingItems-id-0001_di" bpmnElement="UserTask-OrderMissingItems-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-OrderedItems-id-0001_di" bpmnElement="ReceiveTask-OrderedItems-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcurementComplete-id-0001_di" bpmnElement="EndEvent-ProcurementComplete-id-0001">
+        <dc:Bounds x="1257" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProcureStartToCheck-id-0001_di" bpmnElement="SequenceFlow-ProcureStartToCheck-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CheckToContact-id-0002_di" bpmnElement="SequenceFlow-CheckToContact-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ContactToReceive-id-0003_di" bpmnElement="SequenceFlow-ContactToReceive-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToCalculate-id-0004_di" bpmnElement="SequenceFlow-ReceiveToCalculate-id-0004">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CalculateToGateway-id-0005_di" bpmnElement="SequenceFlow-CalculateToGateway-id-0005">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="800" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToOrder-id-0006_di" bpmnElement="SequenceFlow-GatewayToOrder-id-0006">
+        <di:waypoint x="850" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToEnd-id-0007_di" bpmnElement="SequenceFlow-GatewayToEnd-id-0007">
+        <di:waypoint x="825" y="95" />
+        <di:waypoint x="825" y="140" />
+        <di:waypoint x="1275" y="140" />
+        <di:waypoint x="1275" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderToReceive-id-0008_di" bpmnElement="SequenceFlow-OrderToReceive-id-0008">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToEnd-id-0009_di" bpmnElement="SequenceFlow-ReceiveToEnd-id-0009">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1257" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

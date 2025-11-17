@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="TreeHouseProject-Definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="TreeHouseProject-Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-TreeHouseProjectStarted-id-0001" name="Tree House Project Started">
+      <bpmn:outgoing>SequenceFlow-StartToCollectRequirements-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-CollectTreeHouseRequirements-id-0001" name="Collect Tree House Requirements">
+      <bpmn:incoming>SequenceFlow-StartToCollectRequirements-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CollectToSendRequirements-id-0002</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="SendTask-SendRequirementsToArchitect-id-0001" name="Send: requirements to architect">
+      <bpmn:incoming>SequenceFlow-CollectToSendRequirements-id-0002</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendToReceiveDraft-id-0003</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveDraftFromArchitect-id-0001" name="Receive: draft from architect">
+      <bpmn:incoming>SequenceFlow-SendToReceiveDraft-id-0003</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveToDraftApproval-id-0005</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:boundaryEvent id="BoundaryEvent-Timer7Day-ReceiveDraft-id-0001" name="7 Day Architect Response SLA" attachedToRef="ReceiveTask-ReceiveDraftFromArchitect-id-0001">
+      <bpmn:outgoing>SequenceFlow-BoundaryToReminder-id-0004</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="BoundaryEvent-Timer7Day-ReceiveDraft-id-0001_EventDef">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P7D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sendTask id="SendTask-SendReminderToArchitect-id-0001" name="Send: reminder to architect">
+      <bpmn:incoming>SequenceFlow-BoundaryToReminder-id-0004</bpmn:incoming>
+    </bpmn:sendTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-DraftApproval-id-0001" name="Draft Approved?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ReceiveToDraftApproval-id-0005</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DraftApprovalToRefine-id-0006</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-DraftApprovalToMaterials-id-0007</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-RefineDraftWithRequirements-id-0001" name="Refine draft with additional requirements">
+      <bpmn:incoming>SequenceFlow-DraftApprovalToRefine-id-0006</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-RefineToSendRevised-id-0008</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="SendTask-SendRevisedRequirements-id-0001" name="Send: revised requirements to architect">
+      <bpmn:incoming>SequenceFlow-RefineToSendRevised-id-0008</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendRevisedToReceiveFinal-id-0009</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="ReceiveTask-ReceiveFinalDraft-id-0001" name="Receive: final draft from architect">
+      <bpmn:incoming>SequenceFlow-SendRevisedToReceiveFinal-id-0009</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReceiveFinalToMaterials-id-0010</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:serviceTask id="ServiceTask-GenerateMaterialsList-id-0001" name="Generate materials list from plan">
+      <bpmn:incoming>SequenceFlow-DraftApprovalToMaterials-id-0007</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ReceiveFinalToMaterials-id-0010</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GenerateToCategorize-id-0011</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-CategorizeMaterials-id-0001" name="Categorize materials">
+      <bpmn:incoming>SequenceFlow-GenerateToCategorize-id-0011</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CategorizeToOrdering-id-0012</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:subProcess id="SubProcess-MaterialOrdering-id-0001" name="Material Ordering">
+      <bpmn:incoming>SequenceFlow-CategorizeToOrdering-id-0012</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-OrderingToFriendCoordination-id-0013</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-OrderingStarted-id-0001" name="Ordering Started">
+        <bpmn:outgoing>SequenceFlow-OrderingStartToSplit-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:parallelGateway id="ParallelGateway-SplitOrders-id-0001" name="Split Orders" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-OrderingStartToSplit-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SplitToWoodOrder-id-0002</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToHardwareOrder-id-0003</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToToolsOrder-id-0004</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:sendTask id="SendTask-SendWoodOrderToStoreA-id-0001" name="Send: wood order to Store A">
+        <bpmn:incoming>SequenceFlow-SplitToWoodOrder-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-WoodOrderToJoin-id-0006</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:sendTask id="SendTask-SendHardwareOrderToStoreB-id-0001" name="Send: hardware order to Store B">
+        <bpmn:incoming>SequenceFlow-SplitToHardwareOrder-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-HardwareOrderToJoin-id-0007</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:sendTask id="SendTask-SendToolsOrderToStoreC-id-0001" name="Send: tools order to Store C">
+        <bpmn:incoming>SequenceFlow-SplitToToolsOrder-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ToolsOrderToJoin-id-0005</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-Timer3Day-ToolsOrder-id-0001" name="3 Day Order Confirmation SLA" attachedToRef="SendTask-SendToolsOrderToStoreC-id-0001">
+        <bpmn:outgoing>SequenceFlow-BoundaryToFollowUp-id-0008</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="BoundaryEvent-Timer3Day-ToolsOrder-id-0001_EventDef">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P3D</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:boundaryEvent>
+      <bpmn:sendTask id="SendTask-SendOrderFollowUpToStoreC-id-0001" name="Send: order follow-up to Store C">
+        <bpmn:incoming>SequenceFlow-BoundaryToFollowUp-id-0008</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-FollowUpToJoin-id-0009</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:parallelGateway id="ParallelGateway-JoinOrders-id-0001" name="Join Orders" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-ToolsOrderToJoin-id-0005</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-WoodOrderToJoin-id-0006</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-HardwareOrderToJoin-id-0007</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-FollowUpToJoin-id-0009</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-JoinToEnd-id-0010</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:endEvent id="EndEvent-AllOrdersPlaced-id-0001" name="All Orders Placed">
+        <bpmn:incoming>SequenceFlow-JoinToEnd-id-0010</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-OrderingStartToSplit-id-0001" sourceRef="StartEvent-OrderingStarted-id-0001" targetRef="ParallelGateway-SplitOrders-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToWoodOrder-id-0002" sourceRef="ParallelGateway-SplitOrders-id-0001" targetRef="SendTask-SendWoodOrderToStoreA-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToHardwareOrder-id-0003" sourceRef="ParallelGateway-SplitOrders-id-0001" targetRef="SendTask-SendHardwareOrderToStoreB-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToToolsOrder-id-0004" sourceRef="ParallelGateway-SplitOrders-id-0001" targetRef="SendTask-SendToolsOrderToStoreC-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ToolsOrderToJoin-id-0005" sourceRef="SendTask-SendToolsOrderToStoreC-id-0001" targetRef="ParallelGateway-JoinOrders-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-WoodOrderToJoin-id-0006" sourceRef="SendTask-SendWoodOrderToStoreA-id-0001" targetRef="ParallelGateway-JoinOrders-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-HardwareOrderToJoin-id-0007" sourceRef="SendTask-SendHardwareOrderToStoreB-id-0001" targetRef="ParallelGateway-JoinOrders-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-BoundaryToFollowUp-id-0008" sourceRef="BoundaryEvent-Timer3Day-ToolsOrder-id-0001" targetRef="SendTask-SendOrderFollowUpToStoreC-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-FollowUpToJoin-id-0009" sourceRef="SendTask-SendOrderFollowUpToStoreC-id-0001" targetRef="ParallelGateway-JoinOrders-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-JoinToEnd-id-0010" sourceRef="ParallelGateway-JoinOrders-id-0001" targetRef="EndEvent-AllOrdersPlaced-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:subProcess id="SubProcess-FriendCoordination-id-0001" name="Friend Coordination">
+      <bpmn:incoming>SequenceFlow-OrderingToFriendCoordination-id-0013</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FriendCoordinationToBuild-id-0014</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-HelpRecruitmentStarted-id-0001" name="Help Recruitment Started">
+        <bpmn:outgoing>SequenceFlow-RecruitmentStartToRequests-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:sendTask id="SendTask-SendBuildRequestsToFriends-id-0001" name="Send: build requests to friends">
+        <bpmn:incoming>SequenceFlow-RecruitmentStartToRequests-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-RequestsToFriendsAvailable-id-0002</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway-FriendsAvailable-id-0001" name="Friends Available?" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-RequestsToFriendsAvailable-id-0002</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-FriendsAvailableToSchedule-id-0003</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-FriendsAvailableToAlternative-id-0004</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask-ScheduleBuildDates-id-0001" name="Schedule build dates with friends">
+        <bpmn:incoming>SequenceFlow-FriendsAvailableToSchedule-id-0003</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-ScheduleToEnd-id-0005</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:userTask id="UserTask-FindAlternativeHelpers-id-0001" name="Find alternative helpers">
+        <bpmn:incoming>SequenceFlow-FriendsAvailableToAlternative-id-0004</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-AlternativeToEnd-id-0006</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:endEvent id="EndEvent-ConstructionTeamReady-id-0001" name="Construction Team Ready">
+        <bpmn:incoming>SequenceFlow-ScheduleToEnd-id-0005</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-AlternativeToEnd-id-0006</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-RecruitmentStartToRequests-id-0001" sourceRef="StartEvent-HelpRecruitmentStarted-id-0001" targetRef="SendTask-SendBuildRequestsToFriends-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-RequestsToFriendsAvailable-id-0002" sourceRef="SendTask-SendBuildRequestsToFriends-id-0001" targetRef="ExclusiveGateway-FriendsAvailable-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-FriendsAvailableToSchedule-id-0003" name="friends_available" sourceRef="ExclusiveGateway-FriendsAvailable-id-0001" targetRef="ServiceTask-ScheduleBuildDates-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-FriendsAvailableToAlternative-id-0004" name="need_alternative_help" sourceRef="ExclusiveGateway-FriendsAvailable-id-0001" targetRef="UserTask-FindAlternativeHelpers-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-ScheduleToEnd-id-0005" sourceRef="ServiceTask-ScheduleBuildDates-id-0001" targetRef="EndEvent-ConstructionTeamReady-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-AlternativeToEnd-id-0006" sourceRef="UserTask-FindAlternativeHelpers-id-0001" targetRef="EndEvent-ConstructionTeamReady-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:serviceTask id="ServiceTask-BuildTreeHouse-id-0001" name="Build tree house">
+      <bpmn:incoming>SequenceFlow-FriendCoordinationToBuild-id-0014</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BuildToPartyInvitations-id-0015</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendTask-SendPartyInvitations-id-0001" name="Send: party invitations to friends">
+      <bpmn:incoming>SequenceFlow-BuildToPartyInvitations-id-0015</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PartyInvitationsToAttendeeList-id-0016</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="ServiceTask-CreateAttendeeList-id-0001" name="Create attendee list">
+      <bpmn:incoming>SequenceFlow-PartyInvitationsToAttendeeList-id-0016</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AttendeeListToBuySnacks-id-0017</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-BuySnacks-id-0001" name="Buy snacks">
+      <bpmn:incoming>SequenceFlow-AttendeeListToBuySnacks-id-0017</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BuySnacksToProjectComplete-id-0018</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-BuySnacksToPartyComplete-id-0019</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-TreeHouseProjectComplete-id-0001" name="Tree House Project Complete">
+      <bpmn:incoming>SequenceFlow-BuySnacksToProjectComplete-id-0018</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-PartyPreparationComplete-id-0001" name="Party Preparation Complete">
+      <bpmn:incoming>SequenceFlow-BuySnacksToPartyComplete-id-0019</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToCollectRequirements-id-0001" sourceRef="StartEvent-TreeHouseProjectStarted-id-0001" targetRef="UserTask-CollectTreeHouseRequirements-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CollectToSendRequirements-id-0002" sourceRef="UserTask-CollectTreeHouseRequirements-id-0001" targetRef="SendTask-SendRequirementsToArchitect-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendToReceiveDraft-id-0003" sourceRef="SendTask-SendRequirementsToArchitect-id-0001" targetRef="ReceiveTask-ReceiveDraftFromArchitect-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BoundaryToReminder-id-0004" sourceRef="BoundaryEvent-Timer7Day-ReceiveDraft-id-0001" targetRef="SendTask-SendReminderToArchitect-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveToDraftApproval-id-0005" sourceRef="ReceiveTask-ReceiveDraftFromArchitect-id-0001" targetRef="ExclusiveGateway-DraftApproval-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DraftApprovalToRefine-id-0006" name="needs_revision" sourceRef="ExclusiveGateway-DraftApproval-id-0001" targetRef="UserTask-RefineDraftWithRequirements-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DraftApprovalToMaterials-id-0007" name="draft_approved" sourceRef="ExclusiveGateway-DraftApproval-id-0001" targetRef="ServiceTask-GenerateMaterialsList-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-RefineToSendRevised-id-0008" sourceRef="UserTask-RefineDraftWithRequirements-id-0001" targetRef="SendTask-SendRevisedRequirements-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendRevisedToReceiveFinal-id-0009" sourceRef="SendTask-SendRevisedRequirements-id-0001" targetRef="ReceiveTask-ReceiveFinalDraft-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReceiveFinalToMaterials-id-0010" sourceRef="ReceiveTask-ReceiveFinalDraft-id-0001" targetRef="ServiceTask-GenerateMaterialsList-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GenerateToCategorize-id-0011" sourceRef="ServiceTask-GenerateMaterialsList-id-0001" targetRef="ServiceTask-CategorizeMaterials-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CategorizeToOrdering-id-0012" sourceRef="ServiceTask-CategorizeMaterials-id-0001" targetRef="SubProcess-MaterialOrdering-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-OrderingToFriendCoordination-id-0013" sourceRef="SubProcess-MaterialOrdering-id-0001" targetRef="SubProcess-FriendCoordination-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FriendCoordinationToBuild-id-0014" sourceRef="SubProcess-FriendCoordination-id-0001" targetRef="ServiceTask-BuildTreeHouse-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BuildToPartyInvitations-id-0015" sourceRef="ServiceTask-BuildTreeHouse-id-0001" targetRef="SendTask-SendPartyInvitations-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PartyInvitationsToAttendeeList-id-0016" sourceRef="SendTask-SendPartyInvitations-id-0001" targetRef="ServiceTask-CreateAttendeeList-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AttendeeListToBuySnacks-id-0017" sourceRef="ServiceTask-CreateAttendeeList-id-0001" targetRef="ServiceTask-BuySnacks-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BuySnacksToProjectComplete-id-0018" sourceRef="ServiceTask-BuySnacks-id-0001" targetRef="EndEvent-TreeHouseProjectComplete-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BuySnacksToPartyComplete-id-0019" sourceRef="ServiceTask-BuySnacks-id-0001" targetRef="EndEvent-PartyPreparationComplete-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_TreeHouseProject-Process">
+    <bpmndi:BPMNPlane id="BPMNPlane_TreeHouseProject-Process" bpmnElement="TreeHouseProject-Process">
+      <bpmndi:BPMNShape id="StartEvent-TreeHouseProjectStarted-id-0001_di" bpmnElement="StartEvent-TreeHouseProjectStarted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CollectTreeHouseRequirements-id-0001_di" bpmnElement="UserTask-CollectTreeHouseRequirements-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendRequirementsToArchitect-id-0001_di" bpmnElement="SendTask-SendRequirementsToArchitect-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveDraftFromArchitect-id-0001_di" bpmnElement="ReceiveTask-ReceiveDraftFromArchitect-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer7Day-ReceiveDraft-id-0001_di" bpmnElement="BoundaryEvent-Timer7Day-ReceiveDraft-id-0001">
+        <dc:Bounds x="507" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-DraftApproval-id-0001_di" bpmnElement="ExclusiveGateway-DraftApproval-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-RefineDraftWithRequirements-id-0001_di" bpmnElement="UserTask-RefineDraftWithRequirements-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendRevisedRequirements-id-0001_di" bpmnElement="SendTask-SendRevisedRequirements-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-ReceiveFinalDraft-id-0001_di" bpmnElement="ReceiveTask-ReceiveFinalDraft-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-GenerateMaterialsList-id-0001_di" bpmnElement="ServiceTask-GenerateMaterialsList-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CategorizeMaterials-id-0001_di" bpmnElement="ServiceTask-CategorizeMaterials-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-MaterialOrdering-id-0001_di" bpmnElement="SubProcess-MaterialOrdering-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-FriendCoordination-id-0001_di" bpmnElement="SubProcess-FriendCoordination-id-0001">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-BuildTreeHouse-id-0001_di" bpmnElement="ServiceTask-BuildTreeHouse-id-0001">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendPartyInvitations-id-0001_di" bpmnElement="SendTask-SendPartyInvitations-id-0001">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-CreateAttendeeList-id-0001_di" bpmnElement="ServiceTask-CreateAttendeeList-id-0001">
+        <dc:Bounds x="2125" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-BuySnacks-id-0001_di" bpmnElement="ServiceTask-BuySnacks-id-0001">
+        <dc:Bounds x="2275" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-TreeHouseProjectComplete-id-0001_di" bpmnElement="EndEvent-TreeHouseProjectComplete-id-0001">
+        <dc:Bounds x="2457" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendReminderToArchitect-id-0001_di" bpmnElement="SendTask-SendReminderToArchitect-id-0001">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-PartyPreparationComplete-id-0001_di" bpmnElement="EndEvent-PartyPreparationComplete-id-0001">
+        <dc:Bounds x="2457" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToCollectRequirements-id-0001_di" bpmnElement="SequenceFlow-StartToCollectRequirements-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CollectToSendRequirements-id-0002_di" bpmnElement="SequenceFlow-CollectToSendRequirements-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendToReceiveDraft-id-0003_di" bpmnElement="SequenceFlow-SendToReceiveDraft-id-0003">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveToDraftApproval-id-0005_di" bpmnElement="SequenceFlow-ReceiveToDraftApproval-id-0005">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToReminder-id-0004_di" bpmnElement="SequenceFlow-BoundaryToReminder-id-0004">
+        <di:waypoint x="525" y="128" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DraftApprovalToRefine-id-0006_di" bpmnElement="SequenceFlow-DraftApprovalToRefine-id-0006">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DraftApprovalToMaterials-id-0007_di" bpmnElement="SequenceFlow-DraftApprovalToMaterials-id-0007">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="140" />
+        <di:waypoint x="1275" y="140" />
+        <di:waypoint x="1275" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RefineToSendRevised-id-0008_di" bpmnElement="SequenceFlow-RefineToSendRevised-id-0008">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendRevisedToReceiveFinal-id-0009_di" bpmnElement="SequenceFlow-SendRevisedToReceiveFinal-id-0009">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReceiveFinalToMaterials-id-0010_di" bpmnElement="SequenceFlow-ReceiveFinalToMaterials-id-0010">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GenerateToCategorize-id-0011_di" bpmnElement="SequenceFlow-GenerateToCategorize-id-0011">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CategorizeToOrdering-id-0012_di" bpmnElement="SequenceFlow-CategorizeToOrdering-id-0012">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderingToFriendCoordination-id-0013_di" bpmnElement="SequenceFlow-OrderingToFriendCoordination-id-0013">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FriendCoordinationToBuild-id-0014_di" bpmnElement="SequenceFlow-FriendCoordinationToBuild-id-0014">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BuildToPartyInvitations-id-0015_di" bpmnElement="SequenceFlow-BuildToPartyInvitations-id-0015">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PartyInvitationsToAttendeeList-id-0016_di" bpmnElement="SequenceFlow-PartyInvitationsToAttendeeList-id-0016">
+        <di:waypoint x="2075" y="70" />
+        <di:waypoint x="2125" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AttendeeListToBuySnacks-id-0017_di" bpmnElement="SequenceFlow-AttendeeListToBuySnacks-id-0017">
+        <di:waypoint x="2225" y="70" />
+        <di:waypoint x="2275" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BuySnacksToProjectComplete-id-0018_di" bpmnElement="SequenceFlow-BuySnacksToProjectComplete-id-0018">
+        <di:waypoint x="2375" y="70" />
+        <di:waypoint x="2457" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BuySnacksToPartyComplete-id-0019_di" bpmnElement="SequenceFlow-BuySnacksToPartyComplete-id-0019">
+        <di:waypoint x="2325" y="110" />
+        <di:waypoint x="2325" y="210" />
+        <di:waypoint x="2457" y="210" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-FriendCoordination-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-FriendCoordination-id-0001" bpmnElement="SubProcess-FriendCoordination-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-HelpRecruitmentStarted-id-0001_di" bpmnElement="StartEvent-HelpRecruitmentStarted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendBuildRequestsToFriends-id-0001_di" bpmnElement="SendTask-SendBuildRequestsToFriends-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-FriendsAvailable-id-0001_di" bpmnElement="ExclusiveGateway-FriendsAvailable-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ScheduleBuildDates-id-0001_di" bpmnElement="ServiceTask-ScheduleBuildDates-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ConstructionTeamReady-id-0001_di" bpmnElement="EndEvent-ConstructionTeamReady-id-0001">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-FindAlternativeHelpers-id-0001_di" bpmnElement="UserTask-FindAlternativeHelpers-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-RecruitmentStartToRequests-id-0001_di" bpmnElement="SequenceFlow-RecruitmentStartToRequests-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-RequestsToFriendsAvailable-id-0002_di" bpmnElement="SequenceFlow-RequestsToFriendsAvailable-id-0002">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FriendsAvailableToSchedule-id-0003_di" bpmnElement="SequenceFlow-FriendsAvailableToSchedule-id-0003">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FriendsAvailableToAlternative-id-0004_di" bpmnElement="SequenceFlow-FriendsAvailableToAlternative-id-0004">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ScheduleToEnd-id-0005_di" bpmnElement="SequenceFlow-ScheduleToEnd-id-0005">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlternativeToEnd-id-0006_di" bpmnElement="SequenceFlow-AlternativeToEnd-id-0006">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="675" y="88" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-MaterialOrdering-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-MaterialOrdering-id-0001" bpmnElement="SubProcess-MaterialOrdering-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-OrderingStarted-id-0001_di" bpmnElement="StartEvent-OrderingStarted-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-SplitOrders-id-0001_di" bpmnElement="ParallelGateway-SplitOrders-id-0001">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendWoodOrderToStoreA-id-0001_di" bpmnElement="SendTask-SendWoodOrderToStoreA-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-JoinOrders-id-0001_di" bpmnElement="ParallelGateway-JoinOrders-id-0001">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-AllOrdersPlaced-id-0001_di" bpmnElement="EndEvent-AllOrdersPlaced-id-0001">
+        <dc:Bounds x="807" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendHardwareOrderToStoreB-id-0001_di" bpmnElement="SendTask-SendHardwareOrderToStoreB-id-0001">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendToolsOrderToStoreC-id-0001_di" bpmnElement="SendTask-SendToolsOrderToStoreC-id-0001">
+        <dc:Bounds x="325" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-Timer3Day-ToolsOrder-id-0001_di" bpmnElement="BoundaryEvent-Timer3Day-ToolsOrder-id-0001">
+        <dc:Bounds x="357" y="372" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendOrderFollowUpToStoreC-id-0001_di" bpmnElement="SendTask-SendOrderFollowUpToStoreC-id-0001">
+        <dc:Bounds x="475" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-OrderingStartToSplit-id-0001_di" bpmnElement="SequenceFlow-OrderingStartToSplit-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToWoodOrder-id-0002_di" bpmnElement="SequenceFlow-SplitToWoodOrder-id-0002">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToHardwareOrder-id-0003_di" bpmnElement="SequenceFlow-SplitToHardwareOrder-id-0003">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToToolsOrder-id-0004_di" bpmnElement="SequenceFlow-SplitToToolsOrder-id-0004">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="350" />
+        <di:waypoint x="325" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WoodOrderToJoin-id-0006_di" bpmnElement="SequenceFlow-WoodOrderToJoin-id-0006">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToEnd-id-0010_di" bpmnElement="SequenceFlow-JoinToEnd-id-0010">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="807" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HardwareOrderToJoin-id-0007_di" bpmnElement="SequenceFlow-HardwareOrderToJoin-id-0007">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ToolsOrderToJoin-id-0005_di" bpmnElement="SequenceFlow-ToolsOrderToJoin-id-0005">
+        <di:waypoint x="425" y="350" />
+        <di:waypoint x="675" y="350" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BoundaryToFollowUp-id-0008_di" bpmnElement="SequenceFlow-BoundaryToFollowUp-id-0008">
+        <di:waypoint x="375" y="408" />
+        <di:waypoint x="375" y="490" />
+        <di:waypoint x="475" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FollowUpToJoin-id-0009_di" bpmnElement="SequenceFlow-FollowUpToJoin-id-0009">
+        <di:waypoint x="575" y="490" />
+        <di:waypoint x="675" y="490" />
+        <di:waypoint x="675" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

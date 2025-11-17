@@ -1,0 +1,256 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "Definitions-MaternityLeaveProcess-id-0001",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler (https://bpmn.io)",
+  "exporterVersion": "1.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process-MaternityLeave-id-0001",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-MaternityLeaveInitiated-id-0001",
+          "name": "Maternity Leave Planning Initiated"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-FetchModels-id-0001",
+          "name": "Fetch maternity leave models"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-SelectModel-id-0002",
+          "name": "Select maternity leave model"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ModelValid-id-0001",
+          "name": "Model Valid?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-CollectDocuments-id-0003",
+          "name": "Collect required documents"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ValidateDocuments-id-0004",
+          "name": "Validate documents"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-NotifySplit-id-0001",
+          "name": "Parallel Notification",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-NotifySocialSecurity-id-0001",
+          "name": "Send: notification to Social Security"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-NotifyCompany-id-0002",
+          "name": "Send: notification to Company"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-NotifyJoin-id-0002",
+          "name": "Synchronize Notifications",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-ConfirmSplit-id-0003",
+          "name": "Parallel Confirmation",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-SocialSecurityConfirm-id-0001",
+          "name": "Receive: confirmation from Social Security"
+        },
+        {
+          "$type": "bpmn:ReceiveTask",
+          "id": "ReceiveTask-CompanyConfirm-id-0002",
+          "name": "Receive: confirmation from Company"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-ConfirmJoin-id-0004",
+          "name": "Synchronize Confirmations",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-ReviewExtension-id-0004",
+          "name": "Review extension options"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-ExtensionNeeded-id-0002",
+          "name": "Extension Needed?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-ExtensionRequest-id-0003",
+          "name": "Send: extension request (if applicable)"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ExtensionRequested-id-0001",
+          "name": "Extension Requested"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-LeaveComplete-id-0002",
+          "name": "Leave Process Complete"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProcessAborted-id-0003",
+          "name": "Process Aborted - Invalid Model"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToFetch-id-0001",
+          "sourceRef": "StartEvent-MaternityLeaveInitiated-id-0001",
+          "targetRef": "UserTask-FetchModels-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FetchToSelect-id-0002",
+          "sourceRef": "UserTask-FetchModels-id-0001",
+          "targetRef": "UserTask-SelectModel-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SelectToGateway-id-0003",
+          "sourceRef": "UserTask-SelectModel-id-0002",
+          "targetRef": "ExclusiveGateway-ModelValid-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToCollect-id-0004",
+          "sourceRef": "ExclusiveGateway-ModelValid-id-0001",
+          "targetRef": "UserTask-CollectDocuments-id-0003",
+          "name": "model_selected == \"valid\"",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToAbort-id-0005",
+          "sourceRef": "ExclusiveGateway-ModelValid-id-0001",
+          "targetRef": "EndEvent-ProcessAborted-id-0003",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CollectToValidate-id-0006",
+          "sourceRef": "UserTask-CollectDocuments-id-0003",
+          "targetRef": "ServiceTask-ValidateDocuments-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ValidateToNotifySplit-id-0007",
+          "sourceRef": "ServiceTask-ValidateDocuments-id-0004",
+          "targetRef": "ParallelGateway-NotifySplit-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NotifySplitToSocialSecurity-id-0008",
+          "sourceRef": "ParallelGateway-NotifySplit-id-0001",
+          "targetRef": "SendTask-NotifySocialSecurity-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NotifySplitToCompany-id-0009",
+          "sourceRef": "ParallelGateway-NotifySplit-id-0001",
+          "targetRef": "SendTask-NotifyCompany-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SocialSecurityToNotifyJoin-id-0010",
+          "sourceRef": "SendTask-NotifySocialSecurity-id-0001",
+          "targetRef": "ParallelGateway-NotifyJoin-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CompanyToNotifyJoin-id-0011",
+          "sourceRef": "SendTask-NotifyCompany-id-0002",
+          "targetRef": "ParallelGateway-NotifyJoin-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NotifyJoinToConfirmSplit-id-0012",
+          "sourceRef": "ParallelGateway-NotifyJoin-id-0002",
+          "targetRef": "ParallelGateway-ConfirmSplit-id-0003"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmSplitToSocialSecurityConfirm-id-0013",
+          "sourceRef": "ParallelGateway-ConfirmSplit-id-0003",
+          "targetRef": "ReceiveTask-SocialSecurityConfirm-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmSplitToCompanyConfirm-id-0014",
+          "sourceRef": "ParallelGateway-ConfirmSplit-id-0003",
+          "targetRef": "ReceiveTask-CompanyConfirm-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SocialSecurityConfirmToConfirmJoin-id-0015",
+          "sourceRef": "ReceiveTask-SocialSecurityConfirm-id-0001",
+          "targetRef": "ParallelGateway-ConfirmJoin-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CompanyConfirmToConfirmJoin-id-0016",
+          "sourceRef": "ReceiveTask-CompanyConfirm-id-0002",
+          "targetRef": "ParallelGateway-ConfirmJoin-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmJoinToReviewExtension-id-0017",
+          "sourceRef": "ParallelGateway-ConfirmJoin-id-0004",
+          "targetRef": "UserTask-ReviewExtension-id-0004"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReviewExtensionToExtensionGateway-id-0018",
+          "sourceRef": "UserTask-ReviewExtension-id-0004",
+          "targetRef": "ExclusiveGateway-ExtensionNeeded-id-0002"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ExtensionGatewayToExtensionRequest-id-0019",
+          "sourceRef": "ExclusiveGateway-ExtensionNeeded-id-0002",
+          "targetRef": "SendTask-ExtensionRequest-id-0003",
+          "name": "extension_needed == \"yes\"",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ExtensionGatewayToLeaveComplete-id-0020",
+          "sourceRef": "ExclusiveGateway-ExtensionNeeded-id-0002",
+          "targetRef": "EndEvent-LeaveComplete-id-0002",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ExtensionRequestToExtensionEnd-id-0021",
+          "sourceRef": "SendTask-ExtensionRequest-id-0003",
+          "targetRef": "EndEvent-ExtensionRequested-id-0001"
+        }
+      ]
+    }
+  ]
+}

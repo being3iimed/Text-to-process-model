@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="room-service-process-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="RoomServiceProcess-id-0001" name="Room Service Order Fulfillment" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-RoomServiceOrderReceived-id-0001" name="Room Service Order Received">
+      <bpmn:outgoing>SequenceFlow-StartToTakeOrder-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-TakeRoomServiceOrder-id-0001" name="Take Room Service Order">
+      <bpmn:incoming>SequenceFlow-StartToTakeOrder-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-TakeOrderToSplit-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="ParallelGateway-SplitPreparation-id-0001" name="Split Preparation Tasks" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-TakeOrderToSplit-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SplitToKitchen-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToAlcoholCheck-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-SplitToWaiter-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="ServiceTask-SubmitOrderToKitchen-id-0001" name="Submit Order to Kitchen">
+      <bpmn:incoming>SequenceFlow-SplitToKitchen-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-KitchenToPrepareFood-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-PrepareFood-id-0001" name="Prepare Food">
+      <bpmn:incoming>SequenceFlow-KitchenToPrepareFood-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PrepareFoodToJoin-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-AlcoholCheck-id-0001" name="Order Includes Alcohol?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-SplitToAlcoholCheck-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-AlcoholCheckToSommelier-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-AlcoholCheckToJoin-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-SubmitOrderToSommelier-id-0001" name="Submit Order to Sommelier">
+      <bpmn:incoming>SequenceFlow-AlcoholCheckToSommelier-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SommelierToFetchWine-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-FetchWine-id-0001" name="Fetch Wine/Prepare Alcoholic Beverages">
+      <bpmn:incoming>SequenceFlow-SommelierToFetchWine-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FetchWineToJoin-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-ReadyCart-id-0001" name="Ready Cart">
+      <bpmn:incoming>SequenceFlow-SplitToWaiter-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-WaiterToPrepareDrinks-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-PrepareNonalcoholicDrinks-id-0001" name="Prepare Nonalcoholic Drinks">
+      <bpmn:incoming>SequenceFlow-WaiterToPrepareDrinks-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PrepareDrinksToJoin-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="ParallelGateway-JoinPreparation-id-0001" name="Join Preparation Tasks" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-AlcoholCheckToJoin-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-PrepareDrinksToJoin-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-PrepareFoodToJoin-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-FetchWineToJoin-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-JoinToDelivery-id-0001</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="UserTask-DeliverOrderToRoom-id-0001" name="Deliver Order to Room">
+      <bpmn:incoming>SequenceFlow-JoinToDelivery-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DeliveryToBillingDecision-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-BillingTiming-id-0001" name="Billing Timing Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-DeliveryToBillingDecision-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-BillingDecisionToImmediate-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-BillingDecisionToDelay-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-BillingDelay-id-0001" name="Wait for Billing Window">
+      <bpmn:incoming>SequenceFlow-BillingDecisionToDelay-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DelayToDebit-id-0001</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="ServiceTask-DebitGuestAccount-id-0001" name="Debit Guest Account">
+      <bpmn:incoming>SequenceFlow-BillingDecisionToImmediate-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ImmediateDebitToEnd-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask-DebitGuestAccountDelayed-id-0002" name="Debit Guest Account">
+      <bpmn:incoming>SequenceFlow-DelayToDebit-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-DelayedDebitToEnd-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent-OrderFulfilledAndBilled-id-0001" name="Order Fulfilled and Billed">
+      <bpmn:incoming>SequenceFlow-ImmediateDebitToEnd-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-DelayedDebitToEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToTakeOrder-id-0001" sourceRef="StartEvent-RoomServiceOrderReceived-id-0001" targetRef="UserTask-TakeRoomServiceOrder-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-TakeOrderToSplit-id-0001" sourceRef="UserTask-TakeRoomServiceOrder-id-0001" targetRef="ParallelGateway-SplitPreparation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToKitchen-id-0001" sourceRef="ParallelGateway-SplitPreparation-id-0001" targetRef="ServiceTask-SubmitOrderToKitchen-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-KitchenToPrepareFood-id-0001" sourceRef="ServiceTask-SubmitOrderToKitchen-id-0001" targetRef="ServiceTask-PrepareFood-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToAlcoholCheck-id-0001" sourceRef="ParallelGateway-SplitPreparation-id-0001" targetRef="ExclusiveGateway-AlcoholCheck-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AlcoholCheckToSommelier-id-0001" name="order_includes_alcohol" sourceRef="ExclusiveGateway-AlcoholCheck-id-0001" targetRef="ServiceTask-SubmitOrderToSommelier-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SommelierToFetchWine-id-0001" sourceRef="ServiceTask-SubmitOrderToSommelier-id-0001" targetRef="ServiceTask-FetchWine-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-AlcoholCheckToJoin-id-0001" sourceRef="ExclusiveGateway-AlcoholCheck-id-0001" targetRef="ParallelGateway-JoinPreparation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SplitToWaiter-id-0001" sourceRef="ParallelGateway-SplitPreparation-id-0001" targetRef="UserTask-ReadyCart-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-WaiterToPrepareDrinks-id-0001" sourceRef="UserTask-ReadyCart-id-0001" targetRef="ServiceTask-PrepareNonalcoholicDrinks-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrepareDrinksToJoin-id-0001" sourceRef="ServiceTask-PrepareNonalcoholicDrinks-id-0001" targetRef="ParallelGateway-JoinPreparation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PrepareFoodToJoin-id-0001" sourceRef="ServiceTask-PrepareFood-id-0001" targetRef="ParallelGateway-JoinPreparation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FetchWineToJoin-id-0001" sourceRef="ServiceTask-FetchWine-id-0001" targetRef="ParallelGateway-JoinPreparation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-JoinToDelivery-id-0001" sourceRef="ParallelGateway-JoinPreparation-id-0001" targetRef="UserTask-DeliverOrderToRoom-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DeliveryToBillingDecision-id-0001" sourceRef="UserTask-DeliverOrderToRoom-id-0001" targetRef="ExclusiveGateway-BillingTiming-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BillingDecisionToImmediate-id-0001" name="!waiter_has_pending_orders" sourceRef="ExclusiveGateway-BillingTiming-id-0001" targetRef="ServiceTask-DebitGuestAccount-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-BillingDecisionToDelay-id-0001" name="waiter_has_pending_orders" sourceRef="ExclusiveGateway-BillingTiming-id-0001" targetRef="IntermediateCatchEvent-BillingDelay-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DelayToDebit-id-0001" sourceRef="IntermediateCatchEvent-BillingDelay-id-0001" targetRef="ServiceTask-DebitGuestAccountDelayed-id-0002" />
+    <bpmn:sequenceFlow id="SequenceFlow-ImmediateDebitToEnd-id-0001" sourceRef="ServiceTask-DebitGuestAccount-id-0001" targetRef="EndEvent-OrderFulfilledAndBilled-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-DelayedDebitToEnd-id-0001" sourceRef="ServiceTask-DebitGuestAccountDelayed-id-0002" targetRef="EndEvent-OrderFulfilledAndBilled-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_RoomServiceProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_RoomServiceProcess-id-0001" bpmnElement="RoomServiceProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-RoomServiceOrderReceived-id-0001_di" bpmnElement="StartEvent-RoomServiceOrderReceived-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-TakeRoomServiceOrder-id-0001_di" bpmnElement="UserTask-TakeRoomServiceOrder-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-SplitPreparation-id-0001_di" bpmnElement="ParallelGateway-SplitPreparation-id-0001">
+        <dc:Bounds x="350" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SubmitOrderToKitchen-id-0001_di" bpmnElement="ServiceTask-SubmitOrderToKitchen-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareFood-id-0001_di" bpmnElement="ServiceTask-PrepareFood-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-JoinPreparation-id-0001_di" bpmnElement="ParallelGateway-JoinPreparation-id-0001">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-DeliverOrderToRoom-id-0001_di" bpmnElement="UserTask-DeliverOrderToRoom-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-BillingTiming-id-0001_di" bpmnElement="ExclusiveGateway-BillingTiming-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DebitGuestAccount-id-0001_di" bpmnElement="ServiceTask-DebitGuestAccount-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-OrderFulfilledAndBilled-id-0001_di" bpmnElement="EndEvent-OrderFulfilledAndBilled-id-0001">
+        <dc:Bounds x="1707" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-AlcoholCheck-id-0001_di" bpmnElement="ExclusiveGateway-AlcoholCheck-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="500" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-SubmitOrderToSommelier-id-0001_di" bpmnElement="ServiceTask-SubmitOrderToSommelier-id-0001">
+        <dc:Bounds x="625" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-FetchWine-id-0001_di" bpmnElement="ServiceTask-FetchWine-id-0001">
+        <dc:Bounds x="775" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-BillingDelay-id-0001_di" bpmnElement="IntermediateCatchEvent-BillingDelay-id-0001">
+        <dc:Bounds x="1407" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-DebitGuestAccountDelayed-id-0002_di" bpmnElement="ServiceTask-DebitGuestAccountDelayed-id-0002">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReadyCart-id-0001_di" bpmnElement="UserTask-ReadyCart-id-0001">
+        <dc:Bounds x="475" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PrepareNonalcoholicDrinks-id-0001_di" bpmnElement="ServiceTask-PrepareNonalcoholicDrinks-id-0001">
+        <dc:Bounds x="625" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToTakeOrder-id-0001_di" bpmnElement="SequenceFlow-StartToTakeOrder-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-TakeOrderToSplit-id-0001_di" bpmnElement="SequenceFlow-TakeOrderToSplit-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="350" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToKitchen-id-0001_di" bpmnElement="SequenceFlow-SplitToKitchen-id-0001">
+        <di:waypoint x="400" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToAlcoholCheck-id-0001_di" bpmnElement="SequenceFlow-SplitToAlcoholCheck-id-0001">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="210" />
+        <di:waypoint x="500" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToWaiter-id-0001_di" bpmnElement="SequenceFlow-SplitToWaiter-id-0001">
+        <di:waypoint x="375" y="95" />
+        <di:waypoint x="375" y="350" />
+        <di:waypoint x="475" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-KitchenToPrepareFood-id-0001_di" bpmnElement="SequenceFlow-KitchenToPrepareFood-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrepareFoodToJoin-id-0001_di" bpmnElement="SequenceFlow-PrepareFoodToJoin-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-JoinToDelivery-id-0001_di" bpmnElement="SequenceFlow-JoinToDelivery-id-0001">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DeliveryToBillingDecision-id-0001_di" bpmnElement="SequenceFlow-DeliveryToBillingDecision-id-0001">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BillingDecisionToImmediate-id-0001_di" bpmnElement="SequenceFlow-BillingDecisionToImmediate-id-0001">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-BillingDecisionToDelay-id-0001_di" bpmnElement="SequenceFlow-BillingDecisionToDelay-id-0001">
+        <di:waypoint x="1275" y="95" />
+        <di:waypoint x="1275" y="210" />
+        <di:waypoint x="1407" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ImmediateDebitToEnd-id-0001_di" bpmnElement="SequenceFlow-ImmediateDebitToEnd-id-0001">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1707" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlcoholCheckToSommelier-id-0001_di" bpmnElement="SequenceFlow-AlcoholCheckToSommelier-id-0001">
+        <di:waypoint x="550" y="210" />
+        <di:waypoint x="625" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-AlcoholCheckToJoin-id-0001_di" bpmnElement="SequenceFlow-AlcoholCheckToJoin-id-0001">
+        <di:waypoint x="550" y="210" />
+        <di:waypoint x="600" y="210" />
+        <di:waypoint x="600" y="140" />
+        <di:waypoint x="900" y="140" />
+        <di:waypoint x="900" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SommelierToFetchWine-id-0001_di" bpmnElement="SequenceFlow-SommelierToFetchWine-id-0001">
+        <di:waypoint x="725" y="210" />
+        <di:waypoint x="775" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FetchWineToJoin-id-0001_di" bpmnElement="SequenceFlow-FetchWineToJoin-id-0001">
+        <di:waypoint x="875" y="210" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="975" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DelayToDebit-id-0001_di" bpmnElement="SequenceFlow-DelayToDebit-id-0001">
+        <di:waypoint x="1443" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-DelayedDebitToEnd-id-0001_di" bpmnElement="SequenceFlow-DelayedDebitToEnd-id-0001">
+        <di:waypoint x="1625" y="210" />
+        <di:waypoint x="1725" y="210" />
+        <di:waypoint x="1725" y="88" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-WaiterToPrepareDrinks-id-0001_di" bpmnElement="SequenceFlow-WaiterToPrepareDrinks-id-0001">
+        <di:waypoint x="575" y="350" />
+        <di:waypoint x="625" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PrepareDrinksToJoin-id-0001_di" bpmnElement="SequenceFlow-PrepareDrinksToJoin-id-0001">
+        <di:waypoint x="725" y="350" />
+        <di:waypoint x="975" y="350" />
+        <di:waypoint x="975" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

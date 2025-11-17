@@ -1,0 +1,424 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "BlizzardCharacterCreationDefinitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "Process-CharacterCreation-id-0001",
+      "name": "Character Creation Process",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-UserInitiatesCreation-id-0001",
+          "name": "User Initiates Character Creation"
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-SplitBranches-id-0001",
+          "name": "Parallel Branches",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-AccountSetup-id-0001",
+          "name": "Account Setup",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-AccountSetupStart-id-0001",
+              "name": "Account Setup Start"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-HasBattleNetAccount-id-0001",
+              "name": "Has Battle.net Account?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-VerifyBattleNetAccount-id-0001",
+              "name": "Verify Battle.net Account"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-EnterAccountInformation-id-0001",
+              "name": "Enter Account Information"
+            },
+            {
+              "$type": "bpmn:ReceiveTask",
+              "id": "ReceiveTask-ReceiveConfirmationEmail-id-0001",
+              "name": "Receive: confirmation email"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-ClickConfirmationLink-id-0001",
+              "name": "Click Confirmation Link"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-HasActiveSubscription-id-0001",
+              "name": "Has Active Subscription?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-ValidateSubscription-id-0001",
+              "name": "Validate Subscription"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-SelectPaymentMethod-id-0001",
+              "name": "Select Payment Method"
+            },
+            {
+              "$type": "bpmn:ExclusiveGateway",
+              "id": "ExclusiveGateway-PaymentMethod-id-0001",
+              "name": "Payment Method?",
+              "gatewayDirection": "Diverging"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-EnterCreditCardInformation-id-0001",
+              "name": "Enter Credit Card Information"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-EnterIBANandBIC-id-0001",
+              "name": "Enter IBAN and BIC"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-ProcessPayment-id-0001",
+              "name": "Process Payment"
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-LogIntoGame-id-0001",
+              "name": "Log into Game"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-SelectRealmRaceClass-id-0001",
+              "name": "Select Realm, Race, and Class"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-AccountSetupComplete-id-0001",
+              "name": "Account Setup Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-AccountSetupStartToHasAccount-id-0001",
+              "sourceRef": "StartEvent-AccountSetupStart-id-0001",
+              "targetRef": "ExclusiveGateway-HasBattleNetAccount-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-HasAccountToVerifyAccount-id-0002",
+              "sourceRef": "ExclusiveGateway-HasBattleNetAccount-id-0001",
+              "targetRef": "ServiceTask-VerifyBattleNetAccount-id-0001",
+              "name": "has_battle_net_account = true",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-HasAccountToEnterInfo-id-0003",
+              "sourceRef": "ExclusiveGateway-HasBattleNetAccount-id-0001",
+              "targetRef": "UserTask-EnterAccountInformation-id-0001",
+              "name": "has_battle_net_account = false",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-EnterInfoToReceiveEmail-id-0004",
+              "sourceRef": "UserTask-EnterAccountInformation-id-0001",
+              "targetRef": "ReceiveTask-ReceiveConfirmationEmail-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ReceiveEmailToClickLink-id-0005",
+              "sourceRef": "ReceiveTask-ReceiveConfirmationEmail-id-0001",
+              "targetRef": "UserTask-ClickConfirmationLink-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ClickLinkToHasSubscription-id-0006",
+              "sourceRef": "UserTask-ClickConfirmationLink-id-0001",
+              "targetRef": "ExclusiveGateway-HasActiveSubscription-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-VerifyAccountToHasSubscription-id-0007",
+              "sourceRef": "ServiceTask-VerifyBattleNetAccount-id-0001",
+              "targetRef": "ExclusiveGateway-HasActiveSubscription-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-HasSubscriptionToValidate-id-0008",
+              "sourceRef": "ExclusiveGateway-HasActiveSubscription-id-0001",
+              "targetRef": "ServiceTask-ValidateSubscription-id-0001",
+              "name": "has_active_wow_subscription = true",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-HasSubscriptionToSelectPayment-id-0009",
+              "sourceRef": "ExclusiveGateway-HasActiveSubscription-id-0001",
+              "targetRef": "UserTask-SelectPaymentMethod-id-0001",
+              "name": "has_active_wow_subscription = false",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SelectPaymentToPaymentMethod-id-0010",
+              "sourceRef": "UserTask-SelectPaymentMethod-id-0001",
+              "targetRef": "ExclusiveGateway-PaymentMethod-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PaymentMethodToCreditCard-id-0011",
+              "sourceRef": "ExclusiveGateway-PaymentMethod-id-0001",
+              "targetRef": "UserTask-EnterCreditCardInformation-id-0001",
+              "name": "payment_method == \"credit_card\"",
+              "isDefault": false
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PaymentMethodToBankAccount-id-0012",
+              "sourceRef": "ExclusiveGateway-PaymentMethod-id-0001",
+              "targetRef": "UserTask-EnterIBANandBIC-id-0001",
+              "name": "payment_method == \"bank_account\"",
+              "isDefault": true
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-CreditCardToProcessPayment-id-0013",
+              "sourceRef": "UserTask-EnterCreditCardInformation-id-0001",
+              "targetRef": "ServiceTask-ProcessPayment-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BankAccountToProcessPayment-id-0014",
+              "sourceRef": "UserTask-EnterIBANandBIC-id-0001",
+              "targetRef": "ServiceTask-ProcessPayment-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ProcessPaymentToLogIn-id-0015",
+              "sourceRef": "ServiceTask-ProcessPayment-id-0001",
+              "targetRef": "ServiceTask-LogIntoGame-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ValidateSubscriptionToLogIn-id-0016",
+              "sourceRef": "ServiceTask-ValidateSubscription-id-0001",
+              "targetRef": "ServiceTask-LogIntoGame-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-LogInToSelectRealm-id-0017",
+              "sourceRef": "ServiceTask-LogIntoGame-id-0001",
+              "targetRef": "UserTask-SelectRealmRaceClass-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SelectRealmToComplete-id-0018",
+              "sourceRef": "UserTask-SelectRealmRaceClass-id-0001",
+              "targetRef": "EndEvent-AccountSetupComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-NameBrainstorming-id-0001",
+          "name": "Name Brainstorming",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-NameBrainstormingStart-id-0001",
+              "name": "Name Brainstorming Start"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-BrainstormCharacterNames-id-0001",
+              "name": "Brainstorm Character Names"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-NameBrainstormingComplete-id-0001",
+              "name": "Name Brainstorming Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BrainstormingStartToBrainstorm-id-0001",
+              "sourceRef": "StartEvent-NameBrainstormingStart-id-0001",
+              "targetRef": "UserTask-BrainstormCharacterNames-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-BrainstormToComplete-id-0002",
+              "sourceRef": "UserTask-BrainstormCharacterNames-id-0001",
+              "targetRef": "EndEvent-NameBrainstormingComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:ParallelGateway",
+          "id": "ParallelGateway-JoinBranches-id-0001",
+          "name": "Join Branches",
+          "gatewayDirection": "Converging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-EnterFirstNameProposal-id-0001",
+          "name": "Enter First Name Proposal"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-NameAvailable-id-0001",
+          "name": "Name Available?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-EnterNextNameProposal-id-0001",
+          "name": "Enter Next Name Proposal"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-ReserveCharacterName-id-0001",
+          "name": "Reserve Character Name"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendCharacterConfirmation-id-0001",
+          "name": "Send: Character Confirmation"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendCharacterSelfies-id-0001",
+          "name": "Send: Character Selfies"
+        },
+        {
+          "$type": "bpmn:IntermediateCatchEvent",
+          "id": "IntermediateCatchEvent-ExpansionDelay-id-0001",
+          "name": "Expansion Release Delay",
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "PT1M"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendExpansionNotification-id-0001",
+          "name": "Send: Expansion Release Notification"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-CharacterCreationComplete-id-0001",
+          "name": "Character Creation Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToSplit-id-0001",
+          "sourceRef": "StartEvent-UserInitiatesCreation-id-0001",
+          "targetRef": "ParallelGateway-SplitBranches-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToAccountSetup-id-0002",
+          "sourceRef": "ParallelGateway-SplitBranches-id-0001",
+          "targetRef": "SubProcess-AccountSetup-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SplitToNameBrainstorming-id-0003",
+          "sourceRef": "ParallelGateway-SplitBranches-id-0001",
+          "targetRef": "SubProcess-NameBrainstorming-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-AccountSetupToJoin-id-0004",
+          "sourceRef": "SubProcess-AccountSetup-id-0001",
+          "targetRef": "ParallelGateway-JoinBranches-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NameBrainstormingToJoin-id-0005",
+          "sourceRef": "SubProcess-NameBrainstorming-id-0001",
+          "targetRef": "ParallelGateway-JoinBranches-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-JoinToFirstName-id-0006",
+          "sourceRef": "ParallelGateway-JoinBranches-id-0001",
+          "targetRef": "UserTask-EnterFirstNameProposal-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FirstNameToNameCheck-id-0007",
+          "sourceRef": "UserTask-EnterFirstNameProposal-id-0001",
+          "targetRef": "ExclusiveGateway-NameAvailable-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NameCheckToNextName-id-0008",
+          "sourceRef": "ExclusiveGateway-NameAvailable-id-0001",
+          "targetRef": "UserTask-EnterNextNameProposal-id-0001",
+          "name": "name_not_available = true",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NameCheckToReserve-id-0009",
+          "sourceRef": "ExclusiveGateway-NameAvailable-id-0001",
+          "targetRef": "ServiceTask-ReserveCharacterName-id-0001",
+          "name": "name_not_available = false",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NextNameToNameCheck-id-0010",
+          "sourceRef": "UserTask-EnterNextNameProposal-id-0001",
+          "targetRef": "ExclusiveGateway-NameAvailable-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReserveToConfirmation-id-0011",
+          "sourceRef": "ServiceTask-ReserveCharacterName-id-0001",
+          "targetRef": "SendTask-SendCharacterConfirmation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ConfirmationToSelfies-id-0012",
+          "sourceRef": "SendTask-SendCharacterConfirmation-id-0001",
+          "targetRef": "SendTask-SendCharacterSelfies-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SelfiesToDelay-id-0013",
+          "sourceRef": "SendTask-SendCharacterSelfies-id-0001",
+          "targetRef": "IntermediateCatchEvent-ExpansionDelay-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DelayToNotification-id-0014",
+          "sourceRef": "IntermediateCatchEvent-ExpansionDelay-id-0001",
+          "targetRef": "SendTask-SendExpansionNotification-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-NotificationToEnd-id-0015",
+          "sourceRef": "SendTask-SendExpansionNotification-id-0001",
+          "targetRef": "EndEvent-CharacterCreationComplete-id-0001"
+        }
+      ]
+    }
+  ]
+}

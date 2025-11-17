@@ -1,0 +1,87 @@
+{
+  "$type": "bpmn:Definitions",
+  "id": "DismissalProcessDefinitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler (https://bpmn.io)",
+  "exporterVersion": "18.0.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "DismissalProcess",
+      "name": "MPON-MPOO Dismissal Process",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-DismissalProcessInitiated-id-0001",
+          "name": "Dismissal Process Initiated"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-SendDismissalToMPOO-id-0001",
+          "name": "Send: dismissal to MPOO"
+        },
+        {
+          "$type": "bpmn:UserTask",
+          "id": "UserTask-MPOOReviewsDismissal-id-0001",
+          "name": "MPOO Reviews Dismissal"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-DismissalDecision-id-0001",
+          "name": "Dismissal Decision",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-DismissalOpposed-id-0001",
+          "name": "Dismissal Opposed"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-DismissalConfirmed-id-0002",
+          "name": "Dismissal Confirmed"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-DismissalProcessComplete-id-0003",
+          "name": "Dismissal Process Complete"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToSendDismissal-id-0001",
+          "sourceRef": "StartEvent-DismissalProcessInitiated-id-0001",
+          "targetRef": "SendTask-SendDismissalToMPOO-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-SendToReview-id-0002",
+          "sourceRef": "SendTask-SendDismissalToMPOO-id-0001",
+          "targetRef": "UserTask-MPOOReviewsDismissal-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ReviewToDecision-id-0003",
+          "sourceRef": "UserTask-MPOOReviewsDismissal-id-0001",
+          "targetRef": "ExclusiveGateway-DismissalDecision-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DecisionToOpposed-id-0004",
+          "name": "MPOO opposes dismissal",
+          "sourceRef": "ExclusiveGateway-DismissalDecision-id-0001",
+          "targetRef": "EndEvent-DismissalOpposed-id-0001",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-DecisionToConfirmed-id-0005",
+          "name": "MPOO confirms dismissal",
+          "sourceRef": "ExclusiveGateway-DismissalDecision-id-0001",
+          "targetRef": "EndEvent-DismissalConfirmed-id-0002",
+          "isDefault": true
+        }
+      ]
+    }
+  ]
+}

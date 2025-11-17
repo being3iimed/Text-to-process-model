@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="hiring-process-definitions" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler (https://bpmn.io)" exporterVersion="1.0">
+  <bpmn:process id="HiringProcess-id-0001" name="Hiring Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-HiringNeedIdentified-id-0001" name="Hiring need identified">
+      <bpmn:outgoing>SequenceFlow-StartToHRCreatesJobDescription-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="UserTask-HRCreatesJobDescription-id-0001" name="HR creates job description">
+      <bpmn:incoming>SequenceFlow-StartToHRCreatesJobDescription-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-HRCreatesJobDescriptionToPostJob-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-PostJobOnJobBoards-id-0001" name="Post job on job boards">
+      <bpmn:incoming>SequenceFlow-HRCreatesJobDescriptionToPostJob-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-PostJobToScreenResumes-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-ScreenResumes-id-0001" name="Screen resumes">
+      <bpmn:incoming>SequenceFlow-PostJobToScreenResumes-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ScreenResumesToQualifiedCandidates-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-QualifiedCandidates-id-0001" name="Qualified candidates?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ScreenResumesToQualifiedCandidates-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-QualifiedCandidatesToConductPhoneInterviews-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-QualifiedCandidatesToSendRejectionNotice-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-ConductPhoneInterviews-id-0001" name="Conduct phone interviews">
+      <bpmn:incoming>SequenceFlow-QualifiedCandidatesToConductPhoneInterviews-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConductPhoneInterviewsToProceedToInterview-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ProceedToInterview-id-0001" name="Proceed to interview?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ConductPhoneInterviewsToProceedToInterview-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProceedToInterviewToScheduleInterviews-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-ProceedToInterviewToSendRejectionNotice-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-ScheduleInterviews-id-0001" name="Schedule in-person/virtual interviews">
+      <bpmn:incoming>SequenceFlow-ProceedToInterviewToScheduleInterviews-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ScheduleInterviewsToInterviewType-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-InterviewType-id-0001" name="Interview type?" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ScheduleInterviewsToInterviewType-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InterviewTypeToConductInPersonInterview-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-InterviewTypeToConductVirtualInterview-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-ConductInPersonInterview-id-0001" name="Conduct in-person interview">
+      <bpmn:incoming>SequenceFlow-InterviewTypeToConductInPersonInterview-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConductInPersonInterviewToInterviewTypeMerge-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ConductVirtualInterview-id-0001" name="Conduct virtual interview">
+      <bpmn:incoming>SequenceFlow-InterviewTypeToConductVirtualInterview-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConductVirtualInterviewToInterviewTypeMerge-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-InterviewTypeMerge-id-0001" name="Interview type merge" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-ConductInPersonInterviewToInterviewTypeMerge-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ConductVirtualInterviewToInterviewTypeMerge-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-InterviewTypeMergeToSelectFinalCandidate-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="UserTask-SelectFinalCandidate-id-0001" name="Select final candidate">
+      <bpmn:incoming>SequenceFlow-InterviewTypeMergeToSelectFinalCandidate-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-QualifiedCandidatesMergeToSelectFinalCandidate-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectFinalCandidateToExtendOffer-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ExtendOffer-id-0001" name="Extend offer">
+      <bpmn:incoming>SequenceFlow-SelectFinalCandidateToExtendOffer-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ExtendOfferToSalaryNegotiation-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-SalaryNegotiation-id-0001" name="Salary negotiation">
+      <bpmn:incoming>SequenceFlow-ExtendOfferToSalaryNegotiation-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SalaryNegotiationToCompleteOnboarding-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-CompleteOnboardingPaperwork-id-0001" name="Complete onboarding paperwork">
+      <bpmn:incoming>SequenceFlow-SalaryNegotiationToCompleteOnboarding-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-CompleteOnboardingToConductOrientation-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ConductOrientation-id-0001" name="Conduct orientation">
+      <bpmn:incoming>SequenceFlow-CompleteOnboardingToConductOrientation-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ConductOrientationToProvideTraining-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ProvideTraining-id-0001" name="Provide training">
+      <bpmn:incoming>SequenceFlow-ConductOrientationToProvideTraining-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProvideTrainingToNewHireFullyIntegrated-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent-NewHireFullyIntegrated-id-0001" name="New hire fully integrated">
+      <bpmn:incoming>SequenceFlow-ProvideTrainingToNewHireFullyIntegrated-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="SendTask-SendRejectionNotice-id-0001" name="Send: rejection notice">
+      <bpmn:incoming>SequenceFlow-QualifiedCandidatesToSendRejectionNotice-id-0001</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow-ProceedToInterviewToSendRejectionNotice-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SendRejectionNoticeToProcessTerminated-id-0001</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent-ProcessTerminated-id-0001" name="Process terminated">
+      <bpmn:incoming>SequenceFlow-SendRejectionNoticeToProcessTerminated-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ProceedToInterviewMerge-id-0001" name="Proceed to interview merge" gatewayDirection="Converging">
+      <bpmn:outgoing>SequenceFlow-ProceedToInterviewMergeToQualifiedCandidatesMerge-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-QualifiedCandidatesMerge-id-0001" name="Qualified candidates merge" gatewayDirection="Converging">
+      <bpmn:incoming>SequenceFlow-ProceedToInterviewMergeToQualifiedCandidatesMerge-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-QualifiedCandidatesMergeToSelectFinalCandidate-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToHRCreatesJobDescription-id-0001" sourceRef="StartEvent-HiringNeedIdentified-id-0001" targetRef="UserTask-HRCreatesJobDescription-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-HRCreatesJobDescriptionToPostJob-id-0001" sourceRef="UserTask-HRCreatesJobDescription-id-0001" targetRef="ServiceTask-PostJobOnJobBoards-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-PostJobToScreenResumes-id-0001" sourceRef="ServiceTask-PostJobOnJobBoards-id-0001" targetRef="UserTask-ScreenResumes-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ScreenResumesToQualifiedCandidates-id-0001" sourceRef="UserTask-ScreenResumes-id-0001" targetRef="ExclusiveGateway-QualifiedCandidates-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-QualifiedCandidatesToConductPhoneInterviews-id-0001" name="qualified_candidates" sourceRef="ExclusiveGateway-QualifiedCandidates-id-0001" targetRef="UserTask-ConductPhoneInterviews-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-QualifiedCandidatesToSendRejectionNotice-id-0001" sourceRef="ExclusiveGateway-QualifiedCandidates-id-0001" targetRef="SendTask-SendRejectionNotice-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConductPhoneInterviewsToProceedToInterview-id-0001" sourceRef="UserTask-ConductPhoneInterviews-id-0001" targetRef="ExclusiveGateway-ProceedToInterview-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProceedToInterviewToScheduleInterviews-id-0001" name="proceed_to_interview" sourceRef="ExclusiveGateway-ProceedToInterview-id-0001" targetRef="UserTask-ScheduleInterviews-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProceedToInterviewToSendRejectionNotice-id-0001" sourceRef="ExclusiveGateway-ProceedToInterview-id-0001" targetRef="SendTask-SendRejectionNotice-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ScheduleInterviewsToInterviewType-id-0001" sourceRef="UserTask-ScheduleInterviews-id-0001" targetRef="ExclusiveGateway-InterviewType-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InterviewTypeToConductInPersonInterview-id-0001" name="in_person_preferred" sourceRef="ExclusiveGateway-InterviewType-id-0001" targetRef="UserTask-ConductInPersonInterview-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InterviewTypeToConductVirtualInterview-id-0001" sourceRef="ExclusiveGateway-InterviewType-id-0001" targetRef="UserTask-ConductVirtualInterview-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConductInPersonInterviewToInterviewTypeMerge-id-0001" sourceRef="UserTask-ConductInPersonInterview-id-0001" targetRef="ExclusiveGateway-InterviewTypeMerge-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConductVirtualInterviewToInterviewTypeMerge-id-0001" sourceRef="UserTask-ConductVirtualInterview-id-0001" targetRef="ExclusiveGateway-InterviewTypeMerge-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-InterviewTypeMergeToSelectFinalCandidate-id-0001" sourceRef="ExclusiveGateway-InterviewTypeMerge-id-0001" targetRef="UserTask-SelectFinalCandidate-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectFinalCandidateToExtendOffer-id-0001" sourceRef="UserTask-SelectFinalCandidate-id-0001" targetRef="UserTask-ExtendOffer-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ExtendOfferToSalaryNegotiation-id-0001" sourceRef="UserTask-ExtendOffer-id-0001" targetRef="UserTask-SalaryNegotiation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SalaryNegotiationToCompleteOnboarding-id-0001" sourceRef="UserTask-SalaryNegotiation-id-0001" targetRef="UserTask-CompleteOnboardingPaperwork-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-CompleteOnboardingToConductOrientation-id-0001" sourceRef="UserTask-CompleteOnboardingPaperwork-id-0001" targetRef="UserTask-ConductOrientation-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ConductOrientationToProvideTraining-id-0001" sourceRef="UserTask-ConductOrientation-id-0001" targetRef="UserTask-ProvideTraining-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProvideTrainingToNewHireFullyIntegrated-id-0001" sourceRef="UserTask-ProvideTraining-id-0001" targetRef="EndEvent-NewHireFullyIntegrated-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SendRejectionNoticeToProcessTerminated-id-0001" sourceRef="SendTask-SendRejectionNotice-id-0001" targetRef="EndEvent-ProcessTerminated-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProceedToInterviewMergeToQualifiedCandidatesMerge-id-0001" sourceRef="ExclusiveGateway-ProceedToInterviewMerge-id-0001" targetRef="ExclusiveGateway-QualifiedCandidatesMerge-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-QualifiedCandidatesMergeToSelectFinalCandidate-id-0001" sourceRef="ExclusiveGateway-QualifiedCandidatesMerge-id-0001" targetRef="UserTask-SelectFinalCandidate-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_HiringProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_HiringProcess-id-0001" bpmnElement="HiringProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-HiringNeedIdentified-id-0001_di" bpmnElement="StartEvent-HiringNeedIdentified-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-HRCreatesJobDescription-id-0001_di" bpmnElement="UserTask-HRCreatesJobDescription-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-PostJobOnJobBoards-id-0001_di" bpmnElement="ServiceTask-PostJobOnJobBoards-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ScreenResumes-id-0001_di" bpmnElement="UserTask-ScreenResumes-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-QualifiedCandidates-id-0001_di" bpmnElement="ExclusiveGateway-QualifiedCandidates-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="650" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConductPhoneInterviews-id-0001_di" bpmnElement="UserTask-ConductPhoneInterviews-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ProceedToInterview-id-0001_di" bpmnElement="ExclusiveGateway-ProceedToInterview-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="950" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ScheduleInterviews-id-0001_di" bpmnElement="UserTask-ScheduleInterviews-id-0001">
+        <dc:Bounds x="1075" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-InterviewType-id-0001_di" bpmnElement="ExclusiveGateway-InterviewType-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1250" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConductInPersonInterview-id-0001_di" bpmnElement="UserTask-ConductInPersonInterview-id-0001">
+        <dc:Bounds x="1375" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-InterviewTypeMerge-id-0001_di" bpmnElement="ExclusiveGateway-InterviewTypeMerge-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1550" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectFinalCandidate-id-0001_di" bpmnElement="UserTask-SelectFinalCandidate-id-0001">
+        <dc:Bounds x="1675" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ExtendOffer-id-0001_di" bpmnElement="UserTask-ExtendOffer-id-0001">
+        <dc:Bounds x="1825" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SalaryNegotiation-id-0001_di" bpmnElement="UserTask-SalaryNegotiation-id-0001">
+        <dc:Bounds x="1975" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-CompleteOnboardingPaperwork-id-0001_di" bpmnElement="UserTask-CompleteOnboardingPaperwork-id-0001">
+        <dc:Bounds x="2125" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConductOrientation-id-0001_di" bpmnElement="UserTask-ConductOrientation-id-0001">
+        <dc:Bounds x="2275" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ProvideTraining-id-0001_di" bpmnElement="UserTask-ProvideTraining-id-0001">
+        <dc:Bounds x="2425" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-NewHireFullyIntegrated-id-0001_di" bpmnElement="EndEvent-NewHireFullyIntegrated-id-0001">
+        <dc:Bounds x="2607" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ProceedToInterviewMerge-id-0001_di" bpmnElement="ExclusiveGateway-ProceedToInterviewMerge-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="50" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-QualifiedCandidatesMerge-id-0001_di" bpmnElement="ExclusiveGateway-QualifiedCandidatesMerge-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="200" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SendRejectionNotice-id-0001_di" bpmnElement="SendTask-SendRejectionNotice-id-0001">
+        <dc:Bounds x="1075" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ProcessTerminated-id-0001_di" bpmnElement="EndEvent-ProcessTerminated-id-0001">
+        <dc:Bounds x="1257" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConductVirtualInterview-id-0001_di" bpmnElement="UserTask-ConductVirtualInterview-id-0001">
+        <dc:Bounds x="1525" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToHRCreatesJobDescription-id-0001_di" bpmnElement="SequenceFlow-StartToHRCreatesJobDescription-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-HRCreatesJobDescriptionToPostJob-id-0001_di" bpmnElement="SequenceFlow-HRCreatesJobDescriptionToPostJob-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-PostJobToScreenResumes-id-0001_di" bpmnElement="SequenceFlow-PostJobToScreenResumes-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ScreenResumesToQualifiedCandidates-id-0001_di" bpmnElement="SequenceFlow-ScreenResumesToQualifiedCandidates-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="650" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-QualifiedCandidatesToConductPhoneInterviews-id-0001_di" bpmnElement="SequenceFlow-QualifiedCandidatesToConductPhoneInterviews-id-0001">
+        <di:waypoint x="700" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-QualifiedCandidatesToSendRejectionNotice-id-0001_di" bpmnElement="SequenceFlow-QualifiedCandidatesToSendRejectionNotice-id-0001">
+        <di:waypoint x="675" y="95" />
+        <di:waypoint x="675" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConductPhoneInterviewsToProceedToInterview-id-0001_di" bpmnElement="SequenceFlow-ConductPhoneInterviewsToProceedToInterview-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="950" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProceedToInterviewToScheduleInterviews-id-0001_di" bpmnElement="SequenceFlow-ProceedToInterviewToScheduleInterviews-id-0001">
+        <di:waypoint x="1000" y="70" />
+        <di:waypoint x="1075" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProceedToInterviewToSendRejectionNotice-id-0001_di" bpmnElement="SequenceFlow-ProceedToInterviewToSendRejectionNotice-id-0001">
+        <di:waypoint x="975" y="95" />
+        <di:waypoint x="975" y="210" />
+        <di:waypoint x="1075" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ScheduleInterviewsToInterviewType-id-0001_di" bpmnElement="SequenceFlow-ScheduleInterviewsToInterviewType-id-0001">
+        <di:waypoint x="1175" y="70" />
+        <di:waypoint x="1250" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InterviewTypeToConductInPersonInterview-id-0001_di" bpmnElement="SequenceFlow-InterviewTypeToConductInPersonInterview-id-0001">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1375" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InterviewTypeToConductVirtualInterview-id-0001_di" bpmnElement="SequenceFlow-InterviewTypeToConductVirtualInterview-id-0001">
+        <di:waypoint x="1300" y="70" />
+        <di:waypoint x="1350" y="70" />
+        <di:waypoint x="1350" y="140" />
+        <di:waypoint x="1500" y="140" />
+        <di:waypoint x="1500" y="210" />
+        <di:waypoint x="1525" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConductInPersonInterviewToInterviewTypeMerge-id-0001_di" bpmnElement="SequenceFlow-ConductInPersonInterviewToInterviewTypeMerge-id-0001">
+        <di:waypoint x="1475" y="70" />
+        <di:waypoint x="1550" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-InterviewTypeMergeToSelectFinalCandidate-id-0001_di" bpmnElement="SequenceFlow-InterviewTypeMergeToSelectFinalCandidate-id-0001">
+        <di:waypoint x="1600" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectFinalCandidateToExtendOffer-id-0001_di" bpmnElement="SequenceFlow-SelectFinalCandidateToExtendOffer-id-0001">
+        <di:waypoint x="1775" y="70" />
+        <di:waypoint x="1825" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExtendOfferToSalaryNegotiation-id-0001_di" bpmnElement="SequenceFlow-ExtendOfferToSalaryNegotiation-id-0001">
+        <di:waypoint x="1925" y="70" />
+        <di:waypoint x="1975" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SalaryNegotiationToCompleteOnboarding-id-0001_di" bpmnElement="SequenceFlow-SalaryNegotiationToCompleteOnboarding-id-0001">
+        <di:waypoint x="2075" y="70" />
+        <di:waypoint x="2125" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompleteOnboardingToConductOrientation-id-0001_di" bpmnElement="SequenceFlow-CompleteOnboardingToConductOrientation-id-0001">
+        <di:waypoint x="2225" y="70" />
+        <di:waypoint x="2275" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConductOrientationToProvideTraining-id-0001_di" bpmnElement="SequenceFlow-ConductOrientationToProvideTraining-id-0001">
+        <di:waypoint x="2375" y="70" />
+        <di:waypoint x="2425" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProvideTrainingToNewHireFullyIntegrated-id-0001_di" bpmnElement="SequenceFlow-ProvideTrainingToNewHireFullyIntegrated-id-0001">
+        <di:waypoint x="2525" y="70" />
+        <di:waypoint x="2607" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProceedToInterviewMergeToQualifiedCandidatesMerge-id-0001_di" bpmnElement="SequenceFlow-ProceedToInterviewMergeToQualifiedCandidatesMerge-id-0001">
+        <di:waypoint x="100" y="210" />
+        <di:waypoint x="200" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-QualifiedCandidatesMergeToSelectFinalCandidate-id-0001_di" bpmnElement="SequenceFlow-QualifiedCandidatesMergeToSelectFinalCandidate-id-0001">
+        <di:waypoint x="250" y="210" />
+        <di:waypoint x="300" y="210" />
+        <di:waypoint x="300" y="140" />
+        <di:waypoint x="1650" y="140" />
+        <di:waypoint x="1650" y="70" />
+        <di:waypoint x="1675" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SendRejectionNoticeToProcessTerminated-id-0001_di" bpmnElement="SequenceFlow-SendRejectionNoticeToProcessTerminated-id-0001">
+        <di:waypoint x="1175" y="210" />
+        <di:waypoint x="1257" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ConductVirtualInterviewToInterviewTypeMerge-id-0001_di" bpmnElement="SequenceFlow-ConductVirtualInterviewToInterviewTypeMerge-id-0001">
+        <di:waypoint x="1575" y="170" />
+        <di:waypoint x="1575" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

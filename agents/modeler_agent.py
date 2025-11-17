@@ -1,6 +1,6 @@
 """Modeler Agent - Generates BPMN 2.0 JSON models from parsed process descriptions."""
 
-from typing import Optional, Dict, Any, Tuple, List
+from typing import Optional, Dict, Any
 import json
 import httpx
 import re
@@ -47,7 +47,7 @@ class ModelerAgent:
         self.model = ChatMistralAI(
             api_key=self.api_key,
             model=MISTRAL_MODEL,
-            temperature=0.2,
+            temperature=0.05,
         )
 
         # Create the agent with loaded prompt

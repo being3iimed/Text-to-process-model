@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="MaternityLeaveProcess-Definitions-id-0001" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Modeler" exporterVersion="1.0">
+  <bpmn:process id="MaternityLeaveProcess-id-0001" isExecutable="true">
+    <bpmn:startEvent id="StartEvent-MaternityLeaveInitiated-id-0001" name="Maternity leave planning initiated">
+      <bpmn:outgoing>SequenceFlow-StartToFetchModels-id-0001</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="ServiceTask-FetchLeaveModels-id-0001" name="Fetch available leave models">
+      <bpmn:incoming>SequenceFlow-StartToFetchModels-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-FetchToReview-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="UserTask-ReviewModels-id-0001" name="Review maternity leave models">
+      <bpmn:incoming>SequenceFlow-FetchToReview-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ReviewToSelect-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-SelectModel-id-0001" name="Select preferred model">
+      <bpmn:incoming>SequenceFlow-ReviewToSelect-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-SelectToProvideDetails-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="UserTask-ProvideDetails-id-0001" name="Provide personal details">
+      <bpmn:incoming>SequenceFlow-SelectToProvideDetails-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ProvideToValidate-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="ServiceTask-ValidateEligibility-id-0001" name="Validate eligibility">
+      <bpmn:incoming>SequenceFlow-ProvideToValidate-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ValidateToNotification-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:subProcess id="SubProcess-NotificationProcess-id-0001" name="Notification Process">
+      <bpmn:incoming>SequenceFlow-ValidateToNotification-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-NotificationToLeavePeriod-id-0001</bpmn:outgoing>
+      <bpmn:startEvent id="StartEvent-NotificationStart-id-0001" name="Notification process start">
+        <bpmn:outgoing>SequenceFlow-NotificationStartToSplit-id-0001</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:parallelGateway id="ParallelGateway-NotificationSplit-id-0001" name="Parallel Notification" gatewayDirection="Diverging">
+        <bpmn:incoming>SequenceFlow-NotificationStartToSplit-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SplitToSSNotification-id-0001</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow-SplitToCompanyNotification-id-0001</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:sendTask id="SendTask-SocialSecurityNotification-id-0001" name="Send: Social Security notification">
+        <bpmn:incoming>SequenceFlow-SplitToSSNotification-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SSNotificationToReceive-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:sendTask id="SendTask-CompanyNotification-id-0001" name="Send: Company notification">
+        <bpmn:incoming>SequenceFlow-SplitToCompanyNotification-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CompanyNotificationToReceive-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:receiveTask id="ReceiveTask-CompanyConfirmation-id-0001" name="Receive: Company confirmation">
+        <bpmn:incoming>SequenceFlow-CompanyNotificationToReceive-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CompanyReceiveToJoin-id-0001</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:receiveTask id="ReceiveTask-SocialSecurityConfirmation-id-0001" name="Receive: Social Security confirmation">
+        <bpmn:incoming>SequenceFlow-SSNotificationToReceive-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SSReceiveToJoin-id-0001</bpmn:outgoing>
+      </bpmn:receiveTask>
+      <bpmn:boundaryEvent id="BoundaryEvent-CompanyTimeout-id-0001" name="5 Business Day Timeout" attachedToRef="ReceiveTask-CompanyConfirmation-id-0001">
+        <bpmn:outgoing>SequenceFlow-CompanyTimeoutToFollowup-id-0001</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="BoundaryEvent-CompanyTimeout-id-0001_EventDef">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P5D</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:boundaryEvent>
+      <bpmn:boundaryEvent id="BoundaryEvent-SocialSecurityTimeout-id-0001" name="7 Business Day Timeout" attachedToRef="ReceiveTask-SocialSecurityConfirmation-id-0001">
+        <bpmn:outgoing>SequenceFlow-SSTimeoutToFollowup-id-0001</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="BoundaryEvent-SocialSecurityTimeout-id-0001_EventDef">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P7D</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:boundaryEvent>
+      <bpmn:sendTask id="SendTask-CompanyFollowup-id-0001" name="Send: Company follow-up reminder">
+        <bpmn:incoming>SequenceFlow-CompanyTimeoutToFollowup-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-CompanyFollowupToJoin-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:sendTask id="SendTask-SocialSecurityFollowup-id-0001" name="Send: Social Security follow-up reminder">
+        <bpmn:incoming>SequenceFlow-SSTimeoutToFollowup-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-SSFollowupToJoin-id-0001</bpmn:outgoing>
+      </bpmn:sendTask>
+      <bpmn:parallelGateway id="ParallelGateway-NotificationJoin-id-0001" name="Notification Complete" gatewayDirection="Converging">
+        <bpmn:incoming>SequenceFlow-CompanyFollowupToJoin-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-SSFollowupToJoin-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-CompanyReceiveToJoin-id-0001</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow-SSReceiveToJoin-id-0001</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow-NotificationJoinToEnd-id-0001</bpmn:outgoing>
+      </bpmn:parallelGateway>
+      <bpmn:endEvent id="EndEvent-NotificationsConfirmed-id-0001" name="All notifications confirmed">
+        <bpmn:incoming>SequenceFlow-NotificationJoinToEnd-id-0001</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow-NotificationStartToSplit-id-0001" sourceRef="StartEvent-NotificationStart-id-0001" targetRef="ParallelGateway-NotificationSplit-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToSSNotification-id-0001" sourceRef="ParallelGateway-NotificationSplit-id-0001" targetRef="SendTask-SocialSecurityNotification-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SplitToCompanyNotification-id-0001" sourceRef="ParallelGateway-NotificationSplit-id-0001" targetRef="SendTask-CompanyNotification-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SSNotificationToReceive-id-0001" sourceRef="SendTask-SocialSecurityNotification-id-0001" targetRef="ReceiveTask-SocialSecurityConfirmation-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CompanyNotificationToReceive-id-0001" sourceRef="SendTask-CompanyNotification-id-0001" targetRef="ReceiveTask-CompanyConfirmation-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CompanyTimeoutToFollowup-id-0001" sourceRef="BoundaryEvent-CompanyTimeout-id-0001" targetRef="SendTask-CompanyFollowup-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SSTimeoutToFollowup-id-0001" sourceRef="BoundaryEvent-SocialSecurityTimeout-id-0001" targetRef="SendTask-SocialSecurityFollowup-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CompanyFollowupToJoin-id-0001" sourceRef="SendTask-CompanyFollowup-id-0001" targetRef="ParallelGateway-NotificationJoin-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SSFollowupToJoin-id-0001" sourceRef="SendTask-SocialSecurityFollowup-id-0001" targetRef="ParallelGateway-NotificationJoin-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-CompanyReceiveToJoin-id-0001" sourceRef="ReceiveTask-CompanyConfirmation-id-0001" targetRef="ParallelGateway-NotificationJoin-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-SSReceiveToJoin-id-0001" sourceRef="ReceiveTask-SocialSecurityConfirmation-id-0001" targetRef="ParallelGateway-NotificationJoin-id-0001" />
+      <bpmn:sequenceFlow id="SequenceFlow-NotificationJoinToEnd-id-0001" sourceRef="ParallelGateway-NotificationJoin-id-0001" targetRef="EndEvent-NotificationsConfirmed-id-0001" />
+    </bpmn:subProcess>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-LeavePeriod-id-0001" name="Leave Period">
+      <bpmn:incoming>SequenceFlow-NotificationToLeavePeriod-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-LeavePeriodToExtension-id-0001</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:userTask id="UserTask-ConfirmExtension-id-0001" name="Confirm extension decision">
+      <bpmn:incoming>SequenceFlow-LeavePeriodToExtension-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ExtensionToGateway-id-0001</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway-ExtensionDecision-id-0001" name="Extension Decision" gatewayDirection="Diverging">
+      <bpmn:incoming>SequenceFlow-ExtensionToGateway-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-GatewayToExtensionProcess-id-0001</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow-GatewayToLeaveEnd-id-0001</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="ServiceTask-ProcessExtension-id-0001" name="Process extension paperwork">
+      <bpmn:incoming>SequenceFlow-GatewayToExtensionProcess-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ExtensionProcessToPeriod-id-0001</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent-ExtensionPeriod-id-0001" name="Extension Period">
+      <bpmn:incoming>SequenceFlow-ExtensionProcessToPeriod-id-0001</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow-ExtensionPeriodToEnd-id-0001</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="EndEvent-LeaveCompleted-id-0001" name="Leave period completed">
+      <bpmn:incoming>SequenceFlow-GatewayToLeaveEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="EndEvent-ExtensionCompleted-id-0001" name="Extension period completed">
+      <bpmn:incoming>SequenceFlow-ExtensionPeriodToEnd-id-0001</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow-StartToFetchModels-id-0001" sourceRef="StartEvent-MaternityLeaveInitiated-id-0001" targetRef="ServiceTask-FetchLeaveModels-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-FetchToReview-id-0001" sourceRef="ServiceTask-FetchLeaveModels-id-0001" targetRef="UserTask-ReviewModels-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ReviewToSelect-id-0001" sourceRef="UserTask-ReviewModels-id-0001" targetRef="UserTask-SelectModel-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-SelectToProvideDetails-id-0001" sourceRef="UserTask-SelectModel-id-0001" targetRef="UserTask-ProvideDetails-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ProvideToValidate-id-0001" sourceRef="UserTask-ProvideDetails-id-0001" targetRef="ServiceTask-ValidateEligibility-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ValidateToNotification-id-0001" sourceRef="ServiceTask-ValidateEligibility-id-0001" targetRef="SubProcess-NotificationProcess-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-NotificationToLeavePeriod-id-0001" sourceRef="SubProcess-NotificationProcess-id-0001" targetRef="IntermediateCatchEvent-LeavePeriod-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-LeavePeriodToExtension-id-0001" sourceRef="IntermediateCatchEvent-LeavePeriod-id-0001" targetRef="UserTask-ConfirmExtension-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ExtensionToGateway-id-0001" sourceRef="UserTask-ConfirmExtension-id-0001" targetRef="ExclusiveGateway-ExtensionDecision-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToExtensionProcess-id-0001" name="extend_leave = true" sourceRef="ExclusiveGateway-ExtensionDecision-id-0001" targetRef="ServiceTask-ProcessExtension-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-GatewayToLeaveEnd-id-0001" name="extend_leave = false" sourceRef="ExclusiveGateway-ExtensionDecision-id-0001" targetRef="EndEvent-LeaveCompleted-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ExtensionProcessToPeriod-id-0001" sourceRef="ServiceTask-ProcessExtension-id-0001" targetRef="IntermediateCatchEvent-ExtensionPeriod-id-0001" />
+    <bpmn:sequenceFlow id="SequenceFlow-ExtensionPeriodToEnd-id-0001" sourceRef="IntermediateCatchEvent-ExtensionPeriod-id-0001" targetRef="EndEvent-ExtensionCompleted-id-0001" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_MaternityLeaveProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_MaternityLeaveProcess-id-0001" bpmnElement="MaternityLeaveProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-MaternityLeaveInitiated-id-0001_di" bpmnElement="StartEvent-MaternityLeaveInitiated-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-FetchLeaveModels-id-0001_di" bpmnElement="ServiceTask-FetchLeaveModels-id-0001">
+        <dc:Bounds x="175" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ReviewModels-id-0001_di" bpmnElement="UserTask-ReviewModels-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-SelectModel-id-0001_di" bpmnElement="UserTask-SelectModel-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ProvideDetails-id-0001_di" bpmnElement="UserTask-ProvideDetails-id-0001">
+        <dc:Bounds x="625" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ValidateEligibility-id-0001_di" bpmnElement="ServiceTask-ValidateEligibility-id-0001">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess-NotificationProcess-id-0001_di" bpmnElement="SubProcess-NotificationProcess-id-0001">
+        <dc:Bounds x="925" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-LeavePeriod-id-0001_di" bpmnElement="IntermediateCatchEvent-LeavePeriod-id-0001">
+        <dc:Bounds x="1107" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask-ConfirmExtension-id-0001_di" bpmnElement="UserTask-ConfirmExtension-id-0001">
+        <dc:Bounds x="1225" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway-ExtensionDecision-id-0001_di" bpmnElement="ExclusiveGateway-ExtensionDecision-id-0001" isMarkerVisible="true">
+        <dc:Bounds x="1400" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask-ProcessExtension-id-0001_di" bpmnElement="ServiceTask-ProcessExtension-id-0001">
+        <dc:Bounds x="1525" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent-ExtensionPeriod-id-0001_di" bpmnElement="IntermediateCatchEvent-ExtensionPeriod-id-0001">
+        <dc:Bounds x="1707" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-ExtensionCompleted-id-0001_di" bpmnElement="EndEvent-ExtensionCompleted-id-0001">
+        <dc:Bounds x="1857" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-LeaveCompleted-id-0001_di" bpmnElement="EndEvent-LeaveCompleted-id-0001">
+        <dc:Bounds x="1557" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-StartToFetchModels-id-0001_di" bpmnElement="SequenceFlow-StartToFetchModels-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="175" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-FetchToReview-id-0001_di" bpmnElement="SequenceFlow-FetchToReview-id-0001">
+        <di:waypoint x="275" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ReviewToSelect-id-0001_di" bpmnElement="SequenceFlow-ReviewToSelect-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SelectToProvideDetails-id-0001_di" bpmnElement="SequenceFlow-SelectToProvideDetails-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="625" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ProvideToValidate-id-0001_di" bpmnElement="SequenceFlow-ProvideToValidate-id-0001">
+        <di:waypoint x="725" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ValidateToNotification-id-0001_di" bpmnElement="SequenceFlow-ValidateToNotification-id-0001">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="925" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotificationToLeavePeriod-id-0001_di" bpmnElement="SequenceFlow-NotificationToLeavePeriod-id-0001">
+        <di:waypoint x="1025" y="70" />
+        <di:waypoint x="1107" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-LeavePeriodToExtension-id-0001_di" bpmnElement="SequenceFlow-LeavePeriodToExtension-id-0001">
+        <di:waypoint x="1143" y="70" />
+        <di:waypoint x="1225" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExtensionToGateway-id-0001_di" bpmnElement="SequenceFlow-ExtensionToGateway-id-0001">
+        <di:waypoint x="1325" y="70" />
+        <di:waypoint x="1400" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToExtensionProcess-id-0001_di" bpmnElement="SequenceFlow-GatewayToExtensionProcess-id-0001">
+        <di:waypoint x="1450" y="70" />
+        <di:waypoint x="1525" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-GatewayToLeaveEnd-id-0001_di" bpmnElement="SequenceFlow-GatewayToLeaveEnd-id-0001">
+        <di:waypoint x="1425" y="95" />
+        <di:waypoint x="1425" y="210" />
+        <di:waypoint x="1557" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExtensionProcessToPeriod-id-0001_di" bpmnElement="SequenceFlow-ExtensionProcessToPeriod-id-0001">
+        <di:waypoint x="1625" y="70" />
+        <di:waypoint x="1707" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-ExtensionPeriodToEnd-id-0001_di" bpmnElement="SequenceFlow-ExtensionPeriodToEnd-id-0001">
+        <di:waypoint x="1743" y="70" />
+        <di:waypoint x="1857" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SubProcess-NotificationProcess-id-0001">
+    <bpmndi:BPMNPlane id="BPMNPlane_SubProcess-NotificationProcess-id-0001" bpmnElement="SubProcess-NotificationProcess-id-0001">
+      <bpmndi:BPMNShape id="StartEvent-NotificationStart-id-0001_di" bpmnElement="StartEvent-NotificationStart-id-0001">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-NotificationSplit-id-0001_di" bpmnElement="ParallelGateway-NotificationSplit-id-0001">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SocialSecurityNotification-id-0001_di" bpmnElement="SendTask-SocialSecurityNotification-id-0001">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-SocialSecurityConfirmation-id-0001_di" bpmnElement="ReceiveTask-SocialSecurityConfirmation-id-0001">
+        <dc:Bounds x="475" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-SocialSecurityTimeout-id-0001_di" bpmnElement="BoundaryEvent-SocialSecurityTimeout-id-0001">
+        <dc:Bounds x="507" y="92" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway-NotificationJoin-id-0001_di" bpmnElement="ParallelGateway-NotificationJoin-id-0001">
+        <dc:Bounds x="1100" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent-NotificationsConfirmed-id-0001_di" bpmnElement="EndEvent-NotificationsConfirmed-id-0001">
+        <dc:Bounds x="1257" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-CompanyNotification-id-0001_di" bpmnElement="SendTask-CompanyNotification-id-0001">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask-CompanyConfirmation-id-0001_di" bpmnElement="ReceiveTask-CompanyConfirmation-id-0001">
+        <dc:Bounds x="475" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent-CompanyTimeout-id-0001_di" bpmnElement="BoundaryEvent-CompanyTimeout-id-0001">
+        <dc:Bounds x="507" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-SocialSecurityFollowup-id-0001_di" bpmnElement="SendTask-SocialSecurityFollowup-id-0001">
+        <dc:Bounds x="925" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendTask-CompanyFollowup-id-0001_di" bpmnElement="SendTask-CompanyFollowup-id-0001">
+        <dc:Bounds x="625" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotificationStartToSplit-id-0001_di" bpmnElement="SequenceFlow-NotificationStartToSplit-id-0001">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToSSNotification-id-0001_di" bpmnElement="SequenceFlow-SplitToSSNotification-id-0001">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SplitToCompanyNotification-id-0001_di" bpmnElement="SequenceFlow-SplitToCompanyNotification-id-0001">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SSNotificationToReceive-id-0001_di" bpmnElement="SequenceFlow-SSNotificationToReceive-id-0001">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="475" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SSReceiveToJoin-id-0001_di" bpmnElement="SequenceFlow-SSReceiveToJoin-id-0001">
+        <di:waypoint x="575" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SSTimeoutToFollowup-id-0001_di" bpmnElement="SequenceFlow-SSTimeoutToFollowup-id-0001">
+        <di:waypoint x="525" y="128" />
+        <di:waypoint x="525" y="140" />
+        <di:waypoint x="600" y="140" />
+        <di:waypoint x="600" y="110" />
+        <di:waypoint x="600" y="140" />
+        <di:waypoint x="900" y="140" />
+        <di:waypoint x="900" y="210" />
+        <di:waypoint x="925" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-NotificationJoinToEnd-id-0001_di" bpmnElement="SequenceFlow-NotificationJoinToEnd-id-0001">
+        <di:waypoint x="1150" y="70" />
+        <di:waypoint x="1257" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompanyNotificationToReceive-id-0001_di" bpmnElement="SequenceFlow-CompanyNotificationToReceive-id-0001">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="475" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompanyReceiveToJoin-id-0001_di" bpmnElement="SequenceFlow-CompanyReceiveToJoin-id-0001">
+        <di:waypoint x="575" y="210" />
+        <di:waypoint x="600" y="210" />
+        <di:waypoint x="600" y="140" />
+        <di:waypoint x="1050" y="140" />
+        <di:waypoint x="1050" y="70" />
+        <di:waypoint x="1100" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompanyTimeoutToFollowup-id-0001_di" bpmnElement="SequenceFlow-CompanyTimeoutToFollowup-id-0001">
+        <di:waypoint x="525" y="268" />
+        <di:waypoint x="525" y="350" />
+        <di:waypoint x="625" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-SSFollowupToJoin-id-0001_di" bpmnElement="SequenceFlow-SSFollowupToJoin-id-0001">
+        <di:waypoint x="1025" y="210" />
+        <di:waypoint x="1125" y="210" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow-CompanyFollowupToJoin-id-0001_di" bpmnElement="SequenceFlow-CompanyFollowupToJoin-id-0001">
+        <di:waypoint x="725" y="350" />
+        <di:waypoint x="1125" y="350" />
+        <di:waypoint x="1125" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

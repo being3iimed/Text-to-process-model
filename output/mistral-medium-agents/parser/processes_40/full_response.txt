@@ -1,0 +1,111 @@
+```
+<summary_of_elements>
+
+## Summary of Elements
+
+### TASKS:
+- **serviceTask("Collect Machine Data")** - Automated data collection from machine sensors (availability, performance, quality)
+- **scriptTask("Computation: Calculate OEE")** - Computes OEE using formula: `OEE = Availability × Performance × Quality`
+- **serviceTask("Stop Machine")** - Sends stop command to machine controller
+- **sendTask("Send: OEE Alert Email")** - Notifies engineer of low OEE
+- **serviceTask("Restart Machine")** - Sends restart command to machine controller
+- **serviceTask("Check Machine Connection")** - Verifies if machine is still connected
+
+### GATEWAYS:
+- **XOR** after OEE calculation to check if OEE < threshold
+- **XOR** after machine stop to wait for restart or disconnection
+
+### EVENTS:
+- **messageStartEvent("MachineConnected")** - Triggered by machine connection signal
+- **endEvent("Process Terminated")** - When machine is disconnected
+- **intermediateEvent(timerBoundary("5 minutes"))** - Periodic data collection interval
+
+### BOUNDARY EVENTS:
+- **timerBoundary("1 hour")** on "Check Machine Connection" - SLA: If connection check hangs >1 hour, force process termination
+
+### SUBPROCESSES:
+- **subProcess("OEE Calculation")** - Purpose: Encapsulates data collection and OEE computation
+  - Justification: Cohesive logical grouping (3+ related tasks with single purpose)
+
+---
+
+## BPMN Pseudocode
+
+```pseudocode
+messageStartEvent("MachineConnected")
+
+subProcess("OEE Calculation"):
+    startEvent("Start OEE Monitoring")
+
+    LOOP:
+        intermediateEvent(timerBoundary("5 minutes"))  // Wait 5 minutes between measurements
+        serviceTask("Collect Machine Data")
+        scriptTask("Computation: Calculate OEE")
+
+        if (OEE < threshold):
+            serviceTask("Stop Machine")
+            sendTask("Send: OEE Alert Email")
+
+            // Wait for restart or disconnection
+            if (machine_restarted):
+                serviceTask("Restart Machine")
+                continue LOOP  // Resume monitoring
+            else if (machine_disconnected):
+                endEvent("Process Terminated")
+            END_IF
+        else:
+            continue LOOP  // OEE acceptable, continue monitoring
+        END_IF
+    END_LOOP
+endSubProcess
+
+// Connection monitoring (runs in parallel)
+serviceTask("Check Machine Connection"):
+    timerBoundary("1 hour"):
+        endEvent("Process Terminated")  // Force end if connection check hangs
+```
+
+---
+
+## Compliance Validation
+
+### TIMER EVENTS:
+- `intermediateEvent(timerBoundary("5 minutes"))` → Valid ISO 8601 duration: `"PT5M"`
+- `timerBoundary("1 hour")` → Valid ISO 8601 duration: `"PT1H"`
+
+### GATEWAYS:
+- XOR after OEE calculation: Conditions are mutually exclusive (OEE < threshold vs. OEE ≥ threshold)
+- XOR after machine stop: Exhaustive (restart or disconnection)
+
+### BOUNDARY EVENTS:
+- **timerBoundary on "Check Machine Connection"**:
+  - Justified: Hard SLA ("force termination if connection check hangs >1 hour")
+  - Handler: Single immediate action (`endEvent`)
+
+### SUBPROCESSES:
+- **"OEE Calculation"**:
+  - Passes Three-Question Test:
+    1. Purpose: "Periodically collect data and compute OEE"
+    2. 3+ related tasks (collect data, compute OEE, decision)
+    3. Improves readability by isolating measurement logic
+
+### FLOW PATHS:
+- All paths traceable:
+  - Normal: `Collect → Compute → Loop`
+  - Alert: `Collect → Compute → Stop → Email → Restart/Disconnect`
+  - Timeout: `Connection Check → Force Terminate`
+
+---
+
+## Critical Success Criteria Met:
+✅ **No invalid BPMN properties** (timers use ISO 8601)
+✅ **No unreachable elements** (all paths converge)
+✅ **No missing convergence** (XOR gateways handle all branches)
+✅ **No orphaned flows** (all paths terminate at `endEvent`)
+✅ **No speculative boundaries** (timerBoundary has explicit SLA)
+✅ **Subprocess justified** (cohesive, improves clarity)
+✅ **Balanced design** (core elements: 6 tasks, 2 gateways, 3 events)
+
+---
+</summary_of_elements>
+```

@@ -872,7 +872,7 @@ SUBPROCESSES:
 ```
 ### 2. BPMN Pseudocode
 
-```pseudocode
+```pseudocodeoutgoing
 startEvent("Process Begins")
 ...
 [clean, balanced pseudocode]
@@ -889,6 +889,7 @@ COMPLIANCE CHECKS & CORRECTION:
 - All subprocesses justified
 - No orphaned flows
 ```
+
 <critical_success_criteria>
 
 ## Critical Success Criteria
@@ -903,6 +904,122 @@ COMPLIANCE CHECKS & CORRECTION:
 - Balanced design (core elements 85%+)
 
 </critical_success_criteria>
+
+<output_example>
+
+### Example 1: 
+
+<summary_of_elements>
+## Summary of Elements
+
+### TASKS:
+- **userTask("Manager Reviews Order")** - Human approval required
+- **serviceTask("Check Inventory")** - Automated system check
+- **serviceTask("Process Payment")** - System payment processing
+- **sendTask("Send: confirmation email")** - Outbound notification
+
+### GATEWAYS:
+- **XOR at approval decision** with conditions:
+  - `approved == true` → Proceed to payment
+  - `approved == false` → End process (default)
+
+### EVENTS:
+- **startEvent("Order Received")** - Manual trigger
+- **endEvent("Order Complete")** - Success
+- **endEvent("Order Rejected")** - Alternative completion
+
+### BOUNDARY EVENTS:
+- **None** (No explicit SLAs mentioned)
+
+### SUBPROCESSES:
+- **None** (Linear flow, no cohesive grouping)
+</summary_of_elements>
+
+<bpmn_pseudocode>
+startEvent("Order Received")
+serviceTask("Check Inventory")
+userTask("Manager Reviews Order")
+
+if (approved == true):
+    serviceTask("Process Payment")
+    sendTask("Send: confirmation email")
+    endEvent("Order Complete")
+else:
+    sendTask("Send: rejection email")
+    endEvent("Order Rejected")
+</bpmn_pseudocode>
+
+### Example 2: 
+
+<summary_of_elements>
+
+### TASKS:
+- **userTask("Draft Budget Plan")** - Human judgment required to outline objectives, cost estimates, and justifications.
+- **userTask("Strategic Alignment Review")** - Human decision-making to ensure alignment with organizational goals.
+- **userTask("Finance Department Review")** - Human expertise required to assess budget feasibility.
+- **userTask("Adjust Budget Plan")** - Human intervention to revise plan based on feedback.
+- **userTask("Stakeholder Approval")** - Human approval required for documented adjustments.
+- **userTask("Allocate Budget")** - Human action to officially distribute funds.
+- **serviceTask("Document Adjustments")** - Automated/system action to record changes (assumed digital documentation system).
+
+### GATEWAYS:
+- **XOR after "Finance Department Review"** - Conditions:
+  - `feedback == "approved"` → Proceed to allocation.
+  - `feedback == "needs_adjustment"` → Return to adjustment phase (default if no explicit approval).
+
+### EVENTS:
+- **startEvent("Budget Planning Initiated")** - Trigger: Manual (department initiates process).
+- **endEvent("Budget Allocated and Implementation Begins")** - Normal completion.
+
+### BOUNDARY EVENTS:
+- **None** - No explicit SLA requirements or expected error scenarios mentioned.
+
+### SUBPROCESSES:
+- **None** - No cohesive logical grouping requiring abstraction; linear flow with iterative feedback loop.
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+```pseudocode
+startEvent("Budget Planning Initiated")
+
+// Initial planning phase
+userTask("Draft Budget Plan")
+  description: "Department outlines objectives (hiring, equipment, marketing) with cost estimates and justifications."
+
+// Review phases
+userTask("Strategic Alignment Review")
+  description: "Ensure plan aligns with organizational goals."
+
+userTask("Finance Department Review")
+  description: "Assess budget feasibility and provide feedback."
+
+// Decision gateway for feedback
+if (feedback == "approved"):
+    userTask("Allocate Budget")
+    description: "Officially distribute funds to the department."
+    endEvent("Budget Allocated and Implementation Begins")
+else if (feedback == "needs_adjustment"):  // Default path
+    userTask("Adjust Budget Plan")
+    description: "Revise plan based on feedback."
+
+    serviceTask("Document Adjustments")
+    description: "Record changes made to the budget plan."
+
+    userTask("Stakeholder Approval")
+    description: "Obtain approval for adjusted plan from necessary stakeholders."
+
+    // Loop back to finance review
+    userTask("Finance Department Review")
+    description: "Re-assess adjusted budget."
+endIf
+
+endEvent("Budget Allocated and Implementation Begins")
+  description: "Process concludes when funds are distributed and implementation starts."
+
+</bpmn_pseudocode>
+
+</output_example>
 
 <final_instruction>
 

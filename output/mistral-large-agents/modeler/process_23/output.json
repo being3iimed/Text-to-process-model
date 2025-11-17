@@ -1,0 +1,166 @@
+{
+  "bpmn_model": {
+    "$type": "bpmn:Definitions",
+    "id": "CreditScoringProcess-Definitions",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler",
+    "exporterVersion": "1.0",
+    "rootElements": [
+      {
+        "$type": "bpmn:Process",
+        "id": "CreditScoringProcess",
+        "isExecutable": true,
+        "flowElements": [
+          {
+            "$type": "bpmn:StartEvent",
+            "id": "MessageStartEvent-CreditScoringRequested-id-0001",
+            "name": "Credit Scoring Requested",
+            "eventDefinitions": [
+              {
+                "$type": "bpmn:MessageEventDefinition",
+                "name": "CreditScoringRequested"
+              }
+            ]
+          },
+          {
+            "$type": "bpmn:ServiceTask",
+            "id": "ServiceTask-SendScoringRequest-id-0001",
+            "name": "Send scoring request to agency"
+          },
+          {
+            "$type": "bpmn:ExclusiveGateway",
+            "id": "ExclusiveGateway-ResultAvailability-id-0001",
+            "name": "Result Availability Check",
+            "gatewayDirection": "Diverging"
+          },
+          {
+            "$type": "bpmn:ReceiveTask",
+            "id": "ReceiveTask-Level1Result-id-0001",
+            "name": "Receive: level 1 scoring result"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-DisplayLevel1Result-id-0001",
+            "name": "Send: display level 1 result to clerk"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ScoringResultDisplayed-id-0001",
+            "name": "Scoring Result Displayed"
+          },
+          {
+            "$type": "bpmn:ReceiveTask",
+            "id": "ReceiveTask-Level2Delay-id-0001",
+            "name": "Receive: level 2 scoring delay notification"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-DisplayDelayNotification-id-0001",
+            "name": "Send: display delay notification to clerk"
+          },
+          {
+            "$type": "bpmn:ReceiveTask",
+            "id": "ReceiveTask-Level2Result-id-0001",
+            "name": "Receive: level 2 scoring result"
+          },
+          {
+            "$type": "bpmn:SendTask",
+            "id": "SendTask-DisplayLevel2Result-id-0001",
+            "name": "Send: display level 2 result to clerk"
+          },
+          {
+            "$type": "bpmn:EndEvent",
+            "id": "EndEvent-ScoringResultDisplayed-id-0002",
+            "name": "Scoring Result Displayed"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-StartToRequest-id-0001",
+            "sourceRef": "MessageStartEvent-CreditScoringRequested-id-0001",
+            "targetRef": "ServiceTask-SendScoringRequest-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-RequestToGateway-id-0001",
+            "sourceRef": "ServiceTask-SendScoringRequest-id-0001",
+            "targetRef": "ExclusiveGateway-ResultAvailability-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToLevel1Receive-id-0001",
+            "name": "immediate_result_available",
+            "sourceRef": "ExclusiveGateway-ResultAvailability-id-0001",
+            "targetRef": "ReceiveTask-Level1Result-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-Level1ReceiveToDisplay-id-0001",
+            "sourceRef": "ReceiveTask-Level1Result-id-0001",
+            "targetRef": "SendTask-DisplayLevel1Result-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DisplayToEnd1-id-0001",
+            "sourceRef": "SendTask-DisplayLevel1Result-id-0001",
+            "targetRef": "EndEvent-ScoringResultDisplayed-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-GatewayToLevel2Delay-id-0001",
+            "name": "delayed_processing_required",
+            "sourceRef": "ExclusiveGateway-ResultAvailability-id-0001",
+            "targetRef": "ReceiveTask-Level2Delay-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DelayToDisplayDelay-id-0001",
+            "sourceRef": "ReceiveTask-Level2Delay-id-0001",
+            "targetRef": "SendTask-DisplayDelayNotification-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DisplayDelayToLevel2Receive-id-0001",
+            "sourceRef": "SendTask-DisplayDelayNotification-id-0001",
+            "targetRef": "ReceiveTask-Level2Result-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-Level2ReceiveToDisplay-id-0001",
+            "sourceRef": "ReceiveTask-Level2Result-id-0001",
+            "targetRef": "SendTask-DisplayLevel2Result-id-0001"
+          },
+          {
+            "$type": "bpmn:SequenceFlow",
+            "id": "SequenceFlow-DisplayToEnd2-id-0001",
+            "sourceRef": "SendTask-DisplayLevel2Result-id-0001",
+            "targetRef": "EndEvent-ScoringResultDisplayed-id-0002"
+          }
+        ]
+      }
+    ]
+  },
+  "explanation": "",
+  "metadata": {
+    "model": "mistral-large-latest",
+    "temperature": 0.2,
+    "api_key_set": true,
+    "response_metadata": {
+      "token_usage": {
+        "prompt_tokens": 11448,
+        "total_tokens": 12881,
+        "completion_tokens": 1433
+      },
+      "model_name": "mistral-large-latest",
+      "model": "mistral-large-latest",
+      "finish_reason": "stop",
+      "model_provider": "mistralai"
+    },
+    "usage_metadata": {
+      "input_tokens": 11448,
+      "output_tokens": 1433,
+      "total_tokens": 12881
+    },
+    "id": "lc_run--19641fa9-cab5-4cb2-9aaa-5fde27762713-0"
+  },
+  "status": "success"
+}

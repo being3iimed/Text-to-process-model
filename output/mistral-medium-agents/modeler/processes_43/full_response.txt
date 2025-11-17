@@ -1,0 +1,265 @@
+```json
+{
+  "$type": "bpmn:Definitions",
+  "id": "CarServiceProcessDefinitions",
+  "targetNamespace": "http://bpmn.io/schema/bpmn",
+  "exporter": "BPMN Modeler",
+  "exporterVersion": "1.0",
+  "rootElements": [
+    {
+      "$type": "bpmn:Process",
+      "id": "CarServiceProcess",
+      "isExecutable": true,
+      "flowElements": [
+        {
+          "$type": "bpmn:StartEvent",
+          "id": "StartEvent-ServiceCompleted-id-0001",
+          "name": "Service Completed"
+        },
+        {
+          "$type": "bpmn:ServiceTask",
+          "id": "ServiceTask-CheckCarRegistrationStatus-id-0001",
+          "name": "Check Car Registration Status"
+        },
+        {
+          "$type": "bpmn:ExclusiveGateway",
+          "id": "ExclusiveGateway-CarRegistered-id-0001",
+          "name": "Car Registered?",
+          "gatewayDirection": "Diverging"
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-ServiceNotification-id-0001",
+          "name": "Send: Service Notification"
+        },
+        {
+          "$type": "bpmn:BoundaryEvent",
+          "id": "BoundaryEvent-Timer30Day-ServiceNotification-id-0001",
+          "name": "30 Day Compliance Timeout",
+          "attachedToRef": "SendTask-ServiceNotification-id-0001",
+          "cancelActivity": true,
+          "eventDefinitions": [
+            {
+              "$type": "bpmn:TimerEventDefinition",
+              "timeDuration": "P30D"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-FineNotification-id-0001",
+          "name": "Send: Fine Notification"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-FineIssued-id-0001",
+          "name": "Fine Issued"
+        },
+        {
+          "$type": "bpmn:SubProcess",
+          "id": "SubProcess-RepairWorkflow-id-0001",
+          "name": "Repair Workflow",
+          "flowElements": [
+            {
+              "$type": "bpmn:StartEvent",
+              "id": "StartEvent-RepairInitiated-id-0001",
+              "name": "Repair Initiated"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-MechanicEntersCarProblems-id-0001",
+              "name": "Mechanic Enters Car Problems"
+            },
+            {
+              "$type": "bpmn:IntermediateCatchEvent",
+              "id": "IntermediateCatchEvent-RepairInProgress-id-0001",
+              "name": "Repair In Progress",
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:ConditionalEventDefinition",
+                  "condition": "repair_in_progress"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:ServiceTask",
+              "id": "ServiceTask-GenerateStatusUpdate-id-0001",
+              "name": "Generate Status Update"
+            },
+            {
+              "$type": "bpmn:SendTask",
+              "id": "SendTask-StatusUpdateEmail-id-0001",
+              "name": "Send: Status Update Email"
+            },
+            {
+              "$type": "bpmn:IntermediateCatchEvent",
+              "id": "IntermediateCatchEvent-DailyUpdate-id-0001",
+              "name": "Daily Update Timer",
+              "eventDefinitions": [
+                {
+                  "$type": "bpmn:TimerEventDefinition",
+                  "timeDuration": "P1D"
+                }
+              ]
+            },
+            {
+              "$type": "bpmn:ReceiveTask",
+              "id": "ReceiveTask-PaymentConfirmation-id-0001",
+              "name": "Receive: Payment Confirmation"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-MechanicConfirmsRepairSuccess-id-0001",
+              "name": "Mechanic Confirms Repair Success"
+            },
+            {
+              "$type": "bpmn:UserTask",
+              "id": "UserTask-MechanicSchedulesNextService-id-0001",
+              "name": "Mechanic Schedules Next Service"
+            },
+            {
+              "$type": "bpmn:EndEvent",
+              "id": "EndEvent-RepairComplete-id-0001",
+              "name": "Repair Complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RepairStartToEnterProblems-id-0001",
+              "sourceRef": "StartEvent-RepairInitiated-id-0001",
+              "targetRef": "UserTask-MechanicEntersCarProblems-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-EnterProblemsToRepairInProgress-id-0002",
+              "sourceRef": "UserTask-MechanicEntersCarProblems-id-0001",
+              "targetRef": "IntermediateCatchEvent-RepairInProgress-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RepairInProgressToGenerateUpdate-id-0003",
+              "sourceRef": "IntermediateCatchEvent-RepairInProgress-id-0001",
+              "targetRef": "ServiceTask-GenerateStatusUpdate-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-GenerateUpdateToSendEmail-id-0004",
+              "sourceRef": "ServiceTask-GenerateStatusUpdate-id-0001",
+              "targetRef": "SendTask-StatusUpdateEmail-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-SendEmailToDailyUpdate-id-0005",
+              "sourceRef": "SendTask-StatusUpdateEmail-id-0001",
+              "targetRef": "IntermediateCatchEvent-DailyUpdate-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-DailyUpdateToRepairInProgress-id-0006",
+              "sourceRef": "IntermediateCatchEvent-DailyUpdate-id-0001",
+              "targetRef": "IntermediateCatchEvent-RepairInProgress-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-RepairInProgressToPayment-id-0007",
+              "sourceRef": "IntermediateCatchEvent-RepairInProgress-id-0001",
+              "targetRef": "ReceiveTask-PaymentConfirmation-id-0001",
+              "name": "repair_complete"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-PaymentToConfirmSuccess-id-0008",
+              "sourceRef": "ReceiveTask-PaymentConfirmation-id-0001",
+              "targetRef": "UserTask-MechanicConfirmsRepairSuccess-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ConfirmSuccessToScheduleNext-id-0009",
+              "sourceRef": "UserTask-MechanicConfirmsRepairSuccess-id-0001",
+              "targetRef": "UserTask-MechanicSchedulesNextService-id-0001"
+            },
+            {
+              "$type": "bpmn:SequenceFlow",
+              "id": "SequenceFlow-ScheduleNextToRepairComplete-id-0010",
+              "sourceRef": "UserTask-MechanicSchedulesNextService-id-0001",
+              "targetRef": "EndEvent-RepairComplete-id-0001"
+            }
+          ]
+        },
+        {
+          "$type": "bpmn:SendTask",
+          "id": "SendTask-PickerlConfirmation-id-0001",
+          "name": "Send: Pickerl Confirmation"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-ProcessComplete-id-0001",
+          "name": "Process Complete"
+        },
+        {
+          "$type": "bpmn:EndEvent",
+          "id": "EndEvent-UnregisteredVehicle-id-0001",
+          "name": "Process Complete (Unregistered Vehicle)"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-StartToCheckRegistration-id-0001",
+          "sourceRef": "StartEvent-ServiceCompleted-id-0001",
+          "targetRef": "ServiceTask-CheckCarRegistrationStatus-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-CheckRegistrationToGateway-id-0002",
+          "sourceRef": "ServiceTask-CheckCarRegistrationStatus-id-0001",
+          "targetRef": "ExclusiveGateway-CarRegistered-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToServiceNotification-id-0003",
+          "sourceRef": "ExclusiveGateway-CarRegistered-id-0001",
+          "targetRef": "SendTask-ServiceNotification-id-0001",
+          "name": "car_registered",
+          "isDefault": false
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-GatewayToUnregisteredEnd-id-0004",
+          "sourceRef": "ExclusiveGateway-CarRegistered-id-0001",
+          "targetRef": "EndEvent-UnregisteredVehicle-id-0001",
+          "name": "",
+          "isDefault": true
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-ServiceNotificationToRepairWorkflow-id-0005",
+          "sourceRef": "SendTask-ServiceNotification-id-0001",
+          "targetRef": "SubProcess-RepairWorkflow-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-RepairWorkflowToPickerlConfirmation-id-0006",
+          "sourceRef": "SubProcess-RepairWorkflow-id-0001",
+          "targetRef": "SendTask-PickerlConfirmation-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-PickerlConfirmationToProcessComplete-id-0007",
+          "sourceRef": "SendTask-PickerlConfirmation-id-0001",
+          "targetRef": "EndEvent-ProcessComplete-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-BoundaryToFineNotification-id-0008",
+          "sourceRef": "BoundaryEvent-Timer30Day-ServiceNotification-id-0001",
+          "targetRef": "SendTask-FineNotification-id-0001"
+        },
+        {
+          "$type": "bpmn:SequenceFlow",
+          "id": "SequenceFlow-FineNotificationToFineIssued-id-0009",
+          "sourceRef": "SendTask-FineNotification-id-0001",
+          "targetRef": "EndEvent-FineIssued-id-0001"
+        }
+      ]
+    }
+  ]
+}
+```

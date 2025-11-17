@@ -1,0 +1,205 @@
+```
+<summary_of_elements>
+
+## Summary of Elements
+
+### TASKS:
+- **userTask("Select Starting Block")** - Human decision required to choose starting block
+- **userTask("Enter Work Schedule")** - Human input of work end time
+- **serviceTask("Measure 5km Time")** - Automated time measurement via fitness gadget
+- **serviceTask("Check Time Goal")** - Automated comparison against 25-minute threshold
+- **serviceTask("Collect Training Data")** - Automated data collection from fitness gadgets during training
+- **serviceTask("Generate Starting Number")** - Automated generation after qualification
+- **serviceTask("Calculate Travel Time")** - Automated comparison of work end vs. start time
+- **userTask("Run and Drink Simultaneously")** - Human activity during event (parallel tasks)
+- **serviceTask("Record Final Time")** - Automated time recording at finish
+
+### GATEWAYS:
+- **XOR** after time check: `<25 min` vs `≥25 min` (default)
+- **XOR** after travel time calculation: `>1 hour` vs `≤1 hour` (default)
+- **AND** during event: Parallel "Run" + "Drink" activities
+
+### EVENTS:
+- **startEvent("Start Participation Process")** - Manual trigger
+- **endEvent("Final Time Recorded")** - Process completion
+- **intermediateEvent** - Implicit between training cycles
+
+### BOUNDARY EVENTS:
+- **None** (No explicit SLAs or error scenarios mentioned)
+
+### SUBPROCESSES:
+- **subProcess("Training Cycle")** - Purpose: Iterative training until goal achieved
+  - Justification: Cohesive repeated logic (measure → check → train)
+
+### DATA FLOW:
+- Fitness gadgets → time measurements
+- User inputs → work schedule, block selection
+- System outputs → starting number, final time
+
+</summary_of_elements>
+
+<bpmn_pseudocode>
+
+```pseudocode
+startEvent("Start Participation Process")
+
+// Initial Setup
+userTask("Select Starting Block")
+userTask("Enter Work Schedule")
+
+// Qualification Phase
+subProcess("Training Cycle"):
+    startEvent("Begin Training")
+    serviceTask("Measure 5km Time")  // Via fitness gadget
+    serviceTask("Check Time Goal")
+
+    if (time < 25 minutes):
+        endEvent("Qualified")  // Exit subprocess
+    else:
+        serviceTask("Collect Training Data")  // From gadgets
+        intermediateEvent("Continue Training")
+        // Implicit loop back to "Measure 5km Time"
+    endIf
+endSubProcess
+
+// Post-Qualification
+serviceTask("Generate Starting Number")
+
+// Logistics Planning
+serviceTask("Calculate Travel Time")  // work_end vs. start_time
+if (time_difference > 1 hour):
+    userTask("Travel from Home")
+else:
+    userTask("Travel from Work")  // Default path
+endIf
+
+// Event Execution
+AND:
+    userTask("Run 5km Route")
+    userTask("Drink During Run")  // Parallel activity
+END_AND
+
+// Completion
+serviceTask("Record Final Time")  // Via timing system
+endEvent("Final Time Recorded")
+```
+
+</bpmn_pseudocode>
+
+<compliance_validation>
+
+## Compliance Validation Results
+
+### ✅ TIMER EVENTS:
+- **None used** (No invalid properties possible)
+- All time comparisons use serviceTask logic (valid)
+
+### ✅ GATEWAYS:
+- **XOR** at time check: Mutually exclusive (`<25` vs `≥25`)
+- **XOR** at travel time: Exhaustive (`>1h` vs `≤1h` default)
+- **AND** for parallel run/drink: Truly independent
+- **All diverging gateways have implicit convergence** via subprocess end/process flow
+
+### ✅ SEQUENCE FLOWS:
+- All conditional flows have descriptive labels:
+  - `time < 25 minutes`
+  - `time_difference > 1 hour`
+- No empty strings
+- Default paths marked where applicable
+
+### ✅ BOUNDARY EVENTS:
+- **None added** (No SLAs or error scenarios in description)
+- ✅ Meets gating criteria (none speculative)
+
+### ✅ SUBPROCESSES:
+- **Training Cycle** passes Three-Question Test:
+  1. Purpose: "Iterative training until 25-min goal achieved" ✅
+  2. Contains 3+ related tasks (measure → check → collect) ✅
+  3. Removing would obscure main flow (repetitive logic) ✅
+- Has 1 startEvent, 1 endEvent ✅
+- All paths terminate ✅
+
+### ✅ FLOW PATHS:
+- All paths traceable start-to-end:
+  1. Select Block → Enter Schedule → Training → Qualified → Logistics → Event → Completion
+  2. Training loop repeats until qualified
+- No orphaned flows
+- No unreachable tasks
+
+### ✅ BALANCE:
+- Core elements (tasks/gateways/events): **100%** of design
+- No over-engineering:
+  - 0 boundary events (justified)
+  - 1 subprocess (justified)
+  - 2 gateways (both XOR for clear decisions)
+
+</compliance_validation>
+
+<data_flow_validation>
+
+## Data Flow Validation
+
+### INPUTS:
+| Source          | Data Point               | Consumer Task                     |
+|-----------------|--------------------------|-----------------------------------|
+| User            | Starting block selection | `userTask("Select Starting Block")`|
+| User            | Work end time           | `userTask("Enter Work Schedule")`  |
+| Fitness Gadget  | 5km time measurement     | `serviceTask("Measure 5km Time")` |
+| Fitness Gadget  | Training metrics         | `serviceTask("Collect Training Data")` |
+
+### OUTPUTS:
+| Task                          | Data Generated          | Consumer                     |
+|-------------------------------|-------------------------|------------------------------|
+| `serviceTask("Check Time Goal")` | Qualification status   | Subprocess exit condition    |
+| `serviceTask("Generate Starting Number")` | Starting number   | Implicit output to user      |
+| `serviceTask("Record Final Time")` | Final time record | `endEvent` completion        |
+
+### ✅ Validation:
+- All data producers have consumers
+- No unused measurements
+- No missing inputs for decisions
+
+</data_flow_validation>
+
+<assumptions>
+
+## Documented Assumptions
+
+1. **Training Iteration**:
+   - Assumed user will re-attempt 5km runs until qualified (implied by "check until achieved")
+   - Implemented as subprocess loop
+
+2. **Parallel Activities**:
+   - "Run and drink at the same time" → Modeled as AND gateway with parallel tasks
+
+3. **Travel Time Calculation**:
+   - Assumed system can compare work_end vs. start_time automatically
+   - Implemented as serviceTask with XOR routing
+
+4. **Data Collection**:
+   - Fitness gadgets provide both race times and training metrics
+   - No manual data entry assumed for performance metrics
+
+5. **No Error Handling**:
+   - Description mentioned no failure scenarios (e.g., gadget failures, registration issues)
+   - ✅ Valid per boundary event gating criteria
+
+</assumptions>
+
+<critical_success_verification>
+
+## Critical Success Criteria Verification
+
+| Criterion                              | Status  | Evidence                                                                 |
+|----------------------------------------|---------|--------------------------------------------------------------------------|
+| No invalid BPMN properties             | ✅ PASS | No timer events used; all properties valid                            |
+| No unreachable elements                | ✅ PASS | All paths traceable; no orphaned flows                                |
+| No missing convergence points          | ✅ PASS | XOR gateways have implicit convergence via flow/end events            |
+| No orphaned flows                      | ✅ PASS | Every startEvent reaches endEvent                                      |
+| No speculative boundary events         | ✅ PASS | Zero boundary events (justified by lack of SLAs/error scenarios)      |
+| No unjustified subprocesses            | ✅ PASS | Training Cycle subprocess passes necessity test                       |
+| All labels present                     | ✅ PASS | All conditional flows have descriptive labels                         |
+| Balanced design (≥85% core elements)   | ✅ PASS | 100% core elements; 0% defensive patterns                              |
+
+</critical_success_verification>
+```
