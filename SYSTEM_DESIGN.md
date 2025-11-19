@@ -271,18 +271,6 @@ graph TD
     I --> J["Step 2: Model"]
     J --> E
     E --> K{Model<br/>Success?}
-    
-    K -->|No| H
-    K -->|Yes| L["Save Modeler Results"]
-    
-    L --> M["Step 3: Summary"]
-    M --> N["Organize Output"]
-    N --> O["Return Results"]
-```
-
----
-
-## API Design
 
 ### REST API Architecture
 

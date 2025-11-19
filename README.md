@@ -138,6 +138,32 @@ python main.py \
 | `--output-json` | Output results as JSON |
 
 
+  --output-json
+```
+
+## Performance Evaluation
+
+The project includes tools to analyze agent performance using LangSmith data.
+
+### Prerequisites
+```bash
+pip install langsmith pandas
+```
+
+### Running the Evaluation Pipeline
+
+1.  **Fetch & Enrich Data**:
+    Connects to LangSmith, fetches runs, and injects local metadata (Agent, Process, Stage).
+    ```bash
+    python evals/process_langsmith_data.py
+    ```
+
+2.  **Generate Report**:
+    Aggregates metrics (latency, tokens) and saves a summary to `evals/performance_report.txt`.
+    ```bash
+    python evals/performance.py
+    ```
+
 ## Batch processing (new)
 
 Transform **many** process descriptions in one shot.  
@@ -186,21 +212,6 @@ output/
         ├── metadata.json         # Modeler metadata
         └── output.json           # Combined output
 ```
-
-## Project Structure
-
-```
-text-to-process-model/
-├── agents/
-│   ├── parser_agent.py           # NLP parsing agent
-│   ├── modeler_agent.py          # BPMN generation agent
-│   └── deep_agent.py             # Workflow orchestrator
-├── config/
-│   └── settings.py               # Configuration (API keys, paths)
-├── prompts/
-│   ├── parser_prompt.md          # Parser system prompt
-│   └── modeler_prompt.md         # Modeler system prompt
-├── utils/
 │   ├── file_handler.py           # File I/O utilities
 │   ├── json_parser.py            # JSON extraction utilities
 │   ├── text_formatter.py         # Text formatting utilities
