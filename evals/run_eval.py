@@ -6,7 +6,7 @@ from pathlib import Path
 from datetime import datetime
 
 # === CONFIGURATION ===
-BASE_DIR = "."
+BASE_DIR = "evals"
 GOLD_DIR = os.path.join(BASE_DIR, "bpmn_gold")
 MISTRAL_LARGE_DIR = os.path.join(BASE_DIR, "mistral-large")
 MISTRAL_MEDIUM_DIR = os.path.join(BASE_DIR, "mistral-medium")

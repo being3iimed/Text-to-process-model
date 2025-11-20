@@ -4,10 +4,11 @@ import numpy as np
 import os
 
 # Load results
-df = pd.read_csv('bpmn_evaluation_results.csv')
+df = pd.read_csv('evals/bpmn_evaluation_results.csv')
 
 # Create output directory if it doesn't exist
-os.makedirs('visualizations', exist_ok=True)
+VIS_DIR = 'evals/visualizations'
+os.makedirs(VIS_DIR, exist_ok=True)
 
 # ============ VISUALIZATION 1: Semantic Dimension Comparison ============
 fig1, ax1 = plt.subplots(figsize=(10, 6))
@@ -31,8 +32,42 @@ for bar, score in zip(bars, scores):
     ax1.text(bar.get_x() + bar.get_width()/2., height + 0.02,
             f'{score:.1%}', ha='center', va='bottom', fontweight='bold', fontsize=11)
 plt.tight_layout()
-plt.savefig('visualizations/01_semantic_dimensions.png', dpi=300, bbox_inches='tight')
-print("✅ Saved: visualizations/01_semantic_dimensions.png")
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+
+# Load results
+df = pd.read_csv('evals/bpmn_evaluation_results.csv')
+
+# Create output directory if it doesn't exist
+VIS_DIR = 'evals/visualizations'
+os.makedirs(VIS_DIR, exist_ok=True)
+
+# ============ VISUALIZATION 1: Semantic Dimension Comparison ============
+fig1, ax1 = plt.subplots(figsize=(10, 6))
+dimensions = ['Task\nCoverage', 'Event\nCoverage', 'Gateway\nDiversity', 'Named\nRatio']
+scores = [
+    df['task_coverage_similarity'].mean(),
+    df['event_coverage_similarity'].mean(),
+    df['gateway_diversity_similarity'].mean(),
+    df['named_ratio_similarity'].mean()
+]
+colors = ['#2ecc71' if s > 0.7 else '#f39c12' if s > 0.5 else '#e74c3c' for s in scores]
+bars = ax1.bar(dimensions, scores, color=colors, alpha=0.7, edgecolor='black', linewidth=2)
+ax1.axhline(y=0.654, color='blue', linestyle='--', linewidth=2, label=f'Avg Richness: 0.654')
+ax1.set_ylabel('Similarity Score', fontsize=12, fontweight='bold')
+ax1.set_title('Semantic Richness by Dimension', fontsize=14, fontweight='bold')
+ax1.set_ylim(0, 1.0)
+ax1.legend(fontsize=11)
+ax1.grid(axis='y', alpha=0.3)
+for bar, score in zip(bars, scores):
+    height = bar.get_height()
+    ax1.text(bar.get_x() + bar.get_width()/2., height + 0.02,
+            f'{score:.1%}', ha='center', va='bottom', fontweight='bold', fontsize=11)
+plt.tight_layout()
+plt.savefig(f'{VIS_DIR}/01_semantic_dimensions.png', dpi=300, bbox_inches='tight')
+print(f"✅ Saved: {VIS_DIR}/01_semantic_dimensions.png")
 plt.close()
 
 # ============ VISUALIZATION 2: Distribution of Semantic Richness ============
@@ -44,12 +79,12 @@ ax2.axvline(df['semantic_richness_score'].median(), color='green', linestyle='--
            linewidth=2.5, label=f'Median: {df["semantic_richness_score"].median():.3f}')
 ax2.set_xlabel('Semantic Richness Score', fontsize=12, fontweight='bold')
 ax2.set_ylabel('Number of Models', fontsize=12, fontweight='bold')
-ax2.set_title('Distribution of Semantic Richness Scores', fontsize=14, fontweight='bold')
+ax2.set_title('Distribution of Semantic Richness & Similarity Scores', fontsize=14, fontweight='bold')
 ax2.legend(fontsize=11)
 ax2.grid(axis='y', alpha=0.3)
 plt.tight_layout()
-plt.savefig('visualizations/02_richness_distribution.png', dpi=300, bbox_inches='tight')
-print("✅ Saved: visualizations/02_richness_distribution.png")
+plt.savefig(f'{VIS_DIR}/02_richness_distribution.png', dpi=300, bbox_inches='tight')
+print(f"✅ Saved: {VIS_DIR}/02_richness_distribution.png")
 plt.close()
 
 # ============ VISUALIZATION 3: Structural vs Semantic Similarity ============
@@ -66,8 +101,8 @@ cbar = plt.colorbar(scatter, ax=ax3)
 cbar.set_label('Gateway Diversity Similarity', fontsize=11, fontweight='bold')
 ax3.grid(alpha=0.3)
 plt.tight_layout()
-plt.savefig('visualizations/03_structural_vs_semantic.png', dpi=300, bbox_inches='tight')
-print("✅ Saved: visualizations/03_structural_vs_semantic.png")
+plt.savefig(f'{VIS_DIR}/03_structural_vs_semantic.png', dpi=300, bbox_inches='tight')
+print(f"✅ Saved: {VIS_DIR}/03_structural_vs_semantic.png")
 plt.close()
 
 # ============ VISUALIZATION 4: Node/Edge Coverage ============
@@ -99,8 +134,8 @@ for bars in [bars1, bars2]:
         ax4.text(bar.get_x() + bar.get_width()/2., height + 0.15,
                 f'{height:.1f}', ha='center', va='bottom', fontsize=10, fontweight='bold')
 plt.tight_layout()
-plt.savefig('visualizations/04_feature_count_comparison.png', dpi=300, bbox_inches='tight')
-print("✅ Saved: visualizations/04_feature_count_comparison.png")
+plt.savefig(f'{VIS_DIR}/04_feature_count_comparison.png', dpi=300, bbox_inches='tight')
+print(f"✅ Saved: {VIS_DIR}/04_feature_count_comparison.png")
 plt.close()
 
 # ============ VISUALIZATION 5: Top & Bottom Performers ============
@@ -121,8 +156,8 @@ ax5.grid(axis='x', alpha=0.3)
 for i, (bar, val) in enumerate(zip(bars, combined['semantic_richness_score'])):
     ax5.text(val + 0.02, i, f'{val:.3f}', va='center', fontweight='bold', fontsize=10)
 plt.tight_layout()
-plt.savefig('visualizations/05_top_bottom_performers.png', dpi=300, bbox_inches='tight')
-print("✅ Saved: visualizations/05_top_bottom_performers.png")
+plt.savefig(f'{VIS_DIR}/05_top_bottom_performers.png', dpi=300, bbox_inches='tight')
+print(f"✅ Saved: {VIS_DIR}/05_top_bottom_performers.png")
 plt.close()
 
 # ============ VISUALIZATION 6: Documentation & Named Elements ============
@@ -143,8 +178,8 @@ for bar, val in zip(bars, named_data):
     ax6.text(bar.get_x() + bar.get_width()/2., height + 0.02,
             f'{val:.1%}', ha='center', va='bottom', fontweight='bold', fontsize=12)
 plt.tight_layout()
-plt.savefig('visualizations/06_documentation_quality.png', dpi=300, bbox_inches='tight')
-print("✅ Saved: visualizations/06_documentation_quality.png")
+plt.savefig(f'{VIS_DIR}/06_documentation_quality.png', dpi=300, bbox_inches='tight')
+print(f"✅ Saved: {VIS_DIR}/06_documentation_quality.png")
 plt.close()
 
 # ============ VISUALIZATION 7: Model Comparison (Mistral-Large vs Medium) ============
@@ -173,8 +208,8 @@ ax7.set_ylim(0, 1.0)
 ax7.grid(axis='y', alpha=0.3)
 plt.xticks(rotation=15, ha='right')
 plt.tight_layout()
-plt.savefig('visualizations/07_model_comparison.png', dpi=300, bbox_inches='tight')
-print("✅ Saved: visualizations/07_model_comparison.png")
+plt.savefig(f'{VIS_DIR}/07_model_comparison.png', dpi=300, bbox_inches='tight')
+print(f"✅ Saved: {VIS_DIR}/07_model_comparison.png")
 plt.close()
 
 # ============ VISUALIZATION 8: Gateway Loss Analysis ============
@@ -189,8 +224,8 @@ ax8.set_title('Gateway Loss Analysis (How Many Gateways Were Lost)', fontsize=14
 ax8.legend(fontsize=11)
 ax8.grid(axis='y', alpha=0.3)
 plt.tight_layout()
-plt.savefig('visualizations/08_gateway_loss_analysis.png', dpi=300, bbox_inches='tight')
-print("✅ Saved: visualizations/08_gateway_loss_analysis.png")
+plt.savefig(f'{VIS_DIR}/08_gateway_loss_analysis.png', dpi=300, bbox_inches='tight')
+print(f"✅ Saved: {VIS_DIR}/08_gateway_loss_analysis.png")
 plt.close()
 
 # ============ VISUALIZATION 9: Quality Score Distribution by Category ============
@@ -208,8 +243,8 @@ for bar, count in zip(bars, hist_data):
     ax9.text(bar.get_x() + bar.get_width()/2., height + 0.5,
             f'{int(count)}', ha='center', va='bottom', fontweight='bold', fontsize=11)
 plt.tight_layout()
-plt.savefig('visualizations/09_quality_distribution.png', dpi=300, bbox_inches='tight')
-print("✅ Saved: visualizations/09_quality_distribution.png")
+plt.savefig(f'{VIS_DIR}/09_quality_distribution.png', dpi=300, bbox_inches='tight')
+print(f"✅ Saved: {VIS_DIR}/09_quality_distribution.png")
 plt.close()
 
 # ============ VISUALIZATION 10: Correlation Heatmap ============
@@ -231,8 +266,8 @@ for i in range(len(correlation_cols)):
 cbar = plt.colorbar(im, ax=ax10)
 cbar.set_label('Correlation', fontsize=11, fontweight='bold')
 plt.tight_layout()
-plt.savefig('visualizations/10_correlation_heatmap.png', dpi=300, bbox_inches='tight')
-print("✅ Saved: visualizations/10_correlation_heatmap.png")
+plt.savefig(f'{VIS_DIR}/10_correlation_heatmap.png', dpi=300, bbox_inches='tight')
+print(f"✅ Saved: {VIS_DIR}/10_correlation_heatmap.png")
 plt.close()
 
 # ============ Generate Summary Statistics ============
@@ -267,5 +302,5 @@ for idx, (i, row) in enumerate(bottom5_models.iterrows(), 1):
     print(f"  {idx}. Process {row['process_num']} ({row['model']}): {row['semantic_richness_score']:.3f} (Gateway: {row['gateway_diversity_similarity']:.3f})")
 
 print("\n" + "="*80)
-print("All visualizations saved to: visualizations/")
+print(f"All visualizations saved to: {VIS_DIR}/")
 print("="*80)
