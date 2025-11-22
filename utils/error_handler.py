@@ -31,7 +31,18 @@ def handle_http_error(error: httpx.HTTPStatusError) -> None:
         print("\n" + "=" * 60)
         print(ERROR_RATE_LIMIT)
         print("=" * 60)
-        print(ERROR_RATE_LIMIT_MSG)
+        
+        # Print Rate Limit Headers
+        headers = error.response.headers
+        rl_headers = {k: v for k, v in headers.items() if "ratelimit" in k.lower()}
+        if rl_headers:
+            print("\nRate Limit Details:")
+            for k, v in rl_headers.items():
+                print(f"  - {k}: {v}")
+        else:
+            print("\nNo rate limit headers found in response.")
+
+        print("\n" + ERROR_RATE_LIMIT_MSG)
         print("=" * 60)
         raise RateLimitError("API rate limit exceeded")
     else:

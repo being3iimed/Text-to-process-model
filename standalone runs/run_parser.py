@@ -5,9 +5,10 @@ Standalone script to run the Parser Agent.
 Converts natural language process descriptions to BPMN-style pseudocode.
 
 Usage:
-    python run_parser.py --input input/parser_output.txt
+    python run_parser.py --input input/parser_input.txt
     python run_parser.py --content "your process description"
     python run_parser.py --input file.txt --save my_process
+    python run_parser.py --provider google
 """
 
 import argparse
@@ -16,7 +17,7 @@ import json
 from pathlib import Path
 
 # Add project root to path
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from agents.parser_agent import ParserAgent
 from utils.file_handler import load_input_content
@@ -56,9 +57,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python run_parser.py --input input/parser_output.txt
+  python run_parser.py --input input/parser_input.txt
   python run_parser.py --content "A customer places an order..."
   python run_parser.py --input file.txt --save my_process
+  python run_parser.py --provider google
         """,
     )
     parser.add_argument(
@@ -83,6 +85,14 @@ Examples:
         help="Folder name to save results (default: parsed_process)",
     )
     parser.add_argument(
+        "--provider",
+        "-p",
+        type=str,
+        default="mistral",
+        choices=["mistral", "google"],
+        help="AI provider to use (default: mistral)",
+    )
+    parser.add_argument(
         "--verbose", "-v", action="store_true", help="Enable verbose output"
     )
     parser.add_argument(
@@ -95,8 +105,8 @@ Examples:
     args = parser.parse_args()
 
     try:
-        print("\n🚀 Initializing Parser Agent...\n")
-        parser_agent = ParserAgent()
+        print(f"\n🚀 Initializing Parser Agent (Provider: {args.provider})...\n")
+        parser_agent = ParserAgent(provider=args.provider)
 
         # Load input
         if args.content:
@@ -104,7 +114,7 @@ Examples:
             print(f"📄 Input: Direct content ({len(process_description)} chars)")
         else:
             process_description = load_input_content(args.input)
-            print(f"📄 Input: {args.input or 'input/parser_output.txt'}")
+            print(f"📄 Input: {args.input or 'input/parser_input.txt'}")
 
         print("⏳ Parsing process description...\n")
 

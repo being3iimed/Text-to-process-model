@@ -44,14 +44,14 @@ async function convertSingleProcess() {
     console.log('╚══════════════════════════════════════════════════════╝\n');
 
     // Get process name from command line
-    const processName = argv[2];
+    let processName = argv[2];
 
     if (!processName) {
       console.log('Available processes:\n');
-      
+
       const folders = await readdir(MODELER_OUTPUT_DIR);
       let index = 1;
-      
+
       for (const folder of folders) {
         const modelPath = path.join(MODELER_OUTPUT_DIR, folder, 'bpmn_model.json');
         try {
@@ -62,7 +62,7 @@ async function convertSingleProcess() {
           // Skip folders without bpmn_model.json
         }
       }
-      
+
       console.log('\nUsage:');
       console.log('  node single-converter.js "Process_Name"\n');
       console.log('Example:');
@@ -73,7 +73,15 @@ async function convertSingleProcess() {
     // Ensure output directory exists
     await mkdir(BPMN_OUTPUT_DIR, { recursive: true });
 
-    const modelPath = path.join(MODELER_OUTPUT_DIR, processName, 'bpmn_model.json');
+    let modelPath;
+
+    // Check if argument is a file path (ends with .json)
+    if (processName.toLowerCase().endsWith('.json')) {
+      modelPath = path.resolve(processName);
+      processName = path.basename(processName, '.json');
+    } else {
+      modelPath = path.join(MODELER_OUTPUT_DIR, processName, 'bpmn_model.json');
+    }
 
     // Check if model exists
     try {

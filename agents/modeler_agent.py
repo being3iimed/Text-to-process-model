@@ -8,7 +8,12 @@ from pathlib import Path
 
 from langchain.agents import create_agent
 from langchain_mistralai import ChatMistralAI
-from config.settings import MISTRAL_API_KEY, MISTRAL_MODEL
+from langchain_google_genai import ChatGoogleGenerativeAI
+from config.settings import (
+    MISTRAL_API_KEY, MISTRAL_MODEL,
+    GOOGLE_API_KEY, GOOGLE_MODEL,
+    DEFAULT_PROVIDER
+)
 from utils.file_handler import load_prompt, ensure_output_dir
 from utils.json_parser import extract_json_from_text, parse_json
 from utils.text_formatter import extract_metadata_from_response, format_explanation
@@ -25,7 +30,10 @@ class ModelerAgent:
     """
 
     def __init__(
-        self, api_key: Optional[str] = None, load_prompt_from_file: bool = True
+        self, 
+        api_key: Optional[str] = None, 
+        load_prompt_from_file: bool = True,
+        provider: str = DEFAULT_PROVIDER
     ):
         """
         Initialize the modeler agent.
@@ -33,9 +41,11 @@ class ModelerAgent:
         Args:
             api_key: Optional API key (uses config default if not provided)
             load_prompt_from_file: Whether to load prompt from modeler_prompt.md
+            provider: AI provider to use ("mistral" or "google")
         """
-        self.api_key = api_key or MISTRAL_API_KEY
-
+        self.provider = provider.lower()
+        self.api_key = api_key
+        
         # Always initialize these first
         self.last_result = None
 
@@ -43,12 +53,27 @@ class ModelerAgent:
         self.prompt = self._load_prompt(load_prompt_from_file)
         print(f"[ModelerAgent] Using prompt: {len(self.prompt)} characters")
 
-        # Initialize Mistral model
-        self.model = ChatMistralAI(
-            api_key=self.api_key,
-            model=MISTRAL_MODEL,
-            temperature=0.05,
-        )
+        # Initialize Model based on provider
+        if self.provider == "google":
+            if not GOOGLE_API_KEY:
+                raise ValueError("GOOGLE_API_KEY not found in environment variables")
+            
+            self.model = ChatGoogleGenerativeAI(
+                google_api_key=GOOGLE_API_KEY,
+                model=GOOGLE_MODEL,
+                temperature=0.05,
+                convert_system_message_to_human=True
+            )
+            print(f"[ModelerAgent] Initialized with Google GenAI ({GOOGLE_MODEL})")
+            
+        else: # Default to Mistral
+            self.api_key = self.api_key or MISTRAL_API_KEY
+            self.model = ChatMistralAI(
+                api_key=self.api_key,
+                model=MISTRAL_MODEL,
+                temperature=0.05,
+            )
+            print(f"[ModelerAgent] Initialized with Mistral AI ({MISTRAL_MODEL})")
 
         # Create the agent with loaded prompt
         self.agent = create_agent(
@@ -56,7 +81,7 @@ class ModelerAgent:
             tools=[],
             system_prompt=self.prompt,
         )
-        print("[ModelerAgent] ✓ Agent initialized with real API")
+        print("[ModelerAgent] ✓ Agent initialized")
 
         # Output writer
         try:
@@ -340,9 +365,10 @@ Return ONLY valid BPMN 2.0 JSON that follows the standard structure with:
             Dictionary with metadata
         """
         metadata = {
-            "model": MISTRAL_MODEL,
+            "provider": self.provider,
+            "model": GOOGLE_MODEL if self.provider == "google" else MISTRAL_MODEL,
             "temperature": 0.2,
-            "api_key_set": self.api_key != "test-key-placeholder",
+            "api_key_set": bool(self.api_key) or bool(GOOGLE_API_KEY),
         }
 
         # Extract using utility function

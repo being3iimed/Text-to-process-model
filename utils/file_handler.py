@@ -7,6 +7,7 @@ from config.settings import (
     PROMPTS_DIR,
     ERROR_FILE_NOT_FOUND,
     ERROR_PROMPT_NOT_FOUND,
+    PROJECT_ROOT,
 )
 
 
@@ -28,8 +29,14 @@ def load_input_content(input_path: Optional[str] = None) -> str:
     else:
         input_path = Path(input_path)
 
+    # Try to find file as provided
     if not input_path.exists():
-        raise FileNotFoundError(ERROR_FILE_NOT_FOUND.format(input_path))
+        # Try relative to project root
+        root_path = PROJECT_ROOT / input_path
+        if root_path.exists():
+            input_path = root_path
+        else:
+            raise FileNotFoundError(ERROR_FILE_NOT_FOUND.format(input_path))
 
     with open(input_path, "r", encoding="utf-8") as f:
         return f.read()

@@ -8,7 +8,12 @@ from pathlib import Path
 
 from langchain.agents import create_agent
 from langchain_mistralai import ChatMistralAI
-from config.settings import MISTRAL_API_KEY, MISTRAL_MODEL
+from langchain_google_genai import ChatGoogleGenerativeAI
+from config.settings import (
+    MISTRAL_API_KEY, MISTRAL_MODEL, 
+    GOOGLE_API_KEY, GOOGLE_MODEL,
+    DEFAULT_PROVIDER
+)
 from utils.file_handler import load_prompt, ensure_output_dir
 from utils.text_formatter import extract_metadata_from_response
 from utils.error_handler import handle_http_error, handle_unexpected_error
@@ -24,7 +29,10 @@ class ParserAgent:
     """
 
     def __init__(
-        self, api_key: Optional[str] = None, load_prompt_from_file: bool = True
+        self, 
+        api_key: Optional[str] = None, 
+        load_prompt_from_file: bool = True,
+        provider: str = DEFAULT_PROVIDER
     ):
         """
         Initialize the parser agent.
@@ -32,9 +40,11 @@ class ParserAgent:
         Args:
             api_key: Optional API key (uses config default if not provided)
             load_prompt_from_file: Whether to load prompt from parser_prompt.md
+            provider: AI provider to use ("mistral" or "google")
         """
-        self.api_key = api_key or MISTRAL_API_KEY
-
+        self.provider = provider.lower()
+        self.api_key = api_key
+        
         # Always initialize these first
         self.last_result = None
 
@@ -42,12 +52,27 @@ class ParserAgent:
         self.prompt = self._load_prompt(load_prompt_from_file)
         print(f"[ParserAgent] Using prompt: {len(self.prompt)} characters")
 
-        # Initialize Mistral model
-        self.model = ChatMistralAI(
-            api_key=self.api_key,
-            model=MISTRAL_MODEL,
-            temperature=0.05,
-        )
+        # Initialize Model based on provider
+        if self.provider == "google":
+            if not GOOGLE_API_KEY:
+                raise ValueError("GOOGLE_API_KEY not found in environment variables")
+            
+            self.model = ChatGoogleGenerativeAI(
+                google_api_key=GOOGLE_API_KEY,
+                model=GOOGLE_MODEL,
+                temperature=0.05,
+                convert_system_message_to_human=True
+            )
+            print(f"[ParserAgent] Initialized with Google GenAI ({GOOGLE_MODEL})")
+            
+        else: # Default to Mistral
+            self.api_key = self.api_key or MISTRAL_API_KEY
+            self.model = ChatMistralAI(
+                api_key=self.api_key,
+                model=MISTRAL_MODEL,
+                temperature=0.05,
+            )
+            print(f"[ParserAgent] Initialized with Mistral AI ({MISTRAL_MODEL})")
 
         # Create the agent with loaded prompt
         self.agent = create_agent(
@@ -55,7 +80,6 @@ class ParserAgent:
             tools=[],
             system_prompt=self.prompt,
         )
-        print("[ParserAgent] Agent initialized with real API")
 
     def _load_prompt(self, load_from_file: bool = True) -> str:
         """
@@ -165,7 +189,22 @@ class ParserAgent:
         Returns:
             Section content or empty string if not found
         """
-        # Handle different section names
+        # Pattern 3: XML-style tags (Prioritize these for new prompt)
+        if section_name == "elements":
+            xml_pattern = r"<elements>\n?(.*?)</elements>"
+        elif section_name == "pseudocode":
+            xml_pattern = r"<pseudocode>\n?(.*?)</pseudocode>"
+        elif section_name == "validation":
+            xml_pattern = r"<validation>\n?(.*?)</validation>"
+        else:
+            xml_pattern = None
+
+        if xml_pattern:
+            match = re.search(xml_pattern, content, re.IGNORECASE | re.DOTALL)
+            if match:
+                return match.group(1).strip()
+
+        # Fallback patterns for backward compatibility
         if section_name == "elements":
             search_terms = ["Summary of Elements", "SUMMARY OF ELEMENTS", "Elements"]
         elif section_name == "pseudocode":
@@ -178,13 +217,13 @@ class ParserAgent:
         # Try multiple patterns
         for term in search_terms:
             # Pattern 1: Markdown header with optional code block
-            pattern1 = rf"###\s*{re.escape(term)}.*?\n```(?:pseudocode|bpmn|text)?\n?(.*?)```"
+            pattern1 = rf"#{1,6}\s*{re.escape(term)}.*?\n```(?:pseudocode|bpmn|text)?\n?(.*?)```"
             match = re.search(pattern1, content, re.IGNORECASE | re.DOTALL)
             if match:
                 return match.group(1).strip()
             
             # Pattern 2: Markdown header without code block
-            pattern2 = rf"###\s*{re.escape(term)}.*?\n(.*?)(?=\n###|\Z)"
+            pattern2 = rf"#{1,6}\s*{re.escape(term)}.*?\n(.*?)(?=\n#{1,6}|\Z)"
             match = re.search(pattern2, content, re.IGNORECASE | re.DOTALL)
             if match:
                 extracted = match.group(1).strip()
@@ -192,6 +231,14 @@ class ParserAgent:
                 extracted = re.sub(r'^```(?:pseudocode|bpmn|text)?\n?', '', extracted)
                 extracted = re.sub(r'\n?```$', '', extracted)
                 return extracted.strip()
+
+        # Fallback for pseudocode: look for code block directly if no header found
+        if section_name == "pseudocode":
+            # Look for ```pseudocode or ```bpmn blocks
+            code_block_pattern = r"```(?:pseudocode|bpmn)\n?(.*?)```"
+            match = re.search(code_block_pattern, content, re.IGNORECASE | re.DOTALL)
+            if match:
+                return match.group(1).strip()
 
         return ""
 
@@ -216,72 +263,39 @@ class ParserAgent:
         if not elements_text:
             return structured
 
-        # Extract tasks
-        tasks_match = re.search(
-            r"TASKS?:\s*\n(.*?)(?=\nGATEWAYS?:|\nEVENTS?:|\Z)", 
-            elements_text, 
-            re.DOTALL | re.IGNORECASE
-        )
-        if tasks_match:
-            task_lines = tasks_match.group(1).strip().split("\n")
-            structured["tasks"] = [
-                line.strip() for line in task_lines 
-                if line.strip() and line.strip().startswith("-")
-            ]
+        # Regex to parse lines like: Type("Name") - Reason
+        # e.g., userTask("Approve") - Human decision
+        element_pattern = re.compile(r"^(\w+)\(\"([^\"]+)\"\)\s*-\s*(.*)$")
 
-        # Extract gateways
-        gateways_match = re.search(
-            r"GATEWAYS?:\s*\n(.*?)(?=\nEVENTS?:|\nBOUNDARY|\nSUBPROCESSES?:|\Z)",
-            elements_text,
-            re.DOTALL | re.IGNORECASE
-        )
-        if gateways_match:
-            gateway_lines = gateways_match.group(1).strip().split("\n")
-            structured["gateways"] = [
-                line.strip() for line in gateway_lines 
-                if line.strip() and line.strip().startswith("-")
-            ]
+        for line in elements_text.split("\n"):
+            line = line.strip()
+            if not line or line.startswith("//"):
+                continue
 
-        # Extract events
-        events_match = re.search(
-            r"EVENTS?:\s*\n(.*?)(?=\nBOUNDARY|\nSUBPROCESSES?:|\Z)", 
-            elements_text, 
-            re.DOTALL | re.IGNORECASE
-        )
-        if events_match:
-            event_lines = events_match.group(1).strip().split("\n")
-            structured["events"] = [
-                line.strip() for line in event_lines 
-                if line.strip() and line.strip().startswith("-")
-            ]
+            match = element_pattern.match(line)
+            if match:
+                elem_type, elem_name, reason = match.groups()
+                full_entry = f"{elem_type}(\"{elem_name}\") - {reason}"
 
-        # Extract boundary events
-        boundary_match = re.search(
-            r"BOUNDARY\s+EVENTS?:\s*\n(.*?)(?=\nSUBPROCESSES?:|\Z)", 
-            elements_text, 
-            re.DOTALL | re.IGNORECASE
-        )
-        if boundary_match:
-            boundary_lines = boundary_match.group(1).strip().split("\n")
-            structured["boundary_events"] = [
-                line.strip()
-                for line in boundary_lines
-                if line.strip() and line.strip().startswith("-")
-            ]
-
-        # Extract subprocesses
-        subprocess_match = re.search(
-            r"SUBPROCESSES?:\s*\n(.*?)$", 
-            elements_text, 
-            re.DOTALL | re.IGNORECASE
-        )
-        if subprocess_match:
-            subprocess_lines = subprocess_match.group(1).strip().split("\n")
-            structured["subprocesses"] = [
-                line.strip()
-                for line in subprocess_lines
-                if line.strip() and line.strip().startswith("-")
-            ]
+                # Categorize based on type
+                if "Task" in elem_type:
+                    structured["tasks"].append(full_entry)
+                elif "Gateway" in elem_type or elem_type in ["if", "else", "AND", "OR"]:
+                    structured["gateways"].append(full_entry)
+                elif "Event" in elem_type and "Boundary" not in elem_type:
+                    structured["events"].append(full_entry)
+                elif "Boundary" in elem_type:
+                    structured["boundary_events"].append(full_entry)
+                elif "SubProcess" in elem_type or "subProcess" in elem_type:
+                    structured["subprocesses"].append(full_entry)
+                else:
+                    # Fallback for unknown types, put in tasks or events?
+                    # Let's put in tasks for now as generic
+                    structured["tasks"].append(full_entry)
+            else:
+                # Handle legacy format or unstructured lines if needed
+                # For now, ignore or log?
+                pass
 
         return structured
 
@@ -296,9 +310,10 @@ class ParserAgent:
             Dictionary with metadata
         """
         metadata = {
-            "model": MISTRAL_MODEL,
+            "provider": self.provider,
+            "model": GOOGLE_MODEL if self.provider == "google" else MISTRAL_MODEL,
             "temperature": 0.2,
-            "api_key_set": self.api_key != "test-key-placeholder",
+            "api_key_set": bool(self.api_key) or bool(GOOGLE_API_KEY),
         }
 
         # Extract using utility function
