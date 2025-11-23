@@ -1,0 +1,481 @@
+{
+    "$type": "bpmn:Definitions",
+    "id": "INPI-Submission-Process-Definitions-id-0001",
+    "targetNamespace": "http://bpmn.io/schema/bpmn",
+    "exporter": "BPMN Modeler",
+    "exporterVersion": "1.0",
+    "rootElements": [
+        {
+            "$type": "bpmn:Process",
+            "id": "INPI-Submission-Process-id-0001",
+            "isExecutable": true,
+            "flowElements": [
+                {
+                    "$type": "bpmn:StartEvent",
+                    "id": "StartEvent-ProcessInitiated-id-0001",
+                    "name": "Process Initiated"
+                },
+                {
+                    "$type": "bpmn:SubProcess",
+                    "id": "SubProcess-SplitAndOrganizePDFs-id-0001",
+                    "name": "Split and Organize PDFs",
+                    "flowElements": [
+                        {
+                            "$type": "bpmn:StartEvent",
+                            "id": "StartEvent-SplittingStarted-id-0001",
+                            "name": "Splitting Started"
+                        },
+                        {
+                            "$type": "bpmn:ExclusiveGateway",
+                            "id": "ExclusiveGateway-PVSignPages-id-0001",
+                            "name": "PV Signé Pages?",
+                            "gatewayDirection": "Diverging"
+                        },
+                        {
+                            "$type": "bpmn:ServiceTask",
+                            "id": "ServiceTask-SplitPDFStandard-id-0001",
+                            "name": "Split PDF: PV signé = pages 1–2, Pouvoir = page 4"
+                        },
+                        {
+                            "$type": "bpmn:ServiceTask",
+                            "id": "ServiceTask-SplitPDFException-id-0002",
+                            "name": "Split PDF: PV signé = pages 1–3, Pouvoir = page 5"
+                        },
+                        {
+                            "$type": "bpmn:ExclusiveGateway",
+                            "id": "ExclusiveGateway-PVSignPagesConverge-id-0002",
+                            "name": "PV Signé Pages Converged",
+                            "gatewayDirection": "Converging"
+                        },
+                        {
+                            "$type": "bpmn:ServiceTask",
+                            "id": "ServiceTask-CopySignedPDFs-id-0001",
+                            "name": "Copy signed PDFs to INPI folder"
+                        },
+                        {
+                            "$type": "bpmn:EndEvent",
+                            "id": "EndEvent-SplittingComplete-id-0001",
+                            "name": "Splitting Complete"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-SplittingStartToGateway-id-0001",
+                            "sourceRef": "StartEvent-SplittingStarted-id-0001",
+                            "targetRef": "ExclusiveGateway-PVSignPages-id-0001"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-GatewayToSplitStandard-id-0002",
+                            "name": "PV_signe_pages == \"1-2\"",
+                            "sourceRef": "ExclusiveGateway-PVSignPages-id-0001",
+                            "targetRef": "ServiceTask-SplitPDFStandard-id-0001",
+                            "conditionExpression": {
+                                "$type": "bpmn:FormalExpression",
+                                "body": "PV_signe_pages == \"1-2\""
+                            }
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-GatewayToSplitException-id-0003",
+                            "name": "PV_signe_pages == \"1-3\"",
+                            "sourceRef": "ExclusiveGateway-PVSignPages-id-0001",
+                            "targetRef": "ServiceTask-SplitPDFException-id-0002",
+                            "conditionExpression": {
+                                "$type": "bpmn:FormalExpression",
+                                "body": "PV_signe_pages == \"1-3\""
+                            }
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-SplitStandardToConverge-id-0004",
+                            "sourceRef": "ServiceTask-SplitPDFStandard-id-0001",
+                            "targetRef": "ExclusiveGateway-PVSignPagesConverge-id-0002"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-SplitExceptionToConverge-id-0005",
+                            "sourceRef": "ServiceTask-SplitPDFException-id-0002",
+                            "targetRef": "ExclusiveGateway-PVSignPagesConverge-id-0002"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-ConvergeToCopyPDFs-id-0006",
+                            "sourceRef": "ExclusiveGateway-PVSignPagesConverge-id-0002",
+                            "targetRef": "ServiceTask-CopySignedPDFs-id-0001"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-CopyPDFsToSplittingEnd-id-0007",
+                            "sourceRef": "ServiceTask-CopySignedPDFs-id-0001",
+                            "targetRef": "EndEvent-SplittingComplete-id-0001"
+                        }
+                    ]
+                },
+                {
+                    "$type": "bpmn:SubProcess",
+                    "id": "SubProcess-SubmitToMedialex-id-0002",
+                    "name": "Submit to Medialex",
+                    "flowElements": [
+                        {
+                            "$type": "bpmn:StartEvent",
+                            "id": "StartEvent-MedialexSubmissionStarted-id-0001",
+                            "name": "Medialex Submission Started"
+                        },
+                        {
+                            "$type": "bpmn:UserTask",
+                            "id": "UserTask-OpenMedialexAndExtract-id-0001",
+                            "name": "Open Medialex and extract PV signé text/date"
+                        },
+                        {
+                            "$type": "bpmn:UserTask",
+                            "id": "UserTask-FillAnnonceField-id-0001",
+                            "name": "Fill annonce field and replace date placeholder"
+                        },
+                        {
+                            "$type": "bpmn:UserTask",
+                            "id": "UserTask-SelectModificationType-id-0001",
+                            "name": "Select modification type and publish"
+                        },
+                        {
+                            "$type": "bpmn:UserTask",
+                            "id": "UserTask-DownloadAttestation-id-0001",
+                            "name": "Download attestation de parution"
+                        },
+                        {
+                            "$type": "bpmn:ServiceTask",
+                            "id": "ServiceTask-SaveAttestation-id-0001",
+                            "name": "Save attestation in INPI folder"
+                        },
+                        {
+                            "$type": "bpmn:EndEvent",
+                            "id": "EndEvent-MedialexSubmissionComplete-id-0001",
+                            "name": "Medialex Submission Complete"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-MedialexStartToOpen-id-0001",
+                            "sourceRef": "StartEvent-MedialexSubmissionStarted-id-0001",
+                            "targetRef": "UserTask-OpenMedialexAndExtract-id-0001"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-OpenToFillAnnonce-id-0002",
+                            "sourceRef": "UserTask-OpenMedialexAndExtract-id-0001",
+                            "targetRef": "UserTask-FillAnnonceField-id-0001"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-FillAnnonceToSelectModification-id-0003",
+                            "sourceRef": "UserTask-FillAnnonceField-id-0001",
+                            "targetRef": "UserTask-SelectModificationType-id-0001"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-SelectModificationToDownloadAttestation-id-0004",
+                            "sourceRef": "UserTask-SelectModificationType-id-0001",
+                            "targetRef": "UserTask-DownloadAttestation-id-0001"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-DownloadAttestationToSave-id-0005",
+                            "sourceRef": "UserTask-DownloadAttestation-id-0001",
+                            "targetRef": "ServiceTask-SaveAttestation-id-0001"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-SaveToMedialexEnd-id-0006",
+                            "sourceRef": "ServiceTask-SaveAttestation-id-0001",
+                            "targetRef": "EndEvent-MedialexSubmissionComplete-id-0001"
+                        }
+                    ]
+                },
+                {
+                    "$type": "bpmn:SubProcess",
+                    "id": "SubProcess-UpdateExcelLog-id-0003",
+                    "name": "Update Excel Log",
+                    "flowElements": [
+                        {
+                            "$type": "bpmn:StartEvent",
+                            "id": "StartEvent-ExcelUpdateStarted-id-0001",
+                            "name": "Excel Update Started"
+                        },
+                        {
+                            "$type": "bpmn:ServiceTask",
+                            "id": "ServiceTask-PerformExcelTask-id-0001",
+                            "name": "Perform Excel task (e.g., log submission)"
+                        },
+                        {
+                            "$type": "bpmn:EndEvent",
+                            "id": "EndEvent-ExcelUpdateComplete-id-0001",
+                            "name": "Excel Update Complete"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-ExcelStartToTask-id-0001",
+                            "sourceRef": "StartEvent-ExcelUpdateStarted-id-0001",
+                            "targetRef": "ServiceTask-PerformExcelTask-id-0001"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-ExcelTaskToEnd-id-0002",
+                            "sourceRef": "ServiceTask-PerformExcelTask-id-0001",
+                            "targetRef": "EndEvent-ExcelUpdateComplete-id-0001"
+                        }
+                    ]
+                },
+                {
+                    "$type": "bpmn:SubProcess",
+                    "id": "SubProcess-SubmitToINPIWebsite-id-0004",
+                    "name": "Submit to INPI Website",
+                    "flowElements": [
+                        {
+                            "$type": "bpmn:StartEvent",
+                            "id": "StartEvent-INPISubmissionStarted-id-0001",
+                            "name": "INPI Submission Started"
+                        },
+                        {
+                            "$type": "bpmn:UserTask",
+                            "id": "UserTask-OpenINPIAndFillDetails-id-0001",
+                            "name": "Open INPI, fill SIREN and modification details"
+                        },
+                        {
+                            "$type": "bpmn:UserTask",
+                            "id": "UserTask-AttachPDFsValidateSignPay-id-0001",
+                            "name": "Attach PDFs, validate, sign, and pay"
+                        },
+                        {
+                            "$type": "bpmn:UserTask",
+                            "id": "UserTask-DownloadSynthese-id-0001",
+                            "name": "Download synthèse and move to INPI folder"
+                        },
+                        {
+                            "$type": "bpmn:ServiceTask",
+                            "id": "ServiceTask-UploadSignedSynthese-id-0001",
+                            "name": "Upload signed synthèse"
+                        },
+                        {
+                            "$type": "bpmn:EndEvent",
+                            "id": "EndEvent-INPISubmissionComplete-id-0001",
+                            "name": "INPI Submission Complete"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-INPIStartToOpenAndFill-id-0001",
+                            "sourceRef": "StartEvent-INPISubmissionStarted-id-0001",
+                            "targetRef": "UserTask-OpenINPIAndFillDetails-id-0001"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-OpenAndFillToAttachPDFs-id-0002",
+                            "sourceRef": "UserTask-OpenINPIAndFillDetails-id-0001",
+                            "targetRef": "UserTask-AttachPDFsValidateSignPay-id-0001"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-AttachPDFsToDownloadSynthese-id-0003",
+                            "sourceRef": "UserTask-AttachPDFsValidateSignPay-id-0001",
+                            "targetRef": "UserTask-DownloadSynthese-id-0001"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-DownloadSyntheseToUpload-id-0004",
+                            "sourceRef": "UserTask-DownloadSynthese-id-0001",
+                            "targetRef": "ServiceTask-UploadSignedSynthese-id-0001"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-UploadToINPIEnd-id-0005",
+                            "sourceRef": "ServiceTask-UploadSignedSynthese-id-0001",
+                            "targetRef": "EndEvent-INPISubmissionComplete-id-0001"
+                        }
+                    ]
+                },
+                {
+                    "$type": "bpmn:SubProcess",
+                    "id": "SubProcess-HandlePaymentReceipt-id-0005",
+                    "name": "Handle Payment Receipt",
+                    "flowElements": [
+                        {
+                            "$type": "bpmn:StartEvent",
+                            "id": "StartEvent-PaymentHandlingStarted-id-0001",
+                            "name": "Payment Handling Started"
+                        },
+                        {
+                            "$type": "bpmn:ServiceTask",
+                            "id": "ServiceTask-WaitForPaymentConfirmation-id-0001",
+                            "name": "Wait for payment confirmation"
+                        },
+                        {
+                            "$type": "bpmn:UserTask",
+                            "id": "UserTask-DownloadRecuDePaiement-id-0001",
+                            "name": "Download reçu de paiement"
+                        },
+                        {
+                            "$type": "bpmn:ServiceTask",
+                            "id": "ServiceTask-CopyReceiptToArchive-id-0001",
+                            "name": "Copy receipt to archive folder (2025/facture inpi/month/day)"
+                        },
+                        {
+                            "$type": "bpmn:SendTask",
+                            "id": "SendTask-SendPaymentConfirmationEmail-id-0001",
+                            "name": "Send: payment confirmation email"
+                        },
+                        {
+                            "$type": "bpmn:EndEvent",
+                            "id": "EndEvent-PaymentHandlingComplete-id-0001",
+                            "name": "Payment Handling Complete"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-PaymentStartToWait-id-0001",
+                            "sourceRef": "StartEvent-PaymentHandlingStarted-id-0001",
+                            "targetRef": "ServiceTask-WaitForPaymentConfirmation-id-0001"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-WaitToDownloadRecu-id-0002",
+                            "sourceRef": "ServiceTask-WaitForPaymentConfirmation-id-0001",
+                            "targetRef": "UserTask-DownloadRecuDePaiement-id-0001"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-DownloadRecuToCopyReceipt-id-0003",
+                            "sourceRef": "UserTask-DownloadRecuDePaiement-id-0001",
+                            "targetRef": "ServiceTask-CopyReceiptToArchive-id-0001"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-CopyReceiptToSendEmail-id-0004",
+                            "sourceRef": "ServiceTask-CopyReceiptToArchive-id-0001",
+                            "targetRef": "SendTask-SendPaymentConfirmationEmail-id-0001"
+                        },
+                        {
+                            "$type": "bpmn:SequenceFlow",
+                            "id": "SequenceFlow-SendEmailToPaymentEnd-id-0005",
+                            "sourceRef": "SendTask-SendPaymentConfirmationEmail-id-0001",
+                            "targetRef": "EndEvent-PaymentHandlingComplete-id-0001"
+                        }
+                    ]
+                },
+                {
+                    "$type": "bpmn:UserTask",
+                    "id": "UserTask-CheckForValidationEmail-id-0001",
+                    "name": "Check for validation email"
+                },
+                {
+                    "$type": "bpmn:ExclusiveGateway",
+                    "id": "ExclusiveGateway-ValidationCheck-id-0001",
+                    "name": "Validation Check",
+                    "gatewayDirection": "Diverging"
+                },
+                {
+                    "$type": "bpmn:UserTask",
+                    "id": "UserTask-ManualCheckInINPISystem-id-0001",
+                    "name": "Manual check in INPI system"
+                },
+                {
+                    "$type": "bpmn:ExclusiveGateway",
+                    "id": "ExclusiveGateway-SubmissionStatus-id-0002",
+                    "name": "Submission Status",
+                    "gatewayDirection": "Diverging"
+                },
+                {
+                    "$type": "bpmn:EndEvent",
+                    "id": "EndEvent-ProcessComplete-id-0001",
+                    "name": "Process Complete"
+                },
+                {
+                    "$type": "bpmn:EndEvent",
+                    "id": "EndEvent-ProcessRejected-id-0002",
+                    "name": "Process Rejected"
+                },
+                {
+                    "$type": "bpmn:SequenceFlow",
+                    "id": "SequenceFlow-ProcessStartToSplitPDFs-id-0001",
+                    "sourceRef": "StartEvent-ProcessInitiated-id-0001",
+                    "targetRef": "SubProcess-SplitAndOrganizePDFs-id-0001"
+                },
+                {
+                    "$type": "bpmn:SequenceFlow",
+                    "id": "SequenceFlow-SplitPDFsToMedialex-id-0002",
+                    "sourceRef": "SubProcess-SplitAndOrganizePDFs-id-0001",
+                    "targetRef": "SubProcess-SubmitToMedialex-id-0002"
+                },
+                {
+                    "$type": "bpmn:SequenceFlow",
+                    "id": "SequenceFlow-MedialexToExcelUpdate-id-0003",
+                    "sourceRef": "SubProcess-SubmitToMedialex-id-0002",
+                    "targetRef": "SubProcess-UpdateExcelLog-id-0003"
+                },
+                {
+                    "$type": "bpmn:SequenceFlow",
+                    "id": "SequenceFlow-ExcelUpdateToINPISubmission-id-0004",
+                    "sourceRef": "SubProcess-UpdateExcelLog-id-0003",
+                    "targetRef": "SubProcess-SubmitToINPIWebsite-id-0004"
+                },
+                {
+                    "$type": "bpmn:SequenceFlow",
+                    "id": "SequenceFlow-INPISubmissionToPaymentHandling-id-0005",
+                    "sourceRef": "SubProcess-SubmitToINPIWebsite-id-0004",
+                    "targetRef": "SubProcess-HandlePaymentReceipt-id-0005"
+                },
+                {
+                    "$type": "bpmn:SequenceFlow",
+                    "id": "SequenceFlow-PaymentHandlingToValidationCheck-id-0006",
+                    "sourceRef": "SubProcess-HandlePaymentReceipt-id-0005",
+                    "targetRef": "UserTask-CheckForValidationEmail-id-0001"
+                },
+                {
+                    "$type": "bpmn:SequenceFlow",
+                    "id": "SequenceFlow-ValidationCheckToGateway-id-0007",
+                    "sourceRef": "UserTask-CheckForValidationEmail-id-0001",
+                    "targetRef": "ExclusiveGateway-ValidationCheck-id-0001"
+                },
+                {
+                    "$type": "bpmn:SequenceFlow",
+                    "id": "SequenceFlow-ValidationCheckToProcessComplete-id-0008",
+                    "name": "email_received == true",
+                    "sourceRef": "ExclusiveGateway-ValidationCheck-id-0001",
+                    "targetRef": "EndEvent-ProcessComplete-id-0001",
+                    "conditionExpression": {
+                        "$type": "bpmn:FormalExpression",
+                        "body": "email_received == true"
+                    }
+                },
+                {
+                    "$type": "bpmn:SequenceFlow",
+                    "id": "SequenceFlow-ValidationCheckToManualCheck-id-0009",
+                    "name": "email_received == false (Default)",
+                    "sourceRef": "ExclusiveGateway-ValidationCheck-id-0001",
+                    "targetRef": "UserTask-ManualCheckInINPISystem-id-0001",
+                    "isDefault": true
+                },
+                {
+                    "$type": "bpmn:SequenceFlow",
+                    "id": "SequenceFlow-ManualCheckToSubmissionStatus-id-0010",
+                    "sourceRef": "UserTask-ManualCheckInINPISystem-id-0001",
+                    "targetRef": "ExclusiveGateway-SubmissionStatus-id-0002"
+                },
+                {
+                    "$type": "bpmn:SequenceFlow",
+                    "id": "SequenceFlow-SubmissionStatusToProcessComplete-id-0011",
+                    "name": "submission_rejected == false (Default)",
+                    "sourceRef": "ExclusiveGateway-SubmissionStatus-id-0002",
+                    "targetRef": "EndEvent-ProcessComplete-id-0001",
+                    "isDefault": true
+                },
+                {
+                    "$type": "bpmn:SequenceFlow",
+                    "id": "SequenceFlow-SubmissionStatusToProcessRejected-id-0012",
+                    "name": "submission_rejected == true",
+                    "sourceRef": "ExclusiveGateway-SubmissionStatus-id-0002",
+                    "targetRef": "EndEvent-ProcessRejected-id-0002",
+                    "conditionExpression": {
+                        "$type": "bpmn:FormalExpression",
+                        "body": "submission_rejected == true"
+                    }
+                }
+            ]
+        }
+    ]
+}

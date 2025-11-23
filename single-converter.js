@@ -43,8 +43,18 @@ async function convertSingleProcess() {
     console.log('║        BPMN JSON → XML Single Converter (v2.0)       ║');
     console.log('╚══════════════════════════════════════════════════════╝\n');
 
-    // Get process name from command line
-    let processName = argv[2];
+    // Parse command line arguments
+    const args = argv.slice(2);
+    let processName = null;
+
+    // Check for --input flag
+    const inputIndex = args.findIndex(arg => arg === '--input' || arg === '-i');
+    if (inputIndex !== -1 && args[inputIndex + 1]) {
+      processName = args[inputIndex + 1];
+    } else if (args.length > 0 && !args[0].startsWith('-')) {
+      // Fallback to first positional argument
+      processName = args[0];
+    }
 
     if (!processName) {
       console.log('Available processes:\n');
@@ -64,9 +74,11 @@ async function convertSingleProcess() {
       }
 
       console.log('\nUsage:');
-      console.log('  node single-converter.js "Process_Name"\n');
-      console.log('Example:');
-      console.log('  node single-converter.js "Vendor_Onboarding_Process"\n');
+      console.log('  node single-converter.js [Process_Name]');
+      console.log('  node single-converter.js --input <path_to_json>');
+      console.log('\nExamples:');
+      console.log('  node single-converter.js "Vendor_Onboarding_Process"');
+      console.log('  node single-converter.js --input ./my-model.json\n');
       process.exit(0);
     }
 
